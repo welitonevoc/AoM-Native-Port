@@ -59,7 +59,7 @@ double get_time() {
     return ts.tv_sec + ts.tv_nsec * 1e-9;
 }
 
-void process_input_queue(AInputQueue* queue, aom::Engine* engine) {
+void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* state) {
     if (!queue) return;
 
     AInputEvent* event = nullptr;
@@ -113,7 +113,7 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine) {
 }
 
 void drain_input_queue(AInputQueue* queue) {
-    process_input_queue(queue, nullptr);
+    process_input_queue(queue, nullptr, nullptr);
 }
 
 void game_loop(AppState* state) {
@@ -201,7 +201,7 @@ void game_loop(AppState* state) {
             last_height = height;
         }
 
-        process_input_queue(state->input_queue.load(), state->engine.get());
+        process_input_queue(state->input_queue.load(), state->engine.get(), state);
 
         const double now = get_time();
         const float delta = static_cast<float>(

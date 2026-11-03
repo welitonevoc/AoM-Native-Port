@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <deque>
 #include <unordered_map>
 #include <vector>
 #include <queue>
@@ -62,7 +63,27 @@ struct UnitStats {
 inline UnitStats extract_unit_stats_from_xmb(const XmbElement* proto_root, const std::string& unit_name) {
     UnitStats stats;
     stats.name = unit_name;
-    if (!proto_root) return stats;
+
+    // Archetype classification must also work without proto data (tests or a
+    // missing/corrupt proto.xmb), otherwise trained villagers never become
+    // workers and cannot gather or build.
+    const auto apply_unit_class = [&unit_name, &stats]() {
+        if (unit_name.find("Villager") != std::string::npos || unit_name.find("worker") != std::string::npos) {
+            stats.worker = true;
+            stats.pop_cost = 1;
+        } else if (unit_name.find("Hoplite") != std::string::npos || unit_name.find("Toxotes") != std::string::npos) {
+            stats.pop_cost = 2;
+        } else if (unit_name.find("Minotaur") != std::string::npos) {
+            stats.pop_cost = 4;
+        } else {
+            stats.pop_cost = 1;
+        }
+    };
+
+    if (!proto_root) {
+        apply_unit_class();
+        return stats;
+    }
 
     for (const auto& unit_elem : proto_root->children) {
         if (!unit_elem) continue;
@@ -105,16 +126,7 @@ inline UnitStats extract_unit_stats_from_xmb(const XmbElement* proto_root, const
                     }
                 }
             }
-            if (unit_name.find("Villager") != std::string::npos || unit_name.find("worker") != std::string::npos) {
-                stats.worker = true;
-                stats.pop_cost = 1;
-            } else if (unit_name.find("Hoplite") != std::string::npos || unit_name.find("Toxotes") != std::string::npos) {
-                stats.pop_cost = 2;
-            } else if (unit_name.find("Minotaur") != std::string::npos) {
-                stats.pop_cost = 4;
-            } else {
-                stats.pop_cost = 1;
-            }
+            apply_unit_class();
             break;
         }
     }
@@ -208,53 +220,25 @@ public:
         glm::ivec2 c = cell_for(from), goal = cell_for(to);
         if (!valid(c.x, c.y) || !valid(goal.x, goal.y)) return {};
 
-        // If destination is blocked (e.g. building footprint), find closest walkable neighbor
+        // If destination is blocked (e.g. a 4x4 Town Center footprint), search
+        // outward rings for the closest walkable cell. A 1-cell nudge is not
+        // enough for the center of large buildings, which used to make workers
+        // unable to path back and deposit resources.
         if (!walkable(goal.x, goal.y)) {
-            const int test_dirs[8][2] = {
-                {1,0},{-1,0},{0,1},{0,-1},      // cardinais
-                {1,1},{-1,1},{1,-1},{-1,-1}     // diagonais
-            };
-            int best_gx = -1, best_gy = -1;
-            int best_gd = std::numeric_limits<int>::max();
-            for (const auto& d : test_dirs) {
-                int nx = goal.x + d[0], ny = goal.y + d[1];
-                if (walkable(nx, ny)) {
-                    int dist = std::abs(nx - c.x) + std::abs(ny - c.y);
-                    if (dist < best_gd) {
-                        best_gd = dist;
-                        best_gx = nx;
-                        best_gy = ny;
-                    }
-                }
-            }
-            if (best_gx >= 0) {
-                goal = {best_gx, best_gy};
+            glm::ivec2 nudged;
+            if (nearest_walkable(goal.x, goal.y, c.x, c.y, 4, nudged)) {
+                goal = nudged;
             } else {
                 return {};
             }
         }
 
-        // If start is blocked, nudge to closest walkable neighbor
+        // If start is blocked (unit standing inside a footprint), nudge it to
+        // the closest walkable cell toward the goal.
         if (!walkable(c.x, c.y)) {
-            const int test_dirs[8][2] = {
-                {1,0},{-1,0},{0,1},{0,-1},      // cardinais
-                {1,1},{-1,1},{1,-1},{-1,-1}     // diagonais
-            };
-            int best_cx = -1, best_cy = -1;
-            int best_cd = std::numeric_limits<int>::max();
-            for (const auto& d : test_dirs) {
-                int nx = c.x + d[0], ny = c.y + d[1];
-                if (walkable(nx, ny)) {
-                    int dist = std::abs(nx - goal.x) + std::abs(ny - goal.y);
-                    if (dist < best_cd) {
-                        best_cd = dist;
-                        best_cx = nx;
-                        best_cy = ny;
-                    }
-                }
-            }
-            if (best_cx >= 0) {
-                c = {best_cx, best_cy};
+            glm::ivec2 nudged;
+            if (nearest_walkable(c.x, c.y, goal.x, goal.y, 4, nudged)) {
+                c = nudged;
             } else {
                 return {};
             }
@@ -265,6 +249,9 @@ public:
         }
 
         struct Node { int f; int id; bool operator>(const Node& n) const { return f > n.f; } };
+        // 4 dir no A*: movement grade-alinhado - diagonais são alcançadas por
+        // múltiplos passos cardinais, garantindo predibilidade do movement
+        // e compatibilidade com o sistema de navegação por grade do RTS.
         std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
         std::vector<int> parent(blocked_.size(), -1), cost(blocked_.size(), std::numeric_limits<int>::max());
         const int start = index(c.x, c.y), target = index(goal.x, goal.y);
@@ -299,6 +286,34 @@ private:
     int width_, height_; float cell_; std::vector<bool> blocked_;
     bool valid(int x, int y) const { return x >= 0 && y >= 0 && x < width_ && y < height_; }
     int index(int x, int y) const { return y * width_ + x; }
+
+    /// Scans rings outward from (x, y) and returns a walkable cell from the
+    /// first ring that has one. Within that ring, prefers the cell closest
+    /// (Manhattan distance) to (target_x, target_y). Prioritising the nearest
+    /// ring matters: otherwise a far cell beside the approaching unit can win
+    /// and produce a one-node path that never leaves the blocked footprint.
+    bool nearest_walkable(int x, int y, int target_x, int target_y,
+                          int max_radius, glm::ivec2& out) const {
+        for (int r = 1; r <= max_radius; ++r) {
+            int best_d = std::numeric_limits<int>::max();
+            bool found_ring = false;
+            for (int dy = -r; dy <= r; ++dy) {
+                for (int dx = -r; dx <= r; ++dx) {
+                    if (std::max(std::abs(dx), std::abs(dy)) != r) continue;
+                    const int nx = x + dx, ny = y + dy;
+                    if (!walkable(nx, ny)) continue;
+                    const int d = std::abs(nx - target_x) + std::abs(ny - target_y);
+                    if (d < best_d) {
+                        best_d = d;
+                        out = {nx, ny};
+                        found_ring = true;
+                    }
+                }
+            }
+            if (found_ring) return true;
+        }
+        return false;
+    }
     glm::ivec2 cell_for(const glm::vec3& p) const { return {static_cast<int>(p.x / cell_ + width_ * 0.5f), static_cast<int>(p.z / cell_ + height_ * 0.5f)}; }
     glm::vec3 world_for(const glm::ivec2& c) const { return {(c.x - width_ * 0.5f + 0.5f) * cell_, 0.0f, (c.y - height_ * 0.5f + 0.5f) * cell_}; }
 };
@@ -475,17 +490,23 @@ public:
         }
     }
 
-    std::vector<SpawnOrder> drain_spawn_orders() {
-        std::vector<SpawnOrder> orders = std::move(spawn_orders_);
+    std::deque<SpawnOrder> drain_spawn_orders() {
+        std::deque<SpawnOrder> orders = std::move(spawn_orders_);
         spawn_orders_.clear();
         return orders;
+    }
+
+    /// Re-queue an order that could not be spawned this frame (e.g. pop cap).
+    /// It stays at the front so it is retried before newer orders.
+    void requeue_spawn_order(const SpawnOrder& order) {
+        spawn_orders_.push_front(order);
     }
 
 private:
     std::unordered_map<Entity, TransformComponent>& transforms_;
     std::unordered_map<Entity, BuildingComponent>& buildings_;
     std::unordered_map<Entity, UnitComponent>& units_;
-    std::vector<SpawnOrder> spawn_orders_;
+    std::deque<SpawnOrder> spawn_orders_;
 };
 
 class FogOfWar {
@@ -977,7 +998,37 @@ public:
 
         // Atualizações subsequentes (construção, neblina, animações)
         buildings_.update(dt);
-        // ... spawn orders drenados podem adicionar novas unidades/animations
+
+        // ── Produção: drenar ordens de treino concluídas ─────────────────────
+        // Executado DEPOIS da remoção das entidades mortas: spawn_unit() pode
+        // inserir com segurança em transforms_/units_/health_/animations_.
+        for (const auto& spawn : buildings_.drain_spawn_orders()) {
+            auto b_t = transforms_.find(spawn.building);
+            auto b_c = building_components_.find(spawn.building);
+            if (b_t == transforms_.end() || b_c == building_components_.end()) continue;
+
+            const Team team = b_c->second.team;
+            const UnitStats stats = extract_unit_stats_from_xmb(proto_root_, spawn.unit_type);
+
+            // Re-checa o limite populacional no momento do nascimento: a fila
+            // foi validada no início do treino, mas a população pode ter mudado.
+            const int pop_cost = (stats.pop_cost > 0) ? stats.pop_cost : 1;
+            if (current_population(team) + pop_cost > population_cap(team)) {
+                buildings_.requeue_spawn_order(spawn);
+                continue;
+            }
+
+            const glm::vec3 spawn_pos = find_spawn_position(spawn.building);
+            Entity new_unit = spawn_unit(team, spawn_pos, stats);
+
+            // Rally padrão: afasta-se do edifício para liberar a saída.
+            glm::vec3 away = spawn_pos - b_t->second.position;
+            away.y = 0.0f;
+            const float away_len = glm::length(away);
+            if (away_len > 0.01f) {
+                order_move(new_unit, spawn_pos + (away / away_len) * 1.5f);
+            }
+        }
 
         // Fog of War
         std::vector<std::pair<glm::vec3, float>> vision_sources;
@@ -1413,6 +1464,31 @@ private:
     NavigationGrid navigation_;
     glm::ivec2 navigation_cell(const glm::vec3& p) const {
         return {static_cast<int>(p.x + 16.0f), static_cast<int>(p.z + 16.0f)};
+    }
+
+    /// Finds a walkable cell on a ring around the building, preferring the
+    /// +X side (traditional rally direction) and falling back to the other
+    /// cardinals/diagonals. Returns the building position if nothing is free.
+    glm::vec3 find_spawn_position(Entity building) const {
+        auto b_t = transforms_.find(building);
+        if (b_t == transforms_.end()) return glm::vec3(0.0f);
+
+        const glm::vec3 base = b_t->second.position;
+        static constexpr float kDistances[] = {2.5f, 3.0f, 3.5f, 4.0f, 2.0f};
+        static constexpr int kDirs[8][2] = {
+            {1,0},{-1,0},{0,1},{0,-1},      // cardinais
+            {1,1},{-1,1},{1,-1},{-1,-1}     // diagonais
+        };
+
+        for (float d : kDistances) {
+            for (const auto& dir : kDirs) {
+                const glm::vec3 p = base + glm::vec3(dir[0] * d, 0.0f, dir[1] * d);
+                if (std::abs(p.x) > 16.5f || std::abs(p.z) > 16.5f) continue;
+                const glm::ivec2 cell = navigation_cell(p);
+                if (navigation_.walkable(cell.x, cell.y)) return p;
+            }
+        }
+        return base;
     }
     std::vector<ResourceNode> resources_nodes_;
     MovementSystem movement_{transforms_};

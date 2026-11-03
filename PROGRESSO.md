@@ -2,6 +2,25 @@
 
 Ultima atualizacao: 2026-11-03
 
+## Sprint 7: Fila de Produção Real & Ciclo Seguro de Spawn no ECS (2026-11-03)
+
+**Status:** Concluído com 100% de sucesso. Testes automatizados de jogabilidade e treino (`gameplay_test`) expandidos com validação estrita de nascimento de aldeões e soldados gregos.
+
+- **Dreno e Nascimento de Unidades no ECS (`gameplay.h`):**
+  - **Drenagem Segura Pós-Combate:** Ordens de treino concluídas (`buildings_.drain_spawn_orders()`) são processadas estritamente após a limpeza de entidades mortas e antes da avaliação de animações, eliminando qualquer risco de race condition ou corrupção de ponteiros nos mapas de transform, health e animação.
+  - **Teto Populacional no Momento do Spawn:** Se o teto populacional (`population_cap`) for atingido no momento exato em que a unidade completaria o treinamento, a ordem é reinserida na frente da fila (`requeue_spawn_order` com `std::deque`), evitando perda de recursos e mantendo a prioridade do treino.
+  - **Posicionamento Inteligente de Spawn (`find_spawn_position`):** Busca radial em anéis concêntricos (de 2.0m a 4.0m) ao redor da base do edifício em 8 direções (cardinais e diagonais), preferindo o lado leste (+X) e garantindo posicionamento apenas em células transitáveis (`walkable`).
+  - **Rally Point de Desobstrução:** Unidades recém-nascidas recebem automaticamente ordem de deslocamento radial para afastar-se da edificação em 1.5m, mantendo a saída desobstruída para os próximos treinos.
+  - **Classificação de Arquétipo sem Proto (`extract_unit_stats_from_xmb`):** A identificação de aldeões (`worker`), Hoplitas/Toxotes e Minotauros agora funciona mesmo sem `proto.xmb` (testes ou asset ausente), evitando que unidades treinadas fiquem sem as capacidades de coleta e construção.
+- **Pathfinding para Pegadas Grandes (`NavigationGrid::find_path`):**
+  - **Nudge em Anéis (`nearest_walkable`):** A busca de célula transitável ao redor de destinos/origens bloqueados evoluiu de 1 célula para anéis de raio até 4, priorizando o anel mais próximo. Isso resolve o caso do centro do Centro da Cidade (pegada 4×4), que antes prendia o aldeão no depósito de recursos.
+- **Entrada Android Touchscreen (`native_activity.cpp`):**
+  - Passagem explícita do ponteiro `AppState*` para `process_input_queue`, persistindo com segurança o estado de distância anterior (`state->last_distance`) e eliminando saltos bruscos no gesto de pinch-to-zoom durante eventos multi-touch.
+- **Validação Automatizada (`gameplay_test.cpp`):**
+  - Verificação de que cada aldeão treinado no Centro da Cidade é de fato instanciado no mundo (incrementando `world.units().size()`), atribuído ao time amigável e com a flag `worker = true` ativa.
+  - Novo teste de regressão garantindo que o pathfinding escapa da pegada 4×4 de um edifício, além de passos de simulação realistas de 1/60s no ciclo de colheita, depósito e construção.
+  - Suíte executada no emulador x86_64 (`Medium_Phone_API_36.1`) com 100% das asserções aprovadas; build ARM64 completo (70 alvos) recompilado sem erros.
+
 ## Sprint 6: Áudio 3D Posicional OpenSL ES & Vozes Gregas Autênticas (2026-11-03)
 
 **Status:** Concluído com 100% de sucesso. Suíte de testes `test_audio_3d` passou com 29/29 asserções (100% PASS). Regressões completas `test_campaign_mission` (35/35 PASS), `test_particles_anim` (29/29 PASS), `test_terrain_water` (28/28 PASS) e `gameplay_test` (25/25 PASS) com 100% de aprovação. Biblioteca nativa `libaom_native.so` (1.2 MB, ARM64) recompilada sem erros e APK `aom-native-debug.apk` (16 MB) assinado com esquemas v2 e v3 e alinhado a 4 bytes.

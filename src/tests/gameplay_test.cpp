@@ -37,6 +37,18 @@ int main() {
     grid.set_blocked(16, 16);
     const auto blocked_path = grid.find_path({-2.0f, 0.0f, 0.0f}, {2.0f, 0.0f, 0.0f});
     ok &= check(!blocked_path.empty(), "navigation routes around blocked cell");
+
+    // Regression: destination inside a 4x4 Town Center footprint. The nudge
+    // must pick the nearest exit ring, not the worker's own distant cell,
+    // otherwise the path collapses to one node and the worker never moves.
+    aom::NavigationGrid footprint_grid;
+    for (int dx = -1; dx <= 2; ++dx) {
+        for (int dz = -1; dz <= 2; ++dz) {
+            footprint_grid.set_blocked(10 + dx, 16 + dz);
+        }
+    }
+    const auto footprint_path = footprint_grid.find_path({-9.5f, 0.0f, -0.5f}, {-6.0f, 0.0f, 0.0f});
+    ok &= check(footprint_path.size() > 1, "navigation escapes a 4x4 building footprint");
     const aom::Entity building = world.place_building(aom::Team::FRIENDLY, {0.0f, 0.0f, 0.0f});
     ok &= check(building != aom::INVALID_ENTITY, "building occupies a navigation cell");
     ok &= check(world.demolish_building({0.0f, 0.0f, 0.0f}), "building can be demolished");
@@ -61,10 +73,21 @@ int main() {
     // Advance time past first villager duration (4.5s)
     world.update(4.6f);
     ok &= check(world.get_training_queue_count(tc) == 1, "first villager completed, 1 remaining in queue");
+    ok &= check(world.units().size() == 2, "first trained villager actually spawned in the world");
 
     // Advance time past second villager duration
     world.update(4.6f);
     ok &= check(world.get_training_queue_count(tc) == 0, "second villager completed, queue empty");
+    ok &= check(world.units().size() == 3, "second trained villager actually spawned in the world");
+
+    bool trained_villager_is_worker = false;
+    for (const auto& [id, unit] : world.units()) {
+        if (unit.team == aom::Team::FRIENDLY && unit.unit_type_name == "Villager Greek") {
+            trained_villager_is_worker = unit.worker;
+            break;
+        }
+    }
+    ok &= check(trained_villager_is_worker, "trained villager has the worker flag");
 
     // ── Sprint 2: Population Cap ($Pop/Cap$) Verification ───────────────
     // Base pop: 10 + 15 (Town Center) = 25
@@ -78,21 +101,24 @@ int main() {
     ok &= check(world.population_cap(aom::Team::FRIENDLY) == 35, "population cap with 1 TC and 1 House is 35");
 
     // ── Sprint 2: Autonomous Harvesting & Cargo Deposit Cycle ───────────
-    const aom::Entity worker = world.spawn_worker({-5.0f, 0.0f, 0.0f});
-    world.add_resource_node(aom::ResourceType::FOOD, {-4.5f, 0.0f, 0.0f}, 50);
+    // Spawn outside the Town Center footprint (it blocks a 4x4 cell area).
+    const aom::Entity worker = world.spawn_worker({-12.0f, 0.0f, 0.0f});
+    world.add_resource_node(aom::ResourceType::FOOD, {-12.5f, 0.0f, 0.0f}, 50);
     const int food_before = world.resources().food;
 
-    ok &= check(world.order_gather(worker, {-4.5f, 0.0f, 0.0f}), "worker accepts gather order");
-    // Advance time for worker to harvest 10 Food (carrying capacity)
-    for (int step = 0; step < 6; ++step) {
-        world.update(1.0f);
+    ok &= check(world.order_gather(worker, {-12.5f, 0.0f, 0.0f}), "worker accepts gather order");
+    // Advance ~4.2s in 60 Hz steps: worker harvests 10 Food (carrying capacity).
+    // Large dt steps (>= 1s) overshoot 1 m waypoints, so keep the test realistic.
+    constexpr float kFrame = 1.0f / 60.0f;
+    for (int step = 0; step < 250; ++step) {
+        world.update(kFrame);
     }
     const auto* w_comp = world.get_unit(worker);
     ok &= check(w_comp != nullptr && w_comp->carried_resource_amount > 0, "worker harvested resources into cargo");
 
     // Advance time for worker to walk to Town Center and deposit cargo
-    for (int step = 0; step < 8; ++step) {
-        world.update(1.0f);
+    for (int step = 0; step < 600; ++step) {
+        world.update(kFrame);
     }
     ok &= check(world.resources().food > food_before, "worker successfully deposited cargo at Town Center");
 
@@ -101,9 +127,9 @@ int main() {
     ok &= check(world.order_worker_build(worker, aom::BuildingType::HOUSE, {-8.0f, 0.0f, -4.0f}), "worker accepted build order for House");
     ok &= check(world.resources().wood == wood_before - 100, "100 wood deducted for House construction");
 
-    // Advance time for worker to build the house
-    for (int step = 0; step < 8; ++step) {
-        world.update(1.0f);
+    // Advance time for worker to walk to the site and build the house
+    for (int step = 0; step < 600; ++step) {
+        world.update(kFrame);
     }
     const auto* w_after = world.get_unit(worker);
     ok &= check(w_after != nullptr, "worker entity is valid after construction");
