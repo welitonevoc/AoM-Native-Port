@@ -189,7 +189,7 @@ layout(location = 3) in vec4 aColor;
 
 uniform mat4 uModel;
 uniform mat4 uViewProj;
-uniform float uTime;
+uniform highp float uTime;
 
 out vec3 vWorldPos;
 out vec2 vTex;
@@ -219,7 +219,7 @@ uniform vec3 uCameraPos;
 uniform vec3 uLightDir;
 uniform vec3 uLightColor;
 uniform vec3 uAmbient;
-uniform float uTime;
+uniform highp float uTime;
 
 out vec4 fragColor;
 

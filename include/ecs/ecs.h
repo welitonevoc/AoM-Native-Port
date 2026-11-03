@@ -124,6 +124,23 @@ public:
     HealthComponent&    add_health(Entity e)    { return healths_[e]; }
     RenderableComponent& add_renderable(Entity e){ return renderables_[e]; }
 
+    // Component storage accessors (read‑only) ---------------------------
+    const std::unordered_map<Entity, TransformComponent>& transforms() const { return transforms_; }
+    const std::unordered_map<Entity, HealthComponent>& healths() const { return healths_; }
+    const std::unordered_map<Entity, RenderableComponent>& renderables() const { return renderables_; }
+
+    // Non‑const accessors (needed by GameplayWorld to mutate components) --
+    std::unordered_map<Entity, TransformComponent>& transforms_mut() { return transforms_; }
+    std::unordered_map<Entity, HealthComponent>& healths_mut() { return healths_; }
+    std::unordered_map<Entity, RenderableComponent>& renderables_mut() { return renderables_; }
+
+    // Clear all entities and components -----------------------------------
+    void clear() {
+        transforms_.clear();
+        healths_.clear();
+        renderables_.clear();
+        next_id_ = 0;
+    }
 
     // System registration -------------------------------------------------
     template <typename T, typename... Args>
@@ -140,10 +157,6 @@ public:
             sys->update(dt);
         }
     }
-
-    // Component storage accessors (read‑only) ---------------------------
-    const std::unordered_map<Entity, TransformComponent>& transforms() const { return transforms_; }
-    const std::unordered_map<Entity, RenderableComponent>& renderables() const { return renderables_; }
 
 private:
     Entity next_id_ = 0;

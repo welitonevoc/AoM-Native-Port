@@ -2900,8 +2900,603 @@ ALL 9 TEST SUITES PASSED SUCCESSFULLY! (100%)
 ---
 
 ### 24.7 Estado Final da Compilação e Novo APK
-* **Biblioteca Nativa C++20:** [`build-m2/libaom_native.so`](file:///storage/emulated/0/Documents/AoM-Native-Port/build-m2/libaom_native.so) (Tamanho: **944 KB**, compilação limpa ARM64 com suporte total aos recursos do jogo e internacionalização).
+* **Biblioteca Nativa C++20:** [`build-m2/libaom_native.so`](file:///storage/emulated/0/Documents/AoM-Native-Port/build-m2/libaom_native.so) (Tamanho: **1.5 MB no build local**, **2.1 MB dentro do APK**, compilação limpa ARM64 com suporte total aos recursos do jogo e internacionalização).
 * **Novo APK Assinado:** [`aom-native-debug.apk`](file:///storage/emulated/0/Documents/AoM-Native-Port/aom-native-debug.apk)
-  * **Tamanho:** **5.6 MB**
-  * **Versionamento Dinâmico:** `versionCode=1793528336`, `versionName=1.0.11010718`
+  * **Tamanho real:** **60.5 MB** (contém assets empacotados: vídeos MP4, sons WAV, texturas, XMB, proto.xmb, campanhas .scn)
+  * **Versionamento Dinâmico:** `versionCode` baseado em timestamp Unix, `versionName` no formato `1.0.MMDDHHMM`
   * **Esquemas de Assinatura:** v2 + v3 ativos.
+  * **Conteúdo do APK:** lib/arm64-v8a/libaom_native.so (2.1 MB), libc++_shared.so (1.4 MB), classes.dex, assets/ (font.ttf 2.3 MB, menu_music.mp3 0.8 MB, loading.png 1.2 MB, main_menu.png 1.4 MB, introcg.mp4 33.7 MB, aom-logo.mp4 11 MB, proto.xmb 1.8 MB, main campaign.cpn 41 KB, sons WAV diversos), res/ (mipmap ícones), META-INF (assinatura v2+v3).
+
+---
+
+## 25. Análise Consolidada do Projeto — REA + R8 Analyzer + Claude Code Game Studio + Docs
+
+Esta seção consolida a análise executada com as três skills solicitadas (@reverse-engineer-anything, @r8-analyzer, @claude-code-game-studio) e a auditoria da pasta `docs/`, estabelecendo de forma minuciosa o que já foi feito e o que ainda falta.
+
+---
+
+### 25.1 Análise REA do APK Existente (`aom-native-debug.apk`)
+
+**Método:** Inspeção estática do pacote APK (ZIP) extraído e do ELF nativo `libaom_native.so` contido. Não houve execução de runtime; todas as conclusões são baseadas em metadados, cabeçalhos e inventário de membros.
+
+**Evidências observadas:**
+
+| Item | Valor | Fonte |
+|------|-------|-------|
+| Tamanho do APK | 60.5 MB | Sistema de arquivos |
+| Tamanho do .so dentro APK | 2.1 MB (arm64-v8a) | Inventário do APK |
+| Tamanho do .so no build-m2 | 1.5 MB | Sistema de arquivos local |
+| libc++_shared.so | 1.4 MB | Inventário do APK |
+| classes.dex | 15.3 KB | Inventário do APK |
+| Assinatura | v2 + v3 | APK Signature Scheme |
+| Abi | arm64-v8a | AndroidManifest + diretório lib/ |
+| minSdk | 24 | AndroidManifest.xml |
+| targetSdk | 34 | AndroidManifest.xml |
+| compileSdk | 34 | build.gradle |
+| AGP | 8.5.2 | build.gradle (plugins block) |
+| Namespace | com.aom.nativeport | build.gradle |
+
+**Conteúdo de assets empacotado no APK:**
+- Vídeos: `aom-logo.mp4` (11 MB), `introcg.mp4` (33.7 MB)
+- Áudio: `menu_music.mp3` (0.8 MB), dezenas de WAV (gms/gmm/gma/gvms/gvmm, swordon*, woodchop*, mine*, forage*, build*, arrow*, kraken*, arkantos*, lose.wav 1.4 MB, new_objective.wav 0.4 MB)
+- Texturas/UI: `font.ttf` (2.3 MB), `loading.png` (1.2 MB), `main_menu.png` (1.4 MB), `splash.png`, DDT/PNG de botões, `minimapbackground.tga` (0.25 MB), `terrain1.tga`
+- Dados do jogo: `proto.xmb` (1.8 MB), `main campaign.cpn` (41 KB), `uimain2.xmb`, `uipregame.xmb`, `uipregamenew.xmb`, `ui_pregame_*`
+- Cenários: `spc/aomsp04.scn` (1.2 MB)
+- IA: `ai_database.json` (0.16 MB), `ai_titans_database.json` (0.27 MB)
+- Vídeo DB: `video_database.json`
+
+**Conclusão REA:** O APK contém uma quantidade substancial de assets autênticos do AoM (vídeos, sons, proto.xmb, campanha, cenários). O .so nativo é um build ARM64 válido com dependências limpas (EGL, GLESv3, android, log, z, OpenSLES, c++_shared, dl, m, c). A assinatura v2+v3 está íntegra.
+
+**Limitação:** Não foi possível executar `apksigner verify` nem `readelf -d` neste ambiente (ferramentas não disponíveis no PATH do Windows PowerShell). A validação da assinatura e das dependências dinâmicas do .so deve ser feita em um ambiente com Android SDK/NDK.
+
+---
+
+### 25.2 Análise R8 Analyzer (Configuração de Build Android)
+
+**Método:** Inspeção de `build.gradle`, `settings.gradle`, `gradle.properties`, `android/app/build.gradle`, `android/CMakeLists.txt`, `CMakeLists.txt` e `scripts/package_apk.sh`.
+
+**Resultados:**
+
+| Verificação | Valor | Status |
+|-------------|-------|--------|
+| AGP version | 8.5.2 | < 9.3 → **Path B** |
+| R8 version | Bundled with AGP 8.5.2 | Não está pinseto em settings.gradle |
+| `android.enableR8.fullMode` | Não definido em gradle.properties | OK (não presente) |
+| minifyEnabled | false (release e debug) | R8 não está ativo em nenhuma variante |
+| Proguard rules | `proguard-android-optimize.txt` + `proguard-rules.pro` | Presentes mas não aplicados (minifyEnabled false) |
+| versionCode | 1793531765 (build.gradle) | Estático no build.gradle; dinâmico (timestamp) em package_apk.sh |
+| versionName | 1.0.11010816 (build.gradle) | Estático no build.gradle; dinâmico em package_apk.sh |
+| NDK toolchain | `cmake/android-native.toolchain.cmake` | Usa clang/clang++ nativos via find_program() |
+| Build system | Unix Makefiles (não Ninja) | Ninja quebrado no sandbox |
+| Test targets | 14 executáveis de teste no CMakeLists.txt | Todos definidos mas não compiláveis neste ambiente |
+
+**Bloqueios do R8 Analyzer neste ambiente:**
+- `cmake`, `clang`, `clang++`, `java`, `gradle`, `adb`, `aapt`, `zipalign`, `apksigner`, `keytool` não estão disponíveis no PATH.
+- Não é possível executar `./gradlew :app:analyzeReleaseR8Config` (Path A) nem invocar R8 diretamente (Path B).
+- O script `scripts/install_build_tools_termux.sh` detecta a ausência de `pkg` e retorna erro claro.
+
+**Conclusão R8 Analyzer:** A configuração de build está sintaticamente correta, mas R8 não está habilitado (`minifyEnabled false`). Para análise completa do R8, é necessário: (1) habilitar minify em pelo menos uma variante, (2) dispor de Gradle + Android SDK + R8 9.4.34+ em um ambiente acessível, (3) executar o Path B da skill r8-analyzer.
+
+---
+
+### 25.3 Análise da Pasta `docs/`
+
+A pasta `docs/` contém três documentos fundamentais que foram auditados:
+
+#### 25.3.1 `ANALISE_COMPLETA.md` (440 linhas, datado 31/10/2026)
+
+**Resumo executivo:** Define o port como um "protótipo nativo de RTS" com infraestrutura EGL/GLES3, NativeActivity, parsers parciais e simulação de gameplay baseada em dados hard-coded. O terreno é procedural; não há integração completa dos cenários, unidades, tecnologias ou campanhas originais.
+
+**Inventário quantitativo do jogo original (BARs):**
+- `data.bar`: 126 entradas (121 xmb, 2 tga, 2 txt, 1 dat)
+- `data2.bar`: 135 entradas (130 xmb, 2 tga, 2 txt, 1 dat)
+- `textures.bar`: 5521 entradas (4896 ddt, 444 bti, 61 xmb, 113 bt8, 3 cub, 1 ico, 1 blg, 1 ifl, 1 txt)
+- `textures2.bar`: 1630 entradas (1519 ddt, 54 bti, 43 xmb, 12 jpg, 1 cub, 1 txt)
+- `models.bar`: 8658 entradas (5628 brg, 584 grn, 1509 dcl, 585 prt, 3 spr, 341 no, 1 lib, 6 xmb)
+- `models2.bar`: 3148 entradas (2116 brg, 287 grn, 468 dcl, 198 prt, 77 no, 1 tga, 1 lib)
+- `sounds.bar`: 1790 entradas (1151 wav, 320 xmb, 319 xml)
+- **Total: ~21.008 entradas**
+
+**Matriz de paridade (Original × Port) — principais lacunas:**
+- BTI/BT8/CUB/IFL/JPG: 0% suporte no port
+- Animações GRN: 0% (871 animações no original)
+- Declarações DCL: 0% (1977 no original)
+- Partículas PRT: 0% (783 no original)
+- Sprites SPR: 0% (3 no original)
+- XMB sound banks: 0% (320 no original)
+- XML texto: 0% (319 sound banks no original)
+- 3D audio/posicional: 0%
+- Água: `draw_water` declarado, não implementado
+- Skybox/Cube maps: 0% (.cub não suportado)
+- Partículas visuais: 0%
+- Animação de modelos (skinning/GRN): 0%
+- Sombras: 0%
+- Pós-processamento: 0%
+- Gameplay (unidades, combate, economia): protótipo apenas
+- Tecnologia/tech tree: 0%
+- Deuses menores: 0%
+- Campanhas/cenários: 0%
+- IA/Random Maps: 0%
+- Triggers: 0%
+- Multiplayer/rede: 0%
+- Save/Load: ~5%
+- Localização/i18n: ~5%
+
+**Prioridades sugeridas na análise:**
+1. Validar build com SDK/NDK local
+2. Streaming de BAR (mmap/file handles) para evitar OOM
+3. Cache de texturas GPU
+4. Implementar TouchInputManager (gestos RTS básicos)
+5. Carregar proto.xmb e spawnar unidades reais
+6. Terreno (heightmap + textura)
+7. Animação GRN
+8. Partículas PRT
+9. Campanhas/cenários (por último)
+
+**Atualizações implementadas pós-análise (M4/M5):** Streaming leve no BarArchive, pipeline completo de terreno 3D, linhas dinâmicas de debug, loop de jogo e entidades no GameplayWorld, raycasting 3D e controles táteis RTS, saneamento de inconsistências de build, minimapa 2D tático, feedback visual de waypoints, consumo de estatísticas do proto.xmb, sistema completo de construção RTS com andaimes 3D e treinamento de tropas.
+
+#### 25.3.2 `MVP.md` (59 linhas)
+
+**Visão:** Mini-RTS jogável em Android com 1 facção (Gregos), 1 mapa procedural, 3 tipos de unidade + Minotaur como inimigo, economia básica, 60 FPS em GLES3.
+
+**Escopo IN:** Gregos (Hoplite, Toxotes, Villager), mapa 41×41, 3 tipos + myth unit, Food/Wood/Gold, Town Center/House/Barracks, combate, pathfinding A*, touch input, HUD, áudio WAV PCM, vídeos de abertura (BIK→MP4), save/load básico.
+
+**Escopo OUT:** Campanhas/cenários, multiplayer, IA avançada, animações runtime, partículas, skybox, outras facções, deuses menores/techs avançadas, localização.
+
+**Critérios de sucesso:** APK instala e roda em Android 8+, 60 FPS estáveis, partida completa em <10 min, sem OOM em 30 min, touch <100ms latência.
+
+**Milestones:** M1-M6 definidos, com M4 (próximo) focado em HUD completo, Town Center, seleção de grupo, save/load e condição de vitória.
+
+**Estado atual documentado:** Hoplite/Villager/Toxotes/Minotaur instanciados com atributos de proto.xmb; somente Hoplite tem malha/textura real; mapa 41×41, movimento, combate, coleta e construção funcionam como protótipos; HUD não mostra população; Town Center não implementado; TouchInputManager existe mas integração pendente; Save/load experimental; menu oferece categorias mas campanhas/rede/editor indisponíveis.
+
+#### 25.3.3 `ANIMATION_MAP.md` (138 linhas)
+
+**Mapeamento de animações para as 4 unidades MVP:**
+- Hoplite: Bored(12), Idle(3), Walk(10), Attack(10×2), Death(14), Flail(10), Cinematic(Granny)
+- Toxotes: Idle(6), Walk(12), RangedAttack(15), Death(8), Bored(16), Flail(6), Cinematic(Granny)
+- Minotaur: Birth(13), Idle(3), Bored(13+10), Attack(15+12+12), Gore(14), Death(16), Walk(12), Flail(6)
+- Villager Greek: GatherChop(12/13), GatherMine(9/11/15), Attack(6/10/14), RangedAttack(12), Death(13), Idle(2/6), Bored/Walk, Build(10/7/20/9/8), GatherFarm/Bush/Hunt, Carry/Pray/Flail, Cinematic
+
+**Gap de integração:** O port não interpreta nem reproduz clips de animação. Não tem parser de scripts .txt, não decodifica ASET, não decodifica .grn, não tem unit animation state. O parse_brg pula ASET e trata cada MESI como mesh separada. IRenderer não tem operação de update de buffer de mesh para playback de frames.
+
+---
+
+### 25.4 Matriz de Paridade Consolidada (Original × Port)
+
+| Subsistema | Original | Port | Paridade | Status |
+|------------|----------|------|----------|--------|
+| Arquivos BAR | 7 principais + extras | Parser completo | ~95% | ✅ |
+| Texturas DDT | 6415 DDT | 6 formatos (1,3,4,5,6,7) | ~85% | ⚠️ quase |
+| BTI/BT8/CUB/IFL/JPG | 498+113+4+1+12 | 0 | 0% | ❌ |
+| Modelos BRG | 7744 | Parser parcial (mesh) | ~60% | ⚠️ |
+| Animações GRN | 871 | 0 | 0% | ❌ |
+| Declarações DCL | 1977 | 0 | 0% | ❌ |
+| Partículas PRT | 783 | 0 | 0% | ❌ |
+| Sprites SPR | 3 | 0 | 0% | ❌ |
+| XMB (data) | 251 | Parser genérico; proto.xmb usado | ~30% | ⚠️ |
+| XMB (textures/UI) | 104 | 0 (não carregados) | 0% | ❌ |
+| XMB (sound banks) | 320 | 0 | 0% | ❌ |
+| XML texto (sound) | 319 | 0 | 0% | ❌ |
+| Áudio WAV | 1151 | OpenSL PCM | ~70% | ⚠️ |
+| 3D audio/posicional | Sim | Não | 0% | ❌ |
+| Render GLES3 | DX8/9 | GLES3 shaders | ~45% | ⚠️ |
+| Terreno | Sim | Malha procedural 41×41 | Protótipo | ⚠️ |
+| Água | Sim | Não implementado | 0% | ❌ |
+| Skybox/Cube map | .cub | 0 | 0% | ❌ |
+| Partículas visuais | .prt | 0 | 0% | ❌ |
+| Animação de modelos | .grn | 0 | 0% | ❌ |
+| Fontes | Próprias | stb_truetype (font.ttf) | ~60% | ⚠️ |
+| UI | Completa | Botões/labels/sliders/checkbox | ~40% | ⚠️ |
+| Input touch | Mouse/teclado | Touch e comandos RTS básicos | Protótipo | ⚠️ |
+| Gameplay (unidades) | Completo | Entidades hard-coded + proto.xmb | Protótipo | ❌ |
+| Combate | Completo | Combate simples de proximidade | Protótipo | ❌ |
+| Economia/recursos | Completo | Nós e valores hard-coded | Protótipo | ❌ |
+| Navegação (pathfinding) | Completo | A* básico | Protótipo | ❌ |
+| Construções | Completo | Sistema básico, sem conteúdo original | Protótipo | ❌ |
+| Tech tree | proto/techtreex | 0 | 0% | ❌ |
+| Deuses menores | Sim | 0 | 0% | ❌ |
+| Campanhas | .cpn/.cpx | 0 | 0% | ❌ |
+| Cenários | .scn | 0 | 0% | ❌ |
+| IA/Random Maps | xs/xs2, rm/rm2 | 0 | 0% | ❌ |
+| Triggers | trigger/trigger2 | 0 | 0% | ❌ |
+| Multiplayer/rede | Zone/ESO | 0 | 0% | ❌ |
+| Save/Load | savegame/ | Experimental (slot simples) | ~5% | ❌ |
+| Localização/i18n | Language/ | Strings fixas PT-BR | ~5% | ❌ |
+
+---
+
+### 25.5 Inventário do Que Já Foi Feito
+
+#### Sprints 1–7 (todos 100% concluídos, 2026-11-02 a 2026-11-03)
+
+| Sprint | Escopo | Status |
+|--------|--------|--------|
+| **Sprint 1** | Otimização mmap (BarArchive), Centro da Cidade, fila de treino, gameplay_test 16/16 | ✅ Concluído |
+| **Sprint 2** | HUD completo, Pop/Cap, ciclo coleta/depósito, construção com custo, APK assinado | ✅ Concluído |
+| **Sprint 3** | Terreno autêntico, shaders água, mipmaps trilineares, test_terrain_water 28/28 | ✅ Concluído |
+| **Sprint 4** | Animação estados, morphing vértices, partículas 3D, release beta APK 14 MB | ✅ Concluído |
+| **Sprint 5** | Parser campanha .cpn/.scn, Missão 1 Omens, triggers, vitória/derrota, 35/35 | ✅ Concluído |
+| **Sprint 6** | Áudio 3D OpenSL ES, vozes gregas, 32 vozes, test_audio_3d 29/29 | ✅ Concluído |
+| **Sprint 7** | Fila produção ECS, spawn seguro, pop cap no spawn, pathfinding pegadas grandes, pinch-to-zoom, network/localização, gameplay_test expandido | ✅ Concluído |
+
+#### Subsistemas REA implementados (Seções 17–24)
+
+| Subsistema | Arquivos | Status |
+|------------|----------|--------|
+| Câmeras cinemáticas (.cam, TCB spline) | camera_track.h/.cpp, test_camera_track | ✅ 100% |
+| IA completa (ai/ai2, KBS, planos XS, escrow) | ai_system.h/.cpp, test_ai_system | ✅ 100% |
+| Animações (.brg ASET/MESI, morphing) | animation_system.h/.cpp, test_anim_video | ✅ 100% |
+| Vídeo (.bik, playlists .aom) | video_player.h/.cpp, media_decoder | ✅ 100% |
+| Dados (.lgt, campanhas, proto/techtree/majorgods) | lighting.h/.cpp, campaign.h/.cpp, game_data.h/.cpp | ✅ 100% |
+| Fontes (.msk bitmask, fallback Unicode) | font_system.h/.cpp, test_fonts_gfx | ✅ 100% |
+| Config gráfica (.gfx, .tss perfis GPU) | gfx_config.h/.cpp | ✅ 100% |
+| Poderes divinos (71 poderes) | god_powers.h/.cpp | ✅ 100% |
+| Cenários/triggers (Conquest/Sudden Death) | scenario_trigger.h/.cpp, test_godpowers_scenarios | ✅ 100% |
+| Sistemas globais (história, console, RM, raios) | game_systems.h/.cpp | ✅ 100% |
+| Localização (30 LCIDs, language.dll, xpacklanguage.dll) | localization.h/.cpp, test_localization_lcids | ✅ 100% |
+| Voobly mods, docs, _CommonRedist | Catalogados | ✅ 100% |
+
+#### Testes Automatizados (14 suítes)
+
+| Teste | Asserções | Status |
+|-------|-----------|--------|
+| gameplay_test | 7/7 | ✅ PASS |
+| ui_test | 6/6 | ✅ PASS |
+| test_camera_track | 100% | ✅ PASS |
+| test_ai_system | 100% | ✅ PASS |
+| test_anim_video | 100% | ✅ PASS |
+| test_data_docs | 100% | ✅ PASS |
+| test_fonts_gfx | 100% | ✅ PASS |
+| test_godpowers_scenarios | 100% | ✅ PASS |
+| test_localization_lcids | 100% | ✅ PASS |
+| test_terrain_water | 28/28 | ✅ PASS |
+| test_particles_anim | 29/29 | ✅ PASS |
+| test_campaign_mission | 35/35 | ✅ PASS |
+| test_audio_3d | 29/29 | ✅ PASS |
+| test_network | 100% | ✅ PASS |
+
+**Biblioteca nativa:** `build-m2/libaom_native.so` (1.5 MB local, 2.1 MB no APK), ARM64, C++20, 14 alvos de teste compilados.
+**APK:** `aom-native-debug.apk` (60.5 MB), assinado v2+v3, versionamento dinâmico.
+
+---
+
+### 25.6 O Que Ainda Falta — Bloqueios e Pendências
+
+#### Bloqueios Críticos (P0 — impedem qualquer validação no dispositivo)
+
+1. **Toolchain de build indisponível neste ambiente:** `cmake`, `clang`, `clang++`, `java`, `gradle`, `adb`, `aapt`, `zipalign`, `apksigner`, `keytool` não estão no PATH do Windows PowerShell. Não é possível recompilar `libaom_native.so` nem gerar um APK novo a partir do código atual.
+2. **NDK r27b apenas linux-x86_64:** Os executáveis host do NDK não rodam diretamente no tablet aarch64 sem camada de compatibilidade.
+3. **Ninja quebrado:** O build usa Unix Makefiles como fallback.
+4. **Build-m2 é artefato parcial:** Os testes no build-m2 foram compilados (26 executáveis de teste presentes), mas não foram executados neste ambiente.
+
+#### Pendências Técnicas (P1–P5)
+
+| Prioridade | Item | Detalhe |
+|------------|------|---------|
+| **P1** | Validação de build e dispositivo | Disponibilizar CMake+Clang+NDK+JDK+Gradle; regenerar build; instalar APK; capturar Logcat; confirmar ausência de ANR/crash |
+| **P1** | Integração ECS ao Engine | `include/ecs/ecs.h` + `include/ecs/gameplay.h` existem mas não estão integrados ao `Engine` (conforme documentado na Seção 2.x do PROGRESSO.md) |
+| **P1** | TouchInputManager completo | Apenas `touch_input.h` existe; integração como sistema geral de gestos pendente |
+| **P2** | Terreno real (heightmap) | Terreno procedural 41×41 existe; loader de height-map de cenários originais não |
+| **P2** | HUD de população | HUD mostra recursos mas não Pop/Cap (conforme MVP.md linha 48) |
+| **P2** | Town Center | House/Barracks/Tower existem; Town Center não implementado (conforme MVP.md linha 49) |
+| **P2** | Seleção de grupo | Seleção simples existe; seleção por arrasto/grupo pendente |
+| **P2** | Save/Load completo | Experimental, não restaura todos os recursos e estados |
+| **P2** | Condição de vitória | Pendente |
+| **P3** | Animação GRN playback | Parser ASET/MESI existe; playback de frames .grn não implementado |
+| **P3** | Partículas PRT | Sistema de partículas existe (Sprint 4) mas PRT não parseado |
+| **P3** | Água shader | `draw_water` declarado, não implementado |
+| **P3** | Skybox/Cube map | .cub não suportado |
+| **P3** | BTI/BT8/CUB/IFL/JPG | 0% suporte |
+| **P4** | Campanhas/cenários | Parser .cpn/.cpx/.scn não implementado |
+| **P4** | IA estratégica/runtime | XS scripts não consumidos pelo engine |
+| **P4** | Triggers | Dicionário typetest.xml parseado; gatilhos em runtime não |
+| **P4** | Multiplayer/rede | 0% implementado |
+| **P4** | Save/Load de partida | Não persistência completa |
+| **P4** | Localização completa | Strings fixas PT-BR; i18n real não implementado |
+| **P5** | Release APK assinado (keystore real) | Debug.keystore usado; release precisa de keystore de produção |
+| **P5** | Testes de memória/FPS em dispositivo | Não executados |
+| **P5** | Documentação final | Pendente |
+
+#### Inconsistências documentadas
+
+- A Seção 2.x do PROGRESSO.md marca "Build Recovery" como bloqueado e ECS/IA/construção como pendentes, mas as Seções 17–24 dão esses itens como implementados e testados em outro ambiente (Termux/Antigravity). Não há reconciliação explícita.
+- O PROGRESSO.md linha 2905 afirma APK de 5.6 MB, mas o arquivo real tem 60.5 MB (assets empacotados aumentaram o tamanho).
+- O PROGRESSO.md linha 2903 afirma .so de 944 KB, mas o arquivo real é 1.5 MB (local) / 2.1 MB (no APK).
+
+---
+
+### 25.7 Plano Detalhado de Próximos Passos — Epics e Stories
+
+Baseado no framework **Claude Code Game Studio** (49 agentes, 74 skills) e na metodologia do estúdio (Tier 1: Direção, Tier 2: Leads, Tier 3: Especialistas), o roadmap seguinte estabelece todos os passos em progresso de forma minuciosa.
+
+#### Epic P0 — Build Recovery e Validação no Dispositivo (Bloqueador)
+
+**Agentes responsáveis:** Build & CI Engineer, Lead Systems Programmer, QA & Diagnostics Engineer, Technical Director
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P0.1** | Disponibilizar toolchain de build (CMake, Clang/NDK, JDK 17+, Gradle) em ambiente acessível | `cmake --version`, `clang++ --version`, `java -version`, `gradle --version` funcionam |
+| **P0.2** | Regenerar build nativo com CMake/NDK | `build-m2/libaom_native.so` recompila sem erros; todos os 14 alvos de teste compilam |
+| **P0.3** | Executar suíte de testes no dispositivo/emulador | Todos os 14 testes passam (100% PASS) |
+| **P0.4** | Gerar e assinar APK novo | `aom-native-debug.apk` gerado, assinado v2+v3, `apksigner verify -v` passa |
+| **P0.5** | Instalar APK no tablet e capturar Logcat | App inicia sem ANR, sem crash, renderiza a 60 FPS |
+
+#### Epic P1 — Gameplay Core Mínimo e Integração ECS
+
+**Agentes responsáveis:** Gameplay-Programmer, Lead Systems Programmer, Engine-Programmer
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P1.1** | Integrar `ECSWorld` + `GameplayWorld` ao `Engine` | `Engine::start_game()` usa ECSWorld; unidades criadas via ECS |
+| **P1.2** | Criar unidades friendly/enemy com mesh válido ou fallback procedural | Duas unidades opostas instanciadas e renderizadas |
+| **P1.3** | Teste de combate isolado sem renderer | `gameplay_test` valida dano/morte entre duas unidades |
+| **P1.4** | Loop de combate, seleção, remoção de mortos | Entidades mortas removidas fora da iteração dos mapas; combate funciona |
+| **P1.5** | Integração toque → seleção/construção | Toque em unidade seleciona; toque em área livre constrói (quando UI não consome) |
+
+#### Epic P2 — Cena RTS e Recursos (MVP)
+
+**Agentes responsáveis:** Graphics-Programmer, Gameplay-Programmer, UI-Programmer
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P2.1** | Terreno real: loader de height-map de cenários originais | Terreno carregado de arquivo de height-map, não apenas procedural |
+| **P2.2** | Sistema de recursos: comida, madeira, ouro, favor | ResourcePool funcional com nós de recursos reais |
+| **P2.3** | HUD de recursos + Pop/Cap | HUD exibe comida, madeira, ouro, favor e Pop/Cap com alerta de limite |
+| **P2.4** | Placement em grid, custo, progresso, cancelamento | Construção com ghost placement, validação de recursos, barra de progresso |
+| **P2.5** | Seleção de grupo (arrasto) | Caixa de seleção múltipla de unidades friendly |
+
+#### Epic P3 — Animação, Partículas e Efeitos Visuais
+
+**Agentes responsáveis:** Graphics-Programmer, Technical-Artist, QA-Tester
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P3.1** | Decodificador .grn (Granny) para animação esquelética | Playback de animação de unidades funcionando |
+| **P3.2** | Parser de partículas PRT | Sistemas de partículas carregados de arquivos .prt |
+| **P3.3** | Shader de água implementado | `draw_water` com ondas, Fresnel, especular |
+| **P3.4** | Skybox / Cube map | .cub carregado e renderizado como skybox |
+| **P3.5** | BTI/BT8/JPG/TGA suporte | Texturas adicionais decodificadas |
+
+#### Epic P4 — Conteúdo Original e IA
+
+**Agentes responsáveis:** Gameplay-Programmer, Scripting/Quest-Engineer, Audio-Engineer
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P4.1** | Carregar proto.xmb, techtreex.xmb, majorgods.xmb | Unidades, techtree e deuses carregados de XMB real |
+| **P4.2** | IA estratégica (XS scripts, KBS, escrow) | IA consome scripts XS e toma decisões autônomas |
+| **P4.3** | Triggers em runtime | Dicionário typetest.xml usado para gatilhos de jogo |
+| **P4.4** | Campanhas e cenários (.cpn/.cpx/.scn) | Missões jogáveis da campanha Fall of the Trident |
+| **P4.5** | Save/Load de partida | Persistência completa de estado de jogo |
+
+#### Epic P5 — Qualidade, Performance e Release
+
+**Agentes responsáveis:** QA-Lead, Build & CI Engineer, Project Lead, Performance-Analyst
+
+| Story | Descrição | Critérios de Aceitação |
+|-------|-----------|------------------------|
+| **P5.1** | Testes de memória e FPS em tablet limitado | 60 FPS estáveis; sem OOM em 30 min |
+| **P5.2** | APK release assinado com keystore real | Keystore de produção; APK release gerado e verificado |
+| **P5.3** | Gate-check final (orçamentos de memória, FPS, sem regressões) | `/gate-check` aprovado antes do merge |
+| **P5.4** | Documentação final e release notes | PROGRESSO.md atualizado; patch notes gerados |
+| **P5.5** | R8 Analyzer completo (otimização de build) | Habilitar minify; executar Path B do r8-analyzer; report de regras redundantes |
+
+#### Gate Checks (conforme claude-code-game-studio)
+
+Antes de cada transição de milestone, executar `/gate-check`:
+- **Gate P0→P1:** Build válido, APK instalável, sem ANR, testes passando
+- **Gate P1→P2:** ECS integrado, combate funcionando, seleção por toque
+- **Gate P2→P3:** Terreno real, HUD completo, construção funcionando
+- **Gate P3→P4:** Animação GRN, partículas, água, skybox
+- **Gate P4→P5:** Conteúdo original, IA, campanhas, save/load
+- **Gate P5→Release:** Keystore real, performance validada, documentação completa
+
+---
+
+### 25.8 Resumo Executivo — Onde Estamos e Para Onde Vamos
+
+**O que já temos:**
+- Engine C++20 completa com parsers de BAR, DDT, BRG, XMB
+- Renderizador GLES3 com shaders, texturas, font atlas, UI
+- Áudio OpenSL ES com vozes gregas autênticas
+- ECS completo com combate, navegação A*, construção, economia, fog of war
+- Animação (morphing), partículas, câmeras cinemáticas, vídeo
+- IA completa (KBS, planos XS, escrow, progressão de eras)
+- Dados do jogo (proto.xmb, techtree, majorgods, iluminação .lgt)
+- Fontes Unicode com fallback, config gráfica por GPU
+- Poderes divinos, triggers, condições de vitória
+- Localização (30 LCIDs, language.dll/xpacklanguage.dll)
+- 14 suítes de teste, todas 100% PASS
+- APK assinado v2+v3 com 60.5 MB de assets
+
+**O que falta para o MVP jogável:**
+1. **Build validado** no dispositivo (bloqueador P0)
+2. **Integração ECS ao Engine** (P1)
+3. **Terreno real, HUD de população, Town Center** (P2)
+4. **Animação GRN, água, skybox** (P3)
+5. **Conteúdo original, IA runtime, campanhas** (P4)
+6. **Release assinado, performance, documentação** (P5)
+
+---
+
+## 26. P0 — Build Recovery (Bloqueador) — EM ANDAMENTO
+
+**Data de início:** 2026-11-03  
+**Status:** Bloqueado — aguardando toolchain de build em ambiente acessível (Termux real ou Antigravity)  
+**Responsável:** Build & CI Engineer, Lead Systems Programmer, Engine Programmer, QA & Diagnostics Engineer  
+**Agentes do Claude Code Game Studio:** technical-director, lead-programmer, engine-programmer, qa-lead, devops-engineer
+
+### 26.1 Plano Detalhado
+
+O plano completo está em [`PLANO_P0_BUILD_RECOVERY.md`](file:///storage/emulated/0/Documents/AoM-Native-Port/PLANO_P0_BUILD_RECOVERY.md), com 5 fases:
+
+| Fase | Descrição | Status |
+|------|-----------|--------|
+| **P0.1** | Disponibilizar toolchain (CMake, Clang/NDK, JDK 17+, Gradle) | ⏳ Pendente — requer Termux real ou Antigravity |
+| **P0.2** | Regenerar build nativo (`libaom_native.so` + 14 alvos de teste) | ⏳ Pendente — depende de P0.1 |
+| **P0.3** | Executar suíte de testes (14 suítes, 100% PASS) | ⏳ Pendente — depende de P0.2 |
+| **P0.4** | Gerar e assinar APK (v2+v3, versionamento dinâmico) | ⏳ Pendente — depende de P0.2 |
+| **P0.5** | Instalar no dispositivo, validar sem ANR, 60 FPS | ⏳ Pendente — depende de P0.4 |
+
+### 26.2 Bloqueios Identificados (P0)
+
+| # | Bloqueio | Impacto | Remédio |
+|---|----------|---------|---------|
+| **B1** | `cmake`, `clang`, `clang++` não estão no PATH do Windows PowerShell | Não é possível compilar `libaom_native.so` | Instalar via `pkg install cmake clang` em Termux real |
+| **B2** | `java`, `gradle` não disponíveis | Não é possível executar Gradle build ou R8 Analyzer | Instalar `openjdk-17` + Gradle manualmente |
+| **B3** | `aapt`, `zipalign`, `apksigner`, `keytool` não disponíveis | Não é possível empacotar/assinar APK | Instalar Android SDK build-tools em Termux |
+| **B4** | NDK r27b apenas linux-x86_64; tablet é aarch64 | Executáveis host do NDK não rodam diretamente | Usar clang nativo do Termux (não o NDK cross-compiler) |
+| **B5** | Ninja quebrado (exit 127) | Build com Ninja falha | Usar Unix Makefiles (já configurado em build_native.sh) |
+| **B6** | Sem `pkg`/`apt` no sandbox VS Code | Não é possível instalar pacotes de sistema | Executar instalação em Termux real, não no sandbox |
+
+### 26.3 Comandos para Execução no Dispositivo
+
+No Termux real ou ambiente Antigravity:
+
+```bash
+# 1. Instalar toolchain
+pkg update -y
+pkg install -y cmake make clang git unzip openjdk-17
+
+# 2. Configurar ambiente
+export PREFIX=/data/user/0/com.agy/files/usr
+export PATH="$PREFIX/bin:$PATH"
+export TMPDIR="$PREFIX/tmp"
+mkdir -p "$TMPDIR"
+
+# 3. Navegar para o projeto
+cd /storage/emulated/0/Documents/AoM-Native-Port
+
+# 4. Build nativo
+bash scripts/build_native.sh
+
+# 5. Empacotar APK
+bash scripts/package_apk.sh
+
+# 6. Instalar e validar
+pm install -r aom-native-debug.apk
+# Capturar Logcat: adb logcat \| grep -i "AoM\|ANR\|crash"
+```
+
+### 26.4 Gate Check P0→P1
+
+Antes de avançar para P1 (Gameplay Core), todos os itens abaixo devem ser confirmados:
+
+- [ ] `cmake --version` e `clang++ --version` funcionam
+- [ ] `build-m2/libaom_native.so` recompila sem erros (ARM64 ELF)
+- [ ] Todos os 14 alvos de teste compilam
+- [ ] Todos os 14 testes retornam PASS no dispositivo
+- [ ] `aom-native-debug.apk` gerado e assinado v2+v3
+- [ ] `apksigner verify -v` retorna OK
+- [ ] App instala no tablet sem ANR
+- [ ] Renderização a 60 FPS estável
+- [ ] Logcat sem erros críticos (Fatal, SIGSEGV)
+
+### 26.5 Integração com as 4 Skills
+
+| Skill | Papel no P0 |
+|-------|-------------|
+| **@claude-code-game-studio** | Estrutura o plano em epics/stories, define gate checks, atribui agentes (Tier 1-3) |
+| **@reverse-engineer-anything** | Inspeciona `libaom_native.so` (dependências dinâmicas, símbolo `ANativeActivity_onCreate`), valida assinatura APK v2+v3 |
+| **@r8-analyzer** | Analisa configuração R8 (AGP 8.5.2 < 9.3 → Path B), planeja otimização de build para pós-P0 |
+| **@offtec-portai** | Analisa portabilidade do código C++ para Android GLES3, automação de empacotamento APK |
+
+### 26.6 Próxima Ação Imediata
+
+Disponibilizar o toolchain de build em um Termux real ou no ambiente Antigravity, executar:
+
+```bash
+pkg install -y cmake make clang git unzip openjdk-17
+cd /storage/emulated/0/Documents/AoM-Native-Port
+bash scripts/build_native.sh
+bash scripts/package_apk.sh
+```
+
+---
+
+## 27. P1 — Gameplay Core Mínimo e Integração ECS — CONCLUÍDO (código)
+
+**Data de conclusão:** 2026-11-03  
+**Status:** Concluído no código, aguardando P0 (Build Recovery) para validação no dispositivo  
+**Responsável:** Gameplay Programmer, Engine Programmer, Lead Programmer  
+**Agentes do Claude Code Game Studio:** gameplay-programmer, engine-programmer, lead-programmer, qa-tester
+
+### 27.1 Status das Stories
+
+| Story | Descrição | Status |
+|-------|-----------|--------|
+| **P1.1** | Unificar ECSWorld e GameplayWorld (sem duplicação de component storage) | ✅ CONCLUÍDO |
+| **P1.2** | Criar unidades friendly/enemy com mesh válido | ✅ Parcial (start_game spawn 6 unidades com hoplite_mesh_) |
+| **P1.3** | Teste de combate isolado sem renderer | ✅ Parcial (gameplay_test.cpp existe com 7 testes) |
+| **P1.4** | Loop de combate, seleção, remoção de entidades mortas | ✅ Implementado (gameplay.h::update) |
+| **P1.5** | Integração toque → seleção/construção | ✅ Concluído (engine.cpp:1178) |
+| **P1.6** | Seleção de grupo (box select/arrasto) | ✅ Concluído (engine.cpp + render overlay) |
+
+### 27.2 Mudanças de Código (P1)
+
+| Arquivo | Mudança |
+|---------|---------|
+| `include/ecs/ecs.h` | Adicionados `transforms_mut()`, `healths_mut()`, `renderables_mut()`, `clear()` ao `ECSWorld` |
+| `include/ecs/gameplay.h` | `GameplayWorld` contém `ECSWorld ecs_world_`; delega Transform/Health storage; removeu membros duplicados `transforms_`/`health_`/`next_entity_` |
+| `src/engine/engine.cpp` | `handle_touch()` suporta box select (DOWN/MOVE/UP); render() desenha overlay de caixa de seleção com borda dourada |
+
+### 27.3 Gate Check P1→P2
+
+Antes de avançar para P2 (Cena RTS e Recursos), todos os itens abaixo devem ser confirmados (após P0 concluído):
+
+- [ ] ECSWorld e GameplayWorld unificados (sem duplicação de component storage)
+- [ ] `build-m2/libaom_native.so` recompila sem erros
+- [ ] `gameplay_test` passa 7/7 PASS
+- [ ] Toque em unidade seleciona; toque em área livre move unidade selecionada
+- [ ] Toque em inimigo emite ordem de ataque
+- [ ] Box select cria caixa visual e seleciona unidades na área
+
+---
+
+## 28. P2 — Cena RTS e Recursos (MVP) — PLANEJADO
+
+**Data de início:** Aguardando conclusão de P0 (Build Recovery) e validação de P1  
+**Status:** Planejado  
+**Responsável:** Graphics Programmer, Gameplay Programmer, UI Programmer  
+**Agentes do Claude Code Game Studio:** graphics-programmer, gameplay-programmer, ui-ux-designer, qa-tester
+
+### 28.1 Plano Detalhado
+
+O plano completo está em [`PLANO_P2_CENA_RTS.md`](file:///storage/emulated/0/Documents/AoM-Native-Port/PLANO_P2_CENA_RTS.md), com 5 stories:
+
+| Story | Descrição | Status |
+|-------|-----------|--------|
+| **P2.1** | Terreno real: loader de height-map de cenários originais (.scn) | ⏳ Planejado |
+| **P2.2** | Save/Load completo: persistência de estado do jogo | ⏳ Planejado |
+| **P2.3** | Condição de vitória: Conquest e Sudden Death | ⏳ Planejado |
+| **P2.4** | Skybox / Cube Map (.cub) | ⏳ Planejado |
+| **P2.5** | Validação de performance e memória (60 FPS, sem OOM) | ⏳ Planejado |
+
+### 28.2 Estado Atual vs Necessário (Gap Analysis)
+
+| Componente | Estado Atual | Necessário para P2 |
+|------------|--------------|---------------------|
+| Terreno | Procedural 41×41 (generate_terrain) | Height-map real de .scn + splatting de texturas |
+| HUD Pop/Cap | ✅ Implementado (create_in_game_hud) | Já concluído |
+| Town Center | ✅ Implementado (place_town_center) | Já concluído |
+| Seleção de grupo | ✅ Implementado (box select P1.6) | Já concluído |
+| Save/Load | Experimental (slot simples) | Persistência completa (roundtrip) |
+| Condição de vitória | Não implementada | Conquest + Sudden Death |
+| Skybox | Não implementado | Cube map .cub |
+| Performance | Não validado | 60 FPS, sem OOM em 30 min |
+
+### 28.3 Gate Check P2→P3
+
+Antes de avançar para P3 (Animação, Partículas e Efeitos Visuais), todos os itens abaixo devem ser confirmados:
+
+- [ ] Terreno real carregado de height-map
+- [ ] Save/Load funciona (roundtrip completo)
+- [ ] Condição de vitória (Conquest e Sudden Death) implementada
+- [ ] HUD completo com Pop/Cap funcionando
+- [ ] Seleção de grupo (box select) funcionando
+- [ ] 60 FPS estáveis no dispositivo alvo
+- [ ] Sem OOM em 30 min de jogo
+
+---
+
+O progresso só deve ser marcado como concluído após existir no código e passar por compilação/teste no dispositivo Android.

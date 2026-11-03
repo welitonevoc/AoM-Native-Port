@@ -610,9 +610,7 @@ public:
 
     explicit GameplayWorld(const XmbElement* proto_root = nullptr)
         : proto_root_(proto_root),
-          combat_(transforms_, health_, units_),
-          selection_(transforms_, selections_),
-          buildings_(transforms_, building_components_, units_) {
+          ecs_world_() {
         combat_.on_combat_hit = [this](Entity a, Entity t, const glm::vec3& p) {
             if (on_combat_hit) on_combat_hit(a, t, p);
         };
@@ -630,13 +628,14 @@ public:
     }
 
     Entity spawn_unit(Team team, const glm::vec3& position, const UnitStats& stats = {}) {
-        Entity id = ++next_entity_;
-        transforms_[id].position = position;
+        Entity id = ecs_world_.create_entity();
 
-        HealthComponent hp;
+        auto& tr = ecs_world_.transforms_mut()[id];
+        tr.position = position;
+
+        auto& hp = ecs_world_.healths_mut()[id];
         hp.max_hp = static_cast<int>(stats.max_hp);
         hp.current_hp = hp.max_hp;
-        health_[id] = hp;
 
         UnitComponent u;
         u.unit_type_name = stats.name.empty() ? "Unit" : stats.name;
@@ -705,8 +704,8 @@ public:
         float best_dist = std::numeric_limits<float>::max();
         for (const auto& [id, bld] : building_components_) {
             if (bld.team == team && bld.type == BuildingType::TOWN_CENTER && bld.complete) {
-                auto t_it = transforms_.find(id);
-                if (t_it != transforms_.end()) {
+                auto t_it = ecs_world_.transforms().find(id);
+                if (t_it != ecs_world_.transforms().end()) {
                     float d = glm::length(t_it->second.position - pos);
                     if (d < best_dist) {
                         best_dist = d;
@@ -741,8 +740,8 @@ public:
     bool order_build(Entity worker, Entity building) {
         auto w_it = units_.find(worker);
         auto b_it = building_components_.find(building);
-        auto b_t = transforms_.find(building);
-        if (w_it == units_.end() || !w_it->second.worker || b_it == building_components_.end() || b_t == transforms_.end()) {
+        auto b_t = ecs_world_.transforms().find(building);
+        if (w_it == units_.end() || !w_it->second.worker || b_it == building_components_.end() || b_t == ecs_world_.transforms().end()) {
             return false;
         }
         w_it->second.build_target = building;
@@ -847,8 +846,9 @@ public:
 
     Entity place_building(Team team, const glm::vec3& position, float build_time = 5.0f,
                           BuildingType type = BuildingType::BARRACKS, const std::string& name = "Quartel Militar") {
-        Entity id = ++next_entity_;
-        transforms_[id].position = position;
+        Entity id = ecs_world_.create_entity();
+        auto& tr = ecs_world_.transforms_mut()[id];
+        tr.position = position;
         BuildingComponent b;
         b.type = type;
         b.name = name;
@@ -859,13 +859,12 @@ public:
         b.los = (type == BuildingType::TOWER) ? 18.0f : ((type == BuildingType::TOWN_CENTER) ? 22.0f : 14.0f);
         building_components_[id] = b;
 
-        HealthComponent hp;
+        auto& hp = ecs_world_.healths_mut()[id];
         if (type == BuildingType::HOUSE) hp.max_hp = 350;
         else if (type == BuildingType::TOWER) hp.max_hp = 600;
         else if (type == BuildingType::TOWN_CENTER) hp.max_hp = 2400;
         else hp.max_hp = 800; // BARRACKS
         hp.current_hp = hp.max_hp;
-        health_[id] = hp;
 
         const glm::ivec2 cell = navigation_cell(position);
         if (type == BuildingType::TOWN_CENTER) {
@@ -918,8 +917,10 @@ public:
     bool demolish_building(const glm::vec3& point, float radius = 1.5f) {
         for (auto it = building_components_.begin(); it != building_components_.end(); ++it) {
             const Entity id = it->first;
-            if (glm::length(transforms_[id].position - point) > radius) continue;
-            const glm::ivec2 cell = navigation_cell(transforms_[id].position);
+            auto t_it = ecs_world_.transforms().find(id);
+            if (t_it == ecs_world_.transforms().end()) continue;
+            if (glm::length(t_it->second.position - point) > radius) continue;
+            const glm::ivec2 cell = navigation_cell(t_it->second.position);
             if (it->second.type == BuildingType::TOWN_CENTER) {
                 for (int dx = -1; dx <= 2; ++dx) {
                     for (int dz = -1; dz <= 2; ++dz) {
@@ -932,7 +933,7 @@ public:
                 navigation_.set_blocked(cell.x, cell.y + 1, false);
                 navigation_.set_blocked(cell.x + 1, cell.y + 1, false);
             }
-            transforms_.erase(id); building_components_.erase(it); return true;
+            ecs_world_.destroy_entity(id); building_components_.erase(it); return true;
         }
         return false;
     }
@@ -946,7 +947,7 @@ public:
                     u->second.attack_target = INVALID_ENTITY;
                     u->second.build_target = INVALID_ENTITY;
                     u->second.gather_node = -1;
-                    transforms_[entity].velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                 }
             }
         }
@@ -961,17 +962,16 @@ public:
         return (it != units_.end()) ? &it->second : nullptr;
     }
     const HealthComponent* get_health(Entity id) const {
-        auto it = health_.find(id);
-        return (it != health_.end()) ? &it->second : nullptr;
+        auto it = ecs_world_.healths().find(id);
+        return (it != ecs_world_.healths().end()) ? &it->second : nullptr;
     }
     const TransformComponent* get_transform(Entity id) const {
-        auto it = transforms_.find(id);
-        return (it != transforms_.end()) ? &it->second : nullptr;
+        auto it = ecs_world_.transforms().find(id);
+        return (it != ecs_world_.transforms().end()) ? &it->second : nullptr;
     }
     void clear_all_entities() {
-        transforms_.clear();
+        ecs_world_.clear();
         units_.clear();
-        health_.clear();
         building_components_.clear();
         selections_.clear();
         animations_.clear();
@@ -990,8 +990,8 @@ public:
         // chamamos update_animations(dt) para iterar sobre animations_ limpo.
         combat_.update(dt);
         for (Entity dead : combat_.dead_entities()) {
-            auto tit = transforms_.find(dead);
-            if (tit != transforms_.end() && on_unit_death) on_unit_death(tit->second.position);
+            auto tit = ecs_world_.transforms().find(dead);
+            if (tit != ecs_world_.transforms().end() && on_unit_death) on_unit_death(tit->second.position);
             remove_entity(dead);
         }
         combat_.clear_dead();
@@ -1003,9 +1003,9 @@ public:
         // Executado DEPOIS da remoção das entidades mortas: spawn_unit() pode
         // inserir com segurança em transforms_/units_/health_/animations_.
         for (const auto& spawn : buildings_.drain_spawn_orders()) {
-            auto b_t = transforms_.find(spawn.building);
+            auto b_t = ecs_world_.transforms().find(spawn.building);
             auto b_c = building_components_.find(spawn.building);
-            if (b_t == transforms_.end() || b_c == building_components_.end()) continue;
+            if (b_t == ecs_world_.transforms().end() || b_c == building_components_.end()) continue;
 
             const Team team = b_c->second.team;
             const UnitStats stats = extract_unit_stats_from_xmb(proto_root_, spawn.unit_type);
@@ -1034,15 +1034,15 @@ public:
         std::vector<std::pair<glm::vec3, float>> vision_sources;
         for (const auto& [entity, unit] : units_) {
             if (unit.team == Team::FRIENDLY) {
-                auto t = transforms_.find(entity);
-                if (t != transforms_.end())
+                auto t = ecs_world_.transforms().find(entity);
+                if (t != ecs_world_.transforms().end())
                     vision_sources.push_back({t->second.position, unit.los * 0.75f});
             }
         }
         for (const auto& [entity, bld] : building_components_) {
             if (bld.team == Team::FRIENDLY) {
-                auto t = transforms_.find(entity);
-                if (t != transforms_.end())
+                auto t = ecs_world_.transforms().find(entity);
+                if (t != ecs_world_.transforms().end())
                     vision_sources.push_back({t->second.position, bld.los * 0.75f});
             }
         }
@@ -1099,27 +1099,27 @@ public:
             const auto u_it = units_.find(entity);
             if (u_it != units_.end()) {
                 const UnitComponent& u = u_it->second;
-                const auto hp_it = health_.find(entity);
+                const auto hp_it = ecs_world_.healths().find(entity);
                 std::string desired;
-                if (hp_it != health_.end() && hp_it->second.current_hp <= 0) {
+                if (hp_it != ecs_world_.healths().end() && hp_it->second.current_hp <= 0) {
                     desired = "death";
                 } else if (u.attack_target != INVALID_ENTITY) {
                     desired = "attack";
                 } else if (u.build_target != INVALID_ENTITY) {
-                    const auto t_it = transforms_.find(entity);
-                    const float spd = (t_it != transforms_.end())
+                    const auto t_it = ecs_world_.transforms().find(entity);
+                    const float spd = (t_it != ecs_world_.transforms().end())
                         ? glm::length(t_it->second.velocity) : 0.f;
                     desired = (spd > 0.05f) ? "walk" : "build";
                 } else if (u.returning_cargo) {
                     desired = "walk";
                 } else if (u.gather_node >= 0) {
-                    const auto t_it = transforms_.find(entity);
-                    const float spd = (t_it != transforms_.end())
+                    const auto t_it = ecs_world_.transforms().find(entity);
+                    const float spd = (t_it != ecs_world_.transforms().end())
                         ? glm::length(t_it->second.velocity) : 0.f;
                     desired = (spd > 0.05f) ? "walk" : "gather";
                 } else if (u.has_move_order) {
-                    const auto t_it = transforms_.find(entity);
-                    const float spd = (t_it != transforms_.end())
+                    const auto t_it = ecs_world_.transforms().find(entity);
+                    const float spd = (t_it != ecs_world_.transforms().end())
                         ? glm::length(t_it->second.velocity) : 0.f;
                     desired = (spd > 0.05f) ? "walk" : "idle";
                 } else {
@@ -1155,8 +1155,8 @@ public:
         if (!renderer) return;
         for (const auto& [entity, ac] : animations_) {
             if (!ac.is_ready()) continue;
-            const auto t_it = transforms_.find(entity);
-            if (t_it == transforms_.end()) continue;
+            const auto t_it = ecs_world_.transforms().find(entity);
+            if (t_it == ecs_world_.transforms().end()) continue;
             const TransformComponent& tr = t_it->second;
             glm::mat4 model = glm::translate(glm::mat4(1.f), tr.position);
             model = glm::rotate(model, glm::radians(tr.rotation.y), glm::vec3(0.f,1.f,0.f));
@@ -1176,13 +1176,13 @@ public:
     void set_selected(Entity id, bool sel) {
         selections_[id].selected = sel;
     }
-    const std::unordered_map<Entity, TransformComponent>& transforms() const { return transforms_; }
+    const std::unordered_map<Entity, TransformComponent>& transforms() const { return ecs_world_.transforms(); }
     const std::unordered_map<Entity, UnitComponent>& units() const { return units_; }
     std::unordered_map<Entity, UnitComponent>& units() { return units_; }
     const FogOfWar& fog_of_war() const { return fog_of_war_; }
     std::vector<Entity> select_box(const glm::vec3& min_point, const glm::vec3& max_point) {
         std::vector<Entity> result;
-        for (auto& [entity, transform] : transforms_) {
+        for (auto& [entity, transform] : ecs_world_.transforms_mut()) {
             auto unit = units_.find(entity);
             if (unit == units_.end() || unit->second.team != Team::FRIENDLY) continue;
             const auto& p = transform.position;
@@ -1212,7 +1212,7 @@ public:
     }
     Entity enemy_at(const glm::vec3& point, float radius = 1.5f) const {
         Entity result = INVALID_ENTITY; float best = radius;
-        for (const auto& [entity, transform] : transforms_) {
+        for (const auto& [entity, transform] : ecs_world_.transforms()) {
             const auto unit = units_.find(entity);
             if (unit == units_.end() || unit->second.team != Team::ENEMY) continue;
             const float distance = glm::length(transform.position - point);
@@ -1222,7 +1222,7 @@ public:
     }
     Entity building_at(const glm::vec3& point, float radius = 2.0f) const {
         Entity result = INVALID_ENTITY; float best = radius;
-        for (const auto& [entity, transform] : transforms_) {
+        for (const auto& [entity, transform] : ecs_world_.transforms()) {
             if (building_components_.find(entity) == building_components_.end()) continue;
             const float distance = glm::length(transform.position - point);
             if (distance < best) { best = distance; result = entity; }
@@ -1230,22 +1230,22 @@ public:
         return result;
     }
     void order_attack_selected(Entity target) {
-        auto target_transform = transforms_.find(target);
-        if (target_transform == transforms_.end()) return;
+        auto target_transform = ecs_world_.transforms().find(target);
+        if (target_transform == ecs_world_.transforms().end()) return;
         for (const auto& [entity, marker] : selections_) if (marker.selected) {
             auto unit = units_.find(entity);
             if (unit != units_.end() && unit->second.team == Team::FRIENDLY) {
                 unit->second.attack_target = target;
                 unit->second.move_target = target_transform->second.position;
                 unit->second.has_move_order = true;
-                unit->second.waypoints = navigation_.find_path(transforms_[entity].position, target_transform->second.position);
+                unit->second.waypoints = navigation_.find_path(ecs_world_.transforms().at(entity).position, target_transform->second.position);
                 unit->second.waypoint_index = 0;
             }
         }
     }
     bool order_move(Entity entity, const glm::vec3& target) {
-        if (transforms_.find(entity) == transforms_.end() || units_.find(entity) == units_.end()) return false;
-        units_[entity].waypoints = navigation_.find_path(transforms_[entity].position, target);
+        if (ecs_world_.transforms().find(entity) == ecs_world_.transforms().end() || units_.find(entity) == units_.end()) return false;
+        units_[entity].waypoints = navigation_.find_path(ecs_world_.transforms().at(entity).position, target);
         if (units_[entity].waypoints.empty()) return false;
         units_[entity].waypoint_index = 0;
         units_[entity].move_target = target;
@@ -1254,14 +1254,14 @@ public:
         return true;
     }
     bool order_attack(Entity entity, Entity target) {
-        auto target_transform = transforms_.find(target);
-        if (target_transform == transforms_.end()) return false;
+        auto target_transform = ecs_world_.transforms().find(target);
+        if (target_transform == ecs_world_.transforms().end()) return false;
         auto unit = units_.find(entity);
         if (unit == units_.end()) return false;
         unit->second.attack_target = target;
         unit->second.move_target = target_transform->second.position;
         unit->second.has_move_order = true;
-        unit->second.waypoints = navigation_.find_path(transforms_[entity].position, target_transform->second.position);
+        unit->second.waypoints = navigation_.find_path(ecs_world_.transforms().at(entity).position, target_transform->second.position);
         unit->second.waypoint_index = 0;
         return true;
     }
@@ -1283,7 +1283,7 @@ public:
 
     std::vector<MinimapBlip> get_minimap_blips() const {
         std::vector<MinimapBlip> blips;
-        blips.reserve(resources_nodes_.size() + transforms_.size());
+        blips.reserve(resources_nodes_.size() + ecs_world_.transforms().size());
 
         // 1. Resources
         for (const auto& node : resources_nodes_) {
@@ -1297,7 +1297,7 @@ public:
         }
 
         // 2. Units & Buildings
-        for (const auto& [entity, transform] : transforms_) {
+        for (const auto& [entity, transform] : ecs_world_.transforms()) {
             auto u_it = units_.find(entity);
             if (u_it != units_.end()) {
                 if (u_it->second.team == Team::ENEMY && !fog_of_war_.is_visible(transform.position)) {
@@ -1338,7 +1338,7 @@ public:
             renderer->draw_debug_line(node.position + glm::vec3(-0.5f, 0.03f, 0.0f), node.position + glm::vec3(0.5f, 0.03f, 0.0f), color);
             renderer->draw_debug_line(node.position + glm::vec3(0.0f, 0.03f, -0.5f), node.position + glm::vec3(0.0f, 0.03f, 0.5f), color);
         }
-        for (const auto& [entity, transform] : transforms_) {
+        for (const auto& [entity, transform] : ecs_world_.transforms()) {
             if (units_.find(entity) == units_.end() && building_components_.find(entity) == building_components_.end()) continue;
             const auto unit = units_.find(entity);
             if (unit != units_.end() && unit->second.team == Team::ENEMY && !fog_of_war_.is_visible(transform.position)) {
@@ -1372,8 +1372,8 @@ public:
                 renderer->draw_debug_line(p + glm::vec3(-0.8f, 0.02f, 0.8f), p + glm::vec3(-0.8f, 0.02f, -0.8f), 0xFFFFFF00u);
             }
             if (unit != units_.end()) {
-                const auto hp = health_.find(entity);
-                if (hp != health_.end()) {
+                const auto hp = ecs_world_.healths().find(entity);
+                if (hp != ecs_world_.healths().end()) {
                     const float ratio = std::clamp(static_cast<float>(hp->second.current_hp) /
                                                    std::max(1, hp->second.max_hp), 0.0f, 1.0f);
                     renderer->draw_debug_line(p + glm::vec3(-0.7f, 1.5f, 0.0f),
@@ -1410,15 +1410,15 @@ public:
 
         // Tactical Feedback: Waypoint paths, Attack targeting & Construction vectors
         for (const auto& [entity, unit] : units_) {
-            auto t_it = transforms_.find(entity);
-            if (t_it == transforms_.end()) continue;
+            auto t_it = ecs_world_.transforms().find(entity);
+            if (t_it == ecs_world_.transforms().end()) continue;
             const glm::vec3 unit_pos = t_it->second.position;
             const bool selected = selections_.count(entity) && selections_.at(entity).selected;
 
             // 1. Attack targeting line (red vector)
             if (unit.attack_target != INVALID_ENTITY) {
-                auto enemy_t = transforms_.find(unit.attack_target);
-                if (enemy_t != transforms_.end()) {
+                auto enemy_t = ecs_world_.transforms().find(unit.attack_target);
+                if (enemy_t != ecs_world_.transforms().end()) {
                     renderer->draw_debug_line(unit_pos + glm::vec3(0.0f, 0.1f, 0.0f),
                                               enemy_t->second.position + glm::vec3(0.0f, 0.1f, 0.0f),
                                               0xFFFF2222u);
@@ -1426,8 +1426,8 @@ public:
             }
             // 2. Worker construction target line (gold vector)
             else if (unit.build_target != INVALID_ENTITY) {
-                auto b_t = transforms_.find(unit.build_target);
-                if (b_t != transforms_.end()) {
+                auto b_t = ecs_world_.transforms().find(unit.build_target);
+                if (b_t != ecs_world_.transforms().end()) {
                     renderer->draw_debug_line(unit_pos + glm::vec3(0.0f, 0.1f, 0.0f),
                                               b_t->second.position + glm::vec3(0.0f, 0.1f, 0.0f),
                                               0xFFFFBB22u);
@@ -1453,9 +1453,7 @@ public:
     }
 private:
     const XmbElement* proto_root_ = nullptr;
-    Entity next_entity_ = 0;
-    std::unordered_map<Entity, TransformComponent> transforms_;
-    std::unordered_map<Entity, HealthComponent> health_;
+    ECSWorld ecs_world_;
     std::unordered_map<Entity, UnitComponent> units_;
     std::unordered_map<Entity, SelectionComponent> selections_;
     std::unordered_map<Entity, BuildingComponent> building_components_;
@@ -1470,8 +1468,8 @@ private:
     /// +X side (traditional rally direction) and falling back to the other
     /// cardinals/diagonals. Returns the building position if nothing is free.
     glm::vec3 find_spawn_position(Entity building) const {
-        auto b_t = transforms_.find(building);
-        if (b_t == transforms_.end()) return glm::vec3(0.0f);
+        auto b_t = ecs_world_.transforms().find(building);
+        if (b_t == ecs_world_.transforms().end()) return glm::vec3(0.0f);
 
         const glm::vec3 base = b_t->second.position;
         static constexpr float kDistances[] = {2.5f, 3.0f, 3.5f, 4.0f, 2.0f};
@@ -1491,10 +1489,10 @@ private:
         return base;
     }
     std::vector<ResourceNode> resources_nodes_;
-    MovementSystem movement_{transforms_};
-    CombatSystem combat_;
-    SelectionSystem selection_;
-    BuildingSystem buildings_;
+    MovementSystem movement_{ecs_world_.transforms_mut()};
+    CombatSystem combat_{ecs_world_.transforms_mut(), ecs_world_.healths_mut(), units_};
+    SelectionSystem selection_{ecs_world_.transforms_mut(), selections_};
+    BuildingSystem buildings_{ecs_world_.transforms_mut(), building_components_, units_};
     FogOfWar fog_of_war_;
     std::unordered_map<Entity, AnimationComponent> animations_;
     IRenderer* anim_renderer_ = nullptr;
@@ -1505,44 +1503,44 @@ private:
         for (auto& [entity, unit] : units_) {
             // Target tracking for attacks
             if (unit.attack_target != INVALID_ENTITY) {
-                auto enemy_t = transforms_.find(unit.attack_target);
-                auto enemy_hp = health_.find(unit.attack_target);
-                if (enemy_t == transforms_.end() || enemy_hp == health_.end() || enemy_hp->second.current_hp <= 0) {
+                auto enemy_t = ecs_world_.transforms().find(unit.attack_target);
+                auto enemy_hp = ecs_world_.healths().find(unit.attack_target);
+                if (enemy_t == ecs_world_.transforms().end() || enemy_hp == ecs_world_.healths().end() || enemy_hp->second.current_hp <= 0) {
                     unit.attack_target = INVALID_ENTITY;
                     unit.has_move_order = false;
-                    transforms_[entity].velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                     continue;
                 }
-                const float dist = glm::length(enemy_t->second.position - transforms_[entity].position);
+                const float dist = glm::length(enemy_t->second.position - ecs_world_.transforms().at(entity).position);
                 if (dist <= unit.attack_range * 0.9f) {
-                    transforms_[entity].velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                     continue;
                 } else {
                     unit.move_target = enemy_t->second.position;
-                    glm::vec3 dir = glm::normalize(enemy_t->second.position - transforms_[entity].position);
-                    transforms_[entity].velocity = dir * unit.move_speed;
+                    glm::vec3 dir = glm::normalize(enemy_t->second.position - ecs_world_.transforms().at(entity).position);
+                    ecs_world_.transforms_mut()[entity].velocity = dir * unit.move_speed;
                     continue;
                 }
             }
 
             // Target tracking for construction by workers
             if (unit.build_target != INVALID_ENTITY) {
-                auto b_t = transforms_.find(unit.build_target);
+                auto b_t = ecs_world_.transforms().find(unit.build_target);
                 auto b_comp = building_components_.find(unit.build_target);
-                if (b_t == transforms_.end() || b_comp == building_components_.end() || b_comp->second.complete) {
+                if (b_t == ecs_world_.transforms().end() || b_comp == building_components_.end() || b_comp->second.complete) {
                     unit.build_target = INVALID_ENTITY;
                     unit.has_move_order = false;
-                    transforms_[entity].velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                     continue;
                 }
-                const float dist = glm::length(b_t->second.position - transforms_[entity].position);
+                const float dist = glm::length(b_t->second.position - ecs_world_.transforms().at(entity).position);
                 if (dist <= 2.2f) {
-                    transforms_[entity].velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                     continue;
                 } else {
                     unit.move_target = b_t->second.position;
-                    glm::vec3 dir = glm::normalize(b_t->second.position - transforms_[entity].position);
-                    transforms_[entity].velocity = dir * unit.move_speed;
+                    glm::vec3 dir = glm::normalize(b_t->second.position - ecs_world_.transforms().at(entity).position);
+                    ecs_world_.transforms_mut()[entity].velocity = dir * unit.move_speed;
                     continue;
                 }
             }
@@ -1553,9 +1551,9 @@ private:
                 if (node.remaining <= 0) {
                     unit.gather_node = -1;
                 } else {
-                    const float dist = glm::length(node.position - transforms_[entity].position);
+                    const float dist = glm::length(node.position - ecs_world_.transforms().at(entity).position);
                     if (dist <= 2.0f) {
-                        transforms_[entity].velocity = glm::vec3(0.0f);
+                        ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                         unit.has_move_order = false;
                         continue;
                     }
@@ -1563,7 +1561,7 @@ private:
             }
 
             if (!unit.has_move_order) continue;
-            auto& transform = transforms_[entity];
+            auto& transform = ecs_world_.transforms_mut()[entity];
             if (unit.waypoint_index >= unit.waypoints.size()) {
                 unit.has_move_order = false;
                 transform.velocity = glm::vec3(0.0f);
@@ -1586,12 +1584,13 @@ private:
     void gather_resources(float dt) {
         for (auto& [entity, unit] : units_) {
             if (!unit.worker) continue;
-            auto transform = transforms_.find(entity);
-            if (transform == transforms_.end()) continue;
+            auto t_it = ecs_world_.transforms().find(entity);
+            if (t_it == ecs_world_.transforms().end()) continue;
+            auto& transform = t_it->second;
 
             // --- 1. Returning Cargo to Town Center ---
             if (unit.returning_cargo) {
-                Entity tc = get_nearest_town_center(unit.team, transform->second.position);
+                Entity tc = get_nearest_town_center(unit.team, transform.position);
                 if (tc == INVALID_ENTITY) {
                     ResourcePool& target_pool = (unit.team == Team::ENEMY) ? enemy_resources_ : resources_;
                     switch (unit.carried_resource_type) {
@@ -1603,13 +1602,13 @@ private:
                     unit.carried_resource_amount = 0;
                     unit.returning_cargo = false;
                     unit.has_move_order = false;
-                    transform->second.velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
                     continue;
                 }
-                auto tc_t = transforms_.find(tc);
-                if (tc_t == transforms_.end()) continue;
+                auto tc_t = ecs_world_.transforms().find(tc);
+                if (tc_t == ecs_world_.transforms().end()) continue;
 
-                float dist_tc = glm::length(transform->second.position - tc_t->second.position);
+                float dist_tc = glm::length(transform.position - tc_t->second.position);
                 if (dist_tc > 3.2f) {
                     if (!unit.has_move_order || glm::length(unit.move_target - tc_t->second.position) > 1.5f) {
                         order_move(entity, tc_t->second.position);
@@ -1626,7 +1625,7 @@ private:
                     unit.carried_resource_amount = 0;
                     unit.returning_cargo = false;
                     unit.has_move_order = false;
-                    transform->second.velocity = glm::vec3(0.0f);
+                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
 
                     // Autonomously return to gather node if still valid
                     if (unit.gather_node >= 0 && unit.gather_node < static_cast<int>(resources_nodes_.size())) {
@@ -1650,10 +1649,10 @@ private:
             if (node.remaining <= 0) {
                 if (unit.carried_resource_amount > 0) {
                     unit.returning_cargo = true;
-                    Entity tc = get_nearest_town_center(unit.team, transform->second.position);
+                    Entity tc = get_nearest_town_center(unit.team, transform.position);
                     if (tc != INVALID_ENTITY) {
-                        auto tc_t = transforms_.find(tc);
-                        if (tc_t != transforms_.end()) order_move(entity, tc_t->second.position);
+                        auto tc_t = ecs_world_.transforms().find(tc);
+                        if (tc_t != ecs_world_.transforms().end()) order_move(entity, tc_t->second.position);
                     }
                 } else {
                     unit.gather_node = -1;
@@ -1661,7 +1660,7 @@ private:
                 continue;
             }
 
-            float dist_node = glm::length(transform->second.position - node.position);
+            float dist_node = glm::length(transform.position - node.position);
             if (dist_node > 2.5f) {
                 continue;
             }
@@ -1677,15 +1676,15 @@ private:
             unit.gather_timer = 1.0f;
 
             if (harvest > 0 && on_resource_harvested) {
-                on_resource_harvested(node.type, transform->second.position + glm::vec3(0.0f, 0.6f, 0.0f));
+                on_resource_harvested(node.type, transform.position + glm::vec3(0.0f, 0.6f, 0.0f));
             }
 
             if (unit.carried_resource_amount >= unit.max_carry_capacity) {
                 unit.returning_cargo = true;
-                Entity tc = get_nearest_town_center(unit.team, transform->second.position);
+                Entity tc = get_nearest_town_center(unit.team, transform.position);
                 if (tc != INVALID_ENTITY) {
-                    auto tc_t = transforms_.find(tc);
-                    if (tc_t != transforms_.end()) {
+                    auto tc_t = ecs_world_.transforms().find(tc);
+                    if (tc_t != ecs_world_.transforms().end()) {
                         order_move(entity, tc_t->second.position);
                     }
                 }
@@ -1694,8 +1693,7 @@ private:
     }
 
     void remove_entity(Entity id) {
-        transforms_.erase(id);
-        health_.erase(id);
+        ecs_world_.destroy_entity(id);
         units_.erase(id);
         selections_.erase(id);
         building_components_.erase(id);

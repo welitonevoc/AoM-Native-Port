@@ -1167,7 +1167,27 @@ void Engine::render() {
             }
         }
 
-        // 7. Render HUD UI labels, buttons, and action commands
+        // 7. Box Selection Overlay (translucent rectangle during drag-select)
+        if (box_selecting_) {
+            float bx = std::min(box_start_.x, box_current_.x);
+            float by = std::min(box_start_.y, box_current_.y);
+            float bw = std::abs(box_current_.x - box_start_.x);
+            float bh = std::abs(box_current_.y - box_start_.y);
+            if (bw > 2.0f && bh > 2.0f) {
+                // Translucent fill
+                renderer_->draw_ui_quad({bx, by}, {bw, bh}, INVALID_TEXTURE, 0x440000FF);
+                // Golden border (top)
+                renderer_->draw_ui_quad({bx, by}, {bw, 2.0f}, INVALID_TEXTURE, 0xFFFFD000);
+                // Golden border (bottom)
+                renderer_->draw_ui_quad({bx, by + bh - 2.0f}, {bw, 2.0f}, INVALID_TEXTURE, 0xFFFFD000);
+                // Golden border (left)
+                renderer_->draw_ui_quad({bx, by}, {2.0f, bh}, INVALID_TEXTURE, 0xFFFFD000);
+                // Golden border (right)
+                renderer_->draw_ui_quad({bx + bw - 2.0f, by}, {2.0f, bh}, INVALID_TEXTURE, 0xFFFFD000);
+            }
+        }
+
+        // 8. Render HUD UI labels, buttons, and action commands
         if (ui_) ui_->render();
     }
 
@@ -1230,6 +1250,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
 
         if (touch.state == TouchEvent::State::DOWN) {
             dragging_ = false;
+            box_selecting_ = false;
+            box_start_ = {touch.x, touch.y};
+            box_current_ = {touch.x, touch.y};
             last_touch_ = {touch.x, touch.y};
             touch_down_pos_ = {touch.x, touch.y};
         } else if (touch.state == TouchEvent::State::MOVE) {
@@ -1237,10 +1260,19 @@ void Engine::handle_touch(const TouchEvent& touch) {
             float dy = touch.y - last_touch_.y;
             float total_dx = touch.x - touch_down_pos_.x;
             float total_dy = touch.y - touch_down_pos_.y;
-            if (std::sqrt(total_dx * total_dx + total_dy * total_dy) > 14.0f) {
+            float dist = std::sqrt(total_dx * total_dx + total_dy * total_dy);
+            box_current_ = {touch.x, touch.y};
+
+            if (dist > 14.0f) {
                 dragging_ = true;
+                box_selecting_ = true;
             }
-            if (dragging_) {
+
+            if (dragging_ && box_selecting_) {
+                // Box selection: update the second corner of the selection rectangle
+                // (no camera pan while box-selecting)
+                last_touch_ = {touch.x, touch.y};
+            } else if (dragging_) {
                 // Pan RTS camera along ground plane
                 camera_.target.x -= dx * 0.02f;
                 camera_.target.z -= dy * 0.02f;
@@ -1249,7 +1281,33 @@ void Engine::handle_touch(const TouchEvent& touch) {
                 last_touch_ = {touch.x, touch.y};
             }
         } else if (touch.state == TouchEvent::State::UP) {
-            if (!dragging_ && hit_ground && gameplay_world_) {
+            if (box_selecting_ && hit_ground && gameplay_world_) {
+                // Box selection complete: convert screen corners to world coordinates
+                // and select all friendly units inside the rectangle.
+                auto raycast_ground = [&](float sx, float sy) -> glm::vec3 {
+                    float ndc_x = (2.0f * sx) / vw - 1.0f;
+                    float ndc_y = 1.0f - (2.0f * sy) / vh;
+                    glm::mat4 inv_vp = glm::inverse(camera_.projection_matrix() * camera_.view_matrix());
+                    glm::vec4 near_pt = inv_vp * glm::vec4(ndc_x, ndc_y, -1.0f, 1.0f);
+                    near_pt /= (std::abs(near_pt.w) > 0.0001f ? near_pt.w : 1.0f);
+                    glm::vec4 far_pt = inv_vp * glm::vec4(ndc_x, ndc_y, 1.0f, 1.0f);
+                    far_pt /= (std::abs(far_pt.w) > 0.0001f ? far_pt.w : 1.0f);
+                    glm::vec3 ro = glm::vec3(near_pt);
+                    glm::vec3 rd = glm::normalize(glm::vec3(far_pt - near_pt));
+                    if (std::abs(rd.y) > 0.0001f) {
+                        float t = -ro.y / rd.y;
+                        if (t > 0.0f) return ro + rd * t;
+                    }
+                    return glm::vec3(0.0f);
+                };
+
+                glm::vec3 p1 = raycast_ground(box_start_.x, box_start_.y);
+                glm::vec3 p2 = raycast_ground(box_current_.x, box_current_.y);
+                gameplay_world_->select_box(p1, p2);
+                LOGI("Box selection: %u units selected", gameplay_world_->selected_count());
+                box_selecting_ = false;
+                dragging_ = false;
+            } else if (!dragging_ && hit_ground && gameplay_world_) {
                 if (placement_mode_ != PlacementMode::NONE) {
                     Entity sel = gameplay_world_->selected_entity();
                     if (placement_mode_ == PlacementMode::HOUSE) {
