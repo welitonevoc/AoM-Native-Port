@@ -20,6 +20,9 @@ Ultima atualizacao: 2026-11-03
   - Verificação de que cada aldeão treinado no Centro da Cidade é de fato instanciado no mundo (incrementando `world.units().size()`), atribuído ao time amigável e com a flag `worker = true` ativa.
   - Novo teste de regressão garantindo que o pathfinding escapa da pegada 4×4 de um edifício, além de passos de simulação realistas de 1/60s no ciclo de colheita, depósito e construção.
   - Suíte executada no emulador x86_64 (`Medium_Phone_API_36.1`) com 100% das asserções aprovadas; build ARM64 completo (70 alvos) recompilado sem erros.
+- **Alinhamento do Subsistema Multijogador & Localização (`network_manager.cpp` & `test_network.cpp`):**
+  - Padronização de rótulos de dificuldade da IA para `"Moderado"` (alinhando com a interface autêntica em PT-BR e com as asserções da suíte `test_network`).
+  - Ajuste de modo de jogo para `"Mata-Mata"` no teste automatizado de rede, garantindo paridade total entre strings exportadas e validação da máquina de estados do lobby.
 
 ## Sprint 6: Áudio 3D Posicional OpenSL ES & Vozes Gregas Autênticas (2026-11-03)
 

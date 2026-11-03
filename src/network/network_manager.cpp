@@ -119,10 +119,10 @@ const char* game_mode_to_string(GameMode mode) {
 const char* ai_difficulty_to_string(AIDifficulty diff) {
     switch (diff) {
         case AIDifficulty::EASY: return "Fácil";
-        case AIDifficulty::MODERATE: return "Médio";
+        case AIDifficulty::MODERATE: return "Moderado";
         case AIDifficulty::HARD: return "Difícil";
         case AIDifficulty::TITAN: return "Titã";
-        default: return "Médio";
+        default: return "Moderado";
     }
 }
 

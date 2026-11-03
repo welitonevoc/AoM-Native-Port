@@ -32,7 +32,7 @@ int main() {
     std::cout << "\n--- 2. Testing Game Modes & AI Diff ---\n";
     assert(std::string(game_mode_to_string(GameMode::SUPREMACY)) == "Supremacia");
     assert(std::string(game_mode_to_string(GameMode::CONQUEST)) == "Conquista");
-    assert(std::string(game_mode_to_string(GameMode::DEATHMATCH)) == "Morte Súbita");
+    assert(std::string(game_mode_to_string(GameMode::DEATHMATCH)) == "Mata-Mata");
     assert(std::string(game_mode_to_string(GameMode::LIGHTNING)) == "Relâmpago");
 
     assert(std::string(ai_difficulty_to_string(AIDifficulty::EASY)) == "Fácil");
