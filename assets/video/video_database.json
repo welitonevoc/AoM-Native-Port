@@ -1,0 +1,179 @@
+{
+  "version": "1.0",
+  "source_directory": "E:\\Port\\Age of Mythology\\avi",
+  "total_videos": 6,
+  "total_playlists": 7,
+  "videos": {
+    "aom logo.bik": {
+      "id": "AOM_LOGO",
+      "original_bik": "aom logo.bik",
+      "converted_mp4": "aom-logo.mp4",
+      "title": "Logos Microsoft Games & Ensemble Studios",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 13339672,
+        "num_frames": 1082,
+        "width": 640,
+        "height": 480,
+        "fps": 29.97,
+        "duration_sec": 36.1,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    },
+    "credits.bik": {
+      "id": "CREDITS",
+      "original_bik": "credits.bik",
+      "converted_mp4": "credits.mp4",
+      "title": "Créditos Finais Clássicos",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 87233820,
+        "num_frames": 9990,
+        "width": 640,
+        "height": 480,
+        "fps": 30.0,
+        "duration_sec": 333.0,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    },
+    "introcg.bik": {
+      "id": "INTRO_CG",
+      "original_bik": "introcg.bik",
+      "converted_mp4": "introcg.mp4",
+      "title": "A Queda do Tridente - Abertura Cinematográfica",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 54740900,
+        "num_frames": 4480,
+        "width": 640,
+        "height": 480,
+        "fps": 29.97,
+        "duration_sec": 149.48,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    },
+    "outtakes.bik": {
+      "id": "OUTTAKES",
+      "original_bik": "outtakes.bik",
+      "converted_mp4": "outtakes.mp4",
+      "title": "Erros de Gravação & Cenas Deletadas (Outtakes)",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 19682392,
+        "num_frames": 1794,
+        "width": 640,
+        "height": 480,
+        "fps": 29.97,
+        "duration_sec": 59.86,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    },
+    "xcredits.bik": {
+      "id": "XCREDITS",
+      "original_bik": "xcredits.bik",
+      "converted_mp4": "xcredits.mp4",
+      "title": "Créditos Finais The Titans",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 50308152,
+        "num_frames": 5850,
+        "width": 640,
+        "height": 480,
+        "fps": 30.0,
+        "duration_sec": 195.0,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    },
+    "xintrocg.bik": {
+      "id": "XINTRO_CG",
+      "original_bik": "xintrocg.bik",
+      "converted_mp4": "xintrocg.mp4",
+      "title": "A Nova Atlântida (The Titans) - Abertura Cinematográfica",
+      "header": {
+        "magic": "BIKi",
+        "file_size": 21886052,
+        "num_frames": 1800,
+        "width": 640,
+        "height": 480,
+        "fps": 30.0,
+        "duration_sec": 60.0,
+        "num_audio_tracks": 1,
+        "flags": 0
+      }
+    }
+  },
+  "playlists": {
+    "aomcinematic": {
+      "file": "aomcinematic.aom",
+      "videos": [
+        "introcg.bik"
+      ],
+      "mp4_sequence": [
+        "introcg.mp4"
+      ]
+    },
+    "aomxcinematic": {
+      "file": "aomxcinematic.aom",
+      "videos": [
+        "xintrocg.bik"
+      ],
+      "mp4_sequence": [
+        "xintrocg.mp4"
+      ]
+    },
+    "credits": {
+      "file": "credits.aom",
+      "videos": [
+        "credits.bik"
+      ],
+      "mp4_sequence": [
+        "credits.mp4"
+      ]
+    },
+    "playlist": {
+      "file": "playlist.aom",
+      "videos": [
+        "AOM LOGO.bik",
+        "introcg.bik"
+      ],
+      "mp4_sequence": [
+        "aom-logo.mp4",
+        "introcg.mp4"
+      ]
+    },
+    "xcredits": {
+      "file": "xcredits.aom",
+      "videos": [
+        "xcredits.bik"
+      ],
+      "mp4_sequence": [
+        "xcredits.mp4"
+      ]
+    },
+    "xplaylist": {
+      "file": "xplaylist.aom",
+      "videos": [
+        "AOM LOGO.bik",
+        "xintrocg.bik"
+      ],
+      "mp4_sequence": [
+        "aom-logo.mp4",
+        "xintrocg.mp4"
+      ]
+    },
+    "outtakes": {
+      "file": "outtakes.aom (virtual)",
+      "videos": [
+        "outtakes.bik"
+      ],
+      "mp4_sequence": [
+        "outtakes.mp4"
+      ]
+    }
+  }
+}

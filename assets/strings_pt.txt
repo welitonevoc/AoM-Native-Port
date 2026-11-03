@@ -1,0 +1,51 @@
+# Age of Mythology Native - Strings (Portuguese)
+# Format: key=value
+menu.title=AGE OF MYTHOLOGY
+menu.play=JOGAR
+menu.options=OPCOES
+menu.credits=CREDITOS
+menu.quit=SAIR
+options.title=CONFIGURACOES
+options.audio=AUDIO
+options.video=VIDEO & SISTEMA
+options.volume_master=Volume Geral
+options.volume_music=Volume da Musica
+options.volume_sfx=Volume dos Efeitos
+options.music_enabled=Musica Ativada
+options.sfx_enabled=Efeitos Sonoros Ativados
+options.graphics_quality=Qualidade Grafica
+options.show_fps=Exibir Contador de FPS
+options.mipmaps=Filtragem Trilinear Mipmap
+options.lighting=Iluminacao Direcional Phong
+options.back=VOLTAR
+options.save_game=SALVAR JOGO
+options.load_game=CARREGAR JOGO
+game.food=Alimento
+game.wood=Madeira
+game.gold=Ouro
+game.favor=Favor
+game.population=Pop
+game.minimap=MINIMAPA
+game.pause=PAUSAR
+game.resume=RETOMAR
+
+
+splash.title=ENSEMBLE STUDIOS
+splash.skip=Toque na tela para pular...
+loading.text=Carregando...
+game.resources=Alimento: %d   Madeira: %d   Ouro: %d   Favor: %d
+game.minimap=MINIMAPA
+panel.command=PAINEL DE COMANDO
+panel.hint1=Toque em unidades ou terreno.
+panel.hint2=Ative o modo caixa p/ selecionar
+panel.hint3=pelotoes inteiros de combate.
+panel.placement1=Arraste pelo terreno para escolher
+panel.placement2=o local e solte para construir.
+panel.group=Comando em grupo ativo.
+panel.group_hint=Toque no mapa para mover ou atacar.
+menu.credits_title=CREDITOS
+
+
+options.save_game=SALVAR JOGO
+options.load_game=CARREGAR JOGO
+game.resources=Alimento: %d   Madeira: %d   Ouro: %d   Favor: %d

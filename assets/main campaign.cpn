@@ -1,0 +1,491 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<campaign name = "$$20623$$Fall of the Trident" version = "1">
+	<BackgroundSet name = "Atlantis">
+		<Image pos = "1">ui\campmap_atlantis1</Image>
+		<Image pos = "2">ui\campmap_atlantis2</Image>
+		<Image pos = "3">ui\campmap_atlantis3</Image>
+		<Image pos = "4">ui\campmap_atlantis4</Image>
+		<Image pos = "5">ui\campmap_atlantis5</Image>
+		<Image pos = "6" textureReplace="">ui\campmap_atlantis6</Image>
+		<Image pos = "7" textureReplace="">ui\campmap_atlantis7</Image>
+		<Image pos = "8">ui\campmap_atlantis8</Image>
+		<Image pos = "9">ui\campmap_atlantis9</Image>
+		<Image pos = "10">ui\campmap_atlantis10</Image>
+		<Image pos = "11">ui\campmap_atlantis11</Image>
+		<Image pos = "12">ui\campmap_atlantis12</Image>
+	</BackgroundSet>     
+	<BackgroundSet name = "Greece">
+		<Image pos = "1">ui\campmap_greece1</Image>
+		<Image pos = "2">ui\campmap_greece2</Image>
+		<Image pos = "3">ui\campmap_greece3</Image>
+		<Image pos = "4">ui\campmap_greece4</Image>
+		<Image pos = "5">ui\campmap_greece5</Image>
+		<Image pos = "6">ui\campmap_greece6</Image>
+		<Image pos = "7" textureReplace="">ui\campmap_greece7</Image>
+		<Image pos = "8" textureReplace="">ui\campmap_greece8</Image>
+		<Image pos = "9">ui\campmap_greece9</Image>
+		<Image pos = "10">ui\campmap_greece10</Image>
+		<Image pos = "11">ui\campmap_greece11</Image>
+		<Image pos = "12">ui\campmap_greece12</Image>
+	</BackgroundSet> 
+	<BackgroundSet name = "Egypt">
+		<Image pos = "1">ui\campmap_Egypt1</Image>
+		<Image pos = "2">ui\campmap_Egypt2</Image>
+		<Image pos = "3">ui\campmap_Egypt3</Image>
+		<Image pos = "4">ui\campmap_Egypt4</Image>
+		<Image pos = "5">ui\campmap_Egypt5</Image>
+		<Image pos = "6">ui\campmap_Egypt6</Image>
+		<Image pos = "7" textureReplace="">ui\campmap_Egypt7</Image>
+		<Image pos = "8">ui\campmap_Egypt8</Image>
+		<Image pos = "9">ui\campmap_Egypt9</Image>
+		<Image pos = "10">ui\campmap_Egypt10</Image>
+		<Image pos = "11">ui\campmap_Egypt11</Image>
+		<Image pos = "12">ui\campmap_Egypt12</Image>
+	</BackgroundSet>
+		<BackgroundSet name = "Norselands">
+		<Image pos = "1">ui\campmap_Norselands1</Image>
+		<Image pos = "2">ui\campmap_Norselands2</Image>
+		<Image pos = "3" textureReplace="">ui\campmap_Norselands3</Image>
+		<Image pos = "4" textureReplace="">ui\campmap_Norselands4</Image>
+		<Image pos = "5">ui\campmap_Norselands5</Image>
+		<Image pos = "6">ui\campmap_Norselands6</Image>
+		<Image pos = "7">ui\campmap_Norselands7</Image>
+		<Image pos = "8">ui\campmap_Norselands8</Image>
+		<Image pos = "9">ui\campmap_Norselands9</Image>
+		<Image pos = "10">ui\campmap_Norselands10</Image>
+		<Image pos = "11">ui\campmap_Norselands11</Image>
+		<Image pos = "12">ui\campmap_Norselands12</Image>
+	</BackgroundSet>        
+	<Scenario dispName = "$$20585$$Prologue: Troubled Sleep" filename = "spc\cinematics\cineA_1" BackgroundSet = "Atlantis">$$20624$$Athena comes to Arkantos in a dream to set him on his quest.</Scenario>   
+	<Scenario dispName = "$$20586$$Omens" filename = "spc\aomsp04" BackgroundSet = "Atlantis">$$20625$$Arkantos sails in to Atlantis. Krakens and pirates attack. You and your men must defend Atlantis at all costs.
+		<Overlay offset = "480 401" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "483 351" size = "64 64">ui\overlay_poseidon_4</Overlay> 
+	</Scenario>   
+	<Scenario dispName = "      Stolen Trident (Cinematic)" unlisted = "" filename = "spc\cinematics\cine04_2">The krakens and pirates are defeated and retreating, but Posiedons trident has been taken.</Scenario>   
+	<Scenario dispName = "$$20587$$Consequences" filename = "spc\aomsp05" BackgroundSet = "Atlantis">$$20626$$You and your men will make Kamos pay for stealing the trident.
+			<Overlay offset = "480 401" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "874 354" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "527 397" size = "256 32">ui\overlay_arrow_04a</Overlay>
+		<Overlay offset = "783 364" size = "128 64">ui\overlay_arrow_04b</Overlay>
+		<Overlay offset = "483 351" size = "64 64">ui\overlay_poseidon_4</Overlay>
+		<Overlay offset = "865 301" size = "64 64">ui\overlay_kamos_5</Overlay>  
+	</Scenario>   
+	<Scenario dispName = "      Another Time (Cinematic)" unlisted = "" filename = "spc\cinematics\cine05_2">Kamos escapes on a Kraken.</Scenario>  
+	<Scenario dispName = "$$20588$$Scratching the Surface" filename = "spc\aomsp06" BackgroundSet = "Greece">$$20627$$Break through Troys outer defenses.
+      <Overlay offset = "780 275" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "789 189" size = "128 128">ui\overlay_wall_06</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20589$$A Fine Plan" filename = "spc\aomsp07" BackgroundSet = "Greece">$$20628$$The Greeks and their Atlantean allies are prepared to lay siege the mighty Trojan gate.
+      <Overlay offset = "780 275" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "789 185" size = "128 128">ui\overlay_gate_07</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20590$$Just Enough Rope" filename = "spc\aomsp08" BackgroundSet = "Greece">$$20629$$Troy counter attacks Ajax and his men. You and your men must rescue Ajax and regain control.
+      <Overlay offset = "780 275" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "790 226" size = "64 64">ui\overlay_Ajax_08</Overlay>
+	</Scenario> 
+	<Scenario dispName = "      Sneak Attack (Cinematic)" unlisted = "" filename = "spc\cinematics\cine08_2">Troy has surprised Agamemnon while Arkantos saved Ajax.</Scenario> 
+	<Scenario dispName = "$$20591$$I Hope This Works" filename = "spc\aomsp09" BackgroundSet = "Greece">$$20630$$Secretly build a Trojan Horse and prepare it to be taken inside the Troy walls. Once inside, open the gates and destroy the Trojan empire.
+      <Overlay offset = "780 275" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "759 192" size = "128 128">ui\overlay_trojanhorse_09</Overlay>
+	</Scenario>
+	<Scenario dispName = "      The Fall of Troy (Cinematic)" unlisted = "" filename = "spc\cinematics\cine09_2">Troy is in flames.</Scenario>
+	<Scenario dispName = "      In Motion (Cinematic)" unlisted = "" filename = "spc\cinematics\cineB_1">While Gargarensis looks over a dig to the underworld, Kemsyt gives him a report.</Scenario>
+	<Scenario dispName = "$$20592$$More Bandits" filename = "spc\aomsp10" BackgroundSet = "Greece">$$20631$$Loklos is in trouble, push back the opposition and free Chiron.
+	  <Overlay offset = "554 281" size = "256 64">ui\overlay_arrow_09</Overlay> 
+		<Overlay offset = "780 275" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "548 301" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "759 192" size = "128 128">ui\overlay_trojanhorse_09</Overlay>  
+		<Overlay offset = "543 247" size = "64 64">ui\overlay_chiron_10</Overlay>
+	</Scenario>
+	<Scenario dispName = "      The Centaur Hero (Cinematic)" unlisted = "" filename = "spc\cinematics\cine10_2">We meet Chiron the Centaur Hero.</Scenario>
+	<Scenario dispName = "$$20593$$Bad News" filename = "spc\aomsp11" BackgroundSet = "Greece">$$20632$$Forces are split. Move them individually and take the underworld entrance.      
+	  <Overlay offset = "554 281" size = "256 64">ui\overlay_arrow_09</Overlay>  
+		<Overlay offset = "447 102" size = "128 256">ui\overlay_arrow_10</Overlay>  
+		<Overlay offset = "780 275" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "548 301" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "445 114" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "759 192" size = "128 128">ui\overlay_trojanhorse_09</Overlay>  
+		<Overlay offset = "543 247" size = "64 64">ui\overlay_chiron_10</Overlay>  
+		<Overlay offset = "469 97" size = "64 64">ui\overlay_passage_11</Overlay>
+	</Scenario>
+	<Scenario dispName = "      A Display of Power (Cinematic)" unlisted = "" filename = "spc\cinematics\cine11_2">Gargarensis calls on the gods to rain terror and escapes to the underworld.</Scenario>
+	<Scenario dispName = "$$20594$$Revelation" filename = "spc\aomsp12" BackgroundSet = "Greece">$$20633$$Destroy the great ram Gargarensis is using to open the Hades gate.
+	  <Overlay offset = "554 281" size = "256 64">ui\overlay_arrow_09</Overlay>  
+		<Overlay offset = "447 102" size = "128 256">ui\overlay_arrow_10</Overlay>  
+		<Overlay offset = "436 116" size = "64 256">ui\overlay_arrow_11</Overlay>  
+		<Overlay offset = "780 275" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "548 301" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "445 114" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "465 344" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "759 192" size = "128 128">ui\overlay_trojanhorse_09</Overlay>  
+		<Overlay offset = "543 247" size = "64 64">ui\overlay_chiron_10</Overlay>  
+		<Overlay offset = "469 97" size = "64 64">ui\overlay_passage_11</Overlay>  
+		<Overlay offset = "407 281" size = "64 128">ui\overlay_door_12</Overlay>
+	</Scenario>
+	<Scenario dispName = "      &quot;This One can be Closed&quot; (Cinematic)." unlisted = "" filename = "spc\cinematics\cine12_2">Gargarensis traps Arkantos and his men in the underworld.</Scenario>
+	<Scenario dispName = "$$20595$$Strangers" filename = "spc\aomsp13" BackgroundSet = "Greece">$$20634$$With the help of undead souls, you must escape the underworld.   
+	    <Overlay offset = "554 281" size = "256 64">ui\overlay_arrow_09</Overlay>  
+		<Overlay offset = "447 102" size = "128 256">ui\overlay_arrow_10</Overlay>  
+		<Overlay offset = "436 116" size = "64 256">ui\overlay_arrow_11</Overlay>  
+		<Overlay offset = "454 314" size = "256 256">ui\overlay_arrow_12</Overlay> 
+		<Overlay offset = "780 275" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "548 301" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "445 114" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "465 344" size = "32 32">ui\overlay_blue_09</Overlay>  
+		<Overlay offset = "669 512" size = "32 32">ui\overlay_red_09</Overlay>  
+		<Overlay offset = "759 192" size = "128 128">ui\overlay_trojanhorse_09</Overlay>  
+		<Overlay offset = "543 247" size = "64 64">ui\overlay_chiron_10</Overlay>  
+		<Overlay offset = "469 97" size = "64 64">ui\overlay_passage_11</Overlay>  
+		<Overlay offset = "407 281" size = "64 128">ui\overlay_door_12</Overlay>  
+		<Overlay offset = "657 411" size = "64 128">ui\overlay_shade_13</Overlay>
+	</Scenario>
+	<Scenario dispName = "      The Stairway of Zeus (Cinematic)" unlisted = "" filename = "spc\cinematics\cine13_2">The Gods provide a safe passage out of Erebus.</Scenario>
+	<Scenario dispName = "      Fallback (Cinematic)" unlisted = "" filename = "spc\cinematics\cineC_1">Gargarensis and Kamos discuss further plans.</Scenario>
+	<Scenario dispName = "$$20596$$The Lost Relic" filename = "spc\aomsp14" BackgroundSet = "Egypt">$$20635$$After meeting Amanra, you and your men must defend and dig out the Guardians sword.
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay> 
+	</Scenario>
+	<Scenario dispName = "Egyptian IGC" unlisted = "" filename = "spc\cinematics\aomspegc">Egyptian differentiation IGC</Scenario>
+	<Scenario dispName = "$$20597$$Light Sleeper" filename = "spc\aomsp15" BackgroundSet = "Egypt">$$20636$$You and your men must bring the sword to the Guardian, then use the Guardian and capture an Osiris piece.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay> 
+	</Scenario>
+	<Scenario dispName = "$$20598$$Tug of War" filename = "spc\aomsp16" BackgroundSet = "Egypt">$$20637$$You and your men are ambushed and must not let the Osiris piece be captured.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20599$$Isis Hear My Plea" filename = "spc\aomsp17" BackgroundSet = "Egypt">$$20638$$You must use Amanra to rescue the other warriors from an Egyptian prison.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay>
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay> 
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "666 331" size = "64 64">ui\overlay_migdol_17</Overlay>
+	</Scenario>
+	<Scenario dispName = "      A Visitor (Cinematic)" unlisted = "" filename = "spc\cinematics\cine17_2">Amanra shows up just in time to run off Gargarensis and free Arkantos and Ajax.</Scenario>
+	<Scenario dispName = "$$20600$$Let's Go" filename = "spc\aomsp18" BackgroundSet = "Egypt">$$20639$$You must rescue the rest of your men from the prison and get out of Alexandria with an Osiris part.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "645 338" size = "128 64">ui\overlay_pyramid_18</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20601$$Good Advice" filename = "spc\aomsp19" BackgroundSet = "Egypt">$$20640$$Athena appears in a dream, Arkantos is asked to complete two strange tasks.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "676 424" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "645 338" size = "128 64">ui\overlay_pyramid_18</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Good Advice (2)" unlisted = "" filename = "spc\aomsp19A">A third task is asked of Arkantos.</Scenario>
+	<Scenario dispName = "      A Desperate Plan (Cinematic)" unlisted = "" filename = "spc\cinematics\cine19_2">Arkantos is awakened by Amanra and the heroes must make their plan.</Scenario>
+	<Scenario dispName = "$$20602$$The Jackals' Stronghold" filename = "spc\aomsp20" BackgroundSet = "Egypt">$$20641$$Amanra must befriend her people and capture another Osiris part from Kemsyt.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay>
+	   	<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay> 
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "703 467" size = "32 32">ui\overlay_arrow_18</Overlay>
+		<Overlay offset = "720 489" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+	  	<Overlay offset = "676 424" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "645 338" size = "128 64">ui\overlay_pyramid_18</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+		<Overlay offset = "684 492" size = "64 64">ui\overlay_Kemsyt_20</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Perfect Timing (Cinematic)" unlisted = "" filename = "spc\cinematics\cine20_2">Just as Amanra is going to finish Kemsyt, he makes his escape in the talons of a Roc.</Scenario>
+	<Scenario dispName = "$$20603$$A Long Way From Home" filename = "spc\aomsp21" BackgroundSet = "Egypt">$$20642$$You and your men must defend the Dwarves while they cut down the Great Tamarisk tree.
+	  <Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay>
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay> 
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "703 467" size = "32 32">ui\overlay_arrow_18</Overlay>
+		<Overlay offset = "722 500" size = "64 64">ui\overlay_arrow_19</Overlay>
+		<Overlay offset = "754 549" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+	  	<Overlay offset = "720 489" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "676 424" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "645 338" size = "128 64">ui\overlay_pyramid_18</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+		<Overlay offset = "684 492" size = "64 64">ui\overlay_Kemsyt_20</Overlay>
+		<Overlay offset = "778 490" size = "64 64">ui\overlay_tammerisk_21</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20604$$Watch That First Step" filename = "spc\aomsp22" BackgroundSet = "Egypt">$$20643$$You and your men must sneak on to Kamos island and recover the final Osiris part.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "703 467" size = "32 32">ui\overlay_arrow_18</Overlay>
+		<Overlay offset = "722 500" size = "64 64">ui\overlay_arrow_19</Overlay>
+		<Overlay offset = "793 362" size = "64 128">ui\overlay_arrow_20</Overlay>
+		<Overlay offset = "821 336" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+	  	<Overlay offset = "754 549" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "720 489" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "676 424" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "645 338" size = "128 64">ui\overlay_pyramid_18</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+		<Overlay offset = "684 492" size = "64 64">ui\overlay_Kemsyt_20</Overlay>
+		<Overlay offset = "778 490" size = "64 64">ui\overlay_tammerisk_21</Overlay>
+		<Overlay offset = "839 298" size = "64 64">ui\overlay_battle_22</Overlay>
+	</Scenario>
+	<Scenario dispName = "      &quot;What was that you said before?&quot; (Cinematic)" unlisted = "" filename = "spc\cinematics\cine22_2">Arkantos puts an end to Kamos and the pirates.</Scenario>
+	<Scenario dispName = "$$20605$$Where They Belong" filename = "spc\aomsp23" BackgroundSet = "Egypt">$$20644$$You must bring all the Osiris parts together to bring back Osiris and defeat Gargarensis army.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay> 
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay>
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "703 467" size = "32 32">ui\overlay_arrow_18</Overlay>
+		<Overlay offset = "722 500" size = "64 64">ui\overlay_arrow_19</Overlay>
+		<Overlay offset = "793 362" size = "64 128">ui\overlay_arrow_20</Overlay>
+		<Overlay offset = "713 328" size = "128 64">ui\overlay_arrow_21</Overlay>
+		<Overlay offset = "643 354" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+	  	<Overlay offset = "821 336" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "754 549" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "720 489" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "676 424" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+		<Overlay offset = "684 492" size = "64 64">ui\overlay_Kemsyt_20</Overlay>
+		<Overlay offset = "778 490" size = "64 64">ui\overlay_tammerisk_21</Overlay>
+		<Overlay offset = "839 298" size = "64 64">ui\overlay_battle_22</Overlay>
+		<Overlay offset = "636 331" size = "128 64">ui\overlay_osirispyramid_23</Overlay>
+	</Scenario>
+	<Scenario dispName = "      The Rebirth of Osiris (Cinematic)" unlisted = "" filename = "spc\cinematics\cine23_2">With the Osiris parts brought together Osiris rises and crushes an approaching army.</Scenario>
+	<Scenario dispName = "$$20606$$Old Friends" filename = "spc\aomsp24" BackgroundSet = "Egypt">$$20645$$You must rescue yourself and some friends before becoming breakfast, then return to finish Circe.
+		<Overlay offset = "464 358" size = "64 128">ui\overlay_arrow_14</Overlay>
+		<Overlay offset = "517 457" size = "128 128">ui\overlay_arrow_15</Overlay> 
+		<Overlay offset = "585 331" size = "128 256">ui\overlay_arrow_16</Overlay>
+		<Overlay offset = "666 400" size = "32 32">ui\overlay_arrow_17</Overlay>
+		<Overlay offset = "703 467" size = "32 32">ui\overlay_arrow_18</Overlay>
+		<Overlay offset = "722 500" size = "64 64">ui\overlay_arrow_19</Overlay>
+		<Overlay offset = "793 362" size = "64 128">ui\overlay_arrow_20</Overlay>
+		<Overlay offset = "713 328" size = "128 64">ui\overlay_arrow_21</Overlay>
+		<Overlay offset = "469 120" size = "256 256">ui\overlay_arrow_22</Overlay>
+		<Overlay offset = "504 108" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "457 368" size = "32 32">ui\overlay_blue_09</Overlay> 
+	  	<Overlay offset = "643 354" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "821 336" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "754 549" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "720 489" size = "32 32">ui\overlay_blue_09</Overlay>
+	  	<Overlay offset = "676 424" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "624 540" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "507 456" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "463 321" size = "64 64">ui\overlay_Amanra_14</Overlay>
+		<Overlay offset = "469 462" size = "64 64">ui\overlay_guardian_15</Overlay>
+		<Overlay offset = "536 459" size = "128 64">ui\overlay_cart_16</Overlay>
+		<Overlay offset = "680 404" size = "64 64">ui\overlay_dream_19</Overlay>
+		<Overlay offset = "684 492" size = "64 64">ui\overlay_Kemsyt_20</Overlay>
+		<Overlay offset = "778 490" size = "64 64">ui\overlay_tammerisk_21</Overlay>
+		<Overlay offset = "839 298" size = "64 64">ui\overlay_battle_22</Overlay>
+		<Overlay offset = "636 331" size = "128 64">ui\overlay_osirispyramid_23</Overlay>
+		<Overlay offset = "455 093" size = "64 64">ui\overlay_pigs_24</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Pulled from the Fire (Cinematic)" unlisted = "" filename = "spc\cinematics\cine24_2">Odysseus is released from Circe's fortress.</Scenario>
+	<Scenario dispName = "Norse IGC" unlisted = "" filename = "spc\cinematics\aomspnoc">Norse differentiation IGC</Scenario>
+	<Scenario dispName = "$$20607$$North" filename = "spc\aomsp25" BackgroundSet = "Norselands">$$20646$$You and your men must regroup and take out Gargarensis troops after the one eye causes a great Avalanche to separate them.
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Sneaking Suspicion (Cinematic)" unlisted = "" filename = "spc\cinematics\cine25_2">Amanra senses the group is being watched and sets off to find the source.</Scenario>
+	<Scenario dispName = "$$20608$$The Dwarven Forge" filename = "spc\aomsp26" BackgroundSet = "Norselands">$$20647$$You and your men must clear the Dwarven mines of trouble and liberate the Dwarven Forge.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Directions (Cinematic)" unlisted = "" filename = "spc\cinematics\cine26_2">Brokk and Eitri show the heroes the way to Midgard.</Scenario>
+	<Scenario dispName = "      Giant Rampage (Cinematic)" unlisted = "" filename = "spc\cinematics\cineD_1">While Giants pilage a Norse village, Gargarensis and Kemsyt plan their next move.</Scenario>
+	<Scenario dispName = "$$20609$$Not From Around Here" filename = "spc\aomsp27" BackgroundSet = "Norselands">$$20648$$You and your men must be led through a mountain pass on the way to Midgard.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20610$$Welcoming Committee" filename = "spc\aomsp28" BackgroundSet = "Norselands">$$20649$$You and your men must bring the Folstag Flag to help unite Norse Clans.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20611$$Union" filename = "spc\aomsp29" BackgroundSet = "Norselands">$$20650$$After being tricked by Loki and clued in on the Folstag Flag by Reginleif, you and your men must unite the Norse by doing special tasks for three different Norse clans.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "567 314" size = "64 64">ui\overlay_arrow_26</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "612 303" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+		<Overlay offset = "560 249" size = "128 64">ui\overlay_reigenleif_29</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20612$$The Well of Urd" filename = "spc\aomsp30" BackgroundSet = "Norselands">$$20651$$You and your men must siege and capture the Well of Urd.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "567 314" size = "64 64">ui\overlay_arrow_26</Overlay>
+		<Overlay offset = "512 272" size = "128 64">ui\overlay_arrow_27</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "612 303" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "496 278" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+		<Overlay offset = "560 249" size = "128 64">ui\overlay_reigenleif_29</Overlay>
+		<Overlay offset = "451 234" size = "64 64">ui\overlay_wellofurd_30</Overlay>
+	</Scenario>
+	<Scenario dispName = "      You Go FIrst (Cinematic)" unlisted = "" filename = "spc\cinematics\cine30_2">Arkantos and the heroes enter the Underworld.</Scenario>
+	<Scenario dispName = "$$20613$$Beneath the Surface" filename = "spc\aomsp31" BackgroundSet = "Norselands">$$20652$$You and your men must again, prevent the opening of another Erebus Gate.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "567 314" size = "64 64">ui\overlay_arrow_26</Overlay>
+		<Overlay offset = "512 272" size = "128 64">ui\overlay_arrow_27</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "612 303" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "496 278" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+		<Overlay offset = "560 249" size = "128 64">ui\overlay_reigenleif_29</Overlay>
+		<Overlay offset = "451 234" size = "64 64">ui\overlay_ram_31</Overlay>
+	</Scenario>
+	<Scenario dispName = "      A Friend Falls (Cinematic)" unlisted = "" filename = "spc\cinematics\cine31_2">Chiron sacrifices himself to save the rest of the group.</Scenario>
+	<Scenario dispName = "$$20614$$Unlikely Heroes" filename = "spc\aomsp32" BackgroundSet = "Norselands">$$20653$$You and your men must defend Brokk and the dwarves while they cut Thor hammer haft from the taproot. Once the haft is cut free, you must unite it with the hammer head Eitri is controlling.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "567 314" size = "64 64">ui\overlay_arrow_26</Overlay>
+		<Overlay offset = "512 272" size = "128 64">ui\overlay_arrow_27</Overlay>
+		<Overlay offset = "445 296" size = "64 64">ui\overlay_arrow_28</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "612 303" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "496 278" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "426 336" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+		<Overlay offset = "560 249" size = "128 64">ui\overlay_reigenleif_29</Overlay>
+		<Overlay offset = "451 234" size = "64 64">ui\overlay_ram_31</Overlay>
+		<Overlay offset = "390 304" size = "64 64">ui\overlay_hammer_32</Overlay>
+	</Scenario>
+	<Scenario dispName = "      A Perfect Fit (Cinematic)" unlisted = "" filename = "spc\cinematics\cine32_2">After bringing the pieces of Thor's hammer together, Thor seals the Erebus gate.</Scenario>
+	<Scenario dispName = "$$20615$$All is Not Lost" filename = "spc\aomsp33" BackgroundSet = "Norselands">$$20654$$Through the power of Thor sealing the gate, you and your enemies are ejected from the underworld. Gargarensis counter-attacks hard. You and your men must take up a defensive position and wait for Odysseus to arrive with reinforcements.
+		<Overlay offset = "568 473" size = "64 64">ui\overlay_arrow_23</Overlay>
+		<Overlay offset = "531 420" size = "128 64">ui\overlay_arrow_24</Overlay>
+		<Overlay offset = "520 376" size = "64 64">ui\overlay_arrow_25</Overlay>
+		<Overlay offset = "567 314" size = "64 64">ui\overlay_arrow_26</Overlay>
+		<Overlay offset = "512 272" size = "128 64">ui\overlay_arrow_27</Overlay>
+		<Overlay offset = "445 296" size = "64 64">ui\overlay_arrow_28</Overlay>
+		<Overlay offset = "389 362" size = "64 64">ui\overlay_arrow_29</Overlay>
+		<Overlay offset = "558 533" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "604 446" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "513 425" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "554 359" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "612 303" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "496 278" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "426 336" size = "32 32">ui\overlay_blue_09</Overlay>
+		<Overlay offset = "387 415" size = "32 32">ui\overlay_red_09</Overlay>
+		<Overlay offset = "521 495" size = "64 64">ui\overlay_norseman_25</Overlay>
+		<Overlay offset = "587 353" size = "128 128">ui\overlay_forge_26</Overlay>
+		<Overlay offset = "485 385" size = "64 64">ui\overlay_oldman_27</Overlay>
+		<Overlay offset = "515 326" size = "64 64">ui\overlay_banner_28</Overlay>
+		<Overlay offset = "560 249" size = "128 64">ui\overlay_reigenleif_29</Overlay>
+		<Overlay offset = "451 234" size = "64 64">ui\overlay_ram_31</Overlay>
+		<Overlay offset = "390 304" size = "64 64">ui\overlay_hammer_32</Overlay>
+		<Overlay offset = "417 380" size = "64 64">ui\overlay_garg_33</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Payback (Cinematic)" unlisted = "" filename = "spc\cinematics\cine33_2">Arkantos corners Gargarensis and gives Ajax the word.</Scenario>
+	<Scenario dispName = "$$20616$$Welcome Back" filename = "spc\aomsp34" BackgroundSet = "Atlantis">$$20655$$You and your men must save the people of Atlantis.
+	<Overlay offset = "594 457" size = "32 32">ui\overlay_red_09</Overlay>
+	<Overlay offset = "572 378" size = "128 128">ui\overlay_ship_34</Overlay>
+	</Scenario>
+	<Scenario dispName = "$$20617$$A Place In My Dreams" filename = "spc\aomsp35" BackgroundSet = "Atlantis">$$20656$$You must prevent Gargarensis last attempt to unleashy terror on the world.
+	<Overlay offset = "594 457" size = "32 32">ui\overlay_blue_09</Overlay>
+	<Overlay offset = "502 389" size = "32 32">ui\overlay_red_09</Overlay>
+	<Overlay offset = "501 408" size = "128 64">ui\overlay_arrow_30</Overlay>
+	<Overlay offset = "572 378" size = "128 128">ui\overlay_ship_34</Overlay>
+	<Overlay offset = "463 341" size = "64 128">ui\overlay_arck_35</Overlay>
+	</Scenario>
+	<Scenario dispName = "      Retirement (Cinematic)" unlisted = "" filename = "spc\cinematics\cine35_2">Atlantis is sinking. All the people have been saved and we learn Arkantos is now a God.</Scenario>
+</campaign>
