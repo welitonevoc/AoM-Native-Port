@@ -30,7 +30,10 @@
 # Local editor configuration
 /.vscode/settings.json
 
-# Proprietary raw archives are excluded from repo
+# Proprietary game data/assets are not part of this source distribution
+/assets/
+/resources.xmb/
+/tools/*.xmb
 /tools/*.bar
 /tools/*.ddt
 /tools/*.brg

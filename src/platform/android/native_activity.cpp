@@ -50,6 +50,7 @@ struct AppState {
     // Pinch‑zoom state
     bool pinch_active = false;
     float last_pinch_distance = 0.0f;
+    float last_distance = 0.0f;
 };
 
 double get_time() {
@@ -91,16 +92,14 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine) {
                 const float dx = AMotionEvent_getX(event, 1) - AMotionEvent_getX(event, 0);
                 const float dy = AMotionEvent_getY(event, 1) - AMotionEvent_getY(event, 0);
                 const float distance = std::sqrt(dx * dx + dy * dy);
-                static float last_distance = 0.0f;
-                if (action == AMOTION_EVENT_ACTION_POINTER_DOWN || last_distance <= 0.0f) {
-                    last_distance = distance;
+                if (action == AMOTION_EVENT_ACTION_POINTER_DOWN || state->last_distance <= 0.0f) {
+                    state->last_distance = distance;
                 } else if (action == AMOTION_EVENT_ACTION_MOVE) {
-                    engine->adjust_camera_zoom((distance - last_distance) * 0.05f);
-                    last_distance = distance;
+                    engine->adjust_camera_zoom((distance - state->last_distance) * 0.05f);
+                    state->last_distance = distance;
                 }
             } else {
-                static float last_distance = 0.0f;
-                last_distance = 0.0f;
+                state->last_distance = 0.0f;
             }
 
             if (valid && pointer_count > 0) {

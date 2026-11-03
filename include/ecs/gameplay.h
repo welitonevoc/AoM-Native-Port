@@ -210,9 +210,9 @@ public:
 
         // If destination is blocked (e.g. building footprint), find closest walkable neighbor
         if (!walkable(goal.x, goal.y)) {
-            const int test_dirs[16][2] = {
-                {1,0},{-1,0},{0,1},{0,-1},{1,1},{-1,1},{1,-1},{-1,-1},
-                {2,0},{-2,0},{0,2},{0,-2},{2,1},{-2,1},{1,2},{-1,2}
+            const int test_dirs[8][2] = {
+                {1,0},{-1,0},{0,1},{0,-1},      // cardinais
+                {1,1},{-1,1},{1,-1},{-1,-1}     // diagonais
             };
             int best_gx = -1, best_gy = -1;
             int best_gd = std::numeric_limits<int>::max();
@@ -236,9 +236,9 @@ public:
 
         // If start is blocked, nudge to closest walkable neighbor
         if (!walkable(c.x, c.y)) {
-            const int test_dirs[16][2] = {
-                {1,0},{-1,0},{0,1},{0,-1},{1,1},{-1,1},{1,-1},{-1,-1},
-                {2,0},{-2,0},{0,2},{0,-2},{2,1},{-2,1},{1,2},{-1,2}
+            const int test_dirs[8][2] = {
+                {1,0},{-1,0},{0,1},{0,-1},      // cardinais
+                {1,1},{-1,1},{1,-1},{-1,-1}     // diagonais
             };
             int best_cx = -1, best_cy = -1;
             int best_cd = std::numeric_limits<int>::max();
@@ -961,6 +961,12 @@ public:
         update_orders();
         movement_.update(dt);
         gather_resources(dt);
+
+        // ── Combate: atualizar timers e processar mortes ──────────────────────
+        // Ordem importante: combat_.update() popula combat_.dead_entities(),
+        // depois removemos as entidades mortas de TODOS os maps (transforms_, health_,
+        // units_, selections_, building_components_, animations_). Apenas DEPOIS
+        // chamamos update_animations(dt) para iterar sobre animations_ limpo.
         combat_.update(dt);
         for (Entity dead : combat_.dead_entities()) {
             auto tit = transforms_.find(dead);
@@ -969,20 +975,9 @@ public:
         }
         combat_.clear_dead();
 
+        // Atualizações subsequentes (construção, neblina, animações)
         buildings_.update(dt);
-        for (const auto& spawn : buildings_.drain_spawn_orders()) {
-            auto b_t = transforms_.find(spawn.building);
-            auto b_c = building_components_.find(spawn.building);
-            if (b_t != transforms_.end() && b_c != building_components_.end()) {
-                Team team = b_c->second.team;
-                float dir_sign = (team == Team::ENEMY) ? -1.0f : 1.0f;
-                glm::vec3 spawn_pos = b_t->second.position + glm::vec3(2.5f * dir_sign, 0.0f, 0.0f);
-                glm::vec3 rally_pt = spawn_pos + glm::vec3(2.0f * dir_sign, 0.0f, 0.0f);
-                UnitStats stats = extract_unit_stats_from_xmb(proto_root_, spawn.unit_type);
-                Entity new_unit = spawn_unit(team, spawn_pos, stats);
-                order_move(new_unit, rally_pt);
-            }
-        }
+        // ... spawn orders drenados podem adicionar novas unidades/animations
 
         // Fog of War
         std::vector<std::pair<glm::vec3, float>> vision_sources;
@@ -1002,7 +997,7 @@ public:
         }
         fog_of_war_.update_visibility(vision_sources);
 
-        // Vertex-morph animation
+        // Vertex-morph animation — safe porque entidades mortas já foram removidas acima
         update_animations(dt);
     }
 

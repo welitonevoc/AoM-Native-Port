@@ -439,7 +439,7 @@ void Engine::create_main_menu() {
     const TitansBtn btns[] = {
         { 325.0f, [this]() { start_game(); }    }, // Learn To Play
         { 365.0f, [this]() { create_campaign_menu(); } }, // Campaign
-        { 405.0f, [this]() { start_game(); }    }, // Single Player
+        { 405.0f, [this]() { create_campaign_menu(); } }, // Single Player - abre menu de seleção de cenário
         { 445.0f, [this]() { open_multiplayer(); } }, // Multiplayer
         { 485.0f, [this]() { open_options(); } }, // Options
         { 525.0f, [this]() { open_credits(); } }, // More
