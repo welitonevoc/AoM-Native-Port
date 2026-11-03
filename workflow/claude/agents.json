@@ -1,0 +1,29 @@
+{
+  "agents": [
+    {
+      "name": "UI Engineer",
+      "role": "Implement UI components using C++/OpenGL ES, manage UIManager, handle touch input.",
+      "skills": ["C++", "OpenGL ES", "stb_truetype", "Android NDK"]
+    },
+    {
+      "name": "Graphics Engineer",
+      "role": "Maintain the rendering pipeline, shaders, texture handling and performance profiling.",
+      "skills": ["GLSL", "OpenGL ES", "Vulkan (optional)", "Performance profiling"]
+    },
+    {
+      "name": "Asset Pipeline Engineer",
+      "role": "Parse BAR/DTT/XMB assets, generate texture atlases and model loaders.",
+      "skills": ["C++", "Binary parsing", "stb_truetype", "Asset pipelines"]
+    },
+    {
+      "name": "Build & CI Engineer",
+      "role": "Maintain CMake build files, CI scripts, Gradle integration for Android builds.",
+      "skills": ["CMake", "Gradle", "GitHub Actions", "Android SDK/NDK"]
+    },
+    {
+      "name": "Project Lead",
+      "role": "Coordinate tasks, update progress, ensure milestones are met.",
+      "skills": ["Project management", "Documentation", "Roadmap planning"]
+    }
+  ]
+}

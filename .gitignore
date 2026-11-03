@@ -1,0 +1,54 @@
+# Native and Android build output
+/build/
+/build-*/
+/.build-tmp/
+/.venv/
+/.idea/
+/.acside/
+/.agents/
+/aom-native-debug.apk
+/aom-native-debug.apk.idsig
+/debug.keystore
+/local.properties
+*.apk
+*.idsig
+*.so
+*.o
+*.a
+*.class
+**/build/
+**/build-*/
+**/.gradle/
+**/reports/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/compile_commands.json
+**/.ninja_deps
+**/.ninja_log
+
+# Local editor configuration
+/.vscode/settings.json
+
+# Proprietary game data/assets are not part of this source distribution
+/assets/
+/resources.xmb/
+/tools/*.xmb
+/tools/*.bar
+/tools/*.ddt
+/tools/*.brg
+/tools/*.grn
+/tools/rea/
+/tools/android-sdk/
+/tools/lib/
+/tools/*.txt
+/tools/__pycache__/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Editor and sync backups
+/.claude/
+*.device-*
+*.bak

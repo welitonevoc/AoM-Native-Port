@@ -1,0 +1,3 @@
+-keep class com.aom.nativeport.** { *; }
+-keep class android.app.NativeActivity { *; }
+-dontwarn android.app.**
