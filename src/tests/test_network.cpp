@@ -100,10 +100,12 @@ int main() {
     nm.send_chat("Olá mundo!");
 
     auto chat = nm.get_chat_history();
-    assert(chat.size() >= 3);
-    assert(chat[0].text == "1 (Sim)");
-    assert(chat[1].text == "14 (Inicie o jogo!)");
-    assert(chat[2].text == "Olá mundo!");
+    // The first entry is the system welcome message created by host_game().
+    assert(chat.size() >= 4);
+    const auto first_chat = chat.size() - 3;
+    assert(chat[first_chat].text == "1 (Sim)");
+    assert(chat[first_chat + 1].text == "14 (Inicie o jogo!)");
+    assert(chat[first_chat + 2].text == "Olá mundo!");
     std::cout << "PASS: Chat & AoM authentic taunts verified\n";
 
     // 8. Test Clean Session Exit

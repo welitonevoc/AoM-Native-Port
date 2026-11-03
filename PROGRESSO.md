@@ -23,6 +23,11 @@ Ultima atualizacao: 2026-11-03
 - **Alinhamento do Subsistema Multijogador & Localização (`network_manager.cpp` & `test_network.cpp`):**
   - Padronização de rótulos de dificuldade da IA para `"Moderado"` (alinhando com a interface autêntica em PT-BR e com as asserções da suíte `test_network`).
   - Ajuste de modo de jogo para `"Mata-Mata"` no teste automatizado de rede, garantindo paridade total entre strings exportadas e validação da máquina de estados do lobby.
+  - Correção do teste de histórico de chat para considerar a mensagem de boas-vindas do sistema criada por `host_game()`: a verificação agora usa as três últimas mensagens em vez de índices fixos, eliminando a última falha da suíte `test_network`.
+- **Validação Final & Empacotamento:**
+  - `gameplay_test`, `ui_test`, `test_ai_system`, `test_particles_anim` e `test_network` executados no emulador x86_64 com exit code 0.
+  - APK ARM64 regenerado a partir de `build-win`, com `libaom_native.so` stripped (2,1 MB) e assinatura v2/v3 validada; as cinemáticas convertidas permanecem embutidas.
+  - Os testes que dependem do acervo original (`anim`, `audio`, `terrain`, `campaign`, `docs`, `fonts`, `localization`, `godpowers`) permanecem não executáveis neste ambiente por ausência dos arquivos em `/storage/emulated/0/Download/Games/PC/Age of Mythology/...`.
 
 ## Sprint 6: Áudio 3D Posicional OpenSL ES & Vozes Gregas Autênticas (2026-11-03)
 
