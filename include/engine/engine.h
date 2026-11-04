@@ -275,8 +275,6 @@ private:
     int last_ui_width_  = -1; ///< última resolução para a qual a UI foi criada
     int last_ui_height_ = -1;
     void generate_terrain();
-    void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
-    bool load_scenario_heightmap(const std::string& scenario_path);
 
     std::vector<std::string> available_textures_;
     std::vector<std::string> available_models_;
