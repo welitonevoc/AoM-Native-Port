@@ -244,10 +244,16 @@ private:
     MeshHandle skydome_mesh_ = INVALID_MESH;
     MeshHandle terrain_mesh_ = INVALID_MESH;
     void generate_skydome();
+    void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
+    bool load_scenario_heightmap(const std::string& scenario_path);
     TextureHandle terrain_texture_ = INVALID_TEXTURE;
     TextureHandle terrain_blend_tex_ = INVALID_TEXTURE;
     TextureHandle water_normal_tex_ = INVALID_TEXTURE;
     glm::vec4 water_plane_{0.0f, 1.0f, 0.0f, 0.4f}; ///< Plane equation Ax+By+Cz+D = 0, y = -0.4f
+    int heightmap_width_ = 0;
+    int heightmap_height_ = 0;
+    float heightmap_scale_ = 1.0f;
+    std::vector<float> heightmap_data_; ///< Elevation data loaded from .scn height-map
     std::unique_ptr<GameplayWorld> gameplay_world_;
     std::unique_ptr<ai::AiSystem> ai_system_;
     std::unique_ptr<aom::anim::AnimationSystem> anim_system_;
@@ -269,6 +275,8 @@ private:
     int last_ui_width_  = -1; ///< última resolução para a qual a UI foi criada
     int last_ui_height_ = -1;
     void generate_terrain();
+    void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
+    bool load_scenario_heightmap(const std::string& scenario_path);
 
     std::vector<std::string> available_textures_;
     std::vector<std::string> available_models_;

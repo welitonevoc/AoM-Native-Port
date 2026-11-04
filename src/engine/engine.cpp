@@ -727,8 +727,23 @@ void Engine::start_game() {
     gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
     gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
 
-    // Generate 3D procedural terrain and skydome if not already built
-    if (terrain_mesh_ == INVALID_MESH) generate_terrain();
+    // Generate 3D terrain: try loading real height-map from .scn first,
+    // fall back to procedural terrain if no scenario file is available.
+    if (terrain_mesh_ == INVALID_MESH) {
+        bool heightmap_loaded = false;
+        if (scenarios_bar_ && scenarios_bar_->file_count() > 0) {
+            for (const BarEntry& entry : scenarios_bar_->entries()) {
+                if (ends_with(to_lower(entry.filename), ".scn")) {
+                    heightmap_loaded = load_scenario_heightmap(entry.filename);
+                    if (heightmap_loaded) break;
+                }
+            }
+        }
+        if (!heightmap_loaded) {
+            LOGI("No .scn height-map available — using procedural terrain");
+            generate_terrain();
+        }
+    }
     if (skydome_mesh_ == INVALID_MESH) generate_skydome();
 
     create_in_game_hud();
@@ -2465,6 +2480,194 @@ void Engine::generate_terrain() {
     terrain_mesh_ = renderer_->create_terrain_mesh(verts.data(), static_cast<uint32_t>(verts.size()),
                                                    indices.data(), static_cast<uint32_t>(indices.size()));
     LOGI("Generated authentic AoM 3D terrain mesh (%zu verts, %zu indices)", verts.size(), indices.size());
+}
+
+// ── P2.1: Terreno Real — Loader de Height-Map de Cenários .scn ───────────────
+bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
+    if (!renderer_) return false;
+
+    // Ler arquivo do scenarios.bar ou do filesystem
+    std::vector<uint8_t> data;
+    if (scenarios_bar_ && scenarios_bar_->file_count() > 0) {
+        // Extrair do arquivo BAR
+        for (const BarEntry& entry : scenarios_bar_->entries()) {
+            if (ends_with(to_lower(entry.filename), ".scn")) {
+                data = scenarios_bar_->extract(entry);
+                if (!data.empty()) break;
+            }
+        }
+    }
+    if (data.empty()) {
+        // Fallback: tentar ler diretamente do filesystem
+        std::ifstream file(scenario_path, std::ios::binary);
+        if (!file) return false;
+        file.seekg(0, std::ios::end);
+        size_t sz = static_cast<size_t>(file.tellg());
+        file.seekg(0, std::ios::beg);
+        data.resize(sz);
+        file.read(reinterpret_cast<char*>(data.data()), sz);
+    }
+
+    if (data.size() < 64) {
+        LOGE("Scenario file too small for height-map: %zu bytes", data.size());
+        return false;
+    }
+
+    // Verificar magic do formato .scn (R3SG / SM4 / RTS3.exe)
+    bool has_r3sg = false, has_sm4 = false, has_rts3 = false;
+    for (size_t i = 0; i + 4 <= data.size() && i < 1024; ++i) {
+        if (std::memcmp(data.data() + i, "R3SG", 4) == 0) has_r3sg = true;
+        if (std::memcmp(data.data() + i, "SM4", 3) == 0) has_sm4 = true;
+        if (std::memcmp(data.data() + i, "RTS3", 4) == 0) has_rts3 = true;
+    }
+
+    if (!has_r3sg && !has_sm4 && !has_rts3) {
+        LOGE("Scenario file does not contain valid AoM .scn magic");
+        return false;
+    }
+
+    LOGI("Scenario magic found: R3SG=%d SM4=%d RTS3=%d, size=%zu bytes",
+         has_r3sg, has_sm4, has_rts3, data.size());
+
+    // ── Extrair height-map do formato .scn ──────────────────────────────────
+    // O formato .scn do Age of Mythology armazena o height-map como uma grade
+    // de valores de elevação (float32 ou int16) após o cabeçalho.
+    // A localização exata varia entre versões, então tentamos múltiplos offsets.
+
+    const int HM_WIDTH = 64;
+    const int HM_HEIGHT = 64;
+    const size_t HM_DATA_SIZE = static_cast<size_t>(HM_WIDTH) * HM_HEIGHT * sizeof(float);
+
+    // Procurar por dados de height-map após o cabeçalho (offsets comuns)
+    size_t hm_offset = std::string::npos;
+    for (size_t offset = 128; offset + HM_DATA_SIZE <= data.size(); offset += 4) {
+        // Heurística: valores de elevação devem estar em um range razoável (-50 a +500)
+        float test_val;
+        std::memcpy(&test_val, data.data() + offset, sizeof(float));
+        if (test_val > -100.0f && test_val < 1000.0f && std::isfinite(test_val)) {
+            hm_offset = offset;
+            break;
+        }
+    }
+
+    if (hm_offset == std::string::npos) {
+        // Tentar ler como int16 (formato alternativo)
+        const size_t HM_DATA_SIZE_16 = static_cast<size_t>(HM_WIDTH) * HM_HEIGHT * sizeof(int16_t);
+        for (size_t offset = 128; offset + HM_DATA_SIZE_16 <= data.size(); offset += 2) {
+            int16_t test_val;
+            std::memcpy(&test_val, data.data() + offset, sizeof(int16_t));
+            if (test_val > -1000 && test_val < 10000) {
+                hm_offset = offset;
+                // Marcar como formato int16
+                heightmap_scale_ = 0.1f; // Escala para int16
+                break;
+            }
+        }
+        if (hm_offset == std::string::npos) {
+            LOGW("Could not locate height-map data in .scn file");
+            return false;
+        }
+    }
+
+    // Extrair dados de elevação
+    heightmap_width_ = HM_WIDTH;
+    heightmap_height_ = HM_HEIGHT;
+    heightmap_scale_ = (heightmap_scale_ == 0.1f) ? 0.1f : 1.0f;
+    heightmap_data_.resize(HM_WIDTH * HM_HEIGHT);
+
+    if (heightmap_scale_ == 0.1f) {
+        // Formato int16
+        for (int i = 0; i < HM_WIDTH * HM_HEIGHT; ++i) {
+            int16_t val;
+            std::memcpy(&val, data.data() + hm_offset + i * sizeof(int16_t), sizeof(int16_t));
+            heightmap_data_[i] = static_cast<float>(val) * heightmap_scale_;
+        }
+    } else {
+        // Formato float32
+        for (int i = 0; i < HM_WIDTH * HM_HEIGHT; ++i) {
+            std::memcpy(&heightmap_data_[i], data.data() + hm_offset + i * sizeof(float), sizeof(float));
+            if (!std::isfinite(heightmap_data_[i])) heightmap_data_[i] = 0.0f;
+        }
+    }
+
+    LOGI("Loaded height-map from .scn: %dx%d, scale=%.2f, range=[%.2f, %.2f]",
+         heightmap_width_, heightmap_height_, heightmap_scale_,
+         *std::min_element(heightmap_data_.begin(), heightmap_data_.end()),
+         *std::max_element(heightmap_data_.begin(), heightmap_data_.end()));
+
+    // Gerar malha de terreno a partir do height-map
+    generate_terrain_from_heightmap(heightmap_data_, heightmap_width_, heightmap_height_, 1.0f);
+
+    return true;
+}
+
+void Engine::generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale) {
+    if (!renderer_) return;
+    if (width <= 0 || height <= 0 || heightmap.empty()) return;
+
+    const float STEP = scale;
+    const float HALF_W = (width * STEP) * 0.5f;
+    const float HALF_H = (height * STEP) * 0.5f;
+
+    std::vector<TerrainVertex> verts;
+    verts.reserve(static_cast<size_t>(width) * height);
+    std::vector<uint32_t> indices;
+    indices.reserve(static_cast<size_t>(width) * height * 6);
+
+    auto get_height = [&](int x, int z) -> float {
+        if (x < 0 || x >= width || z < 0 || z >= height) return 0.0f;
+        return heightmap[static_cast<size_t>(z) * width + x];
+    };
+
+    for (int z = 0; z < height; ++z) {
+        for (int x = 0; x < width; ++x) {
+            float wx = -HALF_W + x * STEP;
+            float wz = -HALF_H + z * STEP;
+            float wy = get_height(x, z);
+
+            // Finite difference normal computation
+            float hL = get_height(x - 1, z);
+            float hR = get_height(x + 1, z);
+            float hD = get_height(x, z - 1);
+            float hU = get_height(x, z + 1);
+            glm::vec3 normal = glm::normalize(glm::vec3(hL - hR, 2.0f * STEP, hD - hU));
+
+            // Vertex color & slope blend weight (splatting: grama em áreas planas, rocha em encostas)
+            float slope = std::clamp(1.0f - normal.y, 0.0f, 1.0f);
+            float alpha = std::clamp(1.0f - slope * 2.8f, 0.0f, 1.0f); // Alpha para blend de textura
+            float tint = 0.92f;
+
+            TerrainVertex v;
+            v.position = glm::vec3(wx, wy, wz);
+            v.normal = normal;
+            v.texcoord = glm::vec2(static_cast<float>(x) / width * 8.0f,
+                                   static_cast<float>(z) / height * 8.0f);
+            v.color = glm::vec4(tint, tint, tint, alpha);
+            verts.push_back(v);
+        }
+    }
+
+    for (int z = 0; z < height - 1; ++z) {
+        for (int x = 0; x < width - 1; ++x) {
+            uint32_t tl = static_cast<uint32_t>(z * width + x);
+            uint32_t tr = tl + 1;
+            uint32_t bl = static_cast<uint32_t>((z + 1) * width + x);
+            uint32_t br = bl + 1;
+
+            indices.push_back(tl);
+            indices.push_back(bl);
+            indices.push_back(tr);
+
+            indices.push_back(tr);
+            indices.push_back(bl);
+            indices.push_back(br);
+        }
+    }
+
+    terrain_mesh_ = renderer_->create_terrain_mesh(verts.data(), static_cast<uint32_t>(verts.size()),
+                                                   indices.data(), static_cast<uint32_t>(indices.size()));
+    LOGI("Generated terrain from height-map: %dx%d, %zu verts, %zu indices",
+         width, height, verts.size(), indices.size());
 }
 
 void Engine::generate_skydome() {
