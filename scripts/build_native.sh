@@ -3,22 +3,35 @@ set -eu
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Detect PREFIX dynamically
-if [ -z "${PREFIX:-}" ]; then
-    if [ -d "/data/user/0/com.agy/files/usr/bin" ]; then
-        PREFIX="/data/user/0/com.agy/files/usr"
-    elif [ -d "/data/data/com.termux/files/usr/bin" ]; then
-        PREFIX="/data/data/com.termux/files/usr"
-    elif [ -d "/usr" ]; then
-        PREFIX="/usr"
-    fi
+# Detect PREFIX dynamically. A prefix is only usable if it actually contains a
+# working clang++; stale inherited values (e.g. from an IDE shell) must not win.
+prefix_is_usable() {
+    [ -n "${1:-}" ] && [ -x "$1/bin/clang++" ]
+}
+
+if ! prefix_is_usable "${PREFIX:-}"; then
+    PREFIX=""
+    for candidate in \
+        "/data/data/com.termux/files/usr" \
+        "/data/user/0/com.agy/files/usr" \
+        "/usr"
+    do
+        if prefix_is_usable "$candidate"; then
+            PREFIX="$candidate"
+            break
+        fi
+    done
 fi
+
+if ! prefix_is_usable "${PREFIX:-}"; then
+    echo "ERROR: no usable toolchain prefix found (need \$PREFIX/bin/clang++)." >&2
+    exit 127
+fi
+export PREFIX
 
 # Prefer the selected native toolchain even when this script is launched from
 # an IDE shell with a different PATH.
-if [ -n "${PREFIX:-}" ] && [ -d "$PREFIX/bin" ]; then
-    export PATH="$PREFIX/bin:$PATH"
-fi
+export PATH="$PREFIX/bin:$PATH"
 
 # Detect valid POSIX shell for Make
 if [ -n "${PREFIX:-}" ] && [ -x "$PREFIX/bin/sh" ]; then
@@ -33,9 +46,12 @@ if [ -n "${PREFIX:-}" ] && [ -d "$PREFIX/lib" ]; then
     export LD_LIBRARY_PATH="$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 fi
 
-export TMPDIR="${TMPDIR:-/data/local/tmp}"
-[ ! -d "$TMPDIR" ] && TMPDIR="$ROOT/build-m2/tmp"
+export TMPDIR="${TMPDIR:-/data/data/com.termux/files/usr/tmp}"
+if [ ! -d "$TMPDIR" ] || [ ! -w "$TMPDIR" ]; then
+    TMPDIR="$ROOT/build-m2/tmp"
+fi
 mkdir -p "$TMPDIR"
+export TMPDIR
 
 CMAKE_BIN="$(command -v cmake 2>/dev/null || true)"
 if [ -z "$CMAKE_BIN" ] && [ -n "${PREFIX:-}" ] && [ -x "$PREFIX/bin/cmake" ]; then
@@ -55,9 +71,25 @@ fi
     exit 127
 }
 
+# Drop caches that point at a toolchain prefix which no longer exists. This
+# happens when the build tree is moved between environments/apps.
+CACHE="$ROOT/build-m2/CMakeCache.txt"
+if [ -f "$CACHE" ]; then
+    CACHED_CXX="$(sed -n 's/^AOM_NATIVE_CLANGXX:FILEPATH=//p' "$CACHE" | head -n 1)"
+    CACHED_MAKE="$(sed -n 's/^CMAKE_MAKE_PROGRAM:FILEPATH=//p' "$CACHE" | head -n 1)"
+    if { [ -n "$CACHED_CXX" ] && [ ! -x "$CACHED_CXX" ]; } || \
+       { [ -n "$CACHED_MAKE" ] && [ ! -x "$CACHED_MAKE" ]; }; then
+        echo "Removing stale CMake cache (missing toolchain: ${CACHED_CXX:-$CACHED_MAKE})"
+        rm -rf "$ROOT/build-m2/CMakeFiles" "$CACHE"
+    fi
+fi
+
 "$CMAKE_BIN" -S "$ROOT" -B "$ROOT/build-m2" \
     -G "Unix Makefiles" \
     -DCMAKE_TOOLCHAIN_FILE="$ROOT/cmake/android-native.toolchain.cmake" \
+    -DCMAKE_C_COMPILER="$PREFIX/bin/clang" \
+    -DCMAKE_CXX_COMPILER="$PREFIX/bin/clang++" \
+    -DCMAKE_MAKE_PROGRAM="$MAKE_BIN" \
     -DCMAKE_SHELL="$SHELL_BIN" \
     -DCMAKE_BUILD_TYPE=Release
 

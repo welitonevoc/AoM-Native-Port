@@ -2,6 +2,23 @@
 
 Ultima atualizacao: 2026-11-03
 
+## Build: Migração Gradle Concluída (2026-11-03)
+
+**Status:** Concluída. O build Android agora é orquestrado pelo Gradle 8.7 + AGP 8.5.2, reaproveitando o pipeline nativo validado (`scripts/build_native.sh`) para compilar a biblioteca e empacotando-a via `jniLibs`.
+
+- **Comando:** `bash gradlew :app:assembleDebug`
+- **Saída:** `android/app/build/outputs/apk/debug/app-debug.apk` (assinado com debug keystore, `lib/arm64-v8a/libaom_native.so` + `libc++_shared.so`).
+- **Wrapper:** Gradle 8.7 (`gradle/wrapper/gradle-wrapper.properties`).
+- **`android/app/build.gradle`:** `namespace`/`applicationId`/versão vindos do Gradle; `compileOptions` Java 17; `externalNativeBuild` removido (o NDK oficial é `linux-x86_64` e não executa no aparelho ARM64). As tasks `buildNative` → `copyNativeLibs` compilam a `.so` com `scripts/build_native.sh` e a entregam em `jniLibs` antes do `preBuild`.
+- **`AndroidManifest.xml`:** removidos `package`, `versionCode`, `versionName` e `<uses-sdk>` (AGP 8 passou a exigir esses valores no Gradle).
+- **`scripts/build_native.sh`:** `PREFIX` só é aceito se `$PREFIX/bin/clang++` for executável; cache do CMake apontando para toolchain inexistente é descartado automaticamente; compiladores e `CMAKE_MAKE_PROGRAM` são passados explicitamente; `TMPDIR` é validado quanto a escrita.
+- **Pré-requisitos locais (não versionados):**
+  - SDK mínimo em `/data/data/com.termux/files/home/android-sdk` (`platforms/android-34` e `build-tools/34.0.0`).
+  - `local.properties` com `sdk.dir=/data/data/com.termux/files/home/android-sdk`.
+  - `aapt2` ARM64 em `/data/data/com.termux/files/home/android-tools/bin/aapt2`, apontado por `android.aapt2FromMavenOverride` no `gradle.properties` (o binário x86_64 distribuído pelo AGP não roda no aparelho).
+  - `libc++` do Termux na versão 30 ou superior (a 27c quebra `cmake`/`aapt2`).
+- O pipeline antigo (`scripts/build_native.sh` + `scripts/package_apk.sh`) continua disponível como alternativa.
+
 ## Sprint 7: Fila de Produção Real & Ciclo Seguro de Spawn no ECS (2026-11-03)
 
 **Status:** Concluído com 100% de sucesso. Testes automatizados de jogabilidade e treino (`gameplay_test`) expandidos com validação estrita de nascimento de aldeões e soldados gregos.

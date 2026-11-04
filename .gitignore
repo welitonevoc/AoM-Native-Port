@@ -19,6 +19,7 @@
 **/build/
 **/build-*/
 **/.gradle/
+**/.cxx/
 **/reports/
 **/CMakeFiles/
 **/CMakeCache.txt

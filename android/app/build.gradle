@@ -2,6 +2,10 @@ plugins {
     id "com.android.application"
 }
 
+def nativeJniDir = file("$buildDir/generated/jniLibs")
+def nativeSo = file("${rootDir}/build-m2/libaom_native.so")
+def libcxxSo = file("${rootDir}/tools/lib/libc++_shared.so")
+
 android {
     namespace "com.aom.nativeport"
     compileSdk 34
@@ -16,23 +20,24 @@ android {
         ndk {
             abiFilters "arm64-v8a"
         }
+    }
 
-        externalNativeBuild {
-            cmake {
-                arguments "-DANDROID_STL=c++_shared", "-DBUILD_TESTING=OFF"
-            }
-        }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     sourceSets {
         main {
             assets.srcDirs = ['../../assets']
+            jniLibs.srcDirs = [nativeJniDir]
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path "../../CMakeLists.txt"
+    packagingOptions {
+        jniLibs {
+            keepDebugSymbols += ["**/*.so"]
+            useLegacyPackaging = true
         }
     }
 
@@ -47,4 +52,30 @@ android {
         }
     }
 }
+
+// O NDK oficial é linux-x86_64 e não executa neste Android ARM64. O Gradle
+// orquestra o build e reaproveita o pipeline nativo validado no dispositivo.
+def termuxPrefix = System.getenv("PREFIX")
+if (!termuxPrefix || !new File(termuxPrefix, "bin/clang++").canExecute()) {
+    termuxPrefix = "/data/data/com.termux/files/usr"
+}
+
+tasks.register("buildNative", Exec) {
+    workingDir rootDir
+    environment "PREFIX", termuxPrefix
+    environment "TERMUX__PREFIX", termuxPrefix
+    environment "TMPDIR", "${termuxPrefix}/tmp"
+    environment "LD_LIBRARY_PATH", "${termuxPrefix}/lib"
+    environment "PATH", "${termuxPrefix}/bin:${System.getenv("PATH") ?: "/system/bin"}"
+    commandLine "bash", "scripts/build_native.sh"
+}
+
+tasks.register("copyNativeLibs", Copy) {
+    dependsOn "buildNative"
+    from(nativeSo) { into "arm64-v8a" }
+    from(libcxxSo) { into "arm64-v8a" }
+    into nativeJniDir
+}
+
+tasks.named("preBuild") { dependsOn "copyNativeLibs" }
 
