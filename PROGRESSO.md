@@ -4,7 +4,7 @@ Ultima atualizacao: 2026-11-05
 
 ## Sprint 11: Expansão The Titans — Overlay de Archives BAR e Protos da Expansão (2026-11-05)
 
-**Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.
+**Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. As demais suítes também foram reexecutadas com o overlay ativo (11 de 13 em 100%; ver itens 9.1 e 9.2 para as duas ressalvas). Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.
 
 ### 1. `BarArchive` com múltiplos mounts (overlay)
 
@@ -57,9 +57,10 @@ Ultima atualizacao: 2026-11-05
 
 ### 7. Suíte de testes automatizados (`test_bar_overlay`)
 
-- Novo alvo CMake `test_bar_overlay` (`src/tests/test_bar_overlay.cpp`), com 32 asserções cobrindo: archives isolados, montagem do overlay, precedência do último mount, entradas exclusivas de cada mount, busca case-insensitive, falha de `mount()` sem corromper o archive, união do `GameDataManager` (base + expansão sem duplicatas, unidade "Tremor" da expansão, "Hoplite" do base, árvore tecnológica) e carga da campanha `xpack campaign.cpx`.
+- Novo alvo CMake `test_bar_overlay` (`src/tests/test_bar_overlay.cpp`), com 33 asserções cobrindo: archives isolados, montagem do overlay, precedência do último mount, entradas exclusivas de cada mount, busca case-insensitive, falha de `mount()` sem corromper o archive, união do `GameDataManager` (base + expansão sem duplicatas, unidade "Tremor" da expansão, "Hoplite" do base, árvore tecnológica) e carga da campanha `xpack campaign.cpx`.
+- A contagem de unidades esperada é calculada **dentro do teste** a partir dos próprios XMB (`proto.xmb` + `protox.xmb`), de modo que o merge é conferido contra a fonte e não contra um número fixo.
 - A suíte aceita a raiz dos dados por argumento ou pela variável `AOM_DATA_ROOT`; sem os arquivos do jogo ela imprime `SKIP` e retorna sucesso, para não quebrar execuções sem a cópia legal.
-- **Resultado no emulador com os dados reais: 100% PASS.**
+- **Resultado no emulador com os dados reais: 100% PASS (33/33).**
 
 ### 8. Validação e empacotamento
 
@@ -79,14 +80,65 @@ Ultima atualizacao: 2026-11-05
 
 - Validação visual: o menu principal renderiza com a **arte de The Titans** vinda do `textures2.bar`, confirmando que o overlay alimenta o renderer (e não apenas o log).
 - Reinício limpo do app: novo processo carrega os archives e entra no menu em ~2 s.
+- **Log do app instalado no emulador** (com a instalação real completa em `Android/data/com.aom.nativeport/files/AoM`):
 
-### 9. Achado: ANR ao iniciar missão de campanha
+```text
+AoM-Engine: Loaded campaign from disk '.../data/main campaign.cpn': 60 scenarios
+AoM-Engine: Loaded Titans campaign '.../data/xpack campaign.cpx': 19 scenarios
+AoM-Engine: Loaded archives: data=137, textures=6782, models=11496, scenarios=99,
+            sounds=2468, anim=1068, godpowers=71 (valid=1)
+AoM-Engine: Game data registry: 803 units, 17 gods, 507 techs
+AoM-Engine: Game config loaded from BAR: root <proto>, 623 entities
+AoM-Engine: Entered state: MAIN_MENU
+```
+
+### 8.1 Regressão das demais suítes com o overlay ativo
+
+Executadas no emulador x86_64 (API 36) com a instalação real do AoM Extended
+Edition copiada para o caminho esperado pelos testes:
+
+| Suíte | Resultado |
+|---|---|
+| `test_bar_overlay` | **100%** (33/33) |
+| `test_data_docs` | **100%** (56 asserções) |
+| `test_anim_video` | **100%** (79 asserções) — valida `anim.bar` + `models.bar` com o novo `BarArchive` |
+| `test_godpowers_scenarios` | **100%** (77 asserções) — valida `godpowers.bar` + `godpowers2.bar` |
+| `test_campaign_mission` | **100%** (68 asserções) |
+| `test_terrain_water` | **100%** (38 asserções) |
+| `test_fonts_gfx` | **100%** (50 asserções) |
+| `test_localization_lcids` | **100%** (46 asserções) |
+| `test_particles_anim` | **100%** (29 asserções) |
+| `test_ai_system` | **100%** (27 asserções) |
+| `test_network` | **100%** (8 asserções) |
+| `gameplay_test` | 1 falha **pré-existente** (ver item 9.1) |
+| `test_audio_3d` | instável no emulador (ver item 9.2) |
+
+### 9.1 Bug pré-existente: `CONQUEST` não detecta derrota
+
+- `gameplay_test` falha em *"Conquest: player loses when friendly Town Center is destroyed"*.
+- Causa em `src/game/victory.cpp`: no caso `CONQUEST`, a função retorna
+  `VictoryResult::WIN` quando `enemy_tc == 0` **antes** de checar
+  `friendly_tc == 0`. Com os dois TCs destruídos, o resultado correto seria
+  `LOSE` (mesma ordem usada no caso `SUDDEN_DEATH`, que está correto).
+- **Não é uma regressão desta sprint:** `victory.cpp` não foi alterado aqui e
+  o comportamento é idêntico antes e depois do overlay.
+
+### 9.2 Flakiness de `test_audio_3d` no emulador
+
+- As contagens de vozes ativas (`active_voice_count()`) oscilam entre
+  execuções no emulador com SwiftShader, porque as vozes OpenSL são
+  encerradas de forma assíncrona. A asserção que falha muda a cada execução
+  (ex.: *"Triggered arrow flight..."*, *"Triggered wood chopping..."*).
+- Não afeta o runtime do jogo; apenas a contagem usada pelo teste é
+  sensível ao tempo.
+
+### 10. Achado: ANR ao iniciar missão de campanha
 
 - Ao tocar **INICIAR MISSÃO**, o log mostra `Starting Campaign Mission (index 1)...` → `Entered state: IN_GAME`, e em seguida o Android registra `ANR in com.aom.nativeport: "Input dispatching timed out (Waited 5002ms for MotionEvent)"`.
 - Causa: o `NativeActivity` roda o game loop na thread da UI, e a construção do mundo da missão (carga de modelos BRG, terreno, spawn) acontece de forma síncrona, bloqueando o dispatch de input por mais de 5 s. No emulador com SwiftShader (renderização por software) o efeito é ainda mais severo.
 - **Correção planejada:** montar o mundo da missão em thread separada, exibindo uma tela de "CARREGANDO", e responder ao input apenas fora do carregamento.
 
-### 10. Arquivos principais alterados
+### 11. Arquivos principais alterados
 
 | Arquivo | Alteração |
 |---|---|
@@ -94,15 +146,16 @@ Ultima atualizacao: 2026-11-05
 | `include/engine/engine.h` / `src/engine/engine.cpp` | Pares base+expansão, `anim_bar_`/`godpowers_bar_`, campanha dos Titãs, novo log de archives |
 | `include/game/god_powers.h` / `src/game/god_powers.cpp` | `load_expansion_from_bar()` com marcação de poderes exclusivos da expansão |
 | `src/data/game_data.cpp` | Carga de `protox.xmb`/`techtreex.xmb` e deduplicação do registro |
-| `src/tests/test_bar_overlay.cpp` | Suíte nova de regressão do overlay (32 asserções) |
+| `src/tests/test_bar_overlay.cpp` | Suíte nova de regressão do overlay (33 asserções) |
 | `CMakeLists.txt` | Alvo `test_bar_overlay`; `bar_archive.cpp` no `gameplay_test` |
 | `README.md` / `docs/IMPORTACAO_DADOS.md` | Overlay da expansão, estrutura da instalação e mapa do AoM Extended Edition |
 
-### 11. Pendências
+### 12. Pendências
 
 - Validação em **hardware ARM64** (nenhum aparelho físico conectado via `adb`; a validação desta sprint foi feita no emulador x86_64).
 - Corrigir o **ANR** do início de missão (carregar o mundo fora da thread da UI).
-- Regressão das demais suítes (`gameplay_test`, `test_audio_3d`, `test_terrain_water`, `test_campaign_mission`, `test_particles_anim`, `test_network`) com o overlay ativo.
+- Corrigir a ordem de precedência de `CONQUEST` em `src/game/victory.cpp` (item 9.1): `LOSE` deve ser avaliado antes de `WIN` quando os dois Town Centers caírem.
+- Estabilizar `test_audio_3d` (item 9.2): esperar o encerramento assíncrono das vozes OpenSL antes de contar `active_voice_count()`.
 - Reconstrução de unidades e edifícios ao carregar um save (o cabeçalho já é restaurado; as entidades ainda não).
 
 ## Sprint 10: Importação de Dados Originais, Save/Load e Condições de Vitória (2026-11-05)
