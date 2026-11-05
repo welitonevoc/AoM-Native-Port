@@ -102,6 +102,7 @@ if(BUILD_TESTING)
 add_executable(gameplay_test
     src/tests/gameplay_test.cpp
     src/assets/xmb_parser.cpp
+    src/assets/bar_archive.cpp
     src/anim/animation_system.cpp
     src/game/save_load.cpp
     src/game/victory.cpp
@@ -316,6 +317,23 @@ target_include_directories(test_audio_3d PRIVATE
 target_link_libraries(test_audio_3d PRIVATE
     OpenSLES
     android
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_bar_overlay
+    src/tests/test_bar_overlay.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+    src/data/game_data.cpp
+    src/campaign/campaign.cpp
+)
+target_include_directories(test_bar_overlay PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_bar_overlay PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )

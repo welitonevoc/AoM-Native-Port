@@ -2,6 +2,109 @@
 
 Ultima atualizacao: 2026-11-05
 
+## Sprint 11: Expansão The Titans — Overlay de Archives BAR e Protos da Expansão (2026-11-05)
+
+**Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.
+
+### 1. `BarArchive` com múltiplos mounts (overlay)
+
+- **Nova estrutura interna:** cada archive montado virou um descritor `Mount` (`path`, ponteiro `mmap`, `tamanho`, `fd`) guardado em `std::vector<Mount> mounts_`; `BarEntry` ganhou `mount_index`, indicando de qual mount cada entrada veio.
+- **Nova API pública:** `mount()` empilha um archive sobre o conteúdo atual; `open_pair(base, expansion)` abre o jogo base e monta a expansão; `mount_count()` e `mount_paths()` expõem o estado dos mounts. `open()` passou a descartar mounts anteriores e `close()` libera todos os `mmap`/`fd` de uma vez.
+- **Semântica de sobreposição (igual ao jogo original):** o mount mais recente substitui a entrada homônima; entradas exclusivas dos mounts anteriores continuam acessíveis; `extract()` valida o `mount_index` e os limites do arquivo antes de ler, evitando leitura fora do `mmap`.
+- **Normalização de nomes:** `normalize()` aplica minúsculas e uniformiza `\` para `/`, preservando a busca case-insensitive já existente.
+- **Correção de build:** `gameplay_test` não compilava `src/assets/bar_archive.cpp`; a fonte foi adicionada ao alvo de teste.
+
+### 2. `Engine::load_archives()` — pares base + expansão
+
+- Sete pares montados pelo helper local `open_pair()`:
+
+| Archive base | Overlay da expansão |
+|---|---|
+| `data/data.bar` | `data/data2.bar` |
+| `textures/textures.bar` | `textures/textures2.bar` |
+| `models/models.bar` | `models/models2.bar` |
+| `scenario/scenarios.bar` | `scenario/scenarios2.bar` |
+| `sound/sounds.bar` | `sound/sounds2.bar` |
+| `anim/anim.bar` | `anim/anim2.bar` |
+| `god powers/godpowers.bar` | `god powers/godpowers2.bar` |
+
+- Novos archives na engine: `anim_bar_` e `godpowers_bar_`, com accessors `animation_archive()`, `godpower_archive()`, `game_data()`, `god_powers()` e `expansion_campaign_manager()`. Os antigos `data2_bar_`/`textures2_bar_` foram removidos — a expansão deixou de ser um archive separado e passou a ser um mount.
+- Cada archive continua aberto via `mmap` (RAM mantida abaixo de 30 MB mesmo com `models.bar` de 266 MB).
+
+### 3. Registro de unidades, deuses e tecnologias (`proto` + `protox`)
+
+- `GameDataManager::load_from_bar()` foi refatorado com um helper `load_xmb()` que consulta `find()` antes de `extract()`, evitando logs de erro para arquivos opcionais da expansão.
+- Agora são lidos: `proto.xmb`, `protox.xmb` (expansão), `majorgods.xmb`, `techtree.xmb` e `techtreex.xmb` (expansão).
+- **Deduplicação:** `load_proto_xmb()`, `load_majorgods_xmb()` e `load_techtree_xmb()` substituem a definição repetida em vez de duplicá-la, porque `protox.xmb` é um *super-set* de `proto.xmb` — as unidades em comum recebem a versão atualizada da expansão.
+- **Medido no device:** 803 unidades, 17 deuses maiores e 507 tecnologias no registro final (união sem duplicatas).
+
+### 4. Poderes dos deuses da expansão
+
+- Novo `GodPowerSystem::load_expansion_from_bar()`: poderes já existentes no jogo base mantêm a flag de base e recebem a definição atualizada; poderes exclusivos da expansão são marcados como tal.
+- O runtime lê base e expansão em `BarArchive` temporários separados, para preservar a origem de cada poder.
+- **Medido no device:** 44 poderes do base + 71 da expansão (44 atualizados, 27 exclusivos dos Titãs) = 71 no total.
+
+### 5. Campanhas
+
+- Novo `campaign_mgr_xpack_` (`expansion_campaign_manager()`) para a campanha `data/xpack campaign.cpx` ("The New Atlantis").
+- A campanha do disco passou a ter **prioridade sobre** a cópia empacotada no APK, que continua sendo o fallback.
+- **Medido no device:** 60 cenários na campanha base e 19 na campanha dos Titãs.
+
+### 6. Documentação
+
+- `README.md`: estrutura mínima/recomendada atualizada, explicação do overlay (`*2.bar` montados por cima do base) e aviso das pastas de apoio que o app ainda não consome.
+- `docs/IMPORTACAO_DADOS.md`: tabela "o que a engine carrega hoje" reescrita, nova seção **"Como a expansão é montada (overlay)"** com as regras de precedência e o mapa completo da instalação real do AoM Extended Edition.
+
+### 7. Suíte de testes automatizados (`test_bar_overlay`)
+
+- Novo alvo CMake `test_bar_overlay` (`src/tests/test_bar_overlay.cpp`), com 32 asserções cobrindo: archives isolados, montagem do overlay, precedência do último mount, entradas exclusivas de cada mount, busca case-insensitive, falha de `mount()` sem corromper o archive, união do `GameDataManager` (base + expansão sem duplicatas, unidade "Tremor" da expansão, "Hoplite" do base, árvore tecnológica) e carga da campanha `xpack campaign.cpx`.
+- A suíte aceita a raiz dos dados por argumento ou pela variável `AOM_DATA_ROOT`; sem os arquivos do jogo ela imprime `SKIP` e retorna sucesso, para não quebrar execuções sem a cópia legal.
+- **Resultado no emulador com os dados reais: 100% PASS.**
+
+### 8. Validação e empacotamento
+
+- Builds nativos: ARM64 (`build-arm64`, Release) e x86_64 (`build-emu`, Debug) **OK** via CMake + Ninja (NDK 28.2.13676358).
+- APK: `aom-native-debug.apk` com **17,51 MB**, assinado com APK Signature Scheme v2 e v3, contendo `lib/arm64-v8a` e `lib/x86_64` (stripped) + `classes.dex` otimizado por R8.
+- Instalação e execução no emulador (API 36): o app localiza os dados em `Android/data/com.aom.nativeport/files/AoM`, carrega todos os archives com overlay e chega ao menu principal sem crash.
+
+| Mount | Base | Expansão | Total |
+|---|---|---|---|
+| data | 126 | 135 (124 sobrescritas) | **137** |
+| textures | 5.521 | 1.630 (369 sobrescritas) | **6.782** |
+| models | 8.658 | 3.148 (310 sobrescritas) | **11.496** |
+| scenarios | 69 | 30 | **99** |
+| sounds | 1.790 | 687 (9 sobrescritas) | **2.468** |
+| anim | 876 | 1.068 (876 sobrescritas) | **1.068** |
+| god powers | 44 | 71 (44 sobrescritas) | **71** |
+
+- Validação visual: o menu principal renderiza com a **arte de The Titans** vinda do `textures2.bar`, confirmando que o overlay alimenta o renderer (e não apenas o log).
+- Reinício limpo do app: novo processo carrega os archives e entra no menu em ~2 s.
+
+### 9. Achado: ANR ao iniciar missão de campanha
+
+- Ao tocar **INICIAR MISSÃO**, o log mostra `Starting Campaign Mission (index 1)...` → `Entered state: IN_GAME`, e em seguida o Android registra `ANR in com.aom.nativeport: "Input dispatching timed out (Waited 5002ms for MotionEvent)"`.
+- Causa: o `NativeActivity` roda o game loop na thread da UI, e a construção do mundo da missão (carga de modelos BRG, terreno, spawn) acontece de forma síncrona, bloqueando o dispatch de input por mais de 5 s. No emulador com SwiftShader (renderização por software) o efeito é ainda mais severo.
+- **Correção planejada:** montar o mundo da missão em thread separada, exibindo uma tela de "CARREGANDO", e responder ao input apenas fora do carregamento.
+
+### 10. Arquivos principais alterados
+
+| Arquivo | Alteração |
+|---|---|
+| `include/assets/bar_archive.h` / `src/assets/bar_archive.cpp` | `Mount`, múltiplos mounts, `mount()`, `open_pair()`, `mount_count()`, `mount_paths()`, `normalize()` |
+| `include/engine/engine.h` / `src/engine/engine.cpp` | Pares base+expansão, `anim_bar_`/`godpowers_bar_`, campanha dos Titãs, novo log de archives |
+| `include/game/god_powers.h` / `src/game/god_powers.cpp` | `load_expansion_from_bar()` com marcação de poderes exclusivos da expansão |
+| `src/data/game_data.cpp` | Carga de `protox.xmb`/`techtreex.xmb` e deduplicação do registro |
+| `src/tests/test_bar_overlay.cpp` | Suíte nova de regressão do overlay (32 asserções) |
+| `CMakeLists.txt` | Alvo `test_bar_overlay`; `bar_archive.cpp` no `gameplay_test` |
+| `README.md` / `docs/IMPORTACAO_DADOS.md` | Overlay da expansão, estrutura da instalação e mapa do AoM Extended Edition |
+
+### 11. Pendências
+
+- Validação em **hardware ARM64** (nenhum aparelho físico conectado via `adb`; a validação desta sprint foi feita no emulador x86_64).
+- Corrigir o **ANR** do início de missão (carregar o mundo fora da thread da UI).
+- Regressão das demais suítes (`gameplay_test`, `test_audio_3d`, `test_terrain_water`, `test_campaign_mission`, `test_particles_anim`, `test_network`) com o overlay ativo.
+- Reconstrução de unidades e edifícios ao carregar um save (o cabeçalho já é restaurado; as entidades ainda não).
+
 ## Sprint 10: Importação de Dados Originais, Save/Load e Condições de Vitória (2026-11-05)
 
 **Status:** Importação de dados concluída e validada em build/APK; Save/Load parcial (recursos, tempo e seed com roundtrip) e condições de vitória implementadas. A execução em hardware ficou pendente porque nenhum dispositivo/emulador estava conectado no momento da validação.
@@ -14,7 +117,7 @@ Ultima atualizacao: 2026-11-05
 - **Detecção flexível:** a engine aceita `data/data.bar`, `textures/textures.bar`, `models/models.bar`, o layout plano (`data.bar`, `textures.bar`) e um nível de contêiner (por exemplo, `Download/AoM/Age of Mythology/...`).
 - **Reinício automático:** ao final, a Activity é recriada; `ANativeActivity_onCreate` refaz a busca e `Engine::load_archives()` abre os arquivos `.bar` diretamente via `mmap` e `BarArchive`, sem extração prévia.
 - **Diagnóstico no app:** o menu principal mostra `DADOS DO JOGO NAO ENCONTRADOS` quando os arquivos originais não estão presentes; o menu de opções mostra o status `Dados do jogo: carregados/não encontrados`.
-- **Documentação:** novo guia completo em [`docs/IMPORTACAO_DADOS.md`](docs/IMPORTACAO_DADOS.md), com fluxo interno, estrutura de pastas, instalação SAF/manual/ADB, logs, solução de problemas e observações legais. O `README.md` foi atualizado com o passo a passo e o link para o guia.
+- **Documentação:** novo guia completo em [`docs/IMPORTACAO_DADOS.md`](docs/IMPORTACAO_DADOS.md), com fluxo interno, mapa completo da instalação (base, expansão The Titans e pastas de apoio), instalação SAF/manual/ADB, logs, solução de problemas e observações legais. O `README.md` foi atualizado com o passo a passo, a estrutura mínima/recomendada e o link para o guia.
 
 ### 2. Save/Load persistente
 

@@ -46,20 +46,69 @@ Download/AoM/Age of Mythology/textures/textures.bar
 Nesse caso a engine desce automaticamente um nível e usa
 `Download/AoM/Age of Mythology` como raiz dos dados.
 
-### O que a engine carrega
+### O que a engine carrega hoje
 
-| Caminho relativo à raiz | Conteúdo | Observação |
+Chamadas em `Engine::load_archives()` e `Engine::load_game_config()`:
+
+| Caminho relativo à raiz | Conteúdo | Uso atual |
 |---|---|---|
-| `data/data.bar` | `proto.xmb`, techtree, dados de balanceamento | **Principal** |
-| `textures/textures.bar` | Texturas DDT, UI, terreno | **Principal** |
-| `models/models.bar` | Modelos e animações BRG | Recomendado |
-| `scenario/scenarios.bar` | Cenários e campanhas | Recomendado |
-| `sound/sounds.bar` | Efeitos sonoros e vozes | Opcional |
-| `anim/anim.bar` | Scripts de animação | Opcional/experimental |
-| `god powers/godpowers.bar` | Poderes dos deuses | Opcional |
-| `god powers/godpowers2.bar` | Poderes da expansão The Titans | Opcional |
-| `data/main campaign.cpn` | Definição da campanha | Opcional (há cópia no APK) |
-| `avi/*.mp4` | Cinemáticas convertidas | Opcional |
+| `data/data.bar` | `proto.xmb`, techtree e balanceamento base | **Obrigatório** |
+| `textures/textures.bar` | Texturas DDT/BTX, UI e terreno | **Obrigatório** |
+| `models/models.bar` | Modelos e animações BRG | Carregado |
+| `scenario/scenarios.bar` | Cenários e campanhas | Carregado |
+| `sound/sounds.bar` | Efeitos, vozes e músicas | Carregado |
+| `data/main campaign.cpn` | Campanha base | Carregado (fallback no APK) |
+| `data/data2.bar` | Dados da expansão The Titans | **Carregado (overlay)** |
+| `textures/textures2.bar` | Texturas da expansão | **Carregado (overlay)** |
+| `models/models2.bar` | Modelos da expansão | **Carregado (overlay)** |
+| `scenario/scenarios2.bar` | Cenários da expansão | **Carregado (overlay)** |
+| `sound/sounds2.bar` | Áudio da expansão | **Carregado (overlay)** |
+| `anim/anim.bar` + `anim2.bar` | Scripts de animação | Montado (runtime usa BRG de `models.bar`) |
+| `god powers/godpowers.bar` + `godpowers2.bar` | Poderes dos deuses | Montado e carregado no `GodPowerSystem` |
+| `data/xpack campaign.cpx` | Campanha The Titans | Carregado (2º `CampaignManager`) |
+| `fonts/*.msk` / `fonts2.xml` | Fontes bitmap | Runtime usa fonte do sistema |
+| `gfxconfig/` e `gfxconfig2/` | Perfis gráficos e pipelines | Apenas testes/subsistema |
+| `startup/*.con` / `gamesettings*.bar` | Configuração de inicialização | Ainda não usado |
+| `ai/*.xs` e `ai2/*.xs` | Scripts de IA | IA nativa própria; não consome `.xs` |
+| `rm/` e `rm2/` | Random maps (`.xml`/`.xs`) | Mapa procedural; não consome |
+| `language.dll`, `xpacklanguage.dll`, `<LCID>/dwintl.dll` | Strings localizadas | Apenas testes/subsistema |
+| `avi/*.bik` | Cinemáticas originais | O app usa MP4 em `assets/avi` |
+
+> **Importante:** só `data.bar` e `textures.bar` são realmente obrigatórios.
+> As demais pastas podem ser copiadas para preservar a instalação completa,
+> mas a engine ignora com segurança o que ainda não sabe ler.
+
+### Como a expansão é montada (overlay)
+
+O jogo original distribui a expansão como archives separados (`*2.bar`) que
+**redeclaram** boa parte das entradas do jogo base com versões atualizadas e
+acrescentam as entradas exclusivas dos Titãs. A engine reproduz esse
+comportamento com *mounts* sobrepostos no `BarArchive`:
+
+```text
+BarArchive
+├── mount 0 → data/data.bar        (jogo base)
+└── mount 1 → data/data2.bar       (expansão, tem prioridade)
+```
+
+Regras aplicadas:
+
+- **Último mount vence:** `proto.xmb`, por exemplo, resolve para a versão de
+  `data2.bar` quando a expansão está instalada.
+- **Entradas só do base continuam acessíveis:** `prwordlist.xmb` e
+  `recentfiles.xmb` existem apenas em `data.bar` e não somem com o overlay.
+- **Entradas só da expansão são adicionadas:** `protox.xmb` (801 unidades),
+  `techtreex.xmb` (507 tecnologias), `main campaign.xmb`, `relics2.xmb`, …
+- **A união não duplica:** `protox.xmb` é um *super-set* de `proto.xmb`; o
+  `GameDataManager` substitui as definições repetidas em vez de duplicá-las.
+
+Sem a expansão instalada, o jogo continua funcionando normalmente: apenas
+um mount é aberto e nenhum arquivo `*2.bar` é exigido.
+
+> No AoM Extended Edition, `proto.xmb` e os dados da expansão ficam **dentro**
+> de `data.bar`/`data2.bar`. Arquivos soltos `proto.xml`/`protox.xml` só
+> aparecem em instalações modificadas; o `protox.Voobly Balance Patch...` desta
+> cópia é um arquivo de mod, não o proto original.
 
 Os arquivos `.bar` são lidos **diretamente**. Não é necessário extrair,
 descompactar ou renomear o conteúdo interno.
@@ -99,31 +148,67 @@ total ao armazenamento.
 
 ### Estrutura final esperada
 
+A pasta importada pode conter a instalação inteira; a engine ignora o que ainda
+não sabe ler. O mínimo para abrir é `data/data.bar` + `textures/textures.bar`.
+Uma instalação completa fica assim:
+
 ```text
 Android/data/com.aom.nativeport/files/AoM/
 ├── data/
-│   ├── data.bar
-│   └── main campaign.cpn
+│   ├── data.bar                 # obrigatório
+│   ├── main campaign.cpn        # campanha base
+│   ├── data2.bar                # expansão The Titans (overlay)
+│   ├── xpack campaign.cpx       # campanha da expansão
+│   └── *.lgt                    # iluminação (não usada ainda)
 ├── textures/
-│   └── textures.bar
+│   ├── textures.bar             # obrigatório
+│   └── textures2.bar            # expansão (overlay)
 ├── models/
-│   └── models.bar
+│   ├── models.bar               # recomendado
+│   └── models2.bar              # expansão (overlay)
 ├── scenario/
-│   └── scenarios.bar
+│   ├── scenarios.bar            # recomendado
+│   ├── scenarios2.bar           # expansão (overlay)
+│   └── *.scn / *.scx            # mapas customizados (não carregados diretamente)
 ├── sound/
-│   └── sounds.bar
+│   ├── sounds.bar               # recomendado
+│   └── sounds2.bar              # expansão (overlay)
 ├── anim/
-│   └── anim.bar
+│   ├── anim.bar
+│   └── anim2.bar
 ├── god powers/
 │   ├── godpowers.bar
 │   └── godpowers2.bar
-└── avi/
-    ├── aom-logo.mp4
-    └── introcg.mp4
+├── fonts/                       # .msk + fonts2.xml
+├── gfxconfig/                   # perfis gráficos
+├── gfxconfig2/                  # perfis da expansão
+├── startup/                     # .con + gamesettings*.bar
+├── ai/                          # scripts .xs (base)
+├── ai2/                         # scripts .xs (expansão)
+├── rm/                          # random maps (base)
+├── rm2/                         # random maps (expansão)
+├── history/ + history2/          # textos históricos (não usados)
+├── cameratracks/                 # tracks de câmera (não usados)
+├── trigger/ + trigger2/          # scripts de trigger (não usados)
+├── docs/                         # documentação original (não usada)
+├── ppdata/                       # dados auxiliares (não usados)
+├── Users/                        # perfis de usuário (não usados)
+├── avi/                         # .bik originais (não lidos diretamente)
+├── language.dll                 # strings base
+├── xpacklanguage.dll            # strings da expansão
+└── <LCID>/dwintl.dll            # recursos de idioma (1033, 1046, ...)
 ```
 
-As pastas `anim`, `god powers` e `avi` são opcionais. Se você selecionou a pasta
-`Age of Mythology` inteira, elas serão copiadas junto.
+`savegame/`, `screenshots/`, `Voobly Mods/` e `_CommonRedist/` **não** são
+recursos do jogo: são saves/replays, capturas, mods e instaladores. Não é
+preciso copiá-los.
+
+> Nesta instalação do AoM Extended Edition não existem as pastas `campaign/`,
+> `gfx/` nem `screenshots/`. As campanhas ficam em `data/main campaign.cpn` e
+> `data/xpack campaign.cpx`; os perfis gráficos ficam em `gfxconfig/` e
+> `gfxconfig2/`; e `screenshots/` é criada pelo jogo original quando você tira
+> uma captura. A pasta `Language/` está vazia; as strings ficam em
+> `language.dll`, `xpacklanguage.dll` e nas pastas LCID (`1033`, `1046`, ...).
 
 ---
 
@@ -135,13 +220,21 @@ As pastas `anim`, `god powers` e `avi` são opcionais. Se você selecionou a pas
    ```text
    /storage/emulated/0/Download/AoM/
    ```
-2. Copie **o conteúdo** da pasta do jogo para dentro dela:
+2. Copie **o conteúdo** da pasta do jogo para dentro dela. No mínimo:
    ```text
    Download/AoM/data/data.bar
    Download/AoM/textures/textures.bar
    Download/AoM/models/models.bar
+   Download/AoM/scenario/scenarios.bar
+   Download/AoM/sound/sounds.bar
+   Download/AoM/data/main campaign.cpn
    ...
    ```
+   Para preservar a instalação completa, copie também as pastas `anim`,
+   `god powers`, `fonts`, `gfxconfig`, `gfxconfig2`, `startup`, `ai`, `ai2`,
+   `rm` e `rm2`, além de `language.dll` e `xpacklanguage.dll`. Os arquivos
+   `*2.bar` da expansão vão junto automaticamente ao copiar `data`,
+   `textures`, `models`, `scenario` e `sound`.
 3. Abra o app. A engine detecta `Download/AoM` automaticamente.
 
 Se você copiou a pasta `Age of Mythology` inteira, ficando
@@ -165,6 +258,14 @@ Com o celular conectado e depuração USB ativada:
 ```bash
 adb shell mkdir -p /sdcard/Android/data/com.aom.nativeport/files/AoM
 
+# Opção mais simples: copiar a pasta inteira. A engine aceita a subpasta
+# "Age of Mythology" como contêiner de primeiro nível.
+adb push "C:\caminho\Age of Mythology" /sdcard/Android/data/com.aom.nativeport/files/AoM/
+```
+
+Se preferir copiar apenas os recursos usados pelo runtime:
+
+```bash
 adb push "C:\caminho\Age of Mythology\data"     /sdcard/Android/data/com.aom.nativeport/files/AoM/
 adb push "C:\caminho\Age of Mythology\textures" /sdcard/Android/data/com.aom.nativeport/files/AoM/
 adb push "C:\caminho\Age of Mythology\models"   /sdcard/Android/data/com.aom.nativeport/files/AoM/
@@ -172,13 +273,26 @@ adb push "C:\caminho\Age of Mythology\scenario" /sdcard/Android/data/com.aom.nat
 adb push "C:\caminho\Age of Mythology\sound"    /sdcard/Android/data/com.aom.nativeport/files/AoM/
 ```
 
-Opcionais:
+Opcionais (a engine ainda não consome, mas preservam a instalação completa):
 
 ```bash
 adb push "C:\caminho\Age of Mythology\anim"       /sdcard/Android/data/com.aom.nativeport/files/AoM/
 adb push "C:\caminho\Age of Mythology\god powers" /sdcard/Android/data/com.aom.nativeport/files/AoM/
-adb push "C:\caminho\Age of Mythology\avi"        /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\fonts"      /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\gfxconfig"  /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\gfxconfig2" /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\startup"    /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\ai"         /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\ai2"        /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\rm"         /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\rm2"        /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\language.dll"      /sdcard/Android/data/com.aom.nativeport/files/AoM/
+adb push "C:\caminho\Age of Mythology\xpacklanguage.dll" /sdcard/Android/data/com.aom.nativeport/files/AoM/
 ```
+
+> A pasta `avi/` original contém vídeos `.bik`, que o app **não** reproduz
+> diretamente. As cinemáticas usadas pelo APK são MP4 convertidos em
+> `assets/avi/`; veja a seção 4.
 
 Depois, feche e abra o app novamente (ou force a parada pelo Android).
 

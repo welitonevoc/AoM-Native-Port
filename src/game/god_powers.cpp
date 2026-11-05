@@ -106,6 +106,40 @@ bool GodPowerSystem::load_from_bar(BarArchive* archive, bool is_expansion) {
     return loaded > 0;
 }
 
+bool GodPowerSystem::load_expansion_from_bar(BarArchive* archive) {
+    if (!archive || archive->file_count() == 0) return false;
+
+    size_t loaded = 0;
+    size_t updated = 0;
+    for (const auto& entry : archive->entries()) {
+        const std::string fn = to_lower_trim(entry.filename);
+        if (fn.size() < 4 || fn.compare(fn.size() - 4, 4, ".xmb") != 0) continue;
+
+        const std::vector<uint8_t> raw = archive->extract(entry);
+        if (raw.empty()) continue;
+
+        auto root = XmbParser::parse(raw);
+        if (!root) continue;
+
+        // Nome do poder, com a mesma precedência de load_power_from_element.
+        std::string name = root->get_attribute("name");
+        if (name.empty()) name = root->get_attribute("techname");
+        const std::string key = to_lower_trim(name);
+        const bool existed = !key.empty() && powers_.find(key) != powers_.end();
+
+        // Poderes do jogo base mantêm a flag base (recebem apenas a
+        // definição atualizada); os novos são exclusivos da expansão.
+        if (load_power_from_element(*root, !existed)) {
+            ++loaded;
+            if (existed) ++updated;
+        }
+    }
+
+    LOGI("Loaded %zu god powers from godpowers2.bar (%zu updated, %zu expansion-only, total: %zu)",
+         loaded, updated, loaded - updated, powers_.size());
+    return loaded > 0;
+}
+
 bool GodPowerSystem::load_power_xmb(const uint8_t* data, size_t size, bool is_expansion) {
     if (!data || size < 4) return false;
 

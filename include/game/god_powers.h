@@ -87,6 +87,13 @@ public:
     /// Load god power definitions from godpowers.bar and optionally godpowers2.bar
     bool load_from_bar(BarArchive* archive, bool is_expansion = false);
 
+    /// Load the The Titans overlay (`godpowers2.bar`) on top of the base game.
+    ///
+    /// Powers that already exist in the base game keep their base-game flag
+    /// but receive the updated definition from the expansion file; powers that
+    /// only exist in the expansion are marked as expansion-only.
+    bool load_expansion_from_bar(BarArchive* archive);
+
     /// Load directly from an XMB element or memory buffer
     bool load_power_xmb(const uint8_t* data, size_t size, bool is_expansion = false);
     bool load_power_from_element(const XmbElement& root, bool is_expansion = false);

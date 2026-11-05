@@ -22,6 +22,7 @@
 #include "campaign/campaign_mission.h"
 #include "game/save_load.h"
 #include "game/victory.h"
+#include "game/god_powers.h"
 #include "assets/cube_map.h"
 
 namespace aom {
@@ -134,7 +135,14 @@ public:
     [[nodiscard]] BarArchive* model_archive() { return models_bar_.get(); }
     [[nodiscard]] BarArchive* scenario_archive() { return scenarios_bar_.get(); }
     [[nodiscard]] BarArchive* sound_archive() { return sound_bar_.get(); }
+    [[nodiscard]] BarArchive* animation_archive() { return anim_bar_.get(); }
+    [[nodiscard]] BarArchive* godpower_archive() { return godpowers_bar_.get(); }
     [[nodiscard]] CampaignManager* campaign_manager() { return campaign_mgr_.get(); }
+    /// Campanha da expansão The Titans ("The New Atlantis"), se disponível.
+    [[nodiscard]] CampaignManager* expansion_campaign_manager() { return campaign_mgr_xpack_.get(); }
+    /// Registro de unidades, deuses e tecnologias (proto.xmb + protox.xmb).
+    [[nodiscard]] GameDataManager& game_data() { return game_data_; }
+    [[nodiscard]] GodPowerSystem& god_powers() { return god_powers_; }
     [[nodiscard]] CampaignMissionManager* mission_manager() { return mission_mgr_.get(); }
     [[nodiscard]] MeshHandle model_mesh() const { return model_mesh_; }
     [[nodiscard]] TextureHandle model_texture() const { return model_texture_; }
@@ -216,15 +224,19 @@ private:
     void* native_activity_ = nullptr;
     bool archives_loaded_ = false;
 
+    // Archives base do jogo; cada um pode ter a expansão The Titans
+    // montada por cima (data2.bar, textures2.bar, models2.bar, ...).
     std::unique_ptr<BarArchive> data_bar_;
-    std::unique_ptr<BarArchive> data2_bar_;
     std::unique_ptr<BarArchive> textures_bar_;
-    std::unique_ptr<BarArchive> textures2_bar_;
     std::unique_ptr<BarArchive> models_bar_;
     std::unique_ptr<BarArchive> scenarios_bar_;
     std::unique_ptr<BarArchive> sound_bar_;
+    std::unique_ptr<BarArchive> anim_bar_;
+    std::unique_ptr<BarArchive> godpowers_bar_;
     std::unique_ptr<CampaignManager> campaign_mgr_;
+    std::unique_ptr<CampaignManager> campaign_mgr_xpack_;
     std::unique_ptr<CampaignMissionManager> mission_mgr_;
+    GodPowerSystem god_powers_;
 
     std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<UIManager> ui_;

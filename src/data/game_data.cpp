@@ -19,32 +19,38 @@ std::string to_lower(std::string_view s) {
 bool GameDataManager::load_from_bar(const BarArchive& bar) {
     bool ok = false;
 
-    // Load proto.xmb
-    auto proto_bytes = bar.extract("proto.xmb");
-    if (!proto_bytes.empty()) {
-        auto proto_root = XmbParser::parse(proto_bytes);
-        if (proto_root && load_proto_xmb(*proto_root)) {
-            ok = true;
-        }
+    // Carrega um XMB do archive, se existir. `find()` é usado antes de
+    // `extract()` para não gerar log de erro quando o arquivo não existe
+    // (ex.: protox.xmb só está presente na expansão The Titans).
+    auto load_xmb = [&](const char* filename,
+                        bool (GameDataManager::*loader)(const XmbElement&)) -> bool {
+        const BarEntry* entry = bar.find(filename);
+        if (!entry) return false;
+        const std::vector<uint8_t> bytes = bar.extract(*entry);
+        if (bytes.empty()) return false;
+        auto root = XmbParser::parse(bytes);
+        if (!root) return false;
+        return (this->*loader)(*root);
+    };
+
+    // proto.xmb — unidades e construções do jogo base
+    if (load_xmb("proto.xmb", &GameDataManager::load_proto_xmb)) {
+        ok = true;
     }
 
-    // Load majorgods.xmb
-    auto gods_bytes = bar.extract("majorgods.xmb");
-    if (!gods_bytes.empty()) {
-        auto gods_root = XmbParser::parse(gods_bytes);
-        if (gods_root) {
-            load_majorgods_xmb(*gods_root);
-        }
+    // protox.xmb — unidades e construções da expansão The Titans
+    if (load_xmb("protox.xmb", &GameDataManager::load_proto_xmb)) {
+        ok = true;
     }
 
-    // Load techtree.xmb
-    auto tech_bytes = bar.extract("techtree.xmb");
-    if (!tech_bytes.empty()) {
-        auto tech_root = XmbParser::parse(tech_bytes);
-        if (tech_root) {
-            load_techtree_xmb(*tech_root);
-        }
-    }
+    // majorgods.xmb — deuses maiores
+    load_xmb("majorgods.xmb", &GameDataManager::load_majorgods_xmb);
+
+    // techtree.xmb — árvore tecnológica do jogo base
+    load_xmb("techtree.xmb", &GameDataManager::load_techtree_xmb);
+
+    // techtreex.xmb — árvore tecnológica da expansão The Titans
+    load_xmb("techtreex.xmb", &GameDataManager::load_techtree_xmb);
 
     return ok;
 }
@@ -83,7 +89,16 @@ bool GameDataManager::load_proto_xmb(const XmbElement& root) {
             }
         }
 
-        unit_index_[to_lower(u.name)] = units_.size();
+        // Substitui definições repetidas: protox.xmb (expansão) é um
+        // super-set de proto.xmb (base) e traz a versão atualizada.
+        const std::string key = to_lower(u.name);
+        const auto it = unit_index_.find(key);
+        if (it != unit_index_.end()) {
+            units_[it->second] = std::move(u);
+            continue;
+        }
+
+        unit_index_[key] = units_.size();
         units_.push_back(std::move(u));
     }
     return !units_.empty();
@@ -115,7 +130,13 @@ bool GameDataManager::load_majorgods_xmb(const XmbElement& root) {
         }
 
         if (!g.tech_name.empty()) {
-            god_index_[to_lower(g.tech_name)] = gods_.size();
+            const std::string key = to_lower(g.tech_name);
+            const auto it = god_index_.find(key);
+            if (it != god_index_.end()) {
+                gods_[it->second] = std::move(g);
+                continue;
+            }
+            god_index_[key] = gods_.size();
         }
         gods_.push_back(std::move(g));
     }
@@ -145,7 +166,13 @@ bool GameDataManager::load_techtree_xmb(const XmbElement& root) {
             }
         }
 
-        tech_index_[to_lower(t.name)] = techs_.size();
+        const std::string key = to_lower(t.name);
+        const auto it = tech_index_.find(key);
+        if (it != tech_index_.end()) {
+            techs_[it->second] = std::move(t);
+            continue;
+        }
+        tech_index_[key] = techs_.size();
         techs_.push_back(std::move(t));
     }
     return !techs_.empty();

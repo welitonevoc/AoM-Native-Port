@@ -30,6 +30,18 @@
 ///     [8-11]  u32  decompressed_size
 ///     [12-19] u64  timestamp/metadata
 ///     [20..]  char[] null-terminated ASCII filename (no length prefix)
+///
+/// Multiple mounts / overlays
+/// -----------------------
+/// The retail game ships the base game and the The Titans expansion as
+/// separate archives (`data.bar` + `data2.bar`, `textures.bar` +
+/// `textures2.bar`, ...). Those pairs are *not* disjoint: the expansion file
+/// usually re-declares the base entries (updated versions) and adds new
+/// ones. A single `BarArchive` therefore supports stacking several BAR files:
+/// the mount added last wins for a given filename, while entries that only
+/// exist in an earlier mount stay reachable.
+///
+/// Mount order used by the engine: base first, expansion second.
 
 #include <cstdint>
 #include <string>
@@ -51,9 +63,12 @@ struct BarEntry {
     uint32_t decompressed_size; ///< Original size of data
     uint64_t metadata;          ///< Timestamp or other metadata
     bool is_compressed;         ///< True if data is l33t-compressed
+    uint32_t mount_index = 0;   ///< Index of the mount this entry came from
 };
 
 /// BAR archive reader — reads and extracts files from .BAR archives
+///
+/// Supports multiple stacked mounts (overlays): see `mount()`.
 class BarArchive {
 public:
     BarArchive();
@@ -66,21 +81,43 @@ public:
     BarArchive(BarArchive&& other) noexcept;
     BarArchive& operator=(BarArchive&& other) noexcept;
 
-    /// Open and parse a BAR archive file
+    /// Open and parse a BAR archive file, discarding any previous mount.
     /// @param path Path to the .bar file
     /// @return true on success
     bool open(const std::string& path);
+
+    /// Mount an additional BAR file on top of the current content.
+    ///
+    /// Entries whose filename already exists are replaced by the ones from
+    /// this mount (last mount wins), entries that only exist in the previous
+    /// mounts remain available. This mirrors how the game layers the The
+    /// Titans expansion (`*2.bar`) over the base archives.
+    ///
+    /// @warning Invalidates pointers previously returned by `find()`.
+    /// @param path Path to the .bar file
+    /// @return true on success
+    bool mount(const std::string& path);
+
+    /// Open `base_path` and, when it exists, mount `expansion_path` over it.
+    /// @return true if at least one archive was mounted successfully
+    bool open_pair(const std::string& base_path, const std::string& expansion_path);
 
     /// Close the archive and free resources
     void close();
 
     /// Check if the archive is open
-    [[nodiscard]] bool is_open() const { return mmap_data_ != nullptr && !entries_.empty(); }
+    [[nodiscard]] bool is_open() const { return !mounts_.empty() && !entries_.empty(); }
 
-    /// Get number of files in the archive
+    /// Get number of files in the archive (union of all mounts)
     [[nodiscard]] size_t file_count() const { return entries_.size(); }
 
-    /// Get all file entries
+    /// Get number of mounted archives
+    [[nodiscard]] size_t mount_count() const { return mounts_.size(); }
+
+    /// Paths of every mounted archive, in mount order
+    [[nodiscard]] std::vector<std::string> mount_paths() const;
+
+    /// Get all file entries (union of all mounts, last mount wins)
     [[nodiscard]] const std::vector<BarEntry>& entries() const { return entries_; }
 
     /// Find a file entry by name (case-insensitive)
@@ -107,14 +144,29 @@ public:
     size_t extract_all(const std::string& output_dir) const;
 
 private:
+    /// One mounted .BAR file (mmap'ed, read-only)
+    struct Mount {
+        std::string path;
+        const uint8_t* data = nullptr;
+        size_t size = 0;
+        int fd = -1;
+    };
+
+    /// Parse a BAR file into a mount descriptor and its entry list
+    static bool parse_file(const std::string& path, Mount& mount,
+                           std::vector<BarEntry>& out_entries);
+
+    /// Release a mount's mmap/fd
+    static void release_mount(Mount& mount);
+
+    /// Lowercase + normalize path separators, used as index key
+    static std::string normalize(const std::string& filename);
+
     /// Decompress l33t-compressed data
     static std::vector<uint8_t> decompress_l33t(const uint8_t* data, size_t size,
                                                  uint32_t decompressed_size);
 
-    std::string archive_path_;
-    const uint8_t* mmap_data_ = nullptr;
-    size_t file_size_ = 0;
-    int fd_ = -1;
+    std::vector<Mount> mounts_;
     std::vector<BarEntry> entries_;
     std::unordered_map<std::string, size_t> name_index_; ///< lowercase name → entry index
 };

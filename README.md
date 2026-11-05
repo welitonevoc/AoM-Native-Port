@@ -140,22 +140,52 @@ uma das pastas abaixo:
 
 Estrutura esperada:
 
+O **mínimo obrigatório** para a engine iniciar é:
+
 ```text
 AoM/
 ├── data/data.bar
-├── textures/textures.bar
-├── models/models.bar          # recomendado
-├── scenario/scenarios.bar     # recomendado
-├── sound/sounds.bar           # opcional
-├── anim/anim.bar              # opcional
-└── god powers/godpowers.bar   # opcional
+└── textures/textures.bar
 ```
+
+O conjunto **recomendado** (e já carregado pelo runtime atual) é:
+
+```text
+AoM/
+├── data/
+│   ├── data.bar
+│   └── main campaign.cpn        # campanha base
+├── textures/textures.bar
+├── models/models.bar            # malhas 3D
+├── scenario/scenarios.bar       # cenários
+└── sound/sounds.bar             # áudio
+```
+
+Se você tem **The Titans**, copie também os arquivos `*2.bar`:
+`data2.bar`, `textures2.bar`, `models2.bar`, `scenarios2.bar`,
+`sounds2.bar`, `anim2.bar` e `godpowers2.bar`. A engine **monta a expansão
+por cima do jogo base** (overlay): os arquivos com o mesmo nome são
+sobrescritos pela versão da expansão e os arquivos exclusivos dela
+(`protox.xmb`, `techtreex.xmb`, `xpack campaign.cpx`, …) são adicionados.
+
+A instalação original também contém pastas de apoio que o app **ainda não
+consome**: `fonts/`, `gfxconfig/`, `gfxconfig2/`, `startup/`, `ai/`,
+`ai2/`, `rm/`, `rm2/`, `avi/` e os arquivos de idioma
+(`language.dll`, `xpacklanguage.dll`, pastas LCID). Copiá-las não quebra nada;
+elas serão usadas nas próximas etapas. **Não copie** `savegame/`,
+`screenshots/`, `Voobly Mods/` nem `_CommonRedist/`.
+
+> Nesta instalação do AoM Extended Edition não existem as pastas `campaign/`,
+> `gfx/` nem `screenshots/`. As campanhas ficam em `data/main campaign.cpn` e
+> `data/xpack campaign.cpx`; os perfis gráficos ficam em `gfxconfig/` e
+> `gfxconfig2/`; `screenshots/` é criada pelo jogo original ao tirar uma
+> captura.
 
 A engine procura, nesta ordem: pasta privada do app, `Documents/AoM`,
 `Download/AoM`, `AoM` na raiz do armazenamento e pastas legadas. A primeira
-pasta que contiver `data/data.bar`, `textures/textures.bar`, `data.bar` ou
-`textures.bar` é usada. Também é aceita uma subpasta de primeiro nível, como
-`Download/AoM/Age of Mythology/...`.
+pasta que contiver `data/data.bar`, `textures/textures.bar`,
+`models/models.bar`, `data.bar` ou `textures.bar` é usada. Também é aceita uma
+subpasta de primeiro nível, como `Download/AoM/Age of Mythology/...`.
 
 Não é necessário extrair os `.bar`: eles são lidos diretamente. No Android 11+,
 se o acesso ao armazenamento compartilhado for negado, use o importador interno

@@ -1636,6 +1636,10 @@ bool Engine::load_archives(const std::string& data_path) {
     data_bar_ = std::make_unique<BarArchive>();
     textures_bar_ = std::make_unique<BarArchive>();
     models_bar_ = std::make_unique<BarArchive>();
+    scenarios_bar_ = std::make_unique<BarArchive>();
+    sound_bar_ = std::make_unique<BarArchive>();
+    anim_bar_ = std::make_unique<BarArchive>();
+    godpowers_bar_ = std::make_unique<BarArchive>();
 
     auto find_archive = [](const fs::path& base, const std::string& sub, const std::string& name) -> fs::path {
         std::error_code ec;
@@ -1646,53 +1650,127 @@ bool Engine::load_archives(const std::string& data_path) {
         return p1;
     };
 
-    const fs::path data_file = find_archive(base, "data", "data.bar");
-    const fs::path textures_file = find_archive(base, "textures", "textures.bar");
-    const fs::path models_file = find_archive(base, "models", "models.bar");
-    const fs::path scenarios_file = find_archive(base, "scenario", "scenarios.bar");
-    const fs::path sound_file = find_archive(base, "sound", "sounds.bar");
+    // Abre o arquivo base e monta a expansão The Titans (`*2.bar`) por cima.
+    // O overlay sobrescreve as entradas homônimas e adiciona as novas, que é
+    // exatamente como o jogo original sobrepõe a expansão ao jogo base.
+    auto open_pair = [](BarArchive& bar, const fs::path& base_file, const fs::path& expansion_file) -> bool {
+        std::error_code ec;
+        bool ok = false;
+        if (fs::exists(base_file, ec)) {
+            ok = bar.open(base_file.string());
+        }
+        if (fs::exists(expansion_file, ec)) {
+            if (bar.mount(expansion_file.string())) {
+                ok = true;
+            }
+        }
+        return ok;
+    };
 
-    data_bar_->open(data_file.string());
-    textures_bar_->open(textures_file.string());
-    models_bar_->open(models_file.string());
+    open_pair(*data_bar_,
+              find_archive(base, "data", "data.bar"),
+              find_archive(base, "data", "data2.bar"));
+    open_pair(*textures_bar_,
+              find_archive(base, "textures", "textures.bar"),
+              find_archive(base, "textures", "textures2.bar"));
+    open_pair(*models_bar_,
+              find_archive(base, "models", "models.bar"),
+              find_archive(base, "models", "models2.bar"));
+    open_pair(*scenarios_bar_,
+              find_archive(base, "scenario", "scenarios.bar"),
+              find_archive(base, "scenario", "scenarios2.bar"));
+    open_pair(*sound_bar_,
+              find_archive(base, "sound", "sounds.bar"),
+              find_archive(base, "sound", "sounds2.bar"));
+    open_pair(*anim_bar_,
+              find_archive(base, "anim", "anim.bar"),
+              find_archive(base, "anim", "anim2.bar"));
+    open_pair(*godpowers_bar_,
+              find_archive(base, "god powers", "godpowers.bar"),
+              find_archive(base, "god powers", "godpowers2.bar"));
 
-    scenarios_bar_ = std::make_unique<BarArchive>();
-    sound_bar_ = std::make_unique<BarArchive>();
-    scenarios_bar_->open(scenarios_file.string());
-    sound_bar_->open(sound_file.string());
     if (audio_ && sound_bar_->is_open()) {
         audio_->set_sound_archive(sound_bar_.get());
     }
 
-    // Initialize CampaignManager and load campaign XML
-    campaign_mgr_ = std::make_unique<CampaignManager>();
-    auto cpn_bytes = read_asset("main campaign.cpn");
-    if (!cpn_bytes.empty()) {
-        campaign_mgr_->load_campaign_from_memory(cpn_bytes.data(), cpn_bytes.size());
-        LOGI("Loaded campaign from APK assets: %zu scenarios", campaign_mgr_->scenario_count());
-    } else {
-        const std::string cpn_candidates[] = {
-            data_path + "/data/main campaign.cpn",
-            data_path + "/main campaign.cpn",
-            "/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/data/main campaign.cpn"
-        };
-        for (const auto& c : cpn_candidates) {
-            if (campaign_mgr_->load_campaign(c)) {
-                LOGI("Loaded campaign from disk '%s': %zu scenarios", c.c_str(), campaign_mgr_->scenario_count());
-                break;
+    // Poderes dos deuses: base e expansão são lidos separadamente para que
+    // cada poder saiba se é exclusivo dos Titãs.
+    {
+        const fs::path gp_base = find_archive(base, "god powers", "godpowers.bar");
+        const fs::path gp_exp = find_archive(base, "god powers", "godpowers2.bar");
+        std::error_code ec;
+        if (fs::exists(gp_base, ec)) {
+            BarArchive gp;
+            if (gp.open(gp_base.string())) {
+                god_powers_.load_from_bar(&gp, false);
+            }
+        }
+        if (fs::exists(gp_exp, ec)) {
+            BarArchive gp;
+            if (gp.open(gp_exp.string())) {
+                god_powers_.load_expansion_from_bar(&gp);
             }
         }
     }
 
+    // Initialize CampaignManager and load campaign XML
+    campaign_mgr_ = std::make_unique<CampaignManager>();
+
+    // A instalação do usuário tem prioridade sobre o asset do APK.
+    bool base_campaign_loaded = false;
+    const std::string cpn_candidates[] = {
+        data_path + "/data/main campaign.cpn",
+        data_path + "/main campaign.cpn",
+        "/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/data/main campaign.cpn"
+    };
+    for (const auto& c : cpn_candidates) {
+        if (campaign_mgr_->load_campaign(c)) {
+            LOGI("Loaded campaign from disk '%s': %zu scenarios", c.c_str(), campaign_mgr_->scenario_count());
+            base_campaign_loaded = true;
+            break;
+        }
+    }
+    if (!base_campaign_loaded) {
+        auto cpn_bytes = read_asset("main campaign.cpn");
+        if (!cpn_bytes.empty()) {
+            campaign_mgr_->load_campaign_from_memory(cpn_bytes.data(), cpn_bytes.size());
+            LOGI("Loaded campaign from APK assets: %zu scenarios", campaign_mgr_->scenario_count());
+        }
+    }
+
+    // Campanha da expansão The Titans ("The New Atlantis")
+    campaign_mgr_xpack_ = std::make_unique<CampaignManager>();
+    const std::string cpx_candidates[] = {
+        data_path + "/data/xpack campaign.cpx",
+        data_path + "/xpack campaign.cpx",
+        "/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/data/xpack campaign.cpx"
+    };
+    for (const auto& c : cpx_candidates) {
+        if (campaign_mgr_xpack_->load_campaign(c)) {
+            LOGI("Loaded Titans campaign '%s': %zu scenarios", c.c_str(),
+                 campaign_mgr_xpack_->scenario_count());
+            break;
+        }
+    }
+
     archives_loaded_ = (textures_bar_->file_count() > 0 || data_bar_->file_count() > 0);
-    LOGI("Loaded archives: data=%zu, textures=%zu, models=%zu, scenarios=%zu, sounds=%zu (valid=%d)",
+    LOGI("Loaded archives: data=%zu, textures=%zu, models=%zu, scenarios=%zu, sounds=%zu, "
+         "anim=%zu, godpowers=%zu (valid=%d)",
          data_bar_->file_count(), textures_bar_->file_count(), models_bar_->file_count(),
-         scenarios_bar_->file_count(), sound_bar_->file_count(), archives_loaded_ ? 1 : 0);
+         scenarios_bar_->file_count(), sound_bar_->file_count(), anim_bar_->file_count(),
+         godpowers_bar_->file_count(), archives_loaded_ ? 1 : 0);
     return true;
 }
 
 bool Engine::load_game_config() {
     if (data_bar_ && data_bar_->file_count() > 0) {
+        // Registro de unidades, deuses e tecnologias: proto.xmb + protox.xmb
+        // (expansão The Titans) e techtree.xmb + techtreex.xmb.
+        if (game_data_.load_from_bar(*data_bar_)) {
+            LOGI("Game data registry: %zu units, %zu gods, %zu techs",
+                 game_data_.unit_count(), game_data_.god_count(), game_data_.tech_count());
+        }
+
         const BarEntry* entry = data_bar_->find("proto.xmb");
         if (entry) {
             const std::vector<uint8_t> raw = data_bar_->extract(*entry);
