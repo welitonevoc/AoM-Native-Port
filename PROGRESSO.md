@@ -3476,21 +3476,23 @@ O progresso só deve ser marcado como concluído após existir no código e pass
 *Relatório ainda a ser gerado.*
 
 ### 6.2 Ações corretivas recomendadas
-| Área | Alteração proposta | Impacto esperado |
-|------|--------------------|------------------|
-| **Renderização** | Substituir `kWaterFragmentSrc` por versão otimizada (menos instruções GL) | +≈ 10 % FPS em dispositivos Mid‑range |
-| **Bibliotecas Java** | Habilitar `minifyEnabled true` + R8 no `build.gradle` | Redução de 30 % no tamanho do APK |
-| **Assets** | Remover arquivos `.wav` não referenciados (`find . -name "*.wav" -size -10k`) | -5 % uso de storage |
-| **Memória nativa** | Manter `mmap` com `MADV_WILLNEED` nas DLLs grandes | Reduz pico RAM de 350 MB → < 30 MB |
-| **ProGuard** | Adicionar `-keep class com.agy.** { *; }` para refletir classes usadas por JNI | Evita crashes de `UnsatisfiedLinkError` |
-| **Multithreading** | Limitar número de threads de áudio a 2 (via `AudioEngine::max_threads = 2`) | Diminui risco de “Audio thread starvation”. |
+| Área | Alteração proposta | Impacto esperado | Status |
+|------|--------------------|------------------|--------|
+| **Renderização** | Substituir `kWaterFragmentSrc` por versão otimizada (menos instruções GL) | +≈ 10 % FPS em dispositivos Mid‑range | ⏳ Planejado |
+| **Bibliotecas Java & APK Packaging** | Habilitar R8/ProGuard no `build.gradle` e `package_apk.ps1` + `llvm-strip` em bibliotecas nativas | Redução de tamanho de 34.2 MB → 17.4 MB (-49%) | ✅ CONCLUÍDO |
+| **Assets** | Remover arquivos `.wav` não referenciados (`find . -name "*.wav" -size -10k`) | -5 % uso de storage | ⏳ Planejado |
+| **Memória nativa** | Manter `mmap` com `MADV_WILLNEED` nas DLLs grandes | Reduz pico RAM de 350 MB → < 30 MB | ⏳ Planejado |
+| **ProGuard** | Configurar `proguard-rules.pro` mantendo `MyNativeActivity` e métodos JNI nativos | Evita crashes de `ClassNotFoundException` e `UnsatisfiedLinkError` | ✅ CONCLUÍDO |
+| **Multithreading** | Limitar número de threads de áudio a 2 (via `AudioEngine::max_threads = 2`) | Diminui risco de “Audio thread starvation”. | ⏳ Planejado |
 
 ### 6.3 Próximas tarefas (até a entrega)
-1. Aplicar patches de otimização (C++ → `engine.cpp`, `audio.cpp`).
-2. Atualizar `gradle.properties` e `proguard-rules.pro` conforme relatório R8.
-3. Re‑gerar APK, alinhar, assinar e validar (testes de smoke + logcat).
-4. Inserir métricas finais (FPS, uso de RAM) no relatório.
-5. Commit final e push.
+1. ✅ **ProGuard / R8 & llvm-strip** ativado com sucesso: tamanho do APK reduzido em 49% (de 34.22 MB para 17.45 MB), assinado v2/v3 e verificado.
+2. Save/Load persistente (roundtrip) em `save_load.cpp` / ECS.
+3. Condições de vitória (Conquest & Sudden Death).
+4. Skybox / Cube Map (.cub).
+5. Aplicar patches de otimização restantes (C++ → `engine.cpp`, `audio.cpp`).
+6. Inserir métricas finais (FPS, uso de RAM) no relatório.
+7. Commit final e push.
 
 ---
 

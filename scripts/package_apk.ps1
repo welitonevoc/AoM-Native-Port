@@ -25,9 +25,12 @@ $Aapt = "$BuildToolsDir\aapt.exe"
 $Zipalign = "$BuildToolsDir\zipalign.exe"
 $Apksigner = "$BuildToolsDir\apksigner.bat"
 $D8 = "$BuildToolsDir\d8.bat"
+$D8Jar = "$BuildToolsDir\lib\d8.jar"
+$LlvmStrip = "$NdkDir\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-strip.exe"
 
 # Java / Keytool
 $JavaBin = if ($env:JAVA_HOME) { "$env:JAVA_HOME\bin" } else { "C:\Program Files\Android\Android Studio\jbr\bin" }
+$JavaExe = "$JavaBin\java.exe"
 $Javac = "$JavaBin\javac.exe"
 $Keytool = "$JavaBin\keytool.exe"
 
@@ -63,18 +66,30 @@ $X86_64Libcxx = "$NdkDir\toolchains\llvm\prebuilt\windows-x86_64\sysroot\usr\lib
 
 if (Test-Path $Arm64So) {
     Copy-Item $Arm64So "$ApkBuildDir\lib\arm64-v8a\libaom_native.so"
+    if (Test-Path $LlvmStrip) {
+        & $LlvmStrip --strip-all "$ApkBuildDir\lib\arm64-v8a\libaom_native.so"
+    }
     if (Test-Path $Arm64Libcxx) {
         Copy-Item $Arm64Libcxx "$ApkBuildDir\lib\arm64-v8a\libc++_shared.so"
+        if (Test-Path $LlvmStrip) {
+            & $LlvmStrip --strip-all "$ApkBuildDir\lib\arm64-v8a\libc++_shared.so"
+        }
     }
-    Write-Host "Added ABI: arm64-v8a" -ForegroundColor Green
+    Write-Host "Added ABI: arm64-v8a (stripped)" -ForegroundColor Green
 }
 
 if (Test-Path $EmuSo) {
     Copy-Item $EmuSo "$ApkBuildDir\lib\x86_64\libaom_native.so"
+    if (Test-Path $LlvmStrip) {
+        & $LlvmStrip --strip-all "$ApkBuildDir\lib\x86_64\libaom_native.so"
+    }
     if (Test-Path $X86_64Libcxx) {
         Copy-Item $X86_64Libcxx "$ApkBuildDir\lib\x86_64\libc++_shared.so"
+        if (Test-Path $LlvmStrip) {
+            & $LlvmStrip --strip-all "$ApkBuildDir\lib\x86_64\libc++_shared.so"
+        }
     }
-    Write-Host "Added ABI: x86_64" -ForegroundColor Green
+    Write-Host "Added ABI: x86_64 (stripped)" -ForegroundColor Green
 }
 
 # 2. Versioning and AndroidManifest.xml
@@ -127,13 +142,27 @@ $ManifestContent = @"
 "@
 Set-Content -Path "$ApkBuildDir\AndroidManifest.xml" -Value $ManifestContent -Encoding UTF8
 
-# 3. Compile Java sources into classes.dex
+# 3. Compile Java sources into classes.dex with R8 optimization
 Write-Host "Compiling Java sources..." -ForegroundColor Yellow
 $JavaSource = "$ProjectDir\android\app\src\main\java\com\aom\nativeport\MyNativeActivity.java"
 & $Javac -cp $AndroidJar -source 8 -target 8 -d "$ApkBuildDir\classes" $JavaSource
 
 $ClassFiles = Get-ChildItem "$ApkBuildDir\classes" -Recurse -Filter "*.class" | ForEach-Object { $_.FullName }
-& $D8 --min-api 24 --output "$ApkBuildDir" $ClassFiles
+$ProguardRules = "$ProjectDir\android\app\proguard-rules.pro"
+
+if ((Test-Path $D8Jar) -and (Test-Path $JavaExe) -and (Test-Path $ProguardRules)) {
+    Write-Host "Running R8 optimizer & minifier..." -ForegroundColor Yellow
+    & $JavaExe -cp $D8Jar com.android.tools.r8.R8 `
+        --release `
+        --min-api 24 `
+        --lib "$AndroidJar" `
+        --pg-conf "$ProguardRules" `
+        --output "$ApkBuildDir" `
+        $ClassFiles
+} else {
+    Write-Host "Falling back to standard d8..." -ForegroundColor Yellow
+    & $D8 --min-api 24 --output "$ApkBuildDir" $ClassFiles
+}
 
 # 4. Generate Keystore if missing
 if (-not (Test-Path $Keystore)) {
