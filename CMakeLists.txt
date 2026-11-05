@@ -10,6 +10,7 @@ set(AOM_SOURCES
     src/assets/bar_archive.cpp
     src/assets/brg_model.cpp
     src/assets/ddt_texture.cpp
+    src/assets/cube_map.cpp
     src/assets/xmb_parser.cpp
     src/audio/opensl_engine.cpp
     src/engine/engine.cpp
@@ -30,6 +31,8 @@ set(AOM_SOURCES
     src/game/god_powers.cpp
     src/game/scenario_trigger.cpp
     src/game/game_systems.cpp
+    src/game/save_load.cpp
+    src/game/victory.cpp
     src/locale/localization.cpp
     src/network/network_manager.cpp
     src/platform/android/native_activity.cpp
@@ -100,6 +103,9 @@ add_executable(gameplay_test
     src/tests/gameplay_test.cpp
     src/assets/xmb_parser.cpp
     src/anim/animation_system.cpp
+    src/game/save_load.cpp
+    src/game/victory.cpp
+    src/assets/cube_map.cpp
 )
 target_include_directories(gameplay_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -217,6 +223,9 @@ add_executable(test_godpowers_scenarios
     src/game/god_powers.cpp
     src/game/scenario_trigger.cpp
     src/game/game_systems.cpp
+    src/game/save_load.cpp
+    src/game/victory.cpp
+    src/assets/cube_map.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
 )

@@ -104,13 +104,75 @@ bash scripts/package_apk.sh
 
 ## 🎮 Importando Dados e Recursos do Jogo
 
-Para carregar dados adicionais ou texturas de alta resolução da sua cópia legal do jogo, coloque os arquivos `.bar` em um dos seguintes diretórios no seu dispositivo Android:
+O APK não inclui os arquivos proprietários de *Age of Mythology*. Para usar
+texturas, modelos, sons, campanhas e dados de balanceamento originais, importe
+a pasta do jogo da sua cópia legal.
+
+### Opção recomendada: importar pelo próprio app
+
+1. Instale o APK.
+2. Abra o app e toque em **OPÇÕES**.
+3. Toque em **IMPORTAR DADOS DO JOGO**.
+4. Selecione a pasta que contém as subpastas `data` e `textures`
+   (normalmente a pasta `Age of Mythology`).
+5. Aguarde a cópia e o reinício automático.
+
+O importador usa o seletor de pastas do Android (SAF), copia os arquivos para
+`Android/data/com.aom.nativeport/files/AoM/` em segundo plano e **não exige**
+permissão de acesso a todos os arquivos do dispositivo.
+
+**Como funciona internamente:**
+
+1. A engine nativa chama `requestGameDataImport()` no Java via JNI.
+2. O Java abre o seletor SAF e recebe permissão persistente de leitura.
+3. A pasta é copiada recursivamente na thread `aom-data-import`, sem travar a UI.
+4. Ao terminar, a Activity é recriada e a engine localiza os `.bar` na pasta
+   privada do app.
+
+### Opção manual
+
+Copie a estrutura de pastas do jogo (não apenas alguns `.bar` isolados) para
+uma das pastas abaixo:
 
 - `/storage/emulated/0/Download/AoM/`
 - `/storage/emulated/0/Documents/AoM/`
-- Ou no armazenamento interno do app em: `Android/data/com.aom.nativeport/files/AoM/`
+- `Android/data/com.aom.nativeport/files/AoM/` (via USB/ADB)
 
-A engine reconhece automaticamente as pastas e arquivos `data/data.bar` e `textures/textures.bar`.
+Estrutura esperada:
+
+```text
+AoM/
+├── data/data.bar
+├── textures/textures.bar
+├── models/models.bar          # recomendado
+├── scenario/scenarios.bar     # recomendado
+├── sound/sounds.bar           # opcional
+├── anim/anim.bar              # opcional
+└── god powers/godpowers.bar   # opcional
+```
+
+A engine procura, nesta ordem: pasta privada do app, `Documents/AoM`,
+`Download/AoM`, `AoM` na raiz do armazenamento e pastas legadas. A primeira
+pasta que contiver `data/data.bar`, `textures/textures.bar`, `data.bar` ou
+`textures.bar` é usada. Também é aceita uma subpasta de primeiro nível, como
+`Download/AoM/Age of Mythology/...`.
+
+Não é necessário extrair os `.bar`: eles são lidos diretamente. No Android 11+,
+se o acesso ao armazenamento compartilhado for negado, use o importador interno
+ou `adb push` para a pasta privada do app.
+
+**Problemas comuns:**
+
+- **“Pasta inválida”** — selecione a pasta que contém `data/data.bar` e
+  `textures/textures.bar`, não uma pasta acima nem um arquivo isolado.
+- **Texturas não aparecem** — confirme que `textures/textures.bar` foi copiado
+  e não está corrompido.
+- **`Download/AoM` não é detectado no Android 11+** — use a importação interna
+  ou `adb push`; o acesso direto ao armazenamento compartilhado pode estar
+  bloqueado.
+
+📖 **Instruções completas, comandos ADB, árvore de arquivos, verificação por
+logcat e solução de problemas:** [`docs/IMPORTACAO_DADOS.md`](docs/IMPORTACAO_DADOS.md).
 
 ---
 

@@ -223,9 +223,14 @@ uniform highp float uTime;
 
 out vec4 fragColor;
 
+const vec4 kShallowColor = vec4(0.08, 0.48, 0.58, 0.72);
+const vec4 kDeepColor    = vec4(0.02, 0.14, 0.34, 0.90);
+
 void main() {
-    vec2 uv1 = vTex * 3.0 + vec2(uTime * 0.025, uTime * 0.018);
-    vec2 uv2 = vTex * 4.5 + vec2(-uTime * 0.018, uTime * 0.028);
+    // Coordenadas UV de scrolling simplificadas e fundidas
+    vec2 t_scroll = vec2(uTime * 0.02, uTime * 0.02);
+    vec2 uv1 = vTex * 3.0 + t_scroll;
+    vec2 uv2 = vTex * 4.5 + vec2(-t_scroll.x * 0.85, t_scroll.y * 1.35);
 
     vec3 waveNormal;
     if (uHasNormalMap != 0) {
@@ -242,19 +247,19 @@ void main() {
     vec3 L = normalize(-uLightDir);
     vec3 H = normalize(L + V);
 
-    float NdotV = clamp(dot(waveNormal, V), 0.0, 1.0);
-    float fresnel = pow(1.0 - NdotV, 3.0);
+    // Fresnel otimizado via multiplicacao direta (sem pow transcendental cara)
+    float oneMinusNdotV = 1.0 - clamp(dot(waveNormal, V), 0.0, 1.0);
+    float fresnel = oneMinusNdotV * oneMinusNdotV * oneMinusNdotV;
 
-    vec4 shallowColor = vec4(0.08, 0.48, 0.58, 0.72);
-    vec4 deepColor = vec4(0.02, 0.14, 0.34, 0.90);
-    vec4 waterBase = mix(shallowColor, deepColor, clamp(0.5 + fresnel * 0.5, 0.0, 1.0));
+    vec4 waterBase = mix(kShallowColor, kDeepColor, clamp(0.5 + fresnel * 0.5, 0.0, 1.0));
 
+    // Especular otimizado: pow(NdotH, 32.0) em potencia de 2 reduz ciclos de instrucao ALU
     float NdotH = max(dot(waveNormal, H), 0.0);
-    float spec = pow(NdotH, 48.0);
-    vec3 specular = uLightColor * spec * 0.85;
+    float spec = pow(NdotH, 32.0);
+    vec3 specular = uLightColor * (spec * 0.85);
 
     float diff = max(dot(waveNormal, L), 0.0);
-    vec3 diffuse = uLightColor * diff * 0.35;
+    vec3 diffuse = uLightColor * (diff * 0.35);
 
     vec3 finalRgb = waterBase.rgb * (uAmbient + diffuse) + specular;
     fragColor = vec4(finalRgb, waterBase.a);

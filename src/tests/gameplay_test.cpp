@@ -1,4 +1,7 @@
 #include "ecs/gameplay.h"
+#include "game/save_load.h"
+#include "game/victory.h"
+#include "assets/cube_map.h"
 #include <iostream>
 
 static bool check(bool condition, const char* message) {
@@ -133,6 +136,74 @@ int main() {
     }
     const auto* w_after = world.get_unit(worker);
     ok &= check(w_after != nullptr, "worker entity is valid after construction");
+
+    // ── Sprint 9: Save / Load State Persistence (Roundtrip) ────────────────
+    {
+        world.resources_mutable().food  = 888;
+        world.resources_mutable().wood  = 666;
+        world.resources_mutable().gold  = 444;
+        world.resources_mutable().favor = 222;
+
+        const std::string save_path = "build-win/test_roundtrip.dat";
+        bool save_ok = aom::save_game_state(save_path, world, 123.5f, 9999);
+        ok &= check(save_ok, "save_game_state successfully exported world snapshot");
+
+        aom::SaveGameData loaded{};
+        bool load_ok = aom::load_game_state(save_path, loaded);
+        ok &= check(load_ok, "load_game_state successfully read snapshot");
+        ok &= check(loaded.magic == aom::kSaveMagic, "Save magic header matches AOMS");
+        ok &= check(loaded.food[0] == 888 && loaded.wood[0] == 666 &&
+                    loaded.gold[0] == 444 && loaded.favor[0] == 222, "Save resources roundtrip matches exactly");
+        ok &= check(loaded.game_time_seconds == 123.5f, "Save game time persists accurately");
+        ok &= check(loaded.map_seed == 9999, "Save map seed persists accurately");
+        ok &= check(aom::has_valid_save(save_path), "has_valid_save returns true for created save");
+    }
+
+    // ── Sprint 9: Victory Conditions (Conquest & Sudden Death) ─────────────
+    {
+        aom::GameplayWorld victory_world(nullptr);
+        const aom::Entity tc_f = victory_world.place_town_center(aom::Team::FRIENDLY, {0.0f, 0.0f, 0.0f});
+        const aom::Entity tc_e = victory_world.place_town_center(aom::Team::ENEMY,    {20.0f, 0.0f, 0.0f});
+
+        // 1. Both TCs alive -> NONE
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::CONQUEST) == aom::VictoryResult::NONE,
+                    "Conquest: game ongoing when both Town Centers are standing");
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::SUDDEN_DEATH) == aom::VictoryResult::NONE,
+                    "Sudden Death: game ongoing when both Town Centers are standing");
+
+        // 2. Destroy Enemy TC -> Player WINS
+        victory_world.set_entity_hp(tc_e, 0);
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::CONQUEST) == aom::VictoryResult::WIN,
+                    "Conquest: player wins when enemy Town Center is destroyed");
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::SUDDEN_DEATH) == aom::VictoryResult::WIN,
+                    "Sudden Death: player wins when enemy Town Center is destroyed");
+
+        // 3. Destroy Friendly TC as well -> LOSE
+        victory_world.set_entity_hp(tc_f, 0);
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::CONQUEST) == aom::VictoryResult::LOSE,
+                    "Conquest: player loses when friendly Town Center is destroyed");
+        ok &= check(aom::check_victory(victory_world, aom::VictoryCondition::SUDDEN_DEATH) == aom::VictoryResult::LOSE,
+                    "Sudden Death: player loses when friendly Town Center is destroyed");
+    }
+
+    // ── Sprint 9: Skybox / Cube Map (.cub) Parser ─────────────────────────
+    {
+        const std::string mock_cub =
+            "// Up\r\nSFX A Shiny Water\r\n\r\n"
+            "// Down\r\nSFX A Shiny Water\r\n\r\n"
+            "// Front\r\nSFX A Shiny Water\r\n\r\n"
+            "// Back\r\nSFX A Shiny Water\r\n\r\n"
+            "// Left\r\nSFX A Shiny Water\r\n\r\n"
+            "// Right\r\nSFX A Shiny Water\r\n";
+        aom::CubeMapDef cub = aom::parse_cub_file(mock_cub);
+        ok &= check(cub.is_valid(), "parse_cub_file returns valid definition");
+        ok &= check(cub.up == "SFX A Shiny Water", "CubeMap face Up matches");
+        ok &= check(cub.down == "SFX A Shiny Water", "CubeMap face Down matches");
+        ok &= check(cub.front == "SFX A Shiny Water", "CubeMap face Front matches");
+        ok &= check(cub.back == "SFX A Shiny Water", "CubeMap face Back matches");
+        ok &= check(cub.left == "SFX A Shiny Water", "CubeMap face Left matches");
+        ok &= check(cub.right == "SFX A Shiny Water", "CubeMap face Right matches");
+    }
 
     return ok ? 0 : 1;
 }

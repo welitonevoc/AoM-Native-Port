@@ -1279,6 +1279,16 @@ public:
         return place_building(Team::FRIENDLY, point);
     }
     const ResourcePool& resources() const { return resources_; }
+    ResourcePool& resources_mutable() { return resources_; }
+    const ResourcePool& resource_pool(Team team) const { return (team == Team::FRIENDLY) ? resources_ : enemy_resources_; }
+    ResourcePool& resource_pool_mutable(Team team) { return (team == Team::FRIENDLY) ? resources_ : enemy_resources_; }
+    const std::unordered_map<Entity, HealthComponent>& health_components() const { return ecs_world_.healths(); }
+    void set_entity_hp(Entity entity, int current_hp) {
+        auto it = ecs_world_.healths_mut().find(entity);
+        if (it != ecs_world_.healths_mut().end()) {
+            it->second.current_hp = current_hp;
+        }
+    }
     void set_navigation_blocked(int x, int y, bool blocked = true) { navigation_.set_blocked(x, y, blocked); }
 
     std::vector<MinimapBlip> get_minimap_blips() const {

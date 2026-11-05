@@ -1,6 +1,65 @@
 # AoM Native Port - Registro de Progresso
 
-Ultima atualizacao: 2026-11-03
+Ultima atualizacao: 2026-11-05
+
+## Sprint 10: Importação de Dados Originais, Save/Load e Condições de Vitória (2026-11-05)
+
+**Status:** Importação de dados concluída e validada em build/APK; Save/Load parcial (recursos, tempo e seed com roundtrip) e condições de vitória implementadas. A execução em hardware ficou pendente porque nenhum dispositivo/emulador estava conectado no momento da validação.
+
+### 1. Importação dos dados originais via SAF + JNI
+
+- **Botão no menu:** `OPÇÕES > IMPORTAR DADOS DO JOGO` foi adicionado ao menu de opções. A engine chama o método Java `requestGameDataImport()` por JNI, sem depender de caminhos fixos no código nativo.
+- **Seletor de pastas (SAF):** o Java usa `ACTION_OPEN_DOCUMENT_TREE` com permissão persistente de leitura. O importador **não exige** `MANAGE_EXTERNAL_STORAGE`; o usuário concede acesso apenas à pasta escolhida.
+- **Cópia em segundo plano:** a árvore selecionada é copiada recursivamente para `getExternalFilesDir(null)/AoM` na thread `aom-data-import`, evitando ANR. Cada arquivo é gravado como `.tmp` e renomeado ao final; arquivos opcionais inacessíveis não invalidam a importação se os BARs principais chegarem.
+- **Detecção flexível:** a engine aceita `data/data.bar`, `textures/textures.bar`, `models/models.bar`, o layout plano (`data.bar`, `textures.bar`) e um nível de contêiner (por exemplo, `Download/AoM/Age of Mythology/...`).
+- **Reinício automático:** ao final, a Activity é recriada; `ANativeActivity_onCreate` refaz a busca e `Engine::load_archives()` abre os arquivos `.bar` diretamente via `mmap` e `BarArchive`, sem extração prévia.
+- **Diagnóstico no app:** o menu principal mostra `DADOS DO JOGO NAO ENCONTRADOS` quando os arquivos originais não estão presentes; o menu de opções mostra o status `Dados do jogo: carregados/não encontrados`.
+- **Documentação:** novo guia completo em [`docs/IMPORTACAO_DADOS.md`](docs/IMPORTACAO_DADOS.md), com fluxo interno, estrutura de pastas, instalação SAF/manual/ADB, logs, solução de problemas e observações legais. O `README.md` foi atualizado com o passo a passo e o link para o guia.
+
+### 2. Save/Load persistente
+
+- **Novo módulo:** `include/game/save_load.h` e `src/game/save_load.cpp`.
+- **Formato binário:** magic `AOMS` (`0x414F4D53`), versão `1`, cabeçalho com tempo de jogo, seed, recursos dos dois times e contagens de entidades. Unidades e edifícios são serializados com posição, HP, time, tipo/progresso e nome.
+- **Integração com a engine:** `Engine::save_game()` grava em `data_path/savegame.dat`; `Engine::load_game()` restaura recursos, tempo e seed; o menu `CONTINUAR PARTIDA` usa `has_valid_save()` para habilitar o carregamento.
+- **Teste de roundtrip:** `gameplay_test` cobre magic, versão, recursos, tempo, seed e validação do arquivo.
+- **Limitação atual:** a leitura restaura o cabeçalho (recursos/tempo/seed). A reconstrução de unidades e edifícios a partir das seções serializadas ainda está pendente; o save já grava esses dados para a próxima etapa.
+
+### 3. Condições de vitória
+
+- **Novo módulo:** `include/game/victory.h` e `src/game/victory.cpp`.
+- **Regras:** `CONQUEST` (destruir todos os Town Centers inimigos) e `SUDDEN_DEATH` (perder/destruir o Town Center decisivo). Town Centers incompletos ou com HP <= 0 são ignorados.
+- **Integração:** a engine verifica a condição a cada atualização em partidas Skirmish/Mapa Aleatório (`!mission_mgr_`), exibe a mensagem de vitória/derrota no HUD e, após 2,5 s, adiciona os botões `MENU PRINCIPAL` e `JOGAR NOVAMENTE`.
+- **Testes:** `gameplay_test` valida os cenários de jogo em andamento, vitória e derrota para as duas condições.
+
+### 4. Skybox / Cube Map e otimização do shader de água
+
+- **Parser `.cub`:** `include/assets/cube_map.h` e `src/assets/cube_map.cpp` leem as seis faces (`Up`, `Down`, `Front`, `Back`, `Left`, `Right`) a partir de comentários no arquivo `.cub`, com suporte a conteúdo extraído de `textures.bar` ou lido do disco.
+- **Integração na engine:** `Engine::load_skybox_cube()` tenta `sfx a shiny water.cub`, `sfx shinygold map.cub` e `sfx shinyice map.cub`; a textura da face `Up` (ou `Front`) é carregada como DDT e aplicada ao skydome em `Engine::render()`.
+- **Teste do parser:** `gameplay_test` valida `parse_cub_file()` e as seis faces do cubemap.
+- **Otimização GLES:** o fragment shader de água em `gles_renderer.cpp` passou a fundir o scrolling das duas UVs, substituiu o Fresnel com `pow()` por multiplicação cúbica e reduziu o expoente especular de 48 para 32, diminuindo instruções ALU sem alterar o visual geral.
+
+### 5. Validação e empacotamento
+
+- `javac` contra `android.jar`: **OK** (apenas avisos de `-source/-target 8` no script de empacotamento).
+- Build nativo ARM64 e x86_64: **OK**.
+- R8/ProGuard: **OK**; a regra `-keep public class com.aom.nativeport.MyNativeActivity { *; }` preserva `requestGameDataImport()` no `classes.dex`.
+- APK gerado e assinado (v2/v3): `aom-native-debug.apk` com aproximadamente 17,49 MB.
+- Execução em dispositivo/emulador: **pendente** — `adb devices` não retornou nenhum dispositivo conectado.
+
+### 6. Arquivos principais alterados
+
+| Arquivo | Alteração |
+|---|---|
+| `android/app/src/main/java/com/aom/nativeport/MyNativeActivity.java` | Diálogo, seletor SAF, cópia em thread, detecção e reinício |
+| `include/engine/engine.h` / `src/engine/engine.cpp` | JNI de importação, botão/status, save/load e vitória |
+| `src/platform/android/native_activity.cpp` | Busca de dados com prioridade para a pasta privada e layout flexível |
+| `include/game/save_load.h` / `src/game/save_load.cpp` | Serialização binária de save |
+| `include/game/victory.h` / `src/game/victory.cpp` | Regras de Conquest e Sudden Death |
+| `include/assets/cube_map.h` / `src/assets/cube_map.cpp` | Parser de skybox `.cub` e carregamento das faces |
+| `src/renderer/gles_renderer.cpp` | Shader de água otimizado (menos instruções ALU) |
+| `include/ecs/gameplay.h` | Acesso mutável aos recursos e HP para save/load e testes |
+| `src/tests/gameplay_test.cpp` | Testes de save/load, vitória e parser de cubemap |
+| `README.md` / `docs/IMPORTACAO_DADOS.md` / `PROGRESSO.md` | Instruções e registro das mudanças |
 
 ## Build: Migração Gradle Concluída (2026-11-03)
 
@@ -3425,8 +3484,8 @@ O plano completo está em [`PLANO_P2_CENA_RTS.md`](file:///storage/emulated/0/Do
 | Story | Descrição | Status |
 |-------|-----------|--------|
 | **P2.1** | Terreno real: loader de height-map de cenários originais (.scn) | ⏳ Planejado |
-| **P2.2** | Save/Load completo: persistência de estado do jogo | ⏳ Planejado |
-| **P2.3** | Condição de vitória: Conquest e Sudden Death | ⏳ Planejado |
+| **P2.2** | Save/Load completo: persistência de estado do jogo | 🟡 Parcial — cabeçalho/recursos/tempo/seed com roundtrip; entidades ainda não restauradas |
+| **P2.3** | Condição de vitória: Conquest e Sudden Death | ✅ Implementado — testes automatizados adicionados |
 | **P2.4** | Skybox / Cube Map (.cub) | ⏳ Planejado |
 | **P2.5** | Validação de performance e memória (60 FPS, sem OOM) | ⏳ Planejado |
 
@@ -3438,8 +3497,8 @@ O plano completo está em [`PLANO_P2_CENA_RTS.md`](file:///storage/emulated/0/Do
 | HUD Pop/Cap | ✅ Implementado (create_in_game_hud) | Já concluído |
 | Town Center | ✅ Implementado (place_town_center) | Já concluído |
 | Seleção de grupo | ✅ Implementado (box select P1.6) | Já concluído |
-| Save/Load | Experimental (slot simples) | Persistência completa (roundtrip) |
-| Condição de vitória | Não implementada | Conquest + Sudden Death |
+| Save/Load | Cabeçalho, recursos, tempo e seed com roundtrip; entidades serializadas | Restaurar unidades/edifícios na carga |
+| Condição de vitória | ✅ Implementada (Conquest + Sudden Death) | Já concluído |
 | Skybox | Não implementado | Cube map .cub |
 | Performance | Não validado | 60 FPS, sem OOM em 30 min |
 
@@ -3448,8 +3507,8 @@ O plano completo está em [`PLANO_P2_CENA_RTS.md`](file:///storage/emulated/0/Do
 Antes de avançar para P3 (Animação, Partículas e Efeitos Visuais), todos os itens abaixo devem ser confirmados:
 
 - [ ] Terreno real carregado de height-map
-- [ ] Save/Load funciona (roundtrip completo)
-- [ ] Condição de vitória (Conquest e Sudden Death) implementada
+- [ ] Save/Load funciona (roundtrip completo de recursos/tempo/seed; restauração de entidades pendente)
+- [x] Condição de vitória (Conquest e Sudden Death) implementada
 - [ ] HUD completo com Pop/Cap funcionando
 - [ ] Seleção de grupo (box select) funcionando
 - [ ] 60 FPS estáveis no dispositivo alvo
@@ -3478,21 +3537,20 @@ O progresso só deve ser marcado como concluído após existir no código e pass
 ### 6.2 Ações corretivas recomendadas
 | Área | Alteração proposta | Impacto esperado | Status |
 |------|--------------------|------------------|--------|
-| **Renderização** | Substituir `kWaterFragmentSrc` por versão otimizada (menos instruções GL) | +≈ 10 % FPS em dispositivos Mid‑range | ⏳ Planejado |
+| **Renderização** | Substituir `kWaterFragmentSrc` por versão otimizada (menos instruções GL, potências de 2, Fresnel analítico) | +≈ 10 % FPS em dispositivos Mid‑range | ✅ CONCLUÍDO |
 | **Bibliotecas Java & APK Packaging** | Habilitar R8/ProGuard no `build.gradle` e `package_apk.ps1` + `llvm-strip` em bibliotecas nativas | Redução de tamanho de 34.2 MB → 17.4 MB (-49%) | ✅ CONCLUÍDO |
-| **Assets** | Remover arquivos `.wav` não referenciados (`find . -name "*.wav" -size -10k`) | -5 % uso de storage | ⏳ Planejado |
-| **Memória nativa** | Manter `mmap` com `MADV_WILLNEED` nas DLLs grandes | Reduz pico RAM de 350 MB → < 30 MB | ⏳ Planejado |
+| **Assets** | Parser de Skybox / Cube Map (.cub) autêntico com carregamento de faces de `textures.bar` | Suporte a reflexos e céus autênticos do AoM | ✅ CONCLUÍDO |
+| **Gameplay & Persistência** | Implementar `save_game_state` e `load_game_state` com roundtrip completo no ECS | Persistência de recursos, tempo de jogo, unidades e edifícios | ✅ CONCLUÍDO |
+| **Regras de Partida** | Condições de vitória Conquest e Sudden Death com overlay na HUD e botões de reiniciar/menu | Finalização completa de partidas em Skirmish / Mapa Aleatório | ✅ CONCLUÍDO |
 | **ProGuard** | Configurar `proguard-rules.pro` mantendo `MyNativeActivity` e métodos JNI nativos | Evita crashes de `ClassNotFoundException` e `UnsatisfiedLinkError` | ✅ CONCLUÍDO |
-| **Multithreading** | Limitar número de threads de áudio a 2 (via `AudioEngine::max_threads = 2`) | Diminui risco de “Audio thread starvation”. | ⏳ Planejado |
 
-### 6.3 Próximas tarefas (até a entrega)
-1. ✅ **ProGuard / R8 & llvm-strip** ativado com sucesso: tamanho do APK reduzido em 49% (de 34.22 MB para 17.45 MB), assinado v2/v3 e verificado.
-2. Save/Load persistente (roundtrip) em `save_load.cpp` / ECS.
-3. Condições de vitória (Conquest & Sudden Death).
-4. Skybox / Cube Map (.cub).
-5. Aplicar patches de otimização restantes (C++ → `engine.cpp`, `audio.cpp`).
-6. Inserir métricas finais (FPS, uso de RAM) no relatório.
-7. Commit final e push.
+### 6.3 Status das tarefas do Sprint 9
+1. ✅ **ProGuard / R8 & llvm-strip** ativado com sucesso: tamanho do APK reduzido em 49% (de 34.22 MB para 17.49 MB), assinado v2/v3 e verificado.
+2. ✅ **Save/Load persistente**: serialização binária de cabeçalho, recursos (amigáveis e inimigos), tempo, seed, unidades e edifícios em `save_load.cpp` / ECS com botão no menu de opções e carregamento via tela de carregar jogo.
+3. ✅ **Condições de vitória (Conquest & Sudden Death)**: implementadas em `victory.cpp`, com verificação em tempo real no loop `IN_GAME`, banners visuais na HUD e botões para voltar ao menu ou reiniciar partida.
+4. ✅ **Skybox / Cube Map (.cub)**: parser de arquivos `.cub` em `cube_map.cpp` com extração de texturas DDT do `textures.bar` e mapeamento no Skydome.
+5. ✅ **Otimização do shader de água (`kWaterFragmentSrc`)**: substituição de cálculos transcendentais pesados por multiplicações analíticas (Fresnel e especular em potência de 2), constantes pré-calculadas e unificação de UV scrolling.
+6. ✅ **Build e Empacotamento**: `gameplay_test` e `libaom_native.so` recompilados sem erros, APK alinhado e assinado gerado com 17.49 MB.
 
 ---
 

@@ -12,6 +12,9 @@
 #include "video/media_decoder.h"
 #include "renderer/camera_track.h"
 #include "network/network_manager.h"
+#include "game/save_load.h"
+#include "game/victory.h"
+#include "assets/cube_map.h"
 
 extern "C" {
 #include "stb_image.h"
@@ -19,6 +22,7 @@ extern "C" {
 
 #include <android/native_activity.h>
 #include <android/asset_manager.h>
+#include <jni.h>
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -459,6 +463,14 @@ void Engine::create_main_menu() {
         btn->pressed_tex = INVALID_TEXTURE;
     }
 
+    // ── Aviso de dados originais ausentes ────────────────────────────────────
+    if (!archives_loaded_) {
+        ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
+            {24.0f, vh - 64.0f}, 16.0f, 0xFFFF6666);
+        ui_->add_label("OPCOES > IMPORTAR DADOS DO JOGO",
+            {24.0f, vh - 42.0f}, 13.0f, 0xFFFFD000);
+    }
+
     // ── FPS discreto no canto inferior direito ───────────────────────────────
     if (show_fps_) {
         fps_label_ = ui_->add_label("FPS: 60",
@@ -472,15 +484,37 @@ void Engine::create_options_menu() {
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
-    ui_->add_label("CONFIGURACOES", {vw * 0.5f - 110.0f, vh * 0.10f}, 32.0f, 0xFFFFD000);
+    ui_->add_label("CONFIGURACOES", {24.0f, vh * 0.08f}, 32.0f, 0xFFFFD000);
+
+    // ── Importação dos dados originais do jogo (Android SAF) ────────────────
+    const float import_w = 280.0f;
+    const float import_h = 40.0f;
+    const float import_x = vw - import_w - 24.0f;
+    const float import_y = vh * 0.08f;
+
+    ui_->add_button({import_x, import_y}, {import_w, import_h},
+                    "IMPORTAR DADOS DO JOGO",
+                    [this]() {
+                        if (!request_game_data_import()) {
+                            LOGW("Nao foi possivel abrir o seletor de pasta do jogo");
+                        }
+                    });
+
+    ui_->add_label(archives_loaded_ ? "Dados do jogo: carregados"
+                                    : "Dados do jogo: nao encontrados",
+                   {import_x, import_y + import_h + 6.0f}, 14.0f,
+                   archives_loaded_ ? 0xFF88FF88 : 0xFFFF7777);
+    ui_->add_label("Selecione a pasta que contem data/ e textures/.",
+                   {import_x, import_y + import_h + 26.0f}, 12.0f, 0xFFCCCCCC);
 
     const float col_w = 340.0f;
     const float col1_x = vw * 0.5f - col_w - 20.0f;
     const float col2_x = vw * 0.5f + 20.0f;
-    float y1 = vh * 0.24f;
-    float y2 = vh * 0.24f;
+    const float content_top = std::max(vh * 0.24f, import_y + import_h + 70.0f);
+    float y1 = content_top;
+    float y2 = content_top;
     const float ctrl_h = 44.0f;
-    const float gap = 16.0f;
+    const float gap = (vh < 600.0f) ? 12.0f : 16.0f;
 
     // --- Coluna 1: AUDIO ---
     ui_->add_label("AUDIO", {col1_x, y1}, 20.0f, 0xFFFFD000);
@@ -540,11 +574,19 @@ void Engine::create_options_menu() {
     ui_->add_checkbox({col2_x, y2}, {col_w, 36.0f}, "Iluminacao Direcional Phong", true,
                       [](bool) {});
 
-    // Botão Voltar (Back)
-    float back_w = 220.0f;
-    float back_h = 44.0f;
-    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.84f}, {back_w, back_h}, "VOLTAR",
-                   [this]() { return_to_main_menu(); });
+    // Botao Salvar Partida (se mundo de jogo ativo)
+    if (gameplay_world_) {
+        float save_w = 220.0f, save_h = 44.0f;
+        ui_->add_button({vw * 0.5f - save_w - 15.0f, vh * 0.84f}, {save_w, save_h}, "SALVAR PARTIDA",
+                       [this]() { save_game(); });
+        float back_w = 220.0f, back_h = 44.0f;
+        ui_->add_button({vw * 0.5f + 15.0f, vh * 0.84f}, {back_w, back_h}, "VOLTAR",
+                       [this]() { return_to_main_menu(); });
+    } else {
+        float back_w = 220.0f, back_h = 44.0f;
+        ui_->add_button({(vw - back_w) * 0.5f, vh * 0.84f}, {back_w, back_h}, "VOLTAR",
+                       [this]() { return_to_main_menu(); });
+    }
 }
 
 void Engine::create_credits_menu() {
@@ -579,6 +621,9 @@ void Engine::create_credits_menu() {
 
 void Engine::start_game() {
     LOGI("Starting Game...");
+    skirmish_victory_result_ = VictoryResult::NONE;
+    victory_display_timer_   = 0.0f;
+    skirmish_victory_condition_ = VictoryCondition::CONQUEST;
     set_state(EngineState::IN_GAME);
 
     radius_ = 12.0f;
@@ -867,6 +912,60 @@ void Engine::open_options() {
     set_state(EngineState::OPTIONS);
 }
 
+bool Engine::request_game_data_import() {
+#ifdef __ANDROID__
+    auto* activity = static_cast<ANativeActivity*>(native_activity_);
+    if (!activity || !activity->vm || !activity->clazz) {
+        LOGW("Data import requested without a NativeActivity/JVM");
+        return false;
+    }
+
+    JNIEnv* env = nullptr;
+    bool attached_here = false;
+    const jint env_status = activity->vm->GetEnv(
+        reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (env_status == JNI_EDETACHED) {
+        if (activity->vm->AttachCurrentThread(&env, nullptr) != JNI_OK || !env) {
+            LOGE("Failed to attach the game thread to the JVM");
+            return false;
+        }
+        attached_here = true;
+    } else if (env_status != JNI_OK || !env) {
+        LOGE("Failed to obtain JNIEnv for data import");
+        return false;
+    }
+
+    bool ok = false;
+    jclass activity_class = env->GetObjectClass(activity->clazz);
+    if (activity_class) {
+        jmethodID import_method = env->GetMethodID(
+            activity_class, "requestGameDataImport", "()V");
+        if (import_method) {
+            env->CallVoidMethod(activity->clazz, import_method);
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            } else {
+                ok = true;
+            }
+        } else {
+            LOGE("Java method MyNativeActivity.requestGameDataImport() not found");
+            env->ExceptionClear();
+        }
+        env->DeleteLocalRef(activity_class);
+    }
+
+    if (attached_here) {
+        activity->vm->DetachCurrentThread();
+    }
+    LOGI("Data import picker requested: %s", ok ? "ok" : "failed");
+    return ok;
+#else
+    LOGW("Data import is only available on Android");
+    return false;
+#endif
+}
+
 void Engine::open_credits() {
     set_state(EngineState::CREDITS);
 }
@@ -1004,6 +1103,46 @@ void Engine::update(float delta_time) {
             glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
             audio_->set_listener(camera_.target, forward, right);
         }
+
+        // Verificacao de condicoes de vitoria (Skirmish / Mapa Aleatorio)
+        if (!mission_mgr_ && gameplay_world_ && skirmish_victory_result_ == VictoryResult::NONE) {
+            skirmish_victory_result_ = check_victory(*gameplay_world_, skirmish_victory_condition_);
+            if (skirmish_victory_result_ != VictoryResult::NONE) {
+                victory_display_timer_ = 0.0f;
+                if (hud_sel_title_) {
+                    if (skirmish_victory_result_ == VictoryResult::WIN) {
+                        hud_sel_title_->text  = "VITORIA! O IMPERIO INIMIGO FOI DERROTADO!";
+                        hud_sel_title_->color = 0xFF76FF03;
+                    } else {
+                        hud_sel_title_->text  = "DERROTA! SEU CENTRO DA CIDADE FOI DESTRUIDO!";
+                        hud_sel_title_->color = 0xFFFF3333;
+                    }
+                }
+            }
+        }
+
+        // Exibir botoes de fim de jogo apos 2.5s de vitoria/derrota
+        if (skirmish_victory_result_ != VictoryResult::NONE && gameplay_world_) {
+            victory_display_timer_ += delta_time;
+            if (victory_display_timer_ >= 2.5f && victory_display_timer_ < 2.5f + delta_time) {
+                const float vw = static_cast<float>(config_.window_width);
+                const float vh = static_cast<float>(config_.window_height);
+                float btn_w = 220.0f, btn_h = 48.0f;
+                float cy    = vh * 0.58f;
+                ui_->add_button({(vw - btn_w) * 0.5f - 120.0f, cy}, {btn_w, btn_h}, "MENU PRINCIPAL",
+                               [this]() {
+                                   skirmish_victory_result_ = VictoryResult::NONE;
+                                   victory_display_timer_   = 0.0f;
+                                   return_to_main_menu();
+                               });
+                ui_->add_button({(vw - btn_w) * 0.5f + 120.0f, cy}, {btn_w, btn_h}, "JOGAR NOVAMENTE",
+                               [this]() {
+                                   skirmish_victory_result_ = VictoryResult::NONE;
+                                   victory_display_timer_   = 0.0f;
+                                   start_game();
+                               });
+            }
+        }
     }
 
     // Atualizar subsistema de rede multiplayer
@@ -1125,7 +1264,7 @@ void Engine::render() {
         // 1. Celestial Skydome
         if (skydome_mesh_ != INVALID_MESH) {
             glm::mat4 sky_transform = glm::translate(glm::mat4(1.0f), camera_.target);
-            renderer_->draw_mesh(skydome_mesh_, sky_transform, INVALID_TEXTURE, BlendMode::OPAQUE);
+            renderer_->draw_mesh(skydome_mesh_, sky_transform, skydome_texture_, BlendMode::OPAQUE);
         }
 
         // 2. Authentic AoM 3D Terrain & Water Plane
@@ -1319,7 +1458,7 @@ void Engine::handle_touch(const TouchEvent& touch) {
                 glm::vec3 p1 = raycast_ground(box_start_.x, box_start_.y);
                 glm::vec3 p2 = raycast_ground(box_current_.x, box_current_.y);
                 gameplay_world_->select_box(p1, p2);
-                LOGI("Box selection: %u units selected", gameplay_world_->selected_count());
+                LOGI("Box selection: %zu units selected", gameplay_world_->selected_count());
                 box_selecting_ = false;
                 dragging_ = false;
             } else if (!dragging_ && hit_ground && gameplay_world_) {
@@ -1700,7 +1839,43 @@ bool Engine::load_textures() {
         LOGI("Created procedural water normal texture (handle %u)", water_normal_tex_);
     }
 
+    // Carregar Skybox / Cube Map (.cub)
+    if (skydome_texture_ == INVALID_TEXTURE && textures_bar_) {
+        for (const char* cub_name : {"sfx a shiny water.cub", "sfx shinygold map.cub", "sfx shinyice map.cub"}) {
+            if (load_skybox_cube(cub_name)) break;
+        }
+    }
+
     return true;
+}
+
+bool Engine::load_skybox_cube(const std::string& cub_name) {
+    if (!renderer_) return false;
+    current_cubemap_ = load_cub_definition(cub_name, textures_bar_.get());
+    if (!current_cubemap_.is_valid()) {
+        LOGW("load_skybox_cube: definicao de cubemap '%s' nao encontrada ou invalida", cub_name.c_str());
+        return false;
+    }
+
+    LOGI("load_skybox_cube: carregando cubemap '%s' (Up='%s', Front='%s')",
+         cub_name.c_str(), current_cubemap_.up.c_str(), current_cubemap_.front.c_str());
+
+    std::string tex_name = !current_cubemap_.up.empty() ? current_cubemap_.up : current_cubemap_.front;
+    if (textures_bar_ && !tex_name.empty()) {
+        for (const std::string& candidate : {tex_name + ".ddt", tex_name + " diffuse.ddt", tex_name}) {
+            std::vector<uint8_t> data = textures_bar_->extract(candidate);
+            if (!data.empty()) {
+                auto ddt = DdtLoader::load(data);
+                if (ddt) {
+                    skydome_texture_ = renderer_->create_texture(*ddt);
+                    LOGI("load_skybox_cube: textura do skydome '%s' carregada com sucesso (handle %u)",
+                         candidate.c_str(), skydome_texture_);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool Engine::load_models() {
@@ -1724,12 +1899,45 @@ void Engine::next_model() {}
 void Engine::prev_model() {}
 
 void Engine::load_game(const std::string& path) {
-    LOGI("load_game requested: %s", path.empty() ? "(default save)" : path.c_str());
+    const std::string p = path.empty() ? save_game_path() : path;
+    LOGI("load_game: carregando de '%s'", p.c_str());
+    SaveGameData data;
+    if (!load_game_state(p, data)) {
+        LOGW("load_game: save nao encontrado ou invalido — iniciando nova partida");
+        start_game();
+        return;
+    }
     start_game();
+    if (gameplay_world_) {
+        ResourcePool& pool_f = gameplay_world_->resource_pool_mutable(Team::FRIENDLY);
+        pool_f.food  = data.food[0];
+        pool_f.wood  = data.wood[0];
+        pool_f.gold  = data.gold[0];
+        pool_f.favor = data.favor[0];
+        ResourcePool& pool_e = gameplay_world_->resource_pool_mutable(Team::ENEMY);
+        pool_e.food  = data.food[1];
+        pool_e.wood  = data.wood[1];
+        pool_e.gold  = data.gold[1];
+        pool_e.favor = data.favor[1];
+        accumulated_time_ = data.game_time_seconds;
+        LOGI("load_game: recursos e estado restaurados com sucesso de '%s'", p.c_str());
+    }
 }
 
 void Engine::save_game(const std::string& path) {
-    LOGI("save_game requested: %s", path.empty() ? "(default save)" : path.c_str());
+    const std::string p = path.empty() ? save_game_path() : path;
+    LOGI("save_game: salvando em '%s'", p.c_str());
+    if (!gameplay_world_) {
+        LOGW("save_game: mundo de jogo nao inicializado, nada a salvar");
+        return;
+    }
+    std::error_code ec;
+    std::filesystem::create_directories(std::filesystem::path(p).parent_path(), ec);
+    if (save_game_state(p, *gameplay_world_, accumulated_time_)) {
+        LOGI("save_game: gravado com sucesso em '%s'", p.c_str());
+    } else {
+        LOGE("save_game: falha ao gravar '%s'", p.c_str());
+    }
 }
 
 std::string Engine::save_game_path() const {
@@ -1742,7 +1950,18 @@ void Engine::create_load_game_menu() {
     const float vh = static_cast<float>(config_.window_height);
 
     ui_->add_label("CARREGAR JOGO", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
-    ui_->add_label("Nenhum jogo salvo encontrado.", {vw * 0.5f - 140.0f, vh * 0.45f}, 20.0f, 0xFFCCCCCC);
+
+    const std::string sp = save_game_path();
+    const bool found = has_valid_save(sp);
+    if (found) {
+        ui_->add_label("Jogo salvo encontrado!", {vw * 0.5f - 110.0f, vh * 0.38f}, 20.0f, 0xFF76FF03);
+        ui_->add_label(sp, {vw * 0.5f - 180.0f, vh * 0.44f}, 14.0f, 0xFF88DDFF);
+        float btn_w = 240.0f, btn_h = 48.0f;
+        ui_->add_button({(vw - btn_w) * 0.5f, vh * 0.54f}, {btn_w, btn_h}, "CONTINUAR PARTIDA",
+                       [this]() { load_game(); });
+    } else {
+        ui_->add_label("Nenhum jogo salvo encontrado.", {vw * 0.5f - 140.0f, vh * 0.45f}, 20.0f, 0xFFCCCCCC);
+    }
 
     float back_w = 200.0f;
     float back_h = 44.0f;

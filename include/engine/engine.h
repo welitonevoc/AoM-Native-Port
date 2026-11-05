@@ -20,6 +20,9 @@
 #include "video/media_decoder.h"
 #include "campaign/campaign.h"
 #include "campaign/campaign_mission.h"
+#include "game/save_load.h"
+#include "game/victory.h"
+#include "assets/cube_map.h"
 
 namespace aom {
 
@@ -119,6 +122,9 @@ public:
 
     [[nodiscard]] EngineState state() const { return state_; }
     void set_callbacks(const EngineCallbacks& callbacks) { callbacks_ = callbacks; }
+
+    /// Abre, no Android, o seletor de pasta (SAF) para importar os dados do jogo.
+    bool request_game_data_import();
 
     [[nodiscard]] IRenderer* renderer() { return renderer_.get(); }
     [[nodiscard]] UIManager* ui() { return ui_.get(); }
@@ -242,6 +248,9 @@ private:
     TextureHandle hoplite_texture_ = INVALID_TEXTURE;
 
     MeshHandle skydome_mesh_ = INVALID_MESH;
+    TextureHandle skydome_texture_ = INVALID_TEXTURE;
+    CubeMapDef current_cubemap_;
+    bool load_skybox_cube(const std::string& cub_name);
     MeshHandle terrain_mesh_ = INVALID_MESH;
     void generate_skydome();
     void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
@@ -363,6 +372,11 @@ private:
     UILabel* hud_subtitle_text_ = nullptr;
     UILabel* hud_reinforce_label_ = nullptr;
     UIButton* hud_skip_btn_ = nullptr;
+
+    // Condicoes de vitoria em Skirmish / Mapa Aleatorio
+    VictoryCondition skirmish_victory_condition_ = VictoryCondition::CONQUEST;
+    VictoryResult    skirmish_victory_result_    = VictoryResult::NONE;
+    float            victory_display_timer_      = 0.0f;
 };
 
 } // namespace aom

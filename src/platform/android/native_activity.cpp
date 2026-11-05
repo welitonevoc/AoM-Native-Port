@@ -26,6 +26,7 @@
 
 #define LOG_TAG "AoM-Native"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 namespace {
@@ -57,6 +58,48 @@ double get_time() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec * 1e-9;
+}
+
+/// Verifica se uma pasta contém os arquivos que a engine usa como ponto de
+/// partida. Aceita tanto a estrutura com subpastas (data/data.bar) quanto a
+/// estrutura plana (data.bar), usada por instalações antigas.
+bool contains_game_data(const std::filesystem::path& dir) {
+    std::error_code ec;
+    return std::filesystem::is_regular_file(dir / "data" / "data.bar", ec) ||
+           std::filesystem::is_regular_file(dir / "textures" / "textures.bar", ec) ||
+           std::filesystem::is_regular_file(dir / "data.bar", ec) ||
+           std::filesystem::is_regular_file(dir / "textures.bar", ec) ||
+           std::filesystem::is_regular_file(dir / "models" / "models.bar", ec);
+}
+
+/// Resolve a pasta real dos dados. Além da própria pasta candidata, aceita um
+/// único nível de contêiner (por exemplo Download/AoM/Age of Mythology/...),
+/// que é o resultado comum de copiar a pasta inteira do jogo manualmente.
+std::string resolve_game_data_root(const std::string& candidate) {
+    namespace fs = std::filesystem;
+    const fs::path root(candidate);
+    std::error_code ec;
+
+    if (contains_game_data(root)) return root.string();
+    if (!fs::is_directory(root, ec)) return {};
+
+    // Nomes de contêiner mais comuns primeiro (ordem determinística).
+    for (const char* nested_name : {"Age of Mythology", "AoM"}) {
+        const fs::path nested = root / nested_name;
+        if (contains_game_data(nested)) return nested.string();
+    }
+
+    // Qualquer subpasta de primeiro nível que contenha a estrutura esperada.
+    fs::directory_iterator it(root, ec);
+    const fs::directory_iterator end;
+    while (!ec && it != end) {
+        std::error_code entry_ec;
+        if (it->is_directory(entry_ec) && contains_game_data(it->path())) {
+            return it->path().string();
+        }
+        it.increment(ec);
+    }
+    return {};
 }
 
 void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* state) {
@@ -337,41 +380,51 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
     auto* state = new AppState();
     state->activity = activity;
 
-    // Candidate data directories for authentic AoM assets
+    // Pastas candidatas, em ordem de prioridade. A pasta privada do app vem
+    // primeiro porque é gravável sem MANAGE_EXTERNAL_STORAGE e é o destino do
+    // importador interno (OPCOES > IMPORTAR DADOS DO JOGO).
     std::vector<std::string> candidates;
-    candidates.emplace_back("/storage/emulated/0/Documents/AoM");
-    candidates.emplace_back("/sdcard/Documents/AoM");
-    candidates.emplace_back("/storage/emulated/0/AoM");
-    candidates.emplace_back("/sdcard/AoM");
+    std::string fallback_path;
     if (activity->externalDataPath) {
-        candidates.emplace_back(std::string(activity->externalDataPath) + "/AoM");
-        candidates.emplace_back(std::string(activity->externalDataPath));
+        const std::string external = activity->externalDataPath;
+        fallback_path = external + "/AoM";
+        candidates.push_back(fallback_path);
+        candidates.push_back(external);
     }
     if (activity->internalDataPath) {
-        candidates.emplace_back(std::string(activity->internalDataPath) + "/AoM");
-        candidates.emplace_back(std::string(activity->internalDataPath));
+        const std::string internal = activity->internalDataPath;
+        candidates.push_back(internal + "/AoM");
+        candidates.push_back(internal);
     }
+    candidates.emplace_back("/storage/emulated/0/Documents/AoM");
+    candidates.emplace_back("/sdcard/Documents/AoM");
+    candidates.emplace_back("/storage/emulated/0/Download/AoM");
+    candidates.emplace_back("/sdcard/Download/AoM");
+    candidates.emplace_back("/storage/emulated/0/AoM");
+    candidates.emplace_back("/sdcard/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM-Native-Port/data");
     candidates.emplace_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology");
     candidates.emplace_back("/sdcard/Download/Games/PC/Age of Mythology/Age of Mythology");
     candidates.emplace_back("/storage/emulated/0/Download/Age of Mythology");
     candidates.emplace_back("/sdcard/Download/Age of Mythology");
-    candidates.emplace_back("/storage/emulated/0/Download/AoM");
-    candidates.emplace_back("/sdcard/Download/AoM");
 
     for (const std::string& candidate : candidates) {
-        std::error_code ec;
-        if (std::filesystem::exists(std::filesystem::path(candidate) / "textures" / "textures.bar", ec) ||
-            std::filesystem::exists(std::filesystem::path(candidate) / "textures.bar", ec) ||
-            std::filesystem::exists(std::filesystem::path(candidate) / "data" / "data.bar", ec)) {
-            state->data_path = candidate;
-            LOGI("Discovered AoM data at: %s", candidate.c_str());
+        const std::string resolved = resolve_game_data_root(candidate);
+        if (!resolved.empty()) {
+            state->data_path = resolved;
+            LOGI("Discovered AoM data at: %s", resolved.c_str());
             break;
         }
+        LOGI("AoM data not found at: %s", candidate.c_str());
     }
     if (state->data_path.empty()) {
-        state->data_path = candidates.back();
-        LOGI("No explicit BAR archive directory found. Fallback path set to: %s", state->data_path.c_str());
+        state->data_path = fallback_path.empty()
+            ? "/sdcard/Download/AoM"
+            : fallback_path;
+        std::error_code ec;
+        std::filesystem::create_directories(state->data_path, ec);
+        LOGW("No AoM .bar archives found. Fallback directory: %s", state->data_path.c_str());
+        LOGW("Use OPCOES > IMPORTAR DADOS DO JOGO or copy data/data.bar + textures/textures.bar there.");
     }
     activity->instance = state;
 
