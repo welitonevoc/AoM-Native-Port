@@ -1,6 +1,7 @@
 #include "game/save_load.h"
 #include <fstream>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #ifdef __ANDROID__
@@ -13,6 +14,17 @@
 #endif
 
 namespace aom {
+
+namespace {
+
+/// Converte um buffer de tamanho fixo (com possivel falta de '\0') em string.
+std::string fixed_string(const char* data, size_t max_len) {
+    size_t len = 0;
+    while (len < max_len && data[len] != '\0') ++len;
+    return std::string(data, len);
+}
+
+} // anonymous namespace
 
 #pragma pack(push, 1)
 struct SaveUnit {
@@ -176,8 +188,70 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
     out.gold[0]  = hdr.gold[0];   out.gold[1]  = hdr.gold[1];
     out.favor[0] = hdr.favor[0];  out.favor[1] = hdr.favor[1];
 
-    LOGI("load_game_state: '%s' carregado — tempo=%.1fs unidades=%u edificios=%u",
-         path.c_str(), hdr.game_time, hdr.unit_count, hdr.building_count);
+    // ── Seções de entidades ────────────────────────────────────────────────
+    // As seções ja eram gravadas desde a versao 1 do formato; aqui elas sao
+    // lidas de volta para permitir reconstruir o mundo ao carregar a partida.
+    // Um limite de sanidade evita alocacoes enormes em arquivos corrompidos.
+    constexpr uint32_t kMaxEntities = 100000;
+    if (hdr.unit_count > kMaxEntities || hdr.building_count > kMaxEntities) {
+        LOGE("load_game_state: contagem de entidades invalida (u=%u b=%u)", hdr.unit_count, hdr.building_count);
+        return false;
+    }
+
+    out.units.clear();
+    out.buildings.clear();
+
+    if (hdr.unit_count > 0) {
+        std::vector<SaveUnit> raw(hdr.unit_count);
+        in.read(reinterpret_cast<char*>(raw.data()), raw.size() * sizeof(SaveUnit));
+        if (!in) {
+            LOGE("load_game_state: falha ao ler a secao de unidades");
+            return false;
+        }
+        out.units.reserve(raw.size());
+        for (const SaveUnit& su : raw) {
+            SavedUnit u;
+            u.entity     = su.entity;
+            u.pos_x      = su.pos_x;
+            u.pos_y      = su.pos_y;
+            u.pos_z      = su.pos_z;
+            u.current_hp = su.current_hp;
+            u.max_hp     = su.max_hp;
+            u.team       = su.team;
+            u.worker     = su.worker != 0;
+            u.pop_cost   = su.pop_cost;
+            u.unit_type = fixed_string(su.unit_type, sizeof(su.unit_type));
+            out.units.push_back(std::move(u));
+        }
+    }
+
+    if (hdr.building_count > 0) {
+        std::vector<SaveBuilding> raw(hdr.building_count);
+        in.read(reinterpret_cast<char*>(raw.data()), raw.size() * sizeof(SaveBuilding));
+        if (!in) {
+            LOGE("load_game_state: falha ao ler a secao de edificios");
+            return false;
+        }
+        out.buildings.reserve(raw.size());
+        for (const SaveBuilding& sb : raw) {
+            SavedBuilding b;
+            b.entity       = sb.entity;
+            b.pos_x        = sb.pos_x;
+            b.pos_y        = sb.pos_y;
+            b.pos_z        = sb.pos_z;
+            b.current_hp   = sb.current_hp;
+            b.max_hp       = sb.max_hp;
+            b.team         = sb.team;
+            b.building_type = sb.btype;
+            b.complete     = sb.complete != 0;
+            b.progress     = sb.progress;
+            b.name = fixed_string(sb.name, sizeof(sb.name));
+            out.buildings.push_back(std::move(b));
+        }
+    }
+
+    LOGI("load_game_state: '%s' carregado — tempo=%.1fs unidades=%zu edificios=%zu",
+         path.c_str(), hdr.game_time, out.units.size(), out.buildings.size());
     return true;
 }
 

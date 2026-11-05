@@ -109,9 +109,24 @@ public:
 
     void start_game();
     void start_campaign_mission(size_t scenario_idx = 1);
+
+    /// Carrega (de forma limitada) os clips de animacao BRG de `models.bar`.
+    ///
+    /// O archive contem milhares de `.brg`; extrair e interpretar todos levava
+    /// mais de 5 segundos na thread da UI e provocava ANR ao iniciar uma
+    /// missao. O limite mantem o custo por partida na casa das dezenas de
+    /// milissegundos, e o resultado e reaproveitado nas partidas seguintes.
+    bool load_animation_clips(size_t max_clips = 8);
+
+    /// Escolhe um clip ja carregado e resolve a textura correspondente.
+    bool select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
+                               TextureHandle& texture) const;
     void create_campaign_menu();
     void save_game(const std::string& path = "");
     void load_game(const std::string& path = "");
+
+    /// Reconstroi as entidades (unidades e edificios) gravadas no save.
+    void restore_saved_entities(const SaveGameData& data);
     void open_options();
     void open_credits();
     void open_multiplayer();
@@ -278,6 +293,8 @@ private:
     std::unique_ptr<GameplayWorld> gameplay_world_;
     std::unique_ptr<ai::AiSystem> ai_system_;
     std::unique_ptr<aom::anim::AnimationSystem> anim_system_;
+    std::vector<std::string> anim_clip_names_; ///< Nomes dos .brg já interpretados
+    bool anim_clips_ready_ = false;            ///< Clips já carregados (reaproveitados)
     std::unique_ptr<aom::video::VideoPlayer> video_player_;
     std::unique_ptr<aom::video::MediaDecoder> media_decoder_;
 

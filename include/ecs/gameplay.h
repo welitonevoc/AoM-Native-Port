@@ -978,6 +978,17 @@ public:
         resources_nodes_.clear();
     }
 
+    /// Remove todas as unidades e edificios, preservando os nos de recursos
+    /// e a grade de navegacao. Usado pelo save/load para reconstruir o mundo
+    /// a partir das entidades gravadas no arquivo.
+    void clear_units_and_buildings() {
+        std::vector<Entity> ids;
+        ids.reserve(units_.size() + building_components_.size());
+        for (const auto& [id, unit] : units_) ids.push_back(id);
+        for (const auto& [id, bld] : building_components_) ids.push_back(id);
+        for (Entity id : ids) remove_entity(id);
+    }
+
     void update(float dt) {
         update_orders();
         movement_.update(dt);
@@ -1179,6 +1190,18 @@ public:
     const std::unordered_map<Entity, TransformComponent>& transforms() const { return ecs_world_.transforms(); }
     const std::unordered_map<Entity, UnitComponent>& units() const { return units_; }
     std::unordered_map<Entity, UnitComponent>& units() { return units_; }
+
+    /// Acesso mutável ao componente de unidade (usado pelo save/load).
+    UnitComponent* unit_component_mutable(Entity id) {
+        auto it = units_.find(id);
+        return (it != units_.end()) ? &it->second : nullptr;
+    }
+
+    /// Acesso mutável ao componente de edificio (usado pelo save/load).
+    BuildingComponent* building_component_mutable(Entity id) {
+        auto it = building_components_.find(id);
+        return (it != building_components_.end()) ? &it->second : nullptr;
+    }
     const FogOfWar& fog_of_war() const { return fog_of_war_; }
     std::vector<Entity> select_box(const glm::vec3& min_point, const glm::vec3& max_point) {
         std::vector<Entity> result;

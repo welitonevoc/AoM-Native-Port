@@ -481,6 +481,11 @@ public:
         return active_voices_.size();
     }
 
+    size_t dispatched_voice_count() const override {
+        std::lock_guard<std::mutex> lock(audio_mutex_);
+        return dispatched_voices_;
+    }
+
     // Public method for automated testing & software mixer step
     void mix_audio_frames(int16_t* out_stereo, size_t num_frames) {
         if (!out_stereo || num_frames == 0) return;
@@ -648,6 +653,7 @@ private:
         v.max_dist = max_d;
 
         active_voices_.push_back(v);
+        ++dispatched_voices_;
     }
 
     const WavData* get_or_load_wav(const std::string& path) {
@@ -872,6 +878,7 @@ private:
     // Thread-safe voice collection
     mutable std::mutex audio_mutex_;
     std::vector<Voice> active_voices_;
+    size_t dispatched_voices_ = 0;  ///< Contador cumulativo de sons disparados
     std::unordered_map<std::string, WavData> wav_cache_;
 
     WavData click_pcm_;

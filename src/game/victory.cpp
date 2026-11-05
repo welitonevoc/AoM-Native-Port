@@ -26,13 +26,17 @@ VictoryResult check_victory(const GameplayWorld& world, VictoryCondition conditi
 
     switch (condition) {
         case VictoryCondition::CONQUEST:
-            if (enemy_tc == 0) {
-                LOGI("check_victory: VITORIA por CONQUISTA (inimigo sem TC)\n");
-                return VictoryResult::WIN;
-            }
+            // A derrota e avaliada ANTES da vitoria: se os dois Town Centers
+            // caíram (ou apenas o do jogador), o resultado correto e LOSE.
+            // Caso contrario, o `WIN` era devolvido mesmo com o TC proprio
+            // destruido, invertendo o desfecho da partida.
             if (friendly_tc == 0) {
                 LOGI("check_victory: DERROTA por CONQUISTA (jogador sem TC)\n");
                 return VictoryResult::LOSE;
+            }
+            if (enemy_tc == 0) {
+                LOGI("check_victory: VITORIA por CONQUISTA (inimigo sem TC)\n");
+                return VictoryResult::WIN;
             }
             break;
 

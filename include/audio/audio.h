@@ -55,6 +55,14 @@ public:
 
     virtual void set_sound_archive(BarArchive* archive) = 0;
     virtual size_t active_voice_count() const = 0;
+
+    /// Total de vozes ja despachadas desde o inicio do motor (cumulativo).
+    ///
+    /// `active_voice_count()` mede as vozes *em reproducao* e por isso cai
+    /// quando um WAV termina — em hardware mais lento a contagem varia entre
+    /// leituras e deixa as verificacoes acumulativas flaky. Este contador
+    /// nunca diminui e mede exatamente "quantos sons foram disparados".
+    virtual size_t dispatched_voice_count() const = 0;
 };
 
 std::unique_ptr<AudioEngine> create_audio_engine();

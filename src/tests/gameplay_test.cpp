@@ -157,6 +157,48 @@ int main() {
         ok &= check(loaded.game_time_seconds == 123.5f, "Save game time persists accurately");
         ok &= check(loaded.map_seed == 9999, "Save map seed persists accurately");
         ok &= check(aom::has_valid_save(save_path), "has_valid_save returns true for created save");
+
+        // ── Sprint 12: reconstrução das entidades (unidades e edificios) ─────
+        ok &= check(loaded.units.size() == world.units().size(),
+                    "Save roundtrip restores the exact unit count");
+        ok &= check(loaded.buildings.size() == world.buildings().size(),
+                    "Save roundtrip restores the exact building count");
+
+        // Amostra a primeira unidade: posicao, HP, time e tipo precisam bater.
+        bool unit_found = false;
+        for (const auto& su : loaded.units) {
+            const auto* orig = world.get_unit(static_cast<aom::Entity>(su.entity));
+            if (!orig) continue;
+            unit_found = true;
+            const auto* tr = world.get_transform(static_cast<aom::Entity>(su.entity));
+            ok &= check(su.unit_type == orig->unit_type_name,
+                        "Restored unit keeps its type name");
+            ok &= check(su.team == (orig->team == aom::Team::FRIENDLY ? 0 : 1),
+                        "Restored unit keeps its team");
+            ok &= check(su.worker == orig->worker,
+                        "Restored unit keeps the worker flag");
+            ok &= check(tr && std::abs(su.pos_x - tr->position.x) < 0.01f &&
+                        std::abs(su.pos_z - tr->position.z) < 0.01f,
+                        "Restored unit keeps its position");
+            break;
+        }
+        ok &= check(unit_found, "At least one unit was serialized with its entity id");
+
+        // Amostra o primeiro edificio: tipo, conclusao e progresso.
+        bool building_found = false;
+        for (const auto& sb : loaded.buildings) {
+            const auto* orig = world.get_building(static_cast<aom::Entity>(sb.entity));
+            if (!orig) continue;
+            building_found = true;
+            ok &= check(static_cast<int>(sb.building_type) == static_cast<int>(orig->type),
+                        "Restored building keeps its type");
+            ok &= check(sb.complete == orig->complete,
+                        "Restored building keeps the completion flag");
+            ok &= check(sb.name == orig->name,
+                        "Restored building keeps its name");
+            break;
+        }
+        ok &= check(building_found, "At least one building was serialized with its entity id");
     }
 
     // ── Sprint 9: Victory Conditions (Conquest & Sudden Death) ─────────────

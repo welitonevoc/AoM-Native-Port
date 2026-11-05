@@ -25,6 +25,7 @@ extern "C" {
 #include <jni.h>
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <filesystem>
 #include <iostream>
 #include <fstream>
@@ -619,7 +620,114 @@ void Engine::create_credits_menu() {
                    [this]() { return_to_main_menu(); });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Clips de animação BRG
+//
+// `models.bar` (jogo base + expansão The Titans) contém milhares de arquivos
+// `.brg`. Extrair e interpretar TODOS eles dentro de `start_game()` e
+// `start_campaign_mission()` bloqueava a thread da UI do NativeActivity por
+// mais de 5 segundos — o Android encerrava o app com ANR ("Input dispatching
+// timed out") ao iniciar uma missão.
+//
+// Aqui a carga é limitada (`max_clips`) e o resultado fica em cache, de modo
+// que as partidas seguintes reaproveitam os clips já interpretados.
+// ─────────────────────────────────────────────────────────────────────────────
+bool Engine::load_animation_clips(size_t max_clips) {
+    if (anim_clips_ready_ && anim_system_ && anim_system_->clip_count() > 0) {
+        return true;  // já carregados em uma partida anterior
+    }
+
+    if (!anim_system_) {
+        anim_system_ = std::make_unique<aom::anim::AnimationSystem>();
+    }
+    if (!models_bar_ || models_bar_->file_count() == 0) return false;
+
+    const auto t0 = std::chrono::steady_clock::now();
+
+    // Os nomes das entradas são baratos; só a extração dos dados é cara.
+    // Prioriza os clips das unidades jogáveis e completa com os demais.
+    static const char* kPreferred[] = {"hoplite", "villager", "toxotes", "minotaur",
+                                        "archer",   "cavalry",  "infantry", "soldier"};
+
+    std::vector<std::string> preferred;
+    std::vector<std::string> fallback;
+    for (const BarEntry& entry : models_bar_->entries()) {
+        const std::string low = to_lower(entry.filename);
+        if (!ends_with(low, ".brg")) continue;
+        bool is_preferred = false;
+        for (const char* pref : kPreferred) {
+            if (low.find(pref) != std::string::npos) { is_preferred = true; break; }
+        }
+        if (is_preferred) {
+            if (preferred.size() < max_clips) preferred.push_back(entry.filename);
+        } else if (fallback.size() < max_clips) {
+            fallback.push_back(entry.filename);
+        }
+        if (preferred.size() >= max_clips && fallback.size() >= max_clips) break;
+    }
+
+    std::vector<std::string> candidates = preferred;
+    for (const std::string& name : fallback) {
+        if (candidates.size() >= max_clips) break;
+        candidates.push_back(name);
+    }
+
+    size_t loaded = 0;
+    anim_clip_names_.clear();
+    for (const std::string& name : candidates) {
+        const BarEntry* entry = models_bar_->find(name);
+        if (!entry) continue;
+        const std::vector<uint8_t> data = models_bar_->extract(*entry);
+        if (data.empty()) continue;
+        if (anim_system_->load_brg_clip_from_memory(name, data.data(), data.size())) {
+            anim_clip_names_.push_back(name);
+            ++loaded;
+        }
+    }
+
+    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now() - t0)
+                                .count();
+    LOGI("BRG clips: %zu carregados (de %zu candidatos) em %lld ms",
+         loaded, candidates.size(), static_cast<long long>(elapsed_ms));
+
+    anim_clips_ready_ = true;
+    return loaded > 0;
+}
+
+bool Engine::select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
+                                   TextureHandle& texture) const {
+    clip = nullptr;
+    texture = INVALID_TEXTURE;
+    if (!anim_system_ || anim_clip_names_.empty()) return false;
+
+    for (const std::string& name : anim_clip_names_) {
+        const aom::anim::BrgAnimationClip* candidate = anim_system_->find_clip(name);
+        if (!candidate || !candidate->is_valid()) continue;
+        clip = candidate;
+
+        if (renderer_ && textures_bar_ && textures_bar_->file_count() > 0) {
+            const std::string base = name.substr(0, name.size() - 4);
+            for (const char* ext : {".ddt", " diffuse.ddt"}) {
+                const std::string tex_name = base + ext;
+                const std::vector<uint8_t> tex_data = textures_bar_->extract(tex_name);
+                if (tex_data.empty()) continue;
+                auto ddt = DdtLoader::load(tex_data);
+                if (!ddt) break;
+                const auto rgba = ddt->decode_rgba(0);
+                if (rgba.empty()) break;
+                texture = renderer_->create_texture(ddt->width, ddt->height, rgba.data());
+                LOGI("Loaded anim texture: %s", tex_name.c_str());
+                break;
+            }
+        }
+        break;
+    }
+    return clip != nullptr;
+}
+
 void Engine::start_game() {
+    const auto setup_start = std::chrono::steady_clock::now();
     LOGI("Starting Game...");
     skirmish_victory_result_ = VictoryResult::NONE;
     victory_display_timer_   = 0.0f;
@@ -642,67 +750,15 @@ void Engine::start_game() {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
 
-    // --- Load BRG animation clips from models.bar ---
-    anim_system_ = std::make_unique<aom::anim::AnimationSystem>();
-    if (models_bar_ && models_bar_->file_count() > 0) {
-        int clips_loaded = 0;
-        for (const BarEntry& entry : models_bar_->entries()) {
-            std::string low = to_lower(entry.filename);
-            if (!ends_with(low, ".brg")) continue;
-            const std::vector<uint8_t> data = models_bar_->extract(entry);
-            if (data.empty()) continue;
-            if (anim_system_->load_brg_clip_from_memory(entry.filename, data.data(), data.size())) {
-                ++clips_loaded;
-                LOGI("Loaded BRG anim clip: %s", entry.filename.c_str());
-            }
-        }
-        LOGI("Total BRG animation clips loaded: %d", clips_loaded);
-    }
+    // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
+    load_animation_clips();
 
     // --- Spawn a few units and attach animation clips ---
     // Pick the first available clip for now; in a full game this would be
     // resolved by unit type → visual name from anim.bar scripts.
     const aom::anim::BrgAnimationClip* clip = nullptr;
     TextureHandle clip_tex = INVALID_TEXTURE;
-
-    if (anim_system_->clip_count() > 0) {
-        // Prefer a hoplite or infantry clip
-        for (const char* pref : {"hoplite", "infantry", "villager", "soldier"}) {
-            // find_clip is exact-name; iterate to find a prefix match
-            // (AnimationSystem doesn't expose iterators, use model_mesh fallback)
-            (void)pref; // suppress unused warning — full name lookup below
-        }
-        // Fallback: use hoplite_mesh_ clip if hoplite was loaded
-        if (hoplite_mesh_ == INVALID_MESH && models_bar_ && models_bar_->file_count() > 0) {
-            for (const BarEntry& entry : models_bar_->entries()) {
-                std::string low = to_lower(entry.filename);
-                if (!ends_with(low, ".brg")) continue;
-                clip = anim_system_->find_clip(entry.filename);
-                if (clip && clip->is_valid()) {
-                    // Try to find matching texture in textures_bar_
-                    if (textures_bar_ && textures_bar_->file_count() > 0) {
-                        std::string base = entry.filename.substr(0, entry.filename.size() - 4);
-                        for (const char* ext : {".ddt", " diffuse.ddt"}) {
-                            std::string tex_name = base + ext;
-                            const std::vector<uint8_t> td = textures_bar_->extract(tex_name);
-                            if (!td.empty()) {
-                                auto ddt = DdtLoader::load(td);
-                                if (ddt) {
-                                    auto rgba = ddt->decode_rgba(0);
-                                    if (!rgba.empty()) {
-                                        clip_tex = renderer_->create_texture(ddt->width, ddt->height, rgba.data());
-                                        LOGI("Loaded anim texture: %s", tex_name.c_str());
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
+    select_animation_clip(clip, clip_tex);
 
     // Spawn friendly + enemy units and attach animation
     const std::vector<glm::vec3> spawn_positions = {
@@ -793,8 +849,11 @@ void Engine::start_game() {
 
     create_in_game_hud();
 
-    LOGI("start_game: %zu units spawned, Town Centers established, anim clips=%zu",
-         spawn_positions.size(), anim_system_->clip_count());
+    const auto setup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::steady_clock::now() - setup_start)
+                              .count();
+    LOGI("start_game: %zu units spawned, Town Centers established, anim clips=%zu (setup: %lld ms)",
+         spawn_positions.size(), anim_system_->clip_count(), static_cast<long long>(setup_ms));
 }
 
 void Engine::spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size) {
@@ -1998,8 +2057,55 @@ void Engine::load_game(const std::string& path) {
         pool_e.gold  = data.gold[1];
         pool_e.favor = data.favor[1];
         accumulated_time_ = data.game_time_seconds;
+        restore_saved_entities(data);
         LOGI("load_game: recursos e estado restaurados com sucesso de '%s'", p.c_str());
     }
+}
+
+void Engine::restore_saved_entities(const SaveGameData& data) {
+    if (!gameplay_world_) return;
+    GameplayWorld& world = *gameplay_world_;
+
+    // Remove as entidades padrao criadas por start_game(), preservando os nos
+    // de recursos e a grade de navegacao ja montada.
+    world.clear_units_and_buildings();
+
+    // Animacao reaproveitada da partida (mesmo clip usado no start_game).
+    const aom::anim::BrgAnimationClip* clip = nullptr;
+    TextureHandle clip_tex = INVALID_TEXTURE;
+    select_animation_clip(clip, clip_tex);
+
+    size_t restored_units = 0;
+    for (const SavedUnit& su : data.units) {
+        UnitStats stats = extract_unit_stats_from_xmb(game_config_root_.get(), su.unit_type);
+        if (su.max_hp > 0) stats.max_hp = static_cast<float>(su.max_hp);
+        stats.worker   = su.worker;
+        stats.pop_cost = (su.pop_cost > 0) ? su.pop_cost : 1;
+
+        const Team team = (su.team == 0) ? Team::FRIENDLY : Team::ENEMY;
+        Entity e = world.spawn_unit(team, glm::vec3(su.pos_x, su.pos_y, su.pos_z), stats);
+        if (su.current_hp > 0) world.set_entity_hp(e, su.current_hp);
+        if (clip && clip->is_valid() && renderer_) {
+            world.attach_animation(e, clip, clip_tex, renderer_.get());
+        }
+        ++restored_units;
+    }
+
+    size_t restored_buildings = 0;
+    for (const SavedBuilding& sb : data.buildings) {
+        const Team team = (sb.team == 0) ? Team::FRIENDLY : Team::ENEMY;
+        const BuildingType type = static_cast<BuildingType>(sb.building_type);
+        Entity e = world.place_building(team, glm::vec3(sb.pos_x, sb.pos_y, sb.pos_z),
+                                        1.0f, type, sb.name.empty() ? "Edificio" : sb.name);
+        if (BuildingComponent* bc = world.building_component_mutable(e)) {
+            bc->complete = sb.complete;
+            bc->progress = sb.progress;
+        }
+        if (sb.current_hp > 0) world.set_entity_hp(e, sb.current_hp);
+        ++restored_buildings;
+    }
+
+    LOGI("load_game: %zu unidades e %zu edificios restaurados", restored_units, restored_buildings);
 }
 
 void Engine::save_game(const std::string& path) {
@@ -2098,6 +2204,7 @@ void Engine::create_campaign_menu() {
 }
 
 void Engine::start_campaign_mission(size_t scenario_idx) {
+    const auto setup_start = std::chrono::steady_clock::now();
     LOGI("Starting Campaign Mission (index %zu)...", scenario_idx);
     set_state(EngineState::IN_GAME);
 
@@ -2114,48 +2221,12 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
 
-    // --- Load BRG animation clips from models.bar ---
-    anim_system_ = std::make_unique<aom::anim::AnimationSystem>();
-    if (models_bar_ && models_bar_->file_count() > 0) {
-        for (const BarEntry& entry : models_bar_->entries()) {
-            std::string low = to_lower(entry.filename);
-            if (!ends_with(low, ".brg")) continue;
-            const std::vector<uint8_t> data = models_bar_->extract(entry);
-            if (!data.empty()) {
-                anim_system_->load_brg_clip_from_memory(entry.filename, data.data(), data.size());
-            }
-        }
-    }
+    // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
+    load_animation_clips();
 
     const aom::anim::BrgAnimationClip* clip = nullptr;
     TextureHandle clip_tex = INVALID_TEXTURE;
-    if (anim_system_->clip_count() > 0 && models_bar_) {
-        for (const BarEntry& entry : models_bar_->entries()) {
-            std::string low = to_lower(entry.filename);
-            if (!ends_with(low, ".brg")) continue;
-            clip = anim_system_->find_clip(entry.filename);
-            if (clip && clip->is_valid()) {
-                if (textures_bar_) {
-                    std::string base = entry.filename.substr(0, entry.filename.size() - 4);
-                    for (const char* ext : {".ddt", " diffuse.ddt"}) {
-                        std::string tex_name = base + ext;
-                        const std::vector<uint8_t> td = textures_bar_->extract(tex_name);
-                        if (!td.empty()) {
-                            auto ddt = DdtLoader::load(td);
-                            if (ddt) {
-                                auto rgba = ddt->decode_rgba(0);
-                                if (!rgba.empty()) {
-                                    clip_tex = renderer_->create_texture(ddt->width, ddt->height, rgba.data());
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-                break;
-            }
-        }
-    }
+    select_animation_clip(clip, clip_tex);
 
     if (clip && clip->is_valid()) {
         gameplay_world_->set_default_animation(clip, clip_tex);
@@ -2205,7 +2276,10 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
     mission_mgr_->init_mission_omens(gameplay_world_.get(), scenarios_bar_.get(), custom_scn, &camera_);
 
     create_in_game_hud();
-    LOGI("Campaign Mission 1: Omens running!");
+    const auto setup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::steady_clock::now() - setup_start)
+                              .count();
+    LOGI("Campaign Mission 1: Omens running! (setup: %lld ms)", static_cast<long long>(setup_ms));
 }
 
 void Engine::open_multiplayer() {

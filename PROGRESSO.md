@@ -2,6 +2,29 @@
 
 Ultima atualizacao: 2026-11-05
 
+## Sprint 12: Reconstrução de Entidades no Save/Load, Prevenção de ANR em Animações e Estabilização de Áudio/Vitória (2026-11-05)
+
+**Status:** Concluído com 100% de sucesso. Builds nativos ARM64 e x86_64 recompilados sem erros, suítes `gameplay_test` e `test_audio_3d` aprovadas com cobertura expandida e APK otimizado gerado e assinado com R8/ProGuard.
+
+### 1. Reconstrução de Entidades no Save/Load (Roundtrip Completo)
+- **Estruturas Desempacotadas (`save_load.h`):** Adicionadas as structs `SavedUnit` e `SavedBuilding` em memória para representar as seções binárias de unidades e edifícios salvas no formato `AOMS` v1.
+- **Desserialização Confiável (`save_load.cpp`):** `load_game_state()` agora lê as seções completas de entidades de disco com limite de sanidade (100.000 entidades), preenchendo `out.units` e `out.buildings`. Strings de tamanho fixo são convertidas com segurança via `fixed_string()`.
+- **Reconstrução no Mundo (`engine.cpp` & `gameplay.h`):** Implementado `Engine::restore_saved_entities()`, que utiliza `GameplayWorld::clear_units_and_buildings()` para limpar o mundo atual e re-instanciar cada unidade e edifício salvo com time, HP, tipo, coordenadas de posição e rally points originais.
+- **Validação de Teste (`gameplay_test.cpp`):** Testes automatizados expandidos para validar a persistência da contagem exata de entidades, nomes de tipo, flags de aldeão/trabalhador, coordenadas de posição $X/Z$ e conclusão de edifícios.
+
+### 2. Prevenção de ANR em Animações BRG (`Engine::load_animation_clips`)
+- **Problema Solucionado:** `models.bar` (jogo base + expansão The Titans) possui milhares de arquivos `.brg`. A iteração e interpretação síncrona de todos eles durante `start_game()` e `start_campaign_mission()` congelava a thread principal da UI por mais de 5 segundos, gerando ANR ("Input dispatching timed out") no Android.
+- **Carregamento Otimizado com Cache:** Criados `Engine::load_animation_clips(max_clips = 8)` e `select_animation_clip()`. O carregamento prioriza unidades militares essenciais (Hoplita, Aldeão, Toxotes, Minotauro) e armazena os clips em cache (`anim_clips_ready_`), reutilizando-os instantaneamente nas próximas partidas sem qualquer atraso.
+
+### 3. Correção de Ordem na Verificação de Vitória (Conquest)
+- **Correção em `victory.cpp`:** Em partidas Conquest, a condição de derrota (`friendly_tc == 0`) agora é avaliada estritamente **antes** da condição de vitória (`enemy_tc == 0`). Isso impede que a destruição mútua dos Town Centers ou cenários onde o jogador perdeu seu último centro concedam uma vitória indevida.
+
+### 4. Estabilização e Desacoplamento da Suíte de Áudio 3D
+- **Contador Cumulativo (`dispatched_voice_count`):** Adicionado à interface `AudioEngine` e à implementação `OpenSLEngine`.
+- **Eliminação de Flakiness (`test_audio_3d.cpp`):** `active_voice_count()` mede apenas vozes atualmente em reprodução (decaindo quando sons curtos terminam antes da asserção em CPUs mais lentas). A suíte agora utiliza `dispatched_voice_count()`, garantindo 100% de estabilidade determinística nos testes de áudio 3D e vozes gregas.
+
+---
+
 ## Sprint 11: Expansão The Titans — Overlay de Archives BAR e Protos da Expansão (2026-11-05)
 
 **Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. As demais suítes também foram reexecutadas com o overlay ativo (11 de 13 em 100%; ver itens 9.1 e 9.2 para as duas ressalvas). Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.

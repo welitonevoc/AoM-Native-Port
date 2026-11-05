@@ -117,59 +117,61 @@ int main() {
     std::cout << "\n--- 3. Testing 3D Positional Audio & Distance Attenuation ---\n";
     // Play sound within min_distance (e.g. at dist = 2m, min_dist = 5m)
     audio->play_sfx_3d("assets/sound/new_objective.wav", glm::vec3(2.0f, 0.0f, 0.0f), 1.0f, 5.0f, 65.0f);
-    assert_test(audio->active_voice_count() > 0, "Voice enqueued for nearby 3D sound event");
+    assert_test(audio->dispatched_voice_count() > 0, "Voice enqueued for nearby 3D sound event");
 
     // Play sound beyond max_distance (e.g. at dist = 80m, max_dist = 65m)
-    size_t count_before = audio->active_voice_count();
+    // O contador cumulativo de disparos e usado porque `active_voice_count()`
+    // mede apenas as vozes em reproducao (cai quando um WAV termina).
+    size_t dispatched_before = audio->dispatched_voice_count();
     audio->play_sfx_3d("assets/sound/new_objective.wav", glm::vec3(80.0f, 0.0f, 0.0f), 1.0f, 5.0f, 65.0f);
-    assert_test(audio->active_voice_count() == count_before, "Sounds beyond max_distance are culled (0 voices spawned)");
+    assert_test(audio->dispatched_voice_count() == dispatched_before, "Sounds beyond max_distance are culled (0 voices spawned)");
 
     // --- 4. Greek Unit Voice Dispatch (Sprint 6 Target) ---
     std::cout << "\n--- 4. Testing Greek Unit Voice Dispatch ---\n";
     // Unit select ("Etimos!", "Lege!")
     audio->play_unit_voice_3d("select", glm::vec3(-5.0f, 0.0f, 0.0f), "hoplite", false);
-    assert_test(audio->active_voice_count() >= 2, "Dispatched Greek military select voice cue ('Etimos' / gms*.wav)");
+    assert_test(audio->dispatched_voice_count() >= 2, "Dispatched Greek military select voice cue ('Etimos' / gms*.wav)");
 
     // Unit move ("Vulome!", "Pame!")
     audio->play_unit_voice_3d("move", glm::vec3(-5.0f, 0.0f, 0.0f), "hoplite", false);
-    assert_test(audio->active_voice_count() >= 3, "Dispatched Greek military move voice cue ('Vulome' / gmm*.wav)");
+    assert_test(audio->dispatched_voice_count() >= 3, "Dispatched Greek military move voice cue ('Vulome' / gmm*.wav)");
 
     // Unit attack ("Prostagma!", "En Taxis!")
     audio->play_unit_voice_3d("attack", glm::vec3(8.0f, 0.0f, 0.0f), "toxotes", false);
-    assert_test(audio->active_voice_count() >= 4, "Dispatched Greek military attack voice cue ('Prostagma' / gma*.wav)");
+    assert_test(audio->dispatched_voice_count() >= 4, "Dispatched Greek military attack voice cue ('Prostagma' / gma*.wav)");
 
     // Worker select & move
     audio->play_unit_voice_3d("select", glm::vec3(0.0f, 0.0f, 3.0f), "aldeao", true);
     audio->play_unit_voice_3d("move", glm::vec3(0.0f, 0.0f, 3.0f), "aldeao", true);
-    assert_test(audio->active_voice_count() >= 6, "Dispatched Greek worker voice cues (gvms*.wav, gvmm*.wav)");
+    assert_test(audio->dispatched_voice_count() >= 6, "Dispatched Greek worker voice cues (gvms*.wav, gvmm*.wav)");
 
     // Hero: Arkantos voice lines
     audio->play_unit_voice_3d("select", glm::vec3(0.0f), "Arkantos", false);
     audio->play_unit_voice_3d("attack", glm::vec3(0.0f), "Arkantos", false);
-    assert_test(audio->active_voice_count() >= 8, "Dispatched Arkantos Hero voice lines (arkantosselect1, arkantosattack1)");
+    assert_test(audio->dispatched_voice_count() >= 8, "Dispatched Arkantos Hero voice lines (arkantosselect1, arkantosattack1)");
 
     // Mythological: Kraken voice
     audio->play_unit_voice_3d("select", glm::vec3(12.0f, 0.0f, 0.0f), "Kraken", false);
-    assert_test(audio->active_voice_count() >= 9, "Dispatched Kraken mythological voice line (krakenacknowledge1)");
+    assert_test(audio->dispatched_voice_count() >= 9, "Dispatched Kraken mythological voice line (krakenacknowledge1)");
 
     // --- 5. Authentic AoM Combat & Harvest Event Triggers ---
     std::cout << "\n--- 5. Testing Authentic AoM Combat & Harvest Triggers ---\n";
     audio->play_combat_hit(glm::vec3(3.0f, 0.0f, 2.0f), true);  // metal
     audio->play_combat_hit(glm::vec3(3.0f, 0.0f, 2.0f), false); // flesh
-    assert_test(audio->active_voice_count() >= 11, "Triggered sword on metal & flesh impact sounds");
+    assert_test(audio->dispatched_voice_count() >= 11, "Triggered sword on metal & flesh impact sounds");
 
     audio->play_arrow_shot(glm::vec3(-2.0f, 0.0f, 0.0f));
     audio->play_arrow_hit(glm::vec3(4.0f, 0.0f, 0.0f));
-    assert_test(audio->active_voice_count() >= 13, "Triggered arrow flight and projectile impact sounds");
+    assert_test(audio->dispatched_voice_count() >= 13, "Triggered arrow flight and projectile impact sounds");
 
     audio->play_harvest_sound(glm::vec3(-6.0f, 0.0f, 0.0f), "wood");
     audio->play_harvest_sound(glm::vec3(-4.0f, 0.0f, 0.0f), "gold");
     audio->play_harvest_sound(glm::vec3(-2.0f, 0.0f, 0.0f), "food");
-    assert_test(audio->active_voice_count() >= 16, "Triggered wood chopping, gold mining, and forage harvest sounds");
+    assert_test(audio->dispatched_voice_count() >= 16, "Triggered wood chopping, gold mining, and forage harvest sounds");
 
     audio->play_building_work(glm::vec3(-5.0f, 0.0f, 5.0f));
     audio->play_unit_death(glm::vec3(7.0f, 0.0f, 1.0f), false);
-    assert_test(audio->active_voice_count() >= 18, "Triggered construction hammering and unit death sound cues");
+    assert_test(audio->dispatched_voice_count() >= 18, "Triggered construction hammering and unit death sound cues");
 
     // --- 6. Software Multi-Voice Mixer & Saturated Accumulation ---
     std::cout << "\n--- 6. Testing Software Multi-Voice Mixer ---\n";
