@@ -51,8 +51,6 @@ enum class EngineState {
     SPLASH,
     LOADING,
     MAIN_MENU,      ///< Menu pregame autentico (uipregamenew.xmb / The Titans)
-    GAME_LIST,      ///< uigamelist — lista de jogos salvos, campanhas e cenarios
-    GOD_PICKER,     ///< uigodpicker — escolha de civilizacao / deus menor
     IN_GAME,
     OPTIONS,
     CREDITS,
@@ -60,104 +58,6 @@ enum class EngineState {
     MULTIPLAYER_LOBBY,
     PAUSED,
     SHUTTING_DOWN,
-
-    // ── Menus adicionais (uipregamenew / The Titans) ──
-    UI_AI_PROMPT,
-    UI_ALTERNATES_DIALOG,
-    UI_ANIMATION_DLG,
-    UI_ARENA_SETUP,
-    UI_ARMY_EDIT,
-    UI_AUTOPATCHER_DIALOG,
-    UI_CAMERA_EDITOR,
-    UI_CAMPAIGN,
-    UI_CAMPAIGN_EDITOR,
-    UI_CAMPAIGN_NLOANDING,
-    UI_CAMPAIGN_SETUP,
-    UI_CHAT_DIALOG,
-    UI_LIFF_DIALOG,
-    UI_COMBAT_COMPARISON,
-    UI_CUSTOMIZE_OPP,
-    UI_DEFAULT_LOADING,
-    UI_EDITOR_MENU,
-    UI_EDITOR_PALETTES,
-    UI_EDIT_UNIT_DLG,
-    UI_EULA,
-    UI_FAKE_TECHTREE,
-    UI_FILE_MANAGER,
-    UI_FRIENDS_DIALOGS,
-    UI_GAME_LIST,
-    UI_GAME_PALETTES,
-    UI_GAME_SETTINGS_DIALOG,
-    UI_GENERIC_ENTRY_DIALOG,
-    UI_GOD_BUFFET_DIALOG,
-    UI_GOD_PICKER,
-    UI_HELP_DIALOG,
-    UI_HOST_GAME_DIALOG,
-    UI_HOTKEYS,
-    UI_HOTKEY_SETUP,
-    UI_IMAGE_DIALOG,
-    UI_INGAME_MSG_1,
-    UI_INGAME_MSG_2,
-    UI_INGAME_MSG_3,
-    UI_INGAME_MSG_DIALOG,
-    UI_LAUNCH_SCREEN,
-    UI_LAYOUT,
-    UI_LOW_DETAIL_BACKGROUND,
-    UI_MAIN,
-    UI_MAP_PICKER,
-    UI_MESSAGE_DIALOGS,
-    UI_MOTD,
-    UI_MP_CUSTOM,
-    UI_MP_ESO,
-    UI_MP_FRIENDS_LIST,
-    UI_MP_HELP,
-    UI_MP_PLANIP,
-    UI_MP_LAUNCH_SCREEN,
-    UI_MP_LOGIN,
-    UI_MP_OTHER_SETTINGS,
-    UI_MP_PASSPORT,
-    UI_MP_PASSPORT_TAKEN,
-    UI_MP_SETUP_FINAL,
-    UI_MP_VOTE_DIALOG,
-    UI_NEW_DIALOGS,
-    UI_OBJECTIVES,
-    UI_OBJECTIVES_DIALOG,
-    UI_OPTIONS,
-    UI_OTHER_SETTINGS,
-    UI_PLAYER_LOGIN,
-    UI_PLAYER_STATUS_DIALOG,
-    UI_PLAYER_STATUS_DIALOG_2,
-    UI_POST_GAME_SCREEN,
-    UI_PREGAME,
-    UI_PREGAME_MP_TEST,
-    UI_PREGAME_MSG_1,
-    UI_PREGAME_MSG_2,
-    UI_PREGAME_MSG_DIALOG,
-    UI_PREGAME_NEW,
-    UI_PREGAME_STRESS,
-    UI_PROFILE_SELECT,
-    UI_RECEIVE,
-    UI_RECEIVE_CONNECT,
-    UI_RM_GENERATION,
-    UI_ROOM_DIALOGS,
-    UI_SAMPLE,
-    UI_SCENARIO_SET_DLG,
-    UI_SESSION_CONNECT,
-    UI_SINGLE_PLAYER_SETUP,
-    UI_SOUND_DLG,
-    UI_SOUND_EDIT_DLG,
-    UI_SOUND_SET_DLG,
-    UI_SPRM_SETUP,
-    UI_STATS_UPLOAD,
-    UI_STATUS_MSG,
-    UI_STRATEGIC_MAP,
-    UI_TECHTREE,
-    UI_TRIBUTE_DLG,
-    UI_TRIGGER_EDITOR,
-    UI_TRIG_GROUP_EDITOR,
-    UI_WATER_DIALOG,
-    UI_XS_DEBUGGER,
-    UI_AI_PROMPT,
 };
 
 enum class PlacementMode {
@@ -352,102 +252,6 @@ private:
     std::string tr(const std::string& key) const;
 
     void create_main_menu();          ///< uipregamenew — menu pregame The Titans
-    void create_game_list_menu();     ///< uigamelist — lista de jogos/campanhas/cenarios
-    void create_god_picker_menu();    ///< uigodpicker — escolha de civilizacao/deus
-
-    // ── Novos menus (90+) ──
-    void create_ai_prompt_menu();
-    void create_alternates_dialog_menu();
-    void create_animation_dlg_menu();
-    void create_arena_setup_menu();
-    void create_army_edit_menu();
-    void create_autopatcher_dialog_menu();
-    void create_camera_editor_menu();
-    void create_campaign_menu();
-    void create_campaign_editor_menu();
-    void create_campaign_nloanding_menu();
-    void create_campaign_setup_menu();
-    void create_chat_dialog_menu();
-    void create_liff_dialog_menu();
-    void create_combat_comparison_menu();
-    void create_customize_opp_menu();
-    void create_default_loading_menu();
-    void create_editor_menu();
-    void create_editor_palettes_menu();
-    void create_edit_unit_dlg_menu();
-    void create_eula_menu();
-    void create_fake_techtree_menu();
-    void create_file_manager_menu();
-    void create_friends_dialogs_menu();
-    void create_game_palettes_menu();
-    void create_game_settings_dialog_menu();
-    void create_generic_entry_dialog_menu();
-    void create_god_buffet_dialog_menu();
-    void create_help_dialog_menu();
-    void create_host_game_dialog_menu();
-    void create_hotkeys_menu();
-    void create_hotkey_setup_menu();
-    void create_image_dialog_menu();
-    void create_ingame_msg_1_menu();
-    void create_ingame_msg_2_menu();
-    void create_ingame_msg_3_menu();
-    void create_ingame_msg_dialog_menu();
-    void create_launch_screen_menu();
-    void create_layout_menu();
-    void create_low_detail_background_menu();
-    void create_main_alt_menu();
-    void create_map_picker_menu();
-    void create_message_dialogs_menu();
-    void create_motd_menu();
-    void create_mp_custom_menu();
-    void create_mp_eso_menu();
-    void create_mp_friends_list_menu();
-    void create_mp_help_menu();
-    void create_mp_planip_menu();
-    void create_mp_launch_screen_menu();
-    void create_mp_login_menu();
-    void create_mp_other_settings_menu();
-    void create_mp_passport_menu();
-    void create_mp_passport_taken_menu();
-    void create_mp_setup_final_menu();
-    void create_mp_vote_dialog_menu();
-    void create_new_dialogs_menu();
-    void create_objectives_menu();
-    void create_objectives_dialog_menu();
-    void create_others_settings_menu();
-    void create_player_login_menu();
-    void create_player_status_dialog_menu();
-    void create_player_status_dialog_2_menu();
-    void create_post_game_screen_menu();
-    void create_pregame_menu();
-    void create_pregame_mp_test_menu();
-    void create_pregame_msg_1_menu();
-    void create_pregame_msg_2_menu();
-    void create_pregame_msg_dialog_menu();
-    void create_pregame_new_menu();
-    void create_pregame_stress_menu();
-    void create_profile_select_menu();
-    void create_receive_menu();
-    void create_receive_connect_menu();
-    void create_rm_generation_menu();
-    void create_room_dialogs_menu();
-    void create_sample_menu();
-    void create_scenario_set_dlg_menu();
-    void create_session_connect_menu();
-    void create_single_player_setup_menu();
-    void create_sound_dlg_menu();
-    void create_sound_edit_dlg_menu();
-    void create_sound_set_dlg_menu();
-    void create_sprm_setup_menu();
-    void create_stats_upload_menu();
-    void create_status_msg_menu();
-    void create_strategic_map_menu();
-    void create_techtree_menu();
-    void create_tribute_dlg_menu();
-    void create_trigger_editor_menu();
-    void create_trig_group_editor_menu();
-    void create_water_dialog_menu();
-    void create_xs_debugger_menu();
 
     void create_single_player_menu();
     void create_random_map_menu();
@@ -687,10 +491,6 @@ private:
     VictoryResult    skirmish_victory_result_    = VictoryResult::NONE;
     float            victory_display_timer_      = 0.0f;
 
-    // Estado do uigodpicker (memoria da escolha do usuario)
-    std::string god_picker_civilization_;
-    std::string god_picker_minor_god_;
-    bool        god_picker_selection_made_ = false;
 };
 
 } // namespace aom
