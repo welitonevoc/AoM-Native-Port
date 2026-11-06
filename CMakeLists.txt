@@ -416,5 +416,21 @@ target_link_libraries(test_data_integration PRIVATE
     log
 )
 
+add_executable(test_ddt_reference
+    src/tests/test_ddt_reference.cpp
+    src/assets/bar_archive.cpp
+    src/assets/ddt_texture.cpp
+    third_party/stb_image.c
+)
+target_include_directories(test_ddt_reference PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_ddt_reference PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
 endif(BUILD_TESTING)
 
