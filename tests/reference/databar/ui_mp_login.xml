@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mp_login>
-  <username>Jogador1</username>
+  <username>Player1</username>
   <password>********</password>
   <buttons>
     <button label="Login" action="mp_login"/>
