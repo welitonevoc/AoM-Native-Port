@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch_screen>
+  <title>Age of Mythology</title>
+  <version>1.0.0</version>
+  <logo>ao m logo.png</logo>
+  <buttons>
+    <button label="Jogar" action="main_menu"/>
+    <button label="Opções" action="options"/>
+    <button label="Sair" action="quit"/>
+  </buttons>
+</launch_screen>

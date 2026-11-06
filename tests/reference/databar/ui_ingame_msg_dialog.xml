@@ -8,20 +8,4 @@
       <button label="Não" action="cancel_attack"/>
     </buttons>
   </dialog>
-  <dialog>
-    <title>Confirmar construção</title>
-    <text>Deseja construir este edifício?</text>
-    <buttons>
-      <button label="Sim" action="start_construction"/>
-      <button label="Não" action="cancel_construction"/>
-    </buttons>
-  </dialog>
-  <dialog>
-    <title>Jogo terminado</title>
-    <text>Você venceu a partida!</text>
-    <buttons>
-      <button label="Menu Principal" action="return_to_main_menu"/>
-      <button label="Sair" action="quit_app"/>
-    </buttons>
-  </dialog>
 </ingame_message_dialog>

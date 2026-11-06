@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ingame_message_3>
-  <message>
-    <title>Edifício concluído</title>
-    <text>Barracks construído com sucesso.</text>
-  </message>
-  <message>
-    <title>Tecnologia pesquisada</title>
-    <text>Nova tecnologia disponível para unidades.</text>
-  </message>
-  <message>
-    <title>Deus menor escolhido</title>
-    <text>Bênção divina concedida para sua civilização.</text>
-  </message>
+  <message id="1">Construção concluída</message>
+  <message id="2">Tecnologia pesquisada</message>
+  <message id="3">Deus menor escolhido</message>
 </ingame_message_3>
