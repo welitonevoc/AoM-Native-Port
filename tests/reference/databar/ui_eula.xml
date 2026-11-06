@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eula>
-  <title>End User License Agreement</title>
-  <text>
-    By installing this game, you agree to the terms of this license agreement.
-  </text>
+<ui_eula>
+  <title>EULA</title>
+  <text>By installing this game, you agree to the terms.</text>
   <buttons>
-    <button label="I Agree" action="accept_eula"/>
-    <button label="I Disagree" action="reject_eula"/>
+    <button label="Accept" action="accept_eula"/>
+    <button label="Decline" action="reject_eula"/>
   </buttons>
-</eula>
+</ui_eula>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_god_buffet_dialog>
+  <gods>
+    <god name="Zeus"/>
+    <god name="Ra"/>
+    <god name="Odin"/>
+  </gods>
+  <buttons>
+    <button label="Select" action="select_god"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_god_buffet_dialog>

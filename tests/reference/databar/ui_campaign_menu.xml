@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_campaign_menu>
+  <campaign name="Fall of the Trident"/>
+  <buttons>
+    <button label="Start Campaign" action="start_campaign"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_campaign_menu>

@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<editor_palettes>
-  <palette name="textures">
-    <texture name="grass"/>
-    <texture name="water"/>
-    <texture name="sand"/>
-    <texture name="dirt"/>
-  </palette>
-  <palette name="models">
-    <model name="house"/>
-    <model name="barracks"/>
-    <model name="temple"/>
-  </palette>
-</editor_palettes>
+<ui_editor_palettes>
+  <palette name="Terrain"/>
+  <palette name="Buildings"/>
+  <palette name="Units"/>
+  <buttons>
+    <button label="Apply" action="apply_palette"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_editor_palettes>

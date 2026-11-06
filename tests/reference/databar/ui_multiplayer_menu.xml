@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_multiplayer_menu>
+  <options>
+    <item>Host Game</option>
+    <item>Join Game</option>
+  </options>
+  <buttons>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_multiplayer_menu>

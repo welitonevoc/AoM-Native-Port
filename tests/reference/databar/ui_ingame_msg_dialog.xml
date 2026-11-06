@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ingame_message_dialog>
-  <dialog>
-    <title>Confirmar ataque</title>
-    <text>Deseja atacar a unidade inimiga?</text>
-    <buttons>
-      <button label="Sim" action="attack_enemy"/>
-      <button label="Não" action="cancel_attack"/>
-    </buttons>
-  </dialog>
-</ingame_message_dialog>
+<ui_ingame_msg_dialog>
+  <title>Mensagem no Jogo</title>
+  <message>Sua unidade foi atacada!</message>
+  <buttons>
+    <button label="OK" action="close"/>
+  </buttons>
+</ui_ingame_msg_dialog>

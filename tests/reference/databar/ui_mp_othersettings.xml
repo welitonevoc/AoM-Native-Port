@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_mp_othersettings>
+  <setting name="fog_of_war" value="true"/>
+  <setting name="starting_age" value="Dark Age"/>
+  <setting name="victory_condition" value="Conquest"/>
+  <buttons>
+    <button label="Save" action="save_settings"/>
+    <button label="Cancel" action="return_to_menu"/>
+  </buttons>
+</ui_mp_othersettings>

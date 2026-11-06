@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image_dialog>
+<ui_image_dialog>
   <image src="image.png"/>
-  <caption>Image Caption</caption>
+  <label>Image Description</label>
   <buttons>
-    <button label="Close" action="close"/>
+    <button label="OK" action="close"/>
   </buttons>
-</image_dialog>
+</ui_image_dialog>

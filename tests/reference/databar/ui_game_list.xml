@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_game_list>
+  <games>
+    <game name="Game 1" players="2/8"/>
+    <game name="Game 2" players="4/8"/>
+  </games>
+  <buttons>
+    <button label="Join" action="join_game"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_game_list>

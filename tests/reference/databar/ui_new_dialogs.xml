@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<new_dialogs>
+  <dialog id="new_game" label="Novo Jogo"/>
+  <dialog name="Load Game" action="load_game"/>
+</new_dialogs>

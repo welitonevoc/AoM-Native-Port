@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<victory_screen>
+  <message>Vitória!</message>
+  <stats>
+    <units_killed>50</units_killed>
+    <resources_gathered>5000</resources_gathered>
+  </stats>
+  <buttons>
+    <button label="Próxima Missão" action="next_mission"/>
+    <button label="Menu Principal" action="return_to_main_menu"/>
+  </buttons>
+</victory_screen>
