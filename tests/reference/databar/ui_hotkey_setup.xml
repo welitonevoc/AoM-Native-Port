@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hotkey_setup>
+  <key_bindings>
+    <key>
+      <action>Select All Units</action>
+      <key>A</key>
+    </key>
+    <key>
+      <action>Select All Units of Type</action>
+      <key>Shift+A</key>
+    </key>
+    <key>
+      <action>Move</action>
+      <key>Right Click</key>
+    </key>
+    <key>
+      <action>Attack</action>
+      <key>Right Click</key>
+    </key>
+    <key>
+      <action>Stop</action>
+      <key>S</key>
+    </key>
+    <key>
+      <action>Stand Ground</action>
+      <key>H</key>
+    </key>
+  </key_bindings>
+</hotkey_setup>

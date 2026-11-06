@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image_dialog>
+  <image src="image.png"/>
+  <caption>Image Caption</caption>
+  <buttons>
+    <button label="Close" action="close"/>
+  </buttons>
+</image_dialog>
