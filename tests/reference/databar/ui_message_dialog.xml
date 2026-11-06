@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<message_dialog>
+  <message id="1">Welcome to AoM Native Port</message>
+  <message id="2">Select your civilization</message>
+</message_dialog>

@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <map_picker>
   <maps>
-    <map>
-      <name>Random Map</map>
-      <type>Random</map_type>
-      <size>Medium</size>
-      <players>8</players>
-    </map>
-    <map>
-      <name>Random Map Aleatório</map>
-      <type>Random</map_type>
-      <size>Small</size>
-      <players>4</players>
-    </map>
+    <map name="Random Map"/>
+    <map name="Skirmish Map"/>
   </maps>
-  <settings>
-    <difficulty>Moderate</difficulty>
-    <starting_age>Archaic</starting_age>
-    <victory_condition>Conquest</victory_condition>
-  </settings>
 </map_picker>

@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <liff_dialog>
-  <messages>
-    <message player="Jogador 1" text="Olá a todos!" timestamp="00:01:00"/>
-    <message player="Jogador 2" text="Olá!" timestamp="00:01:05"/>
-    <message player="Jogador 3" text="Pronto para começar?" timestamp="00:01:10"/>
-  </messages>
-  <input_placeholder>Digite sua mensagem aqui...</input_placeholder>
-  <buttons>
-    <button label="Enviar" action="send_message"/>
-    <button label="Fechar" action="close_chat"/>
-  </buttons>
+  <liff_messages>
+    <liff_message id="1" text="Liff message 1"/>
+    <liff_message id="2" text="Liff message 2"/>
+  </liff_messages>
 </liff_dialog>
