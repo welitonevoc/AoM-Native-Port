@@ -1323,6 +1323,16 @@ void Engine::create_image_dialog_menu() {
                     [this]() { return_to_main_menu(); });
 }
 
+// ── uiingame_msg_1 ──
+void Engine::create_ingame_msg_1_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("INGAME MSG 1", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
 void Engine::create_options_menu() {
     clear_ui();
 
