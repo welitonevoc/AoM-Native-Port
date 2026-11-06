@@ -1213,6 +1213,106 @@ void Engine::create_fake_techtree_menu() {
                     [this]() { return_to_main_menu(); });
 }
 
+// ── uifile_manager ──
+void Engine::create_file_manager_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("FILE MANAGER", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uifriends_dialogs ──
+void Engine::create_friends_dialogs_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("FRIENDS DIALOGS", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigame_palettes ──
+void Engine::create_game_palettes_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GAME PALETTES", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigame_settings_dialog ──
+void Engine::create_game_settings_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GAME SETTINGS DIALOG", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigeneric_entry_dialog ──
+void Engine::create_generic_entry_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GENERIC ENTRY DIALOG", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigod_buffet_dialog ──
+void Engine::create_god_buffet_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GOD BUFFET DIALOG", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihelp_dialog ──
+void Engine::create_help_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HELP DIALOG", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihost_game_dialog ──
+void Engine::create_host_game_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOST GAME DIALOG", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihotkeys ──
+void Engine::create_hotkeys_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOTKEYS", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihotkey_setup ──
+void Engine::create_hotkey_setup_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOTKEY SETUP", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
 void Engine::create_options_menu() {
     clear_ui();
 
