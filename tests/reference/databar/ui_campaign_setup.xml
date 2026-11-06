@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<campaign_setup>
+  <campaigns>
+    <campaign name="Fall of the Trident" missions="12" completed="3"/>
+    <campaign name="The New Atlantis" missions="10" completed="0"/>
+  </campaigns>
+  <buttons>
+    <button label="Nova Campanha" action="new_campaign"/>
+    <button label="Editar Cenário" action="edit_campaign"/>
+    <button label="Salvar" action="save_campaign"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</campaign_setup>
