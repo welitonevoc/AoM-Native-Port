@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<editor_palettes>
+  <palette name="Terrain">
+    <texture name="Grass"/>
+    <texture name="Water"/>
+    <texture name="Sand"/>
+    <texture name="Dirt"/>
+  </palette>
+  <palette name="Buildings">
+    <building name="Town Center"/>
+    <building name="Barracks"/>
+    <building name="Archery Range"/>
+    <building name="Stable"/>
+  </palette>
+</editor_palettes>
