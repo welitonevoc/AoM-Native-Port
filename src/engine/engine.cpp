@@ -990,10 +990,41 @@ void Engine::create_campaign_menu() {
     clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
+
+    // Título
     ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+
+    // Linha de estado
+    std::string state_text = "Campaign progress: " + std::to_string(campaign_progress_) + "%";
+    ui_->add_label(state_text, {vw * 0.5f - 120.0f, vh * 0.25f}, 18.0f, 0xFFCCCCCC);
+
+    // Botão Voltar
     ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }
+
+// Função para atualizar progresso da campanha
+void Engine::update_campaign_progress(int progress) {
+    campaign_progress_ = progress;
+    // Em um projeto completo, isso salvaria o progresso e dispararia eventos
+    // como "missão completada", "nova era desbloqueada", etc.
+    if (campaign_progress_ >= 100) {
+        campaign_progress_ = 100;
+        // Marcar campanha como completada
+        campaign_completed_ = true;
+        // Disparar evento de conclusão
+        if (on_campaign_completed_) on_campaign_completed_();
+    }
+}
+
+// Flag para tracking de campanha completada
+bool campaign_completed_ = false;
+
+// Progresso da campanha (0-100%)
+int campaign_progress_ = 0;
+
+// Callback para quando campanha é completada
+std::function<void()> on_campaign_completed_;
 
 // ── ucampaign_editor ──
 void Engine::create_campaign_editor_menu() {
@@ -2833,6 +2864,15 @@ void Engine::update(float delta_time) {
                     }
                 }
             }
+            // P4.5: Tracking de conclusão de campanha
+            // Se campanha estiver ativa e houver vitória, atualizar progresso
+            if (campaign_completed_ == false && skirmish_victory_result_ == VictoryResult::WIN) {
+                // Em um projeto completo, aqui verificaríamos se esta campanha
+                // já estava em progresso e atualizaríamos o progresso accordingly
+                // Para agora, apenas marcamos que uma vitória ocorreu
+                update_campaign_progress(50); // 50% de progresso como exemplo
+            }
+        }
         }
 
         // P4.4: Sistema de Missões - Objetivos além da destruição do Town Center
