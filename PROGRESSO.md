@@ -133,6 +133,54 @@ Arquivos alterados: `include/engine/engine.h`, `src/engine/engine.cpp`,
 
 ---
 
+## P2 — Cena RTS e Recursos (avanço em 2026-11-06)
+
+**Status:** Em andamento. P0 (Build Recovery) bloqueado sem toolchain Android,
+mas o codigo do P2 pode ser escrito e revisado aqui.
+
+### P2.1 — Terreno Real (HeightMap) — parcialmente implementado
+- `Engine::load_scenario_heightmap()` já carrega o height-map do arquivo .scn
+  correto (busca por nome no scenarios.bar, com fallback para o primeiro .scn
+  disponível e leitura direta do filesystem).
+- `start_game()` e `start_campaign_mission()` tentam carregar o height-map
+  antes de recorrer ao terreno procedural (`generate_terrain()`).
+- Pendente: validar em dispositivo ARM64 real (bloqueado pelo P0).
+
+### P2.2 — Save/Load Completo — implementado (versao 2 do formato)
+- `save_load.h`: `SavedUnit` e `SavedBuilding` estendidos com campos v2:
+  `has_move_order`, `move_target`, `attack_target`, `build_target`,
+  `gather_node`, `returning_cargo`, `carried_resource_amount`,
+  `carried_resource_type`, `training_unit`, `train_timer`, `train_queue`.
+- `save_load.cpp`: serializacao/desserializacao do formato binario v2 com
+  bloco variavel para filas de treinamento de edificios. `kSaveFormatVersion`
+  bumpado para 2.
+- `engine.cpp`: `restore_saved_entities()` agora restaura estado de ordem de
+  unidades (movimento, ataque, construcao, gathering) e estado de treinamento
+  de edificios (fila, timer, unidade em treino) ao carregar uma partida.
+- `ecs/gameplay.h`: adicionado `navigation_find_path()` publico para
+  reconstruir waypoints no save/load.
+
+### P2.3 — Condicao de Vitoria — ja implementada
+- `game/victory.cpp`: `check_victory()` implementa CONQUEST (destruir TCs
+  inimigos) e SUDDEN_DEATH, com LOSE avaliado ANTES de WIN para evitar
+  vitoria indevida em destruicao mutua de TCs.
+- `engine.cpp`: verificacao integrada no loop IN_GAME com exibicao de tela
+  de vitoria/derrota e botoes "MENU PRINCIPAL" / "JOGAR NOVAMENTE".
+
+### P2.4 — Skybox / Cube Map — parcialmente implementado
+- `engine.cpp`: `load_skybox_cube()` carrega definicoes .cub e texturas do
+  textures.bar; `generate_skydome()` cria skydome procedural.
+- Pendente: integrar skybox com 6 faces do cube map no render loop.
+
+### P2.5 — Validação de Performance e Memória — pendente
+- Requer dispositivo ARM64 real para medir FPS, OOM e vazamento (bloqueado
+  pelo P0).
+
+Arquivos alterados nesta sessao: `include/game/save_load.h`,
+`src/game/save_load.cpp`, `src/engine/engine.cpp`, `include/ecs/gameplay.h`.
+
+---
+
 ## Sprint 11: Expansão The Titans — Overlay de Archives BAR e Protos da Expansão (2026-11-05)
 
 **Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. As demais suítes também foram reexecutadas com o overlay ativo (11 de 13 em 100%; ver itens 9.1 e 9.2 para as duas ressalvas). Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.
