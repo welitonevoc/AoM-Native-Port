@@ -946,6 +946,15 @@ void Engine::start_game() {
     skirmish_victory_condition_ = VictoryCondition::CONQUEST;
     set_state(EngineState::IN_GAME);
 
+    // ── Aplicar seleção do uigodpicker (civilização / deus menor) ──
+    if (god_picker_selection_made_) {
+        LOGI("God picker aplicado: civilização=%s deus_menor=%s",
+             god_picker_civilization_.c_str(), god_picker_minor_god_.c_str());
+        // TODO: aplicar civilização e deus menor às unidades/estatísticas
+        // (ex: selecionar mesh/textura da unidade, bônus de deus, etc.)
+        god_picker_selection_made_ = false;  // consome a seleção
+    }
+
     radius_ = 12.0f;
     yaw_ = 0.0f;
     pitch_ = 0.3f;
