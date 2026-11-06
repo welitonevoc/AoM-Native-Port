@@ -23,6 +23,7 @@ set(AOM_SOURCES
     src/video/media_decoder.cpp
     src/anim/animation_system.cpp
     src/anim/grn_animation.cpp
+    src/anim/prt_particle.cpp
     src/graphics/lighting.cpp
     src/campaign/campaign.cpp
     src/campaign/campaign_mission.cpp
@@ -274,6 +275,7 @@ add_executable(test_particles_anim
     src/assets/xmb_parser.cpp
     src/anim/animation_system.cpp
     src/anim/grn_animation.cpp
+    src/anim/prt_particle.cpp
 )
 target_include_directories(test_particles_anim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -285,17 +287,17 @@ target_link_libraries(test_particles_anim PRIVATE
     log
 )
 
-add_executable(test_grn_animation
-    src/tests/test_grn_animation.cpp
-    src/anim/grn_animation.cpp
+add_executable(test_prt_particle
+    src/tests/test_prt_particle.cpp
+    src/anim/prt_particle.cpp
     src/assets/bar_archive.cpp
 )
-target_include_directories(test_grn_animation PRIVATE
+target_include_directories(test_prt_particle PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
-target_link_libraries(test_grn_animation PRIVATE
+target_link_libraries(test_prt_particle PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )
