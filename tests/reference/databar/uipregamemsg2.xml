@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pregame_message_2>
-  <message id="1">Jogo iniciado</message>
-  <message id="2">Seleção de civilização concluída</message>
-  <message id="3">Partida em andamento</message>
+  <message id="1">Sua partida foi salva com sucesso</message>
+  <message id="2">Carregando partida salva...</message>
+  <message id="3">Nenhuma partida salva encontrada</message>
 </pregame_message_2>

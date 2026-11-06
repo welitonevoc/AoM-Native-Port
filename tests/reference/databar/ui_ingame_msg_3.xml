@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ingame_message_3>
-  <message id="1">Construção concluída</message>
-  <message id="2">Tecnologia pesquisada</message>
-  <message id="3">Deus menor escolhido</message>
-</ingame_message_3>
+  <message id="1">Unidade selecionada</message>
+  <message id="2">Recursos insuficientes</message>
+  <message id="3">Construção concluída</message>
+</ingame_message_1>

@@ -4,6 +4,6 @@
   <options>
     <option name="Test Connection"/>
     <option name="Test Latency"/>
-    <button label="Back" action="return_to_mp_menu"/>
+    <button label="Voltar" action="return_to_mp_menu"/>
   </options>
 </pregame_mp_test>
