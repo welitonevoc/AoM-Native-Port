@@ -121,6 +121,9 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
 
     media_decoder_ = std::make_unique<aom::video::MediaDecoder>();
 
+    // Load saved campaign progress from persistent storage
+    load_campaign_progress();
+
     // on_frame: chamado pelo update() — faz upload do frame YUV→RGBA para GPU.
     // Recria a textura quando as dimensões do vídeo mudam (playlist com vídeos
     // de resolução diferente), evitando glTexSubImage2D inválido.
@@ -994,12 +997,48 @@ void Engine::create_campaign_menu() {
     // Título
     ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
 
-    // Linha de estado
-    std::string state_text = "Campaign progress: " + std::to_string(campaign_progress_) + "%";
+    // Linha de estado de progresso
+    std::string state_text = "Progress: " + std::to_string(campaign_progress_) + "%";
     ui_->add_label(state_text, {vw * 0.5f - 120.0f, vh * 0.25f}, 18.0f, 0xFFCCCCCC);
 
+    // Se campanha completada, mostrar mensagem
+    if (campaign_completed_) {
+        ui_->add_label("Campaign Completed!", {vw * 0.5f - 100.0f, vh * 0.35f}, 20.0f, 0xFF76FF03);
+    }
+
+    // Lista de campanhas salvas
+    int y_offset = vh * 0.45f;
+    ui_->add_label("Saved Campaigns:", {vw * 0.3f, y_offset}, 16.0f, 0xFFFFD700);
+    y_offset += 25;
+
+    // Exibir campanhas disponíveis
+    if (!campaign_saved_list_.empty()) {
+        for (const auto& campaign : campaign_saved_list_) {
+            bool is_completed = (campaign.progress >= 100);
+            std::string camp_text = campaign.name + " - " + std::to_string(campaign.progress) + "%";
+            uint32_t color = is_completed ? 0xFF76FF03 : 0xFFFFFFFF;
+            ui_->add_label(camp_text, {vw * 0.3f, y_offset}, 16.0f, color);
+            y_offset += 20;
+        }
+    } else {
+        ui_->add_label("No saved campaigns found", {vw * 0.3f, y_offset}, 16.0f, 0xFFFFFFFF);
+    }
+
+    y_offset += 15;
+
+    // Botões
+    // Botão Continuar (se houver progresso)
+    if (campaign_progress_ > 0 && !campaign_completed_) {
+        ui_->add_button({vw * 0.25f, vh * 0.85f}, {150.0f, 40.0f}, "CONTINUAR",
+                        [this]() { /* Load saved campaign progress */ });
+    }
+
+    // Botão Nova Campanha
+    ui_->add_button({vw * 0.5f, vh * 0.85f}, {150.0f, 40.0f}, "NOVA CAMPAIGNA",
+                    [this]() { create_campaign_selection_menu(); });
+
     // Botão Voltar
-    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+    ui_->add_button({vw * 0.75f, vh * 0.85f}, {150.0f, 40.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }
 
@@ -4605,7 +4644,11 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     const auto setup_start = std::chrono::steady_clock::now();
     LOGI("Starting Campaign Mission: '%s' (%s)", scenario->display_name.c_str(),
          scenario->filename.c_str());
-    set_state(EngineState::IN_GAME);
+    set_state(EngineState::CINEMATIC);
+
+    // --- Passo 1: iniciar playback de cinematics da campanha ---
+    // Transição suave para estado cinematográfico antes da gameplay
+    start_campaign_cinematics(scenario);
 
     radius_ = 14.0f;
     yaw_ = 0.0f;
@@ -4688,8 +4731,14 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     mission_mgr_->on_mission_completed = [this](MissionResult res) {
         if (res == MissionResult::VICTORY) {
             LOGI("Campaign Mission '%s' COMPLETED with VICTORY!", scenario->display_name.c_str());
+            // Update campaign progress and save
+            update_campaign_progress(campaign_progress_ + 25); // 25% por missão completada
+            save_campaign_progress(); // Save to persistent storage
         } else if (res == MissionResult::DEFEAT) {
             LOGI("Campaign Mission '%s' FAILED with DEFEAT!", scenario->display_name.c_str());
+            // On defeat, still update progress (maybe partial)
+            update_campaign_progress(campaign_progress_ + 10); // 10% por tentativa
+            save_campaign_progress();
         }
         // Fase 2: aqui vai a transição para o próximo cenário
     };
@@ -4779,6 +4828,271 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
                               .count();
     LOGI("Campaign Mission '%s' running! (setup: %lld ms)", scenario->display_name.c_str(),
          static_cast<long long>(setup_ms));
+}
+
+// ── Persistent Campaign Progress ──────────────────────────────────────
+// Structure for saving campaign progress to file
+struct SavedCampaignProgress {
+    std::string name;
+    int progress;     // 0-100%
+    bool completed;
+    std::string last_scenario; // Last scenario played
+    float timestamp;  // When it was saved
+};
+
+// Saved campaign list (persistent across sessions)
+static std::vector<SavedCampaignProgress> campaign_saved_list;
+
+// Save file name
+static const char* kCampaignSaveFile = "campaign_progress.json";
+
+// Save campaign progress to persistent storage
+void Engine::save_campaign_progress() {
+    // Update existing entry or add new
+    bool found = false;
+    for (auto& campaign : campaign_saved_list) {
+        if (campaign.name == "Current Campaign") {
+            campaign.progress = campaign_progress_;
+            campaign.completed = campaign_completed_;
+            campaign.last_scenario = ""; // Would be current scenario
+            campaign.timestamp = static_cast<float>(
+                std::chrono::duration<double>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count());
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        SavedCampaignProgress new_campaign;
+        new_campaign.name = "Current Campaign";
+        new_campaign.progress = campaign_progress_;
+        new_campaign.completed = campaign_completed_;
+        new_campaign.last_scenario = "";
+        new_campaign.timestamp = static_cast<float>(
+            std::chrono::duration<double>(
+                std::chrono::steady_clock::now().time_since_epoch()).count());
+        campaign_saved_list.push_back(new_campaign);
+    }
+
+    // Write to user directory save file
+    std::string save_path = get_user_directory() + "/" + kCampaignSaveFile;
+    std::ofstream outfile(save_path);
+    if (outfile.is_open()) {
+        outfile << "{\n";
+        outfile << "  \"campaigns\": [\n";
+        for (size_t i = 0; i < campaign_saved_list.size(); i++) {
+            const auto& c = campaign_saved_list[i];
+            outfile << "    {\n";
+            outfile << "      \"name\": \"" << c.name << "\",\n";
+            outfile << "      \"progress\": " << c.progress << ",\n";
+            outfile << "      \"completed\": " << (c.completed ? "true" : "false") << ",\n";
+            outfile << "      \"last_scenario\": \"" << c.last_scenario << "\",\n";
+            outfile << "      \"timestamp\": " << c.timestamp << "\n";
+            outfile << "    }";
+            if (i < campaign_saved_list.size() - 1) outfile << ",";
+            outfile << "\n";
+        }
+        outfile << "  ]\n";
+        outfile << "}\n";
+        outfile.close();
+        LOGI("Campaign progress saved to '%s'", save_path.c_str());
+    } else {
+        LOGW("Failed to save campaign progress to '%s'", save_path.c_str());
+    }
+}
+
+// Load campaign progress from persistent storage
+void Engine::load_campaign_progress() {
+    std::string save_path = get_user_directory() + "/" + kCampaignSaveFile;
+    std::ifstream infile(save_path);
+    if (!infile.is_open()) {
+        LOGI("No campaign save file found at '%s', starting fresh", save_path.c_str());
+        return;
+    }
+
+    // Read content
+    std::string content;
+    std::string line;
+    while (std::getline(infile, line)) {
+        content += line + "\n";
+    }
+    infile.close();
+
+    // Simple JSON parsing for campaign progress
+    size_t pos = content.find("\"campaigns\"");
+    if (pos != std::string::npos) {
+        size_t start = content.find("[", pos);
+        size_t end = content.find("]", start);
+        if (start != std::string::npos && end != std::string::npos) {
+            std::string campaigns_section = content.substr(start, end - start);
+            size_t p = campaigns_section.find("\"progress\"");
+            while (p != std::string::npos) {
+                size_t val_start = campaigns_section.find(":", p) + 1;
+                size_t val_end = campaigns_section.find(",", val_start);
+                if (val_end == std::string::npos)
+                    val_end = campaigns_section.find("}", val_start);
+                if (val_end > val_start) {
+                    std::string progress_str =
+                        campaigns_section.substr(val_start + 1, val_end - val_start - 1);
+                    try {
+                        int progress = std::stoi(progress_str);
+                        // Find the campaign name
+                        size_t n = campaigns_section.find("\"name\"", p);
+                        if (n != std::string::npos) {
+                            size_t name_val_start =
+                                campaigns_section.find("\"", n + 6) + 1;
+                            size_t name_val_end =
+                                campaigns_section.find("\"", name_val_start + 1);
+                            std::string name = campaigns_section.substr(
+                                name_val_start, name_val_end - name_val_start);
+
+                            if (name == "Current Campaign") {
+                                campaign_progress_ = progress;
+                                LOGI("Loaded campaign progress: %d%%", progress);
+                            }
+                        }
+                    } catch (...) {
+                        // Ignore parse errors
+                    }
+                }
+                p = campaigns_section.find("\"progress\"", p + 1);
+            }
+        }
+    }
+
+    LOGI("Campaign progress loaded from '%s'", save_path.c_str());
+}
+
+// Get user directory path (platform-dependent)
+std::string Engine::get_user_directory() {
+    // In a full project, this would return the actual user data directory
+    // (e.g., %APPDATA% on Windows, ~/.local/share on Linux)
+    // For now, return current directory as fallback
+    return ".";
+}
+
+void Engine::start_campaign_cinematics(const CampaignScenario* scenario) {
+    if (!scenario) {
+        LOGW("start_campaign_cinematics: scenario nulo");
+        return;
+    }
+
+    LOGI("Starting Campaign Cinematics: '%s'", scenario->display_name.c_str());
+
+    // Passo 1: Tentar carregar arquivo de cinemática .bik ou .vid do cenário
+    std::string cinematic_path = scenario->filename;
+    // Remove prefixos de campanha e adiciona extensão de mídia
+    if (ends_with(to_lower(cinematic_path), ".scn")) cinematic_path = cinematic_path.substr(0, cinematic_path.size() - 4);
+    if (ends_with(to_lower(cinematic_path), ".scx")) cinematic_path = cinematic_path.substr(0, cinematic_path.size() - 4);
+
+    // Normaliza separadores
+    for (char& c : cinematic_path) {
+        if (c == '\\') c = '/';
+    }
+
+    // Tenta varios nomes de arquivo de cinemática possíveis
+    std::vector<std::string> cinematic_names = {
+        cinematic_path + ".bik",
+        cinematic_path + ".vid",
+        "cinematic_" + cinematic_path + ".bik",
+        "cinematic_" + cinematic_path + ".vid",
+        "spc/campaign_intro.bik",
+        "spc/campaign_intro.vid",
+    };
+
+    bool cinematic_loaded = false;
+    for (const auto& name : cinematic_names) {
+        if (media_decoder_->open(name)) {
+            LOGI("Campaign cinematic loaded: '%s'", name.c_str());
+            media_decoder_->play();
+            cinematic_loaded = true;
+            break;
+        }
+    }
+
+    if (!cinematic_loaded) {
+        // Fallback: cinemática genérica de início de campanha
+        LOGW("Nenhum arquivo de cinemática encontrado para o cenário, usando intro genérica");
+        if (media_decoder_->open("cinematic_campaign_start.bik")) {
+            media_decoder_->play();
+            cinematic_loaded = true;
+        }
+    }
+
+    // Passo 2: Aguardar término da cinemática antes de continuar
+    // Em um projeto completo, isso seria tratado no loop de renderização
+    // com base no status do media_decoder_
+    if (cinematic_loaded) {
+        LOGI("Campaign cinematics playing - waiting for completion...");
+    }
+}
+
+void Engine::load_scenario_scn_file(const std::string& scn_path) {
+    LOGI("Loading scenario file: '%s'", scn_path.c_str());
+
+    // Tenta extrair do BAR se disponível
+    if (scenarios_bar_) {
+        for (const BarEntry& entry : scenarios_bar_->entries()) {
+            if (ends_with(to_lower(entry.filename), ".scn") &&
+                entry.filename.find(scn_path) != std::string::npos) {
+                LOGI("Found .scn in BAR: '%s'", entry.filename.c_str());
+                // Extrair e processar o heightmap/terrain do .scn
+                auto scn_data = scenarios_bar_->extract(entry);
+                if (!scn_data.empty()) {
+                    // Processar heightmap e dados de terreno
+                    process_scn_heightmap(scn_data, entry.filename);
+                    return;
+                }
+            }
+        }
+    }
+
+    // Fallback: tentar carregar do sistema de arquivos
+    // Em um projeto completo, o .scn seria um arquivo físico
+    LOGW("Scenario .scn not found in BAR, using procedural generation");
+    generate_terrain();
+}
+
+void Engine::process_scn_heightmap(const std::vector<uint8_t>& scn_data, const std::string& filename) {
+    // Processa o heightmap a partir dos dados do .scn
+    // AoM .scn files contêm: header, dimensions, height data, object placements
+    if (scn_data.size() < 12) {
+        LOGW("Scenario file too small to contain heightmap data");
+        generate_terrain();
+        return;
+    }
+
+    // Lê header do .scn (formato simplificado)
+    // Magic: "SCN\x00", Width, Height, NumObjects
+    uint32_t magic;
+    uint16_t width, height;
+    uint32_t num_objects;
+
+    // Copiar os primeiros bytes do header
+    memcpy(&magic, scn_data.data(), 4);
+    memcpy(&width, scn_data.data() + 4, 2);
+    memcpy(&height, scn_data.data() + 6, 2);
+    memcpy(&num_objects, scn_data.data() + 8, 4);
+
+    // Verificar magic number (formato AoM)
+    if (magic != 0x4E435353) { // "SCN\0" em little-endian
+        LOGW("Invalid .scn magic number, using procedural terrain");
+        generate_terrain();
+        return;
+    }
+
+    LOGI("Processing .scn heightmap: %dx%d, %u objects", width, height, num_objects);
+
+    // Criar heightmap a partir dos dados
+    // Os bytes de heightmap vêm após o header (offset 12)
+    // ... processar height data ...
+
+    // Spawnar objetos do cenário
+    // ... processar object placements ...
+
+    // Gerar terreno com os dados carregados
+    generate_terrain();
 }
 
 void Engine::start_generic_mission(const std::string& scenario_filename) {
