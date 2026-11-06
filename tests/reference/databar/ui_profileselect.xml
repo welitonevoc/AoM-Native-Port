@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<profile_select>
+  <profiles>
+    <profile name="Jogador1" level="10" rank="Gold"/>
+    <profile name="Jogador2" level="15" rank="Diamond"/>
+  </profiles>
+  <buttons>
+    <button label="Selecionar" action="select_profile"/>
+    <button label="Criar Novo" action="new_profile"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</profile_select>

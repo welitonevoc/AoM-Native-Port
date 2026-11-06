@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<receive>
+  <receiving>
+    <sender>Jogador2</sender>
+    <resources>
+      <food>100</food>
+      <wood>100</wood>
+      <gold>100</gold>
+    </resources>
+  </receiving>
+  <buttons>
+    <button label="Aceitar" action="accept_resources"/>
+    <button label="Recusar" action="reject_resources"/>
+  </buttons>
+</receive>

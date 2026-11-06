@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<receive_connect>
+  <connection>
+    <status>Conectando...</status>
+    <player>Jogador2</player>
+  </receiving>
+  <buttons>
+    <button label="Cancelar" action="cancel_connection"/>
+  </buttons>
+</receive_connect>

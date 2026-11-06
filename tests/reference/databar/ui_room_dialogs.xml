@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<room_dialogs>
+  <rooms>
+    <room name="Sala 1" players="2/8" map="Random Map"/>
+    <room name="Sala 2" players="4/8" map="Random Map"/>
+  </rooms>
+  <buttons>
+    <button label="Entrar" action="join_room"/>
+    <button label="Criar Sala" action="create_room"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</room_dialogs>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rm_generation>
+  <map_settings>
+    <map_type>Random</map_type>
+    <map_size>Medium</map_size>
+    <players>8</max_players>
+  </map_settings>
+  <buttons>
+    <button label="Gerar Mapa" action="generate_map"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</rm_generation>
