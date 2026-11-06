@@ -428,6 +428,7 @@ private:
         MeshHandle mesh = INVALID_MESH;
         TextureHandle texture = INVALID_TEXTURE;
         BrgModel* model = nullptr;
+        const ProtoUnitData* unit_stats = nullptr;  ///< Estatísticas do proto.xmb (se houver match por nome)
     };
     std::unordered_map<std::string, ModelEntry> model_cache_;
     std::unordered_map<std::string, std::unique_ptr<BrgModel>> model_cache_models_;

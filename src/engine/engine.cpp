@@ -2466,10 +2466,19 @@ bool Engine::load_models() {
             if (tex != INVALID_TEXTURE) break;
         }
 
+        // Associar com dados do proto.xmb (se houver uma unidade com esse nome base)
+        const ProtoUnitData* unit_stats = nullptr;
+        std::string base_name = entry.filename;
+        if (ends_with(to_lower(base_name), ".brg")) {
+            base_name = base_name.substr(0, base_name.size() - 4);
+        }
+        unit_stats = game_data_.proto_units().find(base_name);
+
         ModelEntry& entry_cache = model_cache_[entry.filename];
         entry_cache.mesh = mesh;
         entry_cache.texture = tex;
         entry_cache.model = model.get();
+        entry_cache.unit_stats = unit_stats;
         // Guardar ponteiro estável (o unique_ptr do modelo é descartado, mas
         // precisamos dos dados para referência; o BrgModel é copiado por valor)
         model_cache_models_[entry.filename] = std::move(model);
