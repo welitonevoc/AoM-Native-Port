@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<stats_upload>
+  <stats>
+    <matches_played>50</matches_played>
+    <wins>30</wins>
+    <losses>20</losses>
+    <win_rate>60%</win_rate>
+  </stats>
+  <buttons>
+    <button label="Enviar" action="upload_stats"/>
+    <button label="Cancelar" action="return_to_main_menu"/>
+  </buttons>
+</stats_upload>

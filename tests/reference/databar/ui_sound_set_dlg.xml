@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sound_set_dialog>
+  <sound_set name="Default">
+    <music>menu_music.mp3</music>
+    <sfx>click.wav</sfx>
+  </sound_set>
+  <buttons>
+    <button label="Aplicar" action="apply_sound_set"/>
+    <button label="Cancelar" action="return_to_options_menu"/>
+  </buttons>
+</sound_set_dialog>

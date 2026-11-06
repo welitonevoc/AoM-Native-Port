@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sound_edit_dialog>
+  <sound_effect name="button_click">
+    <volume>0.8</volume>
+    <pitch>1.0</pitch>
+  </sound_effect>
+  <sound_effect name="button_hover">
+    <volume>0.5</volume>
+    <pitch>1.2</pitch>
+  </sound_effect>
+</sound_edit_dialog>

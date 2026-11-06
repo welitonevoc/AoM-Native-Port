@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sprm_setup>
+  <settings>
+    <sprm_enabled>true</sprm_enabled>
+    <sprm_difficulty>Normal</sprm_difficulty>
+  </settings>
+  <buttons>
+    <button label="Aplicar" action="apply_sprm_settings"/>
+    <button label="Cancelar" action="return_to_options_menu"/>
+  </buttons>
+</sprm_setup>
