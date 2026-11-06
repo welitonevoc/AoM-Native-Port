@@ -1353,8 +1353,11 @@ void Engine::render() {
         renderer_->set_camera(camera_);
         renderer_->set_light(dir_light_);
 
-        // 1. Celestial Skydome
-        if (skydome_mesh_ != INVALID_MESH) {
+        // 1. Celestial Skybox (P3.2: 6 faces do cube map) ou Skydome procedural (fallback)
+        if (skybox_mesh_ != INVALID_MESH) {
+            glm::mat4 sky_transform = glm::translate(glm::mat4(1.0f), camera_.target);
+            renderer_->draw_skybox(skybox_faces_, 65.0f);
+        } else if (skydome_mesh_ != INVALID_MESH) {
             glm::mat4 sky_transform = glm::translate(glm::mat4(1.0f), camera_.target);
             renderer_->draw_mesh(skydome_mesh_, sky_transform, skydome_texture_, BlendMode::OPAQUE);
         }
@@ -2009,8 +2012,15 @@ bool Engine::load_textures() {
         LOGI("Created procedural water normal texture (handle %u)", water_normal_tex_);
     }
 
-    // Carregar Skybox / Cube Map (.cub)
-    if (skydome_texture_ == INVALID_TEXTURE && textures_bar_) {
+    // Carregar Skybox / Cube Map (.cub) — P3.2: 6 faces completas
+    if (skybox_mesh_ == INVALID_MESH && textures_bar_) {
+        for (const char* cub_name : {"sfx a shiny water.cub", "sfx shinygold map.cub", "sfx shinyice map.cub"}) {
+            if (load_skybox_faces(cub_name)) break;
+        }
+    }
+
+    // Fallback: skybox com 1 textura (procedural skydome)
+    if (skydome_texture_ == INVALID_TEXTURE && textures_bar_ && skybox_mesh_ == INVALID_MESH) {
         for (const char* cub_name : {"sfx a shiny water.cub", "sfx shinygold map.cub", "sfx shinyice map.cub"}) {
             if (load_skybox_cube(cub_name)) break;
         }
@@ -2046,6 +2056,157 @@ bool Engine::load_skybox_cube(const std::string& cub_name) {
         }
     }
     return false;
+}
+
+bool Engine::load_skybox_faces(const std::string& cub_name) {
+    if (!renderer_ || !textures_bar_) return false;
+
+    current_cubemap_ = load_cub_definition(cub_name, textures_bar_.get());
+    if (!current_cubemap_.is_valid()) {
+        LOGW("load_skybox_faces: definicao de cubemap '%s' nao encontrada ou invalida", cub_name.c_str());
+        return false;
+    }
+
+    LOGI("load_skybox_faces: carregando cubemap '%s' com 6 faces",
+         cub_name.c_str());
+
+    // Mapeamento das faces do .cub para nomes de arquivo .ddt no textures.bar
+    struct FaceEntry {
+        const std::string& face_name;
+        TextureHandle& handle;
+    };
+
+    const std::array<FaceEntry, 6> faces = {{
+        {current_cubemap_.up,    skybox_faces_[0]},   // UP
+        {current_cubemap_.down,  skybox_faces_[1]},   // DOWN
+        {current_cubemap_.front, skybox_faces_[2]},   // FRONT
+        {current_cubemap_.back,  skybox_faces_[3]},   // BACK
+        {current_cubemap_.left,  skybox_faces_[4]},   // LEFT
+        {current_cubemap_.right, skybox_faces_[5]},   // RIGHT
+    }};
+
+    const char* face_names[6] = {"up", "down", "front", "back", "left", "right"};
+    int loaded_count = 0;
+
+    for (int i = 0; i < 6; ++i) {
+        const auto& fe = faces[i];
+        if (fe.face_name.empty()) {
+            LOGW("load_skybox_faces: face '%s' sem nome definido no .cub", face_names[i]);
+            continue;
+        }
+
+        // Tenta candidatos de arquivo de textura
+        bool loaded = false;
+        for (const std::string& cand : {
+                 fe.face_name + ".ddt",
+                 fe.face_name + " diffuse.ddt",
+                 fe.face_name + "_diffuse.ddt",
+                 fe.face_name,
+             }) {
+            std::vector<uint8_t> data = textures_bar_->extract(cand);
+            if (!data.empty()) {
+                auto ddt = DdtLoader::load(data);
+                if (ddt) {
+                    fe.handle = renderer_->create_texture(*ddt);
+                    LOGI("load_skybox_faces: face '%s' = '%s' (handle %u)",
+                         face_names[i], cand.c_str(), fe.handle);
+                    loaded = true;
+                    break;
+                }
+            }
+        }
+        if (!loaded) {
+            LOGW("load_skybox_faces: nao foi possivel carregar textura para face '%s'", face_names[i]);
+        } else {
+            ++loaded_count;
+        }
+    }
+
+    if (loaded_count == 0) {
+        LOGE("load_skybox_faces: nenhuma face de skybox carregada para '%s'", cub_name.c_str());
+        return false;
+    }
+
+    // Criar malha do skybox (cubo invertido com normais apontando para dentro)
+    create_skybox_mesh();
+    LOGI("load_skybox_faces: %d/6 faces carregadas, skybox mesh criado", loaded_count);
+    return true;
+}
+
+void Engine::create_skybox_mesh() {
+    if (!renderer_) return;
+    if (skybox_mesh_ != INVALID_MESH) return;
+
+    const float R = 65.0f;
+    std::vector<Vertex> verts;
+    std::vector<uint32_t> indices;
+
+    // Cubo com 6 faces, normais apontando para dentro (para vista de dentro para fora)
+    // Face: UP (y = +R)
+    {
+        glm::vec3 corners[4] = {{-R, R, -R}, {R, R, -R}, {R, R, R}, {-R, R, R}};
+        glm::vec3 normal(0.0f, 1.0f, 0.0f);
+        // Ordem invertida para normais para dentro (vista interna)
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+    // Face: DOWN (y = -R)
+    {
+        glm::vec3 corners[4] = {{-R, -R, R}, {R, -R, R}, {R, -R, -R}, {-R, -R, -R}};
+        glm::vec3 normal(0.0f, -1.0f, 0.0f);
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+    // Face: FRONT (z = +R)
+    {
+        glm::vec3 corners[4] = {{-R, -R, R}, {R, -R, R}, {R, R, R}, {-R, R, R}};
+        glm::vec3 normal(0.0f, 0.0f, 1.0f);
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+    // Face: BACK (z = -R)
+    {
+        glm::vec3 corners[4] = {{R, -R, -R}, {-R, -R, -R}, {-R, R, -R}, {R, R, -R}};
+        glm::vec3 normal(0.0f, 0.0f, -1.0f);
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+    // Face: LEFT (x = -R)
+    {
+        glm::vec3 corners[4] = {{-R, -R, -R}, {-R, -R, R}, {-R, R, R}, {-R, R, -R}};
+        glm::vec3 normal(-1.0f, 0.0f, 0.0f);
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+    // Face: RIGHT (x = +R)
+    {
+        glm::vec3 corners[4] = {{R, -R, R}, {R, -R, -R}, {R, R, -R}, {R, R, R}};
+        glm::vec3 normal(1.0f, 0.0f, 0.0f);
+        add_skybox_quad(verts, indices, corners[0], corners[3], corners[2], corners[1], normal,
+                        glm::vec2(0,0), glm::vec2(1,0), glm::vec2(1,1), glm::vec2(0,1));
+    }
+
+    skybox_mesh_ = renderer_->create_mesh(verts.data(), static_cast<uint32_t>(verts.size()),
+                                          indices.data(), static_cast<uint32_t>(indices.size()));
+    LOGI("create_skybox_mesh: %zu verts, %zu indices", verts.size(), indices.size());
+}
+
+void Engine::add_skybox_quad(std::vector<Vertex>& verts, std::vector<uint32_t>& indices,
+                             const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2,
+                             const glm::vec3& p3, const glm::vec3& normal,
+                             const glm::vec2& t0, const glm::vec2& t1,
+                             const glm::vec2& t2, const glm::vec2& t3) {
+    uint32_t base = static_cast<uint32_t>(verts.size());
+    verts.push_back({p0, normal, t0, glm::vec4(1.0f)});
+    verts.push_back({p1, normal, t1, glm::vec4(1.0f)});
+    verts.push_back({p2, normal, t2, glm::vec4(1.0f)});
+    verts.push_back({p3, normal, t3, glm::vec4(1.0f)});
+    indices.push_back(base + 0);
+    indices.push_back(base + 1);
+    indices.push_back(base + 2);
+    indices.push_back(base + 0);
+    indices.push_back(base + 2);
+    indices.push_back(base + 3);
 }
 
 bool Engine::load_models() {

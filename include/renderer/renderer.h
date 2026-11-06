@@ -173,6 +173,13 @@ public:
     virtual void draw_water(const glm::vec4& water_plane,
                             TextureHandle normal_map, float time) = 0;
 
+    /// Draw a skybox / cubemap using 6 face textures.
+    /// @param faces  Array of 6 texture handles in order: [up, down, front, back, left, right]
+    /// @param radius  Skybox radius in world units
+    virtual void draw_skybox(const TextureHandle faces[6], float radius = 65.0f) {
+        (void)faces; (void)radius;
+    }
+
     // --- UI Rendering ---
 
     /// Begin UI rendering pass (2D overlay)

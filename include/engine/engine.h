@@ -285,6 +285,12 @@ private:
     TextureHandle skydome_texture_ = INVALID_TEXTURE;
     CubeMapDef current_cubemap_;
     bool load_skybox_cube(const std::string& cub_name);
+
+    /// —— Skybox completo (P3.2) ——
+    TextureHandle skybox_faces_[6] = {INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE,
+                                      INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE};
+    MeshHandle skybox_mesh_ = INVALID_MESH;
+    bool load_skybox_faces(const std::string& cub_name);
     MeshHandle terrain_mesh_ = INVALID_MESH;
     void generate_skydome();
     void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
