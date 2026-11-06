@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sample>
+  <text>Exemplo de menu de amostra</message>
+  <buttons>
+    <button label="OK" action="close"/>
+  </buttons>
+</sample>

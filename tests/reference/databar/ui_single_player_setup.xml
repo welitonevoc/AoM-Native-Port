@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<single_player_setup>
+  <settings>
+    <map_name>Random Map</map_name>
+    <difficulty>Normal</difficulty>
+    <max_players>1</max_players>
+  </settings>
+  <buttons>
+    <button label="Iniciar Partida" action="start_single_player_game"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</single_player_setup>

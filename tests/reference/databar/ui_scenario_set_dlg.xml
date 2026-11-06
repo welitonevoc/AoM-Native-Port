@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scenario_set_dlg>
+  <scenarios>
+    <scenario name="Campanha 1" missions="10"/>
+    <campaign name="Campanha 2" missions="8"/>
+  </campaigns>
+  <buttons>
+    <button label="Carregar" action="load_campaign"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </buttons>
+</scenario_set_dlg>
