@@ -50,7 +50,9 @@ enum class EngineState {
     CINEMATIC,      ///< Playing opening cinematic (introcg.bik / introcg.mp4)
     SPLASH,
     LOADING,
-    MAIN_MENU,
+    MAIN_MENU,      ///< Menu pregame autentico (uipregamenew.xmb / The Titans)
+    GAME_LIST,      ///< uigamelist — lista de jogos salvos, campanhas e cenarios
+    GOD_PICKER,     ///< uigodpicker — escolha de civilizacao / deus menor
     IN_GAME,
     OPTIONS,
     CREDITS,
@@ -251,7 +253,9 @@ private:
     bool load_strings(const std::string& path);
     std::string tr(const std::string& key) const;
 
-    void create_main_menu();
+    void create_main_menu();          ///< uipregamenew — menu pregame The Titans
+    void create_game_list_menu();     ///< uigamelist — lista de jogos/campanhas/cenarios
+    void create_god_picker_menu();    ///< uigodpicker — escolha de civilizacao/deus
     void create_single_player_menu();
     void create_random_map_menu();
     void create_load_game_menu();

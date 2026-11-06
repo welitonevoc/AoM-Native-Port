@@ -380,11 +380,19 @@ void Engine::set_state(EngineState new_state) {
             loading_progress_ = 0.0f;
             break;
         case EngineState::MAIN_MENU:
-            LOGI("Entered state: MAIN_MENU");
+            LOGI("Entered state: MAIN_MENU (uipregamenew)");
             if (audio_) {
                 audio_->play_music("menu_music.mp3", true);
             }
             create_main_menu();
+            break;
+        case EngineState::GAME_LIST:
+            LOGI("Entered state: GAME_LIST (uigamelist)");
+            create_game_list_menu();
+            break;
+        case EngineState::GOD_PICKER:
+            LOGI("Entered state: GOD_PICKER (uigodpicker)");
+            create_god_picker_menu();
             break;
         case EngineState::OPTIONS:
             LOGI("Entered state: OPTIONS");
@@ -464,6 +472,25 @@ void Engine::create_main_menu() {
         btn->pressed_tex = INVALID_TEXTURE;
     }
 
+    // ── Botoes extras do menu pregame (uipregamenew) ────────────────────────
+    // uigamelist e uigodpicker nao estao no portal original dos 7 botoes de jade,
+    // entao recebem um estilo visível (fundo dourado) para diferenciar.
+    const float extra_btn_w = 220.0f * sx;
+    const float extra_btn_h = 34.0f * sy;
+    const float extra_btn_x = (vw - extra_btn_w) * 0.5f;
+    float extra_y = (573.0f + 44.0f) * sy;
+
+    ui_->add_button({extra_btn_x, extra_y}, {extra_btn_w, extra_btn_h},
+                    "LISTA DE JOGOS (uigamelist)",
+                    [this]() { set_state(EngineState::GAME_LIST); },
+                    0xFF8B4513, 0xFFCD853F);
+    extra_y += extra_btn_h + 8.0f * sy;
+
+    ui_->add_button({extra_btn_x, extra_y}, {extra_btn_w, extra_btn_h},
+                    "ESCOLHA DE DEUS (uigodpicker)",
+                    [this]() { set_state(EngineState::GOD_PICKER); },
+                    0xFF8B4513, 0xFFCD853F);
+
     // ── Aviso de dados originais ausentes ────────────────────────────────────
     if (!archives_loaded_) {
         ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
@@ -477,6 +504,181 @@ void Engine::create_main_menu() {
         fps_label_ = ui_->add_label("FPS: 60",
             {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
     }
+}
+
+// ── uigamelist — lista de jogos salvos, campanhas e cenarios ─────────────────
+void Engine::create_game_list_menu() {
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    const float sx = vw / 1024.0f;
+    const float sy = vh / 768.0f;
+
+    ui_->add_label("LISTA DE JOGOS", {vw * 0.5f - 130.0f, vh * 0.08f}, 32.0f,
+                   0xFFFFD000);
+
+    // ── Jogos salvos ────────────────────────────────────────────────────────
+    ui_->add_label("JOGOS SALVOS", {vw * 0.5f - 200.0f, vh * 0.18f}, 22.0f,
+                   0xFFCCCCCC);
+
+    const std::string sp = save_game_path();
+    const bool found = has_valid_save(sp);
+
+    float y = vh * 0.26f;
+    const float btn_w = 340.0f * sx;
+    const float btn_h = 44.0f * sy;
+    const float btn_x = (vw - btn_w) * 0.5f;
+    const float gap = 12.0f * sy;
+
+    if (found) {
+        ui_->add_button({btn_x, y}, {btn_w, btn_h}, "CONTINUAR PARTIDA SALVA",
+                        [this]() { load_game(); });
+        y += btn_h + gap;
+    } else {
+        ui_->add_label("Nenhum jogo salvo encontrado.",
+                       {vw * 0.5f - 150.0f, y}, 16.0f, 0xFFCCCCCC);
+        y += 30.0f * sy;
+    }
+
+    // ── Campanhas disponiveis ───────────────────────────────────────────────
+    y += 8.0f * sy;
+    ui_->add_label("CAMPANHAS", {vw * 0.5f - 200.0f, y}, 22.0f, 0xFFCCCCCC);
+    y += 32.0f * sy;
+
+    const Campaign* camp = campaign_mgr_ ? campaign_mgr_->current_campaign() : nullptr;
+    if (campaign_mgr_ && campaign_mgr_->scenario_count() > 0) {
+        const size_t scenario_count = campaign_mgr_->scenario_count();
+        const size_t show_count = std::min<size_t>(scenario_count, 6);
+        std::string camp_name = camp ? camp->name : "Campanha";
+        ui_->add_label("Campanha: " + camp_name + "  (" +
+                           std::to_string(scenario_count) + " cenarios)",
+                       {vw * 0.5f - 240.0f, y - 8.0f * sy}, 16.0f, 0xFFCCCCCC);
+        for (size_t i = 0; i < show_count; ++i) {
+            std::string label = "Cenario " + std::to_string(i + 1);
+            ui_->add_button({btn_x, y}, {btn_w, btn_h}, label,
+                            [this, i]() { start_campaign_mission(i); });
+            y += btn_h + gap;
+        }
+    } else {
+        ui_->add_label("Nenhuma campanha carregada.",
+                       {vw * 0.5f - 150.0f, y}, 16.0f, 0xFFCCCCCC);
+        y += 30.0f * sy;
+    }
+
+    // ── Cenarios aleatorios / skirmish ──────────────────────────────────────
+    y += 8.0f * sy;
+    ui_->add_label("MAPA ALEATORIO / SKIRMISH", {vw * 0.5f - 220.0f, y},
+                   22.0f, 0xFFCCCCCC);
+    y += 32.0f * sy;
+
+    ui_->add_button({btn_x, y}, {btn_w, btn_h}, "NOVO JOGO SKIRMISH",
+                    [this]() { set_state(EngineState::IN_GAME); start_game(); });
+    y += btn_h + gap;
+
+    ui_->add_button({btn_x, y}, {btn_w, btn_h}, "CAMPANHA (selecionar)",
+                    [this]() { create_campaign_menu(); });
+    y += btn_h + gap;
+
+    // ── Voltar ──────────────────────────────────────────────────────────────
+    float back_w = 220.0f * sx;
+    float back_h = 44.0f * sy;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h},
+                    "VOLTAR", [this]() { return_to_main_menu(); });
+}
+
+// ── uigodpicker — escolha de civilizacao / deus menor ────────────────────────
+void Engine::create_god_picker_menu() {
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    const float sx = vw / 1024.0f;
+    const float sy = vh / 768.0f;
+
+    ui_->add_label("ESCOLHA DE DEUS / CIVILIZACAO",
+                   {vw * 0.5f - 230.0f, vh * 0.08f}, 30.0f, 0xFFFFD000);
+
+    // Lista de civilizacoes / deuses menores do Age of Mythology
+    struct GodEntry {
+        const char* civilization;
+        const char* major_god;
+        const char** minor_gods;
+        int minor_count;
+    };
+
+    static const char* greek_minors[] = {"Afrodite", "Apolo", "Ares", "Artemis",
+                                         "Atena", "Dioniso", "Hades", "Hefesto",
+                                         "Hermes", "Hestia", "Poseidon", "Zeus"};
+    static const char* egyptian_minors[] = {"Anubis", "Bastet", "Hórus", "Isis",
+                                            "Nefti", "Osíris", "Ptah", "Ra",
+                                            "Set", "Toth"};
+    static const char* norse_minors[] = {"Balder", "Freyja", "Freyr", "Heimdall",
+                                         "Hermod", "Loki", "Njord", "Odin",
+                                         "Sif", "Skadi", "Thor", "Tyr", "Uller"};
+    static const char* atlantean_minors[] = {"Atlas", "Cronos", "Hécate", "Helios",
+                                             "Leto", "Okeano", "Prometeu", "Reia",
+                                             "Téia"};
+
+    const GodEntry gods[] = {
+        {"Gregos", "Zeus", greek_minors, 12},
+        {"Egípcios", "Rá", egyptian_minors, 10},
+        {"Nórdicos", "Odin", norse_minors, 13},
+        {"Atlantes", "Cronos", atlantean_minors, 9},
+    };
+
+    const float col_w = 300.0f * sx;
+    const float col_h = 42.0f * sy;
+    const float gap = 10.0f * sy;
+    const float start_x = vw * 0.08f;
+    const float start_y = vh * 0.18f;
+
+    float x = start_x;
+    float y = start_y;
+    const float max_col_h = vh * 0.62f;
+
+    for (const auto& g : gods) {
+        // Título da civilização
+        ui_->add_label(g.civilization, {x, y}, 20.0f, 0xFFFFD000);
+        y += 28.0f * sy;
+
+        // Deus maior
+        ui_->add_label("Maior: " + std::string(g.major_god), {x, y}, 16.0f,
+                       0xFFCCCCCC);
+        y += 24.0f * sy;
+
+        // Deuses menores
+        for (int i = 0; i < g.minor_count; ++i) {
+            if (y + col_h > max_col_h) {
+                // Nova coluna
+                x += col_w + gap;
+                y = start_y;
+            }
+            std::string btn_label = std::string(g.minor_gods[i]) +
+                                    " (" + g.civilization + ")";
+            ui_->add_button({x, y}, {col_w, col_h}, btn_label,
+                            [this, civ = std::string(g.civilization),
+                             god = std::string(g.minor_gods[i])]() {
+                                LOGI("Deus selecionado: %s — %s", civ.c_str(),
+                                     god.c_str());
+                                // Aqui se pode iniciar o jogo com a civ/deus
+                                set_state(EngineState::IN_GAME);
+                                start_game();
+                            });
+            y += col_h + gap;
+        }
+
+        x += col_w + gap;
+        y = start_y;
+    }
+
+    // Voltar
+    float back_w = 200.0f * sx;
+    float back_h = 44.0f * sy;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h},
+                    "VOLTAR", [this]() { return_to_main_menu(); });
 }
 
 void Engine::create_options_menu() {
