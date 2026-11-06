@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_robust_ui>
+  <settings>
+    <ui_scale>1.0</ui_scale>
+    <font_size>12</font_size>
+  </settings>
+  <buttons>
+    <button label="Apply" action="apply_ui_settings"/>
+    <button label="Cancel" action="return_to_menu"/>
+  </buttons>
+</ui_robust_ui>

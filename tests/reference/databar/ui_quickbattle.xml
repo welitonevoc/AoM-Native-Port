@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_quickbattle>
+  <settings>
+    <map_name>Random Map</map_name>
+    <max_players>2</max_players>
+  </settings>
+  <buttons>
+    <button label="Start Battle" action="start_quickbattle"/>
+  </buttons>
+</ui_quickbattle>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_projectmenu>
+  <option name="Start Game" action="start_game"/>
+  <button label="Campaigns" action="create_campaign_menu"/>
+</ui_projectmenu>

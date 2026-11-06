@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_reset_settings>
+  <confirmation>Reset all settings to default?</confirmation>
+  <buttons>
+    <button label="Yes" action="reset_settings"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_reset_settings>

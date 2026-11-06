@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_saved_games>
+  <saved_games>
+    <save name="Campaign 1 Mission 1" date="2026-10-01"/>
+    <save name="Campaign 1 Mission 2" date="2026-11-01"/>
+  </saved_games>
+  <buttons>
+    <button label="Load Selected" action="load_selected_save"/>
+    <button label="Delete Saved Game" action="delete_selected_save"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_saved_games>
