@@ -244,6 +244,47 @@ Arquivos alterados nesta sessão: `include/renderer/renderer.h`,
 
 ---
 
+## Campanha — Fase 1: Estrutura Dinâmica (2026-11-06)
+
+**Status:** Implementado. Menu de campanha agora lista todos os cenários jogáveis
+do .cpn/.cpx dinamicamente, e `start_campaign_mission()` aceita um
+`CampaignScenario*` para iniciar qualquer cenário com suporte a missão dedicada
+ou genérica.
+
+### Campanha Fase 1.1 — Menu de Campanha Dinâmico ✅
+- `create_campaign_menu()` agora lê `campaign_mgr_->current_campaign()` e
+  lista todos os cenários jogáveis (pula cutscenes/unlisted e sem filename)
+  com botões individuais "JOGAR" para cada um
+- Header mostra o nome da campanha e o total de cenários
+- Exibe até 10 cenários por tela com indicação de "e mais X cenario(ns)" se houver
+  mais que o limite
+
+### Campanha Fase 1.2 — start_campaign_mission Genérico ✅
+- `engine.h`: nova assinatura `start_campaign_mission(const CampaignScenario*)`
+  e `start_generic_mission(const std::string&)`
+- `engine.cpp`: `start_campaign_mission(size_t)` delega para a versão com
+  `CampaignScenario*`; nova versão monta o caminho do `.scn` a partir do
+  `filename` do cenário, normaliza separadores `\`→`/`
+- Se o cenário for "Omens" (aomsp04), usa `init_mission_omens()` (script
+  dedicado com cinemática, diálogos, triggers, Kraken, piratas, reforços)
+- Para qualquer outro cenário, chama `start_generic_mission()` que spawn
+  Town Centers friendly/enemy, unidades iniciais, worker e nós de recursos
+- `on_mission_completed` loga vitória/derrota com o nome da missão
+- `start_generic_mission()` carrega dados do `.scn` via `scenarios_bar_` com
+  fallback para primeiro `.scn` disponível
+
+### Campanha Fase 1.3 — Pendências (Fase 2)
+- Transição automática entre missões quando uma termina (vitória/derrota)
+- Save/Load de progresso da campanha (qual missão foi completada)
+- Mission managers dedicados para as outras 59 missões da campanha base +
+  19 da expansão The Titans
+- Tela de seleção de dificuldade e briefing/mapa da campanha
+
+Arquivos alterados nesta sessão: `include/engine/engine.h`,
+`src/engine/engine.cpp`.
+
+---
+
 ## Sprint 11: Expansão The Titans — Overlay de Archives BAR e Protos da Expansão (2026-11-05)
 
 **Status:** Implementado e validado no emulador x86_64 (API 36) com a instalação real do *AoM Extended Edition* (com The Titans). Builds ARM64 e x86_64 OK, APK assinado (v2/v3, 17,51 MB) instalado e executado, e a suíte nova `test_bar_overlay` aprovada em 100% usando os dados originais. As demais suítes também foram reexecutadas com o overlay ativo (11 de 13 em 100%; ver itens 9.1 e 9.2 para as duas ressalvas). Pendências: validação em hardware ARM64 e o ANR registrado no início de missão de campanha.
