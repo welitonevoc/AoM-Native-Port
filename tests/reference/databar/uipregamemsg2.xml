@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pregame_msg_2>
-  <message>
-    <title>Save Game</title>
-    <text>Your game has been saved successfully.</text>
-  </message>
-  <message>
-    <title>Load Game</title>
-    <text>Select a saved game to load.</text>
-  </message>
-</pregame_msg_2>
+<pregame_message_2>
+  <message id="1">Sua partida foi salva com sucesso</message>
+  <message id="2">Carregando partida salva...</message>
+  <message id="3">Nenhuma partida salva encontrada</message>
+</pregame_message_2>

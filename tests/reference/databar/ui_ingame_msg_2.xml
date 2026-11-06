@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ingame_message_2>
-  <message>
-    <title>Unidade atacando</title>
-    <text>O Hoplite está atacando o inimigo.</text>
-  </message>
-  <message>
-    <title>Unidade morta</title>
-    <text>Sua unidade foi derrotada em combate.</text>
-  </message>
-  <message>
-    <title>Recurso coletado</title>
-    <text>Comida coletada com sucesso.</text>
-  </message>
-</ingame_message_2>
+  <message id="1">Unidade selecionada</message>
+  <message id="2">Recursos insuficientes</message>
+  <message id="3">Edifício construído</message>
+</ingame_message_1>

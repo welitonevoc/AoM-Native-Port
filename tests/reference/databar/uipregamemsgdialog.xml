@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pregame_msg_dialog>
+<pregame_message_dialog>
   <dialog>
-    <title>Confirm Exit</title>
-    <text>Are you sure you want to exit the game?</text>
+    <title>Confirmar Saída</title>
+    <text>Tem certeza que deseja sair do jogo?</text>
     <buttons>
-      <button label="Yes" action="quit_app"/>
-      <button label="No" action="return_to_menu"/>
+      <button label="Sim" action="exit_game"/>
+      <button label="Não" action="cancel"/>
     </buttons>
   </dialog>
-  <dialog>
-    <title>New Game</title>
-    <text>Starting a new game will overwrite current progress.</text>
-    <buttons>
-      <button label="Yes" action="start_new_game"/>
-      <button label="No" action="return_to_menu"/>
-    </buttons>
-  </dialog>
-</pregame_msg_dialog>
+</pregame_message_dialog>
