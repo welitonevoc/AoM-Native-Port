@@ -110,6 +110,15 @@ public:
     void start_game();
     void start_campaign_mission(size_t scenario_idx = 1);
 
+    /// Inicia uma campanha a partir de um cenário específico (dados do .cpn/.cpx).
+    /// Usado pelo menu dinâmico de campanha (Fase 1).
+    void start_campaign_mission(const CampaignScenario* scenario);
+
+    /// Inicia uma missão genérica (sem script específico) usando apenas o
+    /// terrain do .scn e entidades básicas. Fallback para cenários sem
+    /// CampaignMissionManager dedicado.
+    void start_generic_mission(const std::string& scenario_filename);
+
     /// Carrega (de forma limitada) os clips de animacao BRG de `models.bar`.
     ///
     /// O archive contem milhares de `.brg`; extrair e interpretar todos levava

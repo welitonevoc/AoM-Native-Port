@@ -2498,45 +2498,92 @@ void Engine::create_campaign_menu() {
     const float vh = static_cast<float>(config_.window_height);
 
     // Header
-    ui_->add_label("CAMPANHA: A QUEDA DO TRIDENTE", {vw * 0.5f - 240.0f, vh * 0.08f}, 26.0f, 0xFFFFD700);
-    ui_->add_label("Fall of the Trident - 32 Cenarios Epicos", {vw * 0.5f - 160.0f, vh * 0.13f}, 16.0f, 0xFFCCCCCC);
+    const Campaign* camp = campaign_mgr_ ? campaign_mgr_->current_campaign() : nullptr;
+    std::string camp_name = camp ? camp->name : "Campanha";
+    ui_->add_label("CAMPANHA: " + camp_name, {vw * 0.5f - 240.0f, vh * 0.05f}, 26.0f, 0xFFFFD700);
+    ui_->add_label("Total de " + std::to_string(campaign_mgr_ ? campaign_mgr_->scenario_count() : 0) +
+                   " cenarios",
+                   {vw * 0.5f - 160.0f, vh * 0.09f}, 14.0f, 0xFFCCCCCC);
 
-    // Scenario box
-    const float box_w = vw * 0.78f;
+    // Lista dinamica de cenarios jogáveis (pula cutscenes/unlisted)
+    const float box_w = vw * 0.90f;
     const float box_x = (vw - box_w) * 0.5f;
-    const float box_y = vh * 0.19f;
+    const float box_y = vh * 0.13f;
+    const float row_h = 42.0f;
+    const float max_rows = 10.0f;  // numero de linhas visíveis antes de rolagem (simplificado)
 
-    ui_->add_label("CENARIO 1: AGOUROS (OMENS)", {box_x + 30.0f, box_y + 24.0f}, 22.0f, 0xFFFFE066);
-    ui_->add_label("Arquivo: spc\\aomsp04.scn  |  Local: Atlantida", {box_x + 30.0f, box_y + 54.0f}, 14.0f, 0xFF88CCFF);
+    float y = box_y;
+    int shown = 0;
+    std::vector<const CampaignScenario*> playable;
+    if (camp) {
+        for (size_t i = 0; i < camp->scenarios.size(); ++i) {
+            const auto* sc = &camp->scenarios[i];
+            if (sc->unlisted) continue;
+            // Considera jogável se tem filename .scn ou .scx (não cinemática pura)
+            if (sc->filename.empty()) continue;
+            playable.push_back(sc);
+        }
+    }
 
-    const std::string briefing =
-        "Arkantos atraca seu navio em Atlantida apos um sonho perturbador com a deusa Atena.\n\n"
-        "O Teocrata exige que tropas sejam enviadas com urgencia para auxiliar no cerco de Troia.\n"
-        "Porem, velas negras surgem no horizonte: os piratas de Kamos iniciam um violento ataque,\n"
-        "e das profundezas do oceano ergue-se o terrivel Kraken!\n\n"
-        "OBJETIVOS PRINCIPAIS:\n"
-        "- Proteja Atlantida derrotando o temivel Kraken.\n"
-        "- Repila os bandos de piratas que desembarcam na praia.\n"
-        "- Mantenha o heroi Arkantos vivo a todo custo!\n"
-        "- Resista ate a chegada do exercito atlante em marcha.";
+    for (size_t i = 0; i < playable.size() && shown < static_cast<size_t>(max_rows); ++i, ++shown) {
+        const auto* sc = playable[i];
+        std::string label = sc->display_name.empty() ? ("Cenario " + std::to_string(i + 1))
+                                                      : sc->display_name;
+        std::string file_info = sc->filename;
+        // Trunca nome do arquivo para caber na linha
+        if (file_info.size() > 38) file_info = file_info.substr(0, 35) + "...";
 
-    ui_->add_label(briefing, {box_x + 30.0f, box_y + 88.0f}, 15.0f, 0xFFFFFFFF);
+        ui_->add_label(label + "  |  " + file_info,
+                       {box_x + 20.0f, y}, 15.0f, 0xFFFFFFFF);
 
-    // Buttons
-    const float btn_w = 260.0f;
+        // Botão "JOGAR" para cada cenário
+        float btn_w = 120.0f, btn_h = 30.0f;
+        float btn_x = box_x + box_w - btn_w - 20.0f;
+        ui_->add_button({btn_x, y - 6.0f}, {btn_w, btn_h}, "JOGAR",
+                        [this, sc]() { start_campaign_mission(sc); },
+                        0xDD2A5A1A, 0xEE408525);
+
+        y += row_h;
+    }
+
+    if (playable.size() > max_rows) {
+        ui_->add_label("... e mais " + std::to_string(playable.size() - max_rows) +
+                       " cenario(ns)",
+                       {box_x + 20.0f, y}, 12.0f, 0xFF888888);
+        y += row_h;
+    }
+
+    // Buttons fixos no rodapé
+    const float btn_w = 200.0f;
     const float btn_h = 44.0f;
-    const float btn_y = vh * 0.84f;
+    const float btn_y = vh * 0.88f;
 
-    ui_->add_button({box_x + 30.0f, btn_y}, {btn_w, btn_h}, "INICIAR MISSAO",
-                    [this]() { start_campaign_mission(1); }, 0xDD2A5A1A, 0xEE408525);
-
-    ui_->add_button({box_x + box_w - btn_w - 30.0f, btn_y}, {btn_w, btn_h}, "VOLTAR",
+    ui_->add_button({(vw - btn_w) * 0.5f, btn_y}, {btn_w, btn_h}, "VOLTAR",
                     [this]() { return_to_main_menu(); }, 0xAA221105, 0xAA44220A);
 }
 
 void Engine::start_campaign_mission(size_t scenario_idx) {
+    if (!campaign_mgr_) {
+        LOGW("start_campaign_mission: campaign_mgr_ nao inicializado");
+        return;
+    }
+    const CampaignScenario* sc = campaign_mgr_->get_scenario(scenario_idx);
+    if (!sc) {
+        LOGW("start_campaign_mission: indice %zu fora do alcance", scenario_idx);
+        return;
+    }
+    start_campaign_mission(sc);
+}
+
+void Engine::start_campaign_mission(const CampaignScenario* scenario) {
+    if (!scenario) {
+        LOGW("start_campaign_mission: scenario nulo");
+        return;
+    }
+
     const auto setup_start = std::chrono::steady_clock::now();
-    LOGI("Starting Campaign Mission (index %zu)...", scenario_idx);
+    LOGI("Starting Campaign Mission: '%s' (%s)", scenario->display_name.c_str(),
+         scenario->filename.c_str());
     set_state(EngineState::IN_GAME);
 
     radius_ = 14.0f;
@@ -2616,24 +2663,48 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
             audio_->play_sfx(cue);
         }
     };
-    mission_mgr_->on_mission_completed = [](MissionResult res) {
+    mission_mgr_->on_mission_completed = [this](MissionResult res) {
         if (res == MissionResult::VICTORY) {
-            LOGI("Campaign Mission 1 COMPLETED with VICTORY!");
+            LOGI("Campaign Mission '%s' COMPLETED with VICTORY!", scenario->display_name.c_str());
         } else if (res == MissionResult::DEFEAT) {
-            LOGI("Campaign Mission 1 FAILED with DEFEAT!");
+            LOGI("Campaign Mission '%s' FAILED with DEFEAT!", scenario->display_name.c_str());
         }
+        // Fase 2: aqui vai a transição para o próximo cenário
     };
 
-    std::string custom_scn = "assets/scenario/spc/aomsp04.scn";
-    mission_mgr_->init_mission_omens(gameplay_world_.get(), scenarios_bar_.get(), custom_scn, &camera_);
+    // Montar caminho do .scn a partir do filename do cenário
+    // filename do .cpn vem como "spc\\aomsp04" ou "spc/aomsp04" (sem .scn)
+    std::string scn_base = scenario->filename;
+    // Remove extensão se houver
+    if (ends_with(to_lower(scn_base), ".scn")) scn_base = scn_base.substr(0, scn_base.size() - 4);
+    if (ends_with(to_lower(scn_base), ".scx")) scn_base = scn_base.substr(0, scn_base.size() - 4);
 
-    // Terreno 3D da campanha: o height-map vem do proprio cenario da missao
-    // ('spc\aomsp04.scn' — mapa "Omens"). O fluxo de campanha nao criava
-    // `terrain_mesh_`/`skydome_mesh_`, de modo que a partida renderizava
-    // apenas o clear color, sem o mapa nem as unidades sobre ele.
+    // Normaliza separadores para / e adiciona .scn
+    std::string scn_path = scn_base;
+    for (char& c : scn_path) {
+        if (c == '\\') c = '/';
+    }
+    if (!ends_with(to_lower(scn_path), ".scn")) scn_path += ".scn";
+
+    // Tenta usar Mission 1: Omens se for esse cenário (script dedicado)
+    bool used_dedicated_mission = false;
+    if (scn_path.find("aomsp04") != std::string::npos ||
+        scenario->display_name.find("Omens") != std::string::npos) {
+        mission_mgr_->init_mission_omens(gameplay_world_.get(), scenarios_bar_.get(),
+                                         scn_path, &camera_);
+        used_dedicated_mission = true;
+    }
+
+    // Para outros cenários, usa missão genérica (terrain + entidades básicas)
+    if (!used_dedicated_mission) {
+        start_generic_mission(scn_path);
+    }
+
+    // Terreno 3D da campanha: o height-map vem do próprio cenário da missão
     if (terrain_mesh_ == INVALID_MESH) {
         bool heightmap_loaded = false;
         static const char* kMissionScn[] = {
+            scn_path.c_str(),
             "spc\\aomsp04.scn", "spc/aomsp04.scn", "aomsp04.scn"
         };
         for (const char* scn : kMissionScn) {
@@ -2653,7 +2724,89 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
     const auto setup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                               std::chrono::steady_clock::now() - setup_start)
                               .count();
-    LOGI("Campaign Mission 1: Omens running! (setup: %lld ms)", static_cast<long long>(setup_ms));
+    LOGI("Campaign Mission '%s' running! (setup: %lld ms)", scenario->display_name.c_str(),
+         static_cast<long long>(setup_ms));
+}
+
+void Engine::start_generic_mission(const std::string& scenario_filename) {
+    LOGI("Starting generic mission: '%s'", scenario_filename.c_str());
+
+    // Carrega dados do cenário .scn (apenas header/terrain por enquanto)
+    std::vector<uint8_t> scn_data;
+    if (scenarios_bar_ && scenarios_bar_->file_count() > 0) {
+        // Tenta o caminho exato
+        const BarEntry* entry = scenarios_bar_->find(scenario_filename);
+        if (entry) {
+            scn_data = scenarios_bar_->extract(*entry);
+        }
+        // Fallback: primeiro .scn disponível
+        if (scn_data.empty()) {
+            for (const BarEntry& e : scenarios_bar_->entries()) {
+                if (ends_with(to_lower(e.filename), ".scn")) {
+                    scn_data = scenarios_bar_->extract(e);
+                    if (!scn_data.empty()) {
+                        LOGW("Generic mission: '%s' não encontrado, usando '%s'",
+                             scenario_filename.c_str(), e.filename.c_str());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Parse do header para saber se é válido
+    bool scn_valid = false;
+    if (!scn_data.empty()) {
+        auto header = ScenarioTriggerSystem::parse_scenario_header(scn_data.data(),
+                                                                   scn_data.size(), false);
+        scn_valid = header.valid;
+        LOGI("Generic mission: scenario '%s' — valid=%d, magic=%s, size=%zu bytes",
+             scenario_filename.c_str(), scn_valid,
+             header.format_magic.empty() ? "?" : header.format_magic.c_str(),
+             scn_data.size());
+    }
+
+    if (!scn_valid) {
+        LOGW("Generic mission: scenario '%s' inválido ou não encontrado — missão sem terreno real",
+             scenario_filename.c_str());
+    }
+
+    // Spawn entidades básicas para missão genérica (Town Center + unidades iniciais)
+    gameplay_world_->place_town_center(Team::FRIENDLY, glm::vec3(-6.0f, 0.0f, 0.0f), true);
+    gameplay_world_->place_town_center(Team::ENEMY, glm::vec3(6.0f, 0.0f, 0.0f), true);
+
+    // Unidades friendly iniciais
+    UnitStats hoplite_stats;
+    hoplite_stats.name = "Hoplite";
+    hoplite_stats.max_hp = 120.0f;
+    hoplite_stats.move_speed = 3.8f;
+    hoplite_stats.attack_damage = 12.0f;
+    hoplite_stats.attack_range = 2.2f;
+
+    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 0.0f), hoplite_stats);
+    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, 1.0f), hoplite_stats);
+    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, -1.0f), hoplite_stats);
+
+    // Worker friendly
+    gameplay_world_->spawn_worker(glm::vec3(-4.0f, 0.0f, 1.5f));
+
+    // Unidades enemy iniciais
+    UnitStats enemy_hoplite = hoplite_stats;
+    enemy_hoplite.name = "Enemy Hoplite";
+    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(3.0f, 0.0f, 0.0f), enemy_hoplite);
+    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, 1.0f), enemy_hoplite);
+    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, -1.0f), enemy_hoplite);
+
+    // Nós de recursos
+    gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(-4.0f, 0.0f, 3.5f), 1200);
+    gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(-7.5f, 0.0f, 3.5f), 1500);
+    gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(-5.5f, 0.0f, -3.5f), 2000);
+
+    gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(4.0f, 0.0f, 3.5f), 1200);
+    gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
+    gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
+
+    LOGI("Generic mission: entidades básicas spawnadas");
 }
 
 void Engine::open_multiplayer() {
