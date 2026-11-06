@@ -2835,6 +2835,73 @@ void Engine::update(float delta_time) {
             }
         }
 
+        // P4.4: Sistema de Missões - Objetivos além da destruição do Town Center
+        // Suporte a vários tipos de missões com condições de vitória variadas
+        if (gameplay_world_ && skirmish_victory_result_ == VictoryResult::NONE) {
+            // Mission objectives tracking
+            static int mission_objectives_[3] = {0, 0, 0}; // 0=pending, 1=completed, 2=failed
+            static int mission_type_ = 0; // 0=Destroy TC, 1=Eliminate King, 2=Collect Resources
+            static int mission_progress_[3] = {0, 0, 0}; // progress per objective
+
+            // Verificar objetivos da missão baseada no tipo selecionado
+            if (mission_type_ == 0) {
+                // Mission Type 0: Destroy Town Center (padrão)
+                // Já verificado pelo check_victory(), mas podemos adicionar
+                // feedback adicional aqui
+                if (skirmish_victory_result_ == VictoryResult::WIN) {
+                    mission_objectives_[0] = 1; // completed
+                    mission_display_timer_ = 2.5f; // Show victory message
+                }
+            } else if (mission_type_ == 1) {
+                // Mission Type 1: Eliminate King/Hero unit
+                // Procurar pela unidade do rei/herói inimiga
+                const auto& units_map = gameplay_world_->units();
+                const auto& hp_map = gameplay_world_->health_components();
+                const auto& transforms = gameplay_world_->transforms();
+                const auto& teams = gameplay_world_->team_components();
+
+                int king_entity = 0;
+                for (const auto& [entity, unit] : units_map) {
+                    if (teams.find(entity) == teams.end()) continue;
+                    if (teams.at(entity) != 1) continue; // Apenas inimigos
+                    if (unit.current_hp <= 0) continue;
+                    
+                    // Verificar se é o "rei" ou herói (unit_type_name contém "King" ou "Hero")
+                    std::string utype = unit.unit_type_name;
+                    if (utype.find("King") != std::string::npos || 
+                        utype.find("Hero") != std::string::npos ||
+                        utype.find("Basileus") != std::string::npos) {
+                        king_entity = entity;
+                        break;
+                    }
+                }
+
+                // Se encontrou o rei/herói e está morto, missão completada
+                if (king_entity != 0) {
+                    auto king_hp_it = hp_map.find(king_entity);
+                    if (king_hp_it == hp_map.end() || king_hp_it->second.current_hp <= 0) {
+                        mission_objectives_[1] = 1; // completed
+                        mission_display_timer_ = 2.5f;
+                    }
+                }
+            } else if (mission_type_ == 2) {
+                // Mission Type 2: Acumular certa quantidade de recursos
+                // Verificar pools de recursos
+                const auto& resource_pools = gameplay_world_->friendly_resource_pool();
+                int total_resources = resource_pools.food + resource_pools.wood + 
+                                     resource_pools.gold + resource_pools.favor;
+                
+                int target_amount = 1000; // Meta de recursos
+                if (total_resources >= target_amount) {
+                    mission_objectives_[2] = 1; // completed
+                    mission_display_timer_ = 2.5f;
+                } else {
+                    // Atualizar progresso
+                    mission_progress_[2] = total_resources;
+                }
+            }
+        }
+
         // Exibir botoes de fim de jogo apos 2.5s de vitoria/derrota
         if (skirmish_victory_result_ != VictoryResult::NONE && gameplay_world_) {
             victory_display_timer_ += delta_time;
