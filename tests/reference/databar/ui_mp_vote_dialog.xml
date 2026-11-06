@@ -7,8 +7,8 @@
     <no>1</no>
   </votes>
   <buttons>
-    <button label="Sim" action="vote_yes"/>
-    <button label="Não" action="vote_no"/>
-    <button label="Fechar" action="close_vote_dialog"/>
+    <button label="Yes" action="vote_yes"/>
+    <button label="No" action="vote_no"/>
+    <button label="Close" action="close_vote_dialog"/>
   </buttons>
 </mp_vote_dialog>
