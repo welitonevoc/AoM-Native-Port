@@ -493,6 +493,11 @@ private:
     VictoryCondition skirmish_victory_condition_ = VictoryCondition::CONQUEST;
     VictoryResult    skirmish_victory_result_    = VictoryResult::NONE;
     float            victory_display_timer_      = 0.0f;
+
+    // Estado do uigodpicker (memoria da escolha do usuario)
+    std::string god_picker_civilization_;
+    std::string god_picker_minor_god_;
+    bool        god_picker_selection_made_ = false;
 };
 
 } // namespace aom

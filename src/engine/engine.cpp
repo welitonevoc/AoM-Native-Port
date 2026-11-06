@@ -601,6 +601,14 @@ void Engine::create_god_picker_menu() {
     ui_->add_label("ESCOLHA DE DEUS / CIVILIZACAO",
                    {vw * 0.5f - 230.0f, vh * 0.08f}, 30.0f, 0xFFFFD000);
 
+    // Mostra selecao atual (se ja houver)
+    if (god_picker_selection_made_) {
+        std::string sel = "Selecionado: " + god_picker_civilization_ +
+                          " / " + god_picker_minor_god_;
+        ui_->add_label(sel, {vw * 0.5f - 200.0f, vh * 0.13f}, 16.0f,
+                       0xFF88FF88);
+    }
+
     // Lista de civilizacoes / deuses menores do Age of Mythology
     struct GodEntry {
         const char* civilization;
@@ -661,9 +669,11 @@ void Engine::create_god_picker_menu() {
             ui_->add_button({x, y}, {col_w, col_h}, btn_label,
                             [this, civ = std::string(g.civilization),
                              god = std::string(g.minor_gods[i])]() {
+                                god_picker_civilization_ = civ;
+                                god_picker_minor_god_    = god;
+                                god_picker_selection_made_ = true;
                                 LOGI("Deus selecionado: %s — %s", civ.c_str(),
                                      god.c_str());
-                                // Aqui se pode iniciar o jogo com a civ/deus
                                 set_state(EngineState::IN_GAME);
                                 start_game();
                             });
