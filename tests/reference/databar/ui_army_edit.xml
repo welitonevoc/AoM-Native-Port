@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<army_edit>
+  <unit_slots>
+    <slot unit_type="Hoplite" count="10"/>
+    <slot unit_type="Toxotes" count="5"/>
+    <slot unit_type="Villager Greek" count="3"/>
+  </unit_slots>
+  <formation>Line</formation>
+  <behavior>Aggressive</behavior>
+</army_edit>

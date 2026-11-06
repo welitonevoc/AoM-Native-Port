@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<alternates_dialog>
+  <title>Escolher Alternativa</title>
+  <options>
+    <option label="Opção A" value="option_a"/>
+    <option label="Opção B" value="option_b"/>
+    <option label="Opção C" value="option_c"/>
+  </options>
+</alternates_dialog>

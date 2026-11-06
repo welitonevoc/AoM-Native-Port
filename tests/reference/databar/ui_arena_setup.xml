@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<arena_setup>
+  <map_name>Arena</map_name>
+  <players>2</players>
+  <game_mode>Duel</game_mode>
+  <time_limit>10:00</time_limit>
+  <starting_units>3</starting_units>
+</arena_setup>

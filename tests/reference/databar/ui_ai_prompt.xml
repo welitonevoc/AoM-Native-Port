@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ai_prompt>
+  <prompt>
+    <text>Qual ação você deseja tomar?</text>
+    <options>
+      <option label="Atacar" action="attack"/>
+      <option label="Defender" action="defend"/>
+      <option label="Recuar" action="retreat"/>
+    </options>
+  </prompt>
+</ai_prompt>

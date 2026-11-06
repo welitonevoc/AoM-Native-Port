@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation_dialog>
+  <animations>
+    <animation name="Walk" duration="1.0" looping="true"/>
+    <animation name="Attack" duration="0.8" looping="false"/>
+    <animation name="Death" duration="1.5" looping="false"/>
+    <animation name="Idle" duration="2.0" looping="true"/>
+  </animations>
+</animation_dialog>
