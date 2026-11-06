@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<corpsedecay>
+  <sinkrate>0.1</sinkrate>
+  <defaultdecaydelay>2.0</defaultdecaydelay>
+  <defaultdecaltime>80.0</defaultdecaltime>
+</corpsedecay>

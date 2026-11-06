@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Farm">
+    <soundtype name="Select">
+      <soundset name="Farm"></soundset>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="FarmDie"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="Farm"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

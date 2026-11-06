@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>UI\background egypt opaque dark</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>UI\background norse opaque dark</texture>
+  </culture>
+  <culture name="Atlantean">
+    <texture>UI\ui background opaque 2</texture>
+  </culture>
+</definition>

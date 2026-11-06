@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Ice Sheet">
+    <soundtype name="Creation">
+      <soundset name="IceStereo"></soundset>
+    </soundtype>
+    <soundtype name="Exists">
+      <soundset name="FrostWindLoop"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

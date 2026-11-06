@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<lightningpower>
+  <strike>lightning strike</strike>
+  <sparks>lightning sparks</sparks>
+  <groundsparks>lightning sparks ground</groundsparks>
+  <scorch>lightning scorch</scorch>
+  <cloud>lightning cloud</cloud>
+  <rain>lightning rain</rain>
+  <cloudbuildupendtime>2.0</cloudbuildupendtime>
+  <rainbuildupstarttime>2.0</rainbuildupstarttime>
+  <rainbuildupendtime>7.0</rainbuildupendtime>
+  <lightningstarttime>7.0</lightningstarttime>
+  <cloudfadeoutstarttime>18.0</cloudfadeoutstarttime>
+  <cloudfadeoutendtime>23.0</cloudfadeoutendtime>
+  <rainfadeoutstarttime>15.0</rainfadeoutstarttime>
+  <rainfadeoutendtime>19.0</rainfadeoutendtime>
+  <lightningendtime>18.0</lightningendtime>
+  <sparksliftoffofterrain>1.0</sparksliftoffofterrain>
+  <fasteststrikefactor>0.2</fasteststrikefactor>
+  <sloweststrikefactor>1.0</sloweststrikefactor>
+</lightningpower>

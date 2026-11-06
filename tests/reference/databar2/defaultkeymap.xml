@@ -1,0 +1,2131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<defaultkeymap>
+  <keymapgroup name="Selection" displayname="$$21552$$Selection">
+    <keymapdata>
+      <name>Select Group 1</name>
+      <displayname>$$20805$$Select Group 1</displayname>
+      <event>1</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(1)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 2</name>
+      <displayname>$$20806$$Select Group 2</displayname>
+      <event>2</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(2)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 3</name>
+      <displayname>$$20807$$Select Group 3</displayname>
+      <event>3</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(3)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 4</name>
+      <displayname>$$20808$$Select Group 4</displayname>
+      <event>4</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(4)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 5</name>
+      <displayname>$$20809$$Select Group 5</displayname>
+      <event>5</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 6</name>
+      <displayname>$$20810$$Select Group 6</displayname>
+      <event>6</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(6)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 7</name>
+      <displayname>$$20811$$Select Group 7</displayname>
+      <event>7</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(7)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 8</name>
+      <displayname>$$20812$$Select Group 8</displayname>
+      <event>8</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(8)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Select Group 9</name>
+      <displayname>$$20813$$Select Group 9</displayname>
+      <event>9</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(9)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 1</name>
+      <displayname>$$20814$$Add to Group 1</displayname>
+      <event>shift-1</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(1)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 2</name>
+      <displayname>$$20815$$Add to Group 2</displayname>
+      <event>shift-2</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(2)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 3</name>
+      <displayname>$$20816$$Add to Group 3</displayname>
+      <event>shift-3</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(3)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 4</name>
+      <displayname>$$20817$$Add to Group 4</displayname>
+      <event>shift-4</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(4)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 5</name>
+      <displayname>$$20818$$Add to Group 5</displayname>
+      <event>shift-5</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 6</name>
+      <displayname>$$20819$$Add to Group 6</displayname>
+      <event>shift-6</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(6)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 7</name>
+      <displayname>$$20820$$Add to Group 7</displayname>
+      <event>shift-7</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(7)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to  Group 8</name>
+      <displayname>$$20821$$Add to  Group 8</displayname>
+      <event>shift-8</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(8)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Add to Group 9</name>
+      <displayname>$$20822$$Add to Group 9</displayname>
+      <event>shift-9</event>
+      <context>game</context>
+      <command>uiAddSelectNumberGroup(9)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 1</name>
+      <displayname>$$20823$$Create Group 1</displayname>
+      <event>control-1</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(1)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 2</name>
+      <displayname>$$20824$$Create Group 2</displayname>
+      <event>control-2</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(2)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 3</name>
+      <displayname>$$20825$$Create Group 3</displayname>
+      <event>control-3</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(3)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 4</name>
+      <displayname>$$20826$$Create Group 4</displayname>
+      <event>control-4</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(4)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 5</name>
+      <displayname>$$20827$$Create Group 5</displayname>
+      <event>control-5</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 6</name>
+      <displayname>$$20828$$Create Group 6</displayname>
+      <event>control-6</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(6)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 7</name>
+      <displayname>$$20829$$Create Group 7</displayname>
+      <event>control-7</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(7)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 8</name>
+      <displayname>$$20830$$Create Group 8</displayname>
+      <event>control-8</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(8)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Create Group 9</name>
+      <displayname>$$20831$$Create Group 9</displayname>
+      <event>control-9</event>
+      <context>game</context>
+      <command>uiCreateNumberGroup(9)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Remove From Any Group</name>
+      <displayname>$$20832$$Remove From Any Group</displayname>
+      <event>control-0</event>
+      <context>game</context>
+      <command>uiRemoveFromAnyNumberGroup</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 1</name>
+      <displayname>$$20833$$Look At Group 1</displayname>
+      <event>alt-1</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(1) uiLookAtNumberGroup(1)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 2</name>
+      <displayname>$$20834$$Look At Group 2</displayname>
+      <event>alt-2</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(2) uiLookAtNumberGroup(2)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 3</name>
+      <displayname>$$20835$$Look At Group 3</displayname>
+      <event>alt-3</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(3) uiLookAtNumberGroup(3)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 4</name>
+      <displayname>$$20836$$Look At Group 4</displayname>
+      <event>alt-4</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(4) uiLookAtNumberGroup(4)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 5</name>
+      <displayname>$$20837$$Look At Group 5</displayname>
+      <event>alt-5</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(5) uiLookAtNumberGroup(5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 6</name>
+      <displayname>$$20838$$Look At Group 6</displayname>
+      <event>alt-6</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(6) uiLookAtNumberGroup(6)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 7</name>
+      <displayname>$$20839$$Look At Group 7</displayname>
+      <event>alt-7</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(7) uiLookAtNumberGroup(7)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 8</name>
+      <displayname>$$20840$$Look At Group 8</displayname>
+      <event>alt-8</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(8) uiLookAtNumberGroup(8)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Look At Group 9</name>
+      <displayname>$$20841$$Look At Group 9</displayname>
+      <event>alt-9</event>
+      <context>game</context>
+      <command>uiSelectNumberGroup(9) uiLookAtNumberGroup(9)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Find Keys" displayname="$$20866$$Find Keys">
+    <keymapdata>
+      <name>Find Hero</name>
+      <displayname>$$20842$$Find Hero</displayname>
+      <event>/</event>
+      <context>game</context>
+      <command>uiFindType("Hero")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Idle Villager</name>
+      <displayname>$$20843$$Find Idle Villager</displayname>
+      <event>.</event>
+      <context>game</context>
+      <command>uiFindIdleType("LogicalTypeIdleCivilian")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Idle Military</name>
+      <displayname>$$20844$$Find Idle Military</displayname>
+      <event>,</event>
+      <context>game</context>
+      <command>uiFindIdleType("LogicalTypeIdleMilitary")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Scout</name>
+      <displayname>$$20845$$Find Scout</displayname>
+      <event>'</event>
+      <context>game</context>
+      <command>uiFindIdleType("AbstractScout")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Settlements</name>
+      <displayname>$$20846$$Find Settlements</displayname>
+      <event>h</event>
+      <context>game</context>
+      <command>uiFindType("settlementsThatTrainVillagers")</command>
+      <allowmultiplebindings>1</allowmultiplebindings>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Selection</name>
+      <displayname>$$20847$$Find Selection</displayname>
+      <event>space</event>
+      <context>game</context>
+      <command>uiLookAtSelection</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Archery Range</name>
+      <displayname>$$20848$$Find Archery Range</displayname>
+      <event>control-a</event>
+      <context>game</context>
+      <command>uiFindType("AbstractArcheryRange")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Barracks</name>
+      <displayname>$$20849$$Find Barracks</displayname>
+      <event>control-b</event>
+      <context>game</context>
+      <command>uiFindType("AbstractBarracks")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Siege Camp</name>
+      <displayname>$$20850$$Find Siege Camp</displayname>
+      <event>control-c</event>
+      <context>game</context>
+      <command>uiFindType("Siege Camp")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Dock</name>
+      <displayname>$$20851$$Find Dock</displayname>
+      <event>control-d</event>
+      <context>game</context>
+      <command>uiFindType("Dock")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Farm</name>
+      <displayname>$$20852$$Find Farm</displayname>
+      <event>control-f</event>
+      <context>game</context>
+      <command>uiFindType("Farm")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Early Food Drop Site</name>
+      <displayname>$$20853$$Find Early Food Drop Site</displayname>
+      <event>control-g</event>
+      <context>game</context>
+      <command>uiFindType("EarlyFoodDropsite") uiFindType("Guild")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Mirror Tower</name>
+      <displayname>$$23860$$Find Mirror Tower</displayname>
+      <event>control-k</event>
+      <context>game</context>
+      <command>uiFindType("Tower Mirror")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Wonder</name>
+      <displayname>$$20854$$Find Wonder</displayname>
+      <event>control-j</event>
+      <context>game</context>
+      <command>uiFindType("Wonder")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Early Gold Drop Site</name>
+      <displayname>$$20855$$Find Early Gold Drop Site</displayname>
+      <event>control-m</event>
+      <context>game</context>
+      <command>uiFindType("EarlyGoldDropsite")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Early Wood Drop Site</name>
+      <displayname>$$20856$$Find Early Wood Drop Site</displayname>
+      <event>control-n</event>
+      <context>game</context>
+      <command>uiFindType("EarlyWoodDropsite")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Outpost</name>
+      <displayname>$$20857$$Find Outpost</displayname>
+      <event>control-o</event>
+      <context>game</context>
+      <command>uiFindType("Outpost")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Tower</name>
+      <displayname>$$20858$$Find Tower</displayname>
+      <event>control-p</event>
+      <context>game</context>
+      <command>uiFindType("Tower")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Armory</name>
+      <displayname>$$20859$$Find Armory</displayname>
+      <event>control-r</event>
+      <context>game</context>
+      <command>uiFindType("AbstractArmory")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Stable or Counter Barracks</name>
+      <displayname>$$20860$$Find Stable or Counter Barracks</displayname>
+      <event>control-s</event>
+      <context>game</context>
+      <command>uiFindType("AbstractStable") uiFindType("Counter Building")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Temple</name>
+      <displayname>$$20861$$Find Temple</displayname>
+      <event>control-t</event>
+      <context>game</context>
+      <command>uiFindType("Temple")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Monument</name>
+      <displayname>$$20862$$Find Monument</displayname>
+      <event>control-u</event>
+      <context>game</context>
+      <command>uiFindType("AbstractMonument") uiFindType("Sky Passage")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Sky Passage</name>
+      <displayname>$$23861$$Find Sky Passage</displayname>
+      <event>control-u</event>
+      <context>game</context>
+      <command>uiFindType("Sky Passage")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Fortress</name>
+      <displayname>$$20863$$Find Fortress</displayname>
+      <event>control-v</event>
+      <context>game</context>
+      <command>uiFindType("AbstractFortress")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Market</name>
+      <displayname>$$20864$$Find Market</displayname>
+      <event>control-x</event>
+      <context>game</context>
+      <command>uiFindType("Market")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Town Center</name>
+      <displayname>$$20865$$Find Town Center</displayname>
+      <event>control-z</event>
+      <context>game</context>
+      <command>uiFindType("SettlementsThatTrainVillagers")</command>
+      <allowmultiplebindings>1</allowmultiplebindings>
+    </keymapdata>
+    <keymapdata>
+      <name>Find Last Notification</name>
+      <displayname>$$22090$$Find Last Notification</displayname>
+      <event>mouse3down</event>
+      <context>game</context>
+      <command>uiZoomToMinimapEvent()</command>
+      <allowmultiplebindings>1</allowmultiplebindings>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Unit Stances And Formations" displayname="$$22329$$Unit Stances And Formations">
+    <keymapdata>
+      <name>Set Stance Aggressive</name>
+      <displayname>$$22330$$Set Stance Aggressive</displayname>
+      <event>alt-a</event>
+      <context>game</context>
+      <command>unitSetStanceAggressive()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Stance Defensive</name>
+      <displayname>$$22331$$Set Stance Defensive</displayname>
+      <event>alt-d</event>
+      <context>game</context>
+      <command>unitSetStanceDefensive()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Stance Passive</name>
+      <displayname>$$22332$$Set Stance Passive</displayname>
+      <event>alt-s</event>
+      <context>game</context>
+      <command>unitSetStancePassive()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Default Formation</name>
+      <displayname>$$22333$$Set Default Formation</displayname>
+      <event>alt-l</event>
+      <context>game</context>
+      <command>unitSetFormationDefault()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Box Formation</name>
+      <displayname>$$22334$$Set Box Formation</displayname>
+      <event>alt-b</event>
+      <context>game</context>
+      <command>unitSetFormationBox()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Mixed Formation</name>
+      <displayname>$$22335$$Set Mixed Formation</displayname>
+      <event>alt-m</event>
+      <context>game</context>
+      <command>unitSetFormationMixed()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Set Spread Formation</name>
+      <displayname>$$22336$$Set Spread Formation</displayname>
+      <event>alt-x</event>
+      <context>game</context>
+      <command>unitSetFormationSpread()</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Building Construction" displayname="$$20867$$Building Construction">
+    <keymapdata>
+      <name>Build Archery Range</name>
+      <displayname>$$20868$$Build Archery Range</displayname>
+      <event>a</event>
+      <context>BuildAccel</context>
+      <command>tis("Archery Range")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Barracks</name>
+      <displayname>$$20869$$Build Barracks</displayname>
+      <event>b</event>
+      <context>BuildAccel</context>
+      <command>tis("Barracks") tis("Academy") tis("Longhouse") tis("Barracks Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Siege Works</name>
+      <displayname>$$20870$$Build Siege Works</displayname>
+      <event>c</event>
+      <context>BuildAccel</context>
+      <command>tis("Siege Camp")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Dock</name>
+      <displayname>$$20871$$Build Dock</displayname>
+      <event>d</event>
+      <context>BuildAccel</context>
+      <command>tis("Dock")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build House</name>
+      <displayname>$$20872$$Build House</displayname>
+      <event>e</event>
+      <context>BuildAccel</context>
+      <command>tis("House") tis("Manor")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Farm</name>
+      <displayname>$$20873$$Build Farm</displayname>
+      <event>f</event>
+      <context>BuildAccel</context>
+      <command>tis("Farm")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Granary</name>
+      <displayname>$$20874$$Build Granary</displayname>
+      <event>g</event>
+      <context>BuildAccel</context>
+      <command>tis("Granary") tis("Guild")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Mirror Tower</name>
+      <displayname>$$23862$$Build Mirror Tower</displayname>
+      <event>k</event>
+      <context>BuildAccel</context>
+      <command>tis("Tower Mirror")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Wonder</name>
+      <displayname>$$20875$$Build Wonder</displayname>
+      <event>j</event>
+      <context>BuildAccel</context>
+      <command>tis("Wonder")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Lighthouse</name>
+      <displayname>$$20876$$Build Lighthouse</displayname>
+      <event>l</event>
+      <context>BuildAccel</context>
+      <command>tis("Lighthouse")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Mining dropsite</name>
+      <displayname>$$20877$$Build Mining dropsite</displayname>
+      <event>m</event>
+      <context>BuildAccel</context>
+      <command>tis("mining camp") tis("Storehouse")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Lumber dropsite</name>
+      <displayname>$$20878$$Build Lumber dropsite</displayname>
+      <event>n</event>
+      <context>BuildAccel</context>
+      <command>tis("lumber camp") tis("Storehouse")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Outpost</name>
+      <displayname>$$20879$$Build Outpost</displayname>
+      <event>o</event>
+      <context>BuildAccel</context>
+      <command>tis("outpost")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Tower</name>
+      <displayname>$$20880$$Build Tower</displayname>
+      <event>p</event>
+      <context>BuildAccel</context>
+      <command>tis("Tower")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Armory</name>
+      <displayname>$$20881$$Build Armory</displayname>
+      <event>r</event>
+      <context>BuildAccel</context>
+      <command>tis("Armory") tis("Dwarf Foundry")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Stable</name>
+      <displayname>$$20882$$Build Stable</displayname>
+      <event>s</event>
+      <context>BuildAccel</context>
+      <command>tis("Stable") tis("Counter Building")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Temple</name>
+      <displayname>$$20884$$Build Temple</displayname>
+      <event>t</event>
+      <context>BuildAccel</context>
+      <command>tis("Temple")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Monument</name>
+      <displayname>$$20883$$Build Monument</displayname>
+      <event>u</event>
+      <context>BuildAccel</context>
+      <command>tis("Monument") tis("Monument 2") tis("Monument 3") tis("Monument 4") tis("Monument 5") tis("Sky Passage")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Fortress</name>
+      <displayname>$$20885$$Build Fortress</displayname>
+      <event>v</event>
+      <context>BuildAccel</context>
+      <command>tis("Migdol Stronghold") tis("Fortress") tis("Hill Fort") tis("Palace")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Wall</name>
+      <displayname>$$20886$$Build Wall</displayname>
+      <event>w</event>
+      <context>BuildAccel</context>
+      <command>tis("Wall Connector")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Market</name>
+      <displayname>$$20887$$Build Market</displayname>
+      <event>x</event>
+      <context>BuildAccel</context>
+      <command>tis("market")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Build Town Center</name>
+      <displayname>$$20888$$Build Town Center</displayname>
+      <event>z</event>
+      <context>BuildAccel</context>
+      <command>tis("Settlement Level 1")</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Settlement" displayname="$$21539$$Settlement Unit Training">
+    <keymapdata>
+      <name>Age 1 Greek Hero</name>
+      <displayname>$$21435$$Age 1 Greek Hero</displayname>
+      <event>a</event>
+      <context>SettlementAccel</context>
+      <command>tis("Hero Greek Ajax") tis("Hero Greek Jason") tis("Hero Greek Theseus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 2 Greek Hero</name>
+      <displayname>$$21436$$Age 2 Greek Hero</displayname>
+      <event>s</event>
+      <context>SettlementAccel</context>
+      <command>tis("Hero Greek Odysseus") tis("Hero Greek Chiron") tis("Hero Greek Hippolyta")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 3 Greek Hero</name>
+      <displayname>$$21437$$Age 3 Greek Hero</displayname>
+      <event>d</event>
+      <context>SettlementAccel</context>
+      <command>tis("Hero Greek Achilles") tis("Hero Greek Atalanta") tis("Hero Greek Heracles")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 4 Greek Hero</name>
+      <displayname>$$21438$$Age 4 Greek Hero</displayname>
+      <event>f</event>
+      <context>SettlementAccel</context>
+      <command>tis("Hero Greek Perseus") tis("Hero Greek Bellerophon") tis("Hero Greek Polyphemus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Mercenary Cavalry</name>
+      <displayname>$$21439$$Mercenary Cavalry</displayname>
+      <event>c</event>
+      <context>SettlementAccel</context>
+      <command>tis("Mercenary Cavalry")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Mercenary</name>
+      <displayname>$$21440$$Mercenary</displayname>
+      <event>i</event>
+      <context>SettlementAccel</context>
+      <command>tis("Mercenary")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Priest</name>
+      <displayname>$$21441$$Priest</displayname>
+      <event>p</event>
+      <context>SettlementAccel</context>
+      <command>tis("Priest")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Dwarf</name>
+      <displayname>$$21442$$Dwarf</displayname>
+      <event>w</event>
+      <context>SettlementAccel</context>
+      <command>tis("Dwarf")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Ox Cart</name>
+      <displayname>$$21443$$Ox Cart</displayname>
+      <event>o</event>
+      <context>SettlementAccel</context>
+      <command>tis("Ox Cart")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Ulfsark</name>
+      <displayname>$$21444$$Ulfsark</displayname>
+      <event>u</event>
+      <context>SettlementAccel</context>
+      <command>tis("Ulfsark")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Villager</name>
+      <displayname>$$21445$$Villager</displayname>
+      <event>v</event>
+      <context>SettlementAccel</context>
+      <command>tis("Villager Norse") tis("Villager Egyptian") tis("Villager Greek") tis("Villager Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Ring Town Bell</name>
+      <displayname>$$22221$$Ring Town Bell</displayname>
+      <event>b</event>
+      <context>SettlementAccel</context>
+      <command>unitTownBell()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Return Unit To Work</name>
+      <displayname>$$22222$$Return Unit To Work</displayname>
+      <event>r</event>
+      <context>SettlementAccel</context>
+      <command>unitReturnToWork()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Eject Garrisoned Units</name>
+      <displayname>$$22223$$Eject Garrisoned Units</displayname>
+      <event>n</event>
+      <context>SettlementAccel</context>
+      <command>uiEjectGarrisonedUnits()</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Mercenary Cavalry</name>
+      <displayname>$$21446$$Multiple Mercenary Cavalry</displayname>
+      <event>shift-c</event>
+      <context>SettlementAccel</context>
+      <command>tis("Mercenary Cavalry",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Mercenary</name>
+      <displayname>$$21447$$Multiple Mercenary</displayname>
+      <event>shift-i</event>
+      <context>SettlementAccel</context>
+      <command>tis("Mercenary",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Priest</name>
+      <displayname>$$21448$$Multiple Priest</displayname>
+      <event>shift-p</event>
+      <context>SettlementAccel</context>
+      <command>tis("Priest",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Dwarf</name>
+      <displayname>$$21449$$Multiple Dwarf</displayname>
+      <event>shift-w</event>
+      <context>SettlementAccel</context>
+      <command>tis("Dwarf",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Ox Cart</name>
+      <displayname>$$21450$$Multiple Ox Cart</displayname>
+      <event>shift-o</event>
+      <context>SettlementAccel</context>
+      <command>tis("Ox Cart",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Ulfsark</name>
+      <displayname>$$21451$$Multiple Ulfsark</displayname>
+      <event>shift-u</event>
+      <context>SettlementAccel</context>
+      <command>tis("Ulfsark",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Villager</name>
+      <displayname>$$21452$$Multiple Villager</displayname>
+      <event>shift-v</event>
+      <context>SettlementAccel</context>
+      <command>tis("Villager Norse",5) tis("Villager Egyptian",5) tis("Villager Greek",5) tis("Villager Atlantean",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Dock" displayname="$$21540$$Dock Unit Training">
+    <keymapdata>
+      <name>Fishing Ship</name>
+      <displayname>$$21453$$Fishing Ship</displayname>
+      <event>f</event>
+      <context>DockAccel</context>
+      <command>tis("Fishing Ship Egyptian") tis("Fishing Ship Greek") tis("Fishing Ship Norse") tis("Fishing Ship Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Transport Ship</name>
+      <displayname>$$21454$$Transport Ship</displayname>
+      <event>t</event>
+      <context>DockAccel</context>
+      <command>tis("Transport Ship Norse") tis("Transport Ship Greek") tis("Transport Ship Egyptian") tis("Transport Ship Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Archer Ship</name>
+      <displayname>$$21455$$Archer Ship</displayname>
+      <event>a</event>
+      <context>DockAccel</context>
+      <command>tis("Trireme") tis("Kebenit") tis("Longboat") tis("Bireme")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Ramming Ship</name>
+      <displayname>$$21456$$Ramming Ship</displayname>
+      <event>r</event>
+      <context>DockAccel</context>
+      <command>tis("Ramming Ship Greek") tis("Ramming Ship Norse") tis("Ramming Ship Egyptian") tis("Fire Ship Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Siege Ship</name>
+      <displayname>$$21457$$Siege Ship</displayname>
+      <event>s</event>
+      <context>DockAccel</context>
+      <command>tis("Siege Ship Greek") tis("Siege Ship Norse") tis("Siege Ship Egyptian") tis("Siege Ship Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Hero Greek Argo</name>
+      <displayname>$$21458$$Hero Greek Argo</displayname>
+      <event>o</event>
+      <context>DockAccel</context>
+      <command>tis("Hero Greek Argo")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Kraken</name>
+      <displayname>$$21459$$Kraken</displayname>
+      <event>k</event>
+      <context>DockAccel</context>
+      <command>tis("Kraken")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Scylla</name>
+      <displayname>$$21460$$Scylla</displayname>
+      <event>y</event>
+      <context>DockAccel</context>
+      <command>tis("Scylla")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Leviathan</name>
+      <displayname>$$21461$$Leviathan</displayname>
+      <event>l</event>
+      <context>DockAccel</context>
+      <command>tis("Leviathan")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Sea Turtle</name>
+      <displayname>$$21462$$Sea Turtle</displayname>
+      <event>u</event>
+      <context>DockAccel</context>
+      <command>tis("Sea Turtle")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Jormund Elver</name>
+      <displayname>$$21463$$Jormund Elver</displayname>
+      <event>j</event>
+      <context>DockAccel</context>
+      <command>tis("Jormund Elver")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Carcinos</name>
+      <displayname>$$21464$$Carcinos</displayname>
+      <event>c</event>
+      <context>DockAccel</context>
+      <command>tis("Carcinos")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Man O War</name>
+      <displayname>$$23320$$Man O War</displayname>
+      <event>m</event>
+      <context>DockAccel</context>
+      <command>tis("Man O War")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Servant</name>
+      <displayname>$$23321$$Servant</displayname>
+      <event>v</event>
+      <context>DockAccel</context>
+      <command>tis("Servant")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Nereid</name>
+      <displayname>$$24261$$Nereid</displayname>
+      <event>n</event>
+      <context>DockAccel</context>
+      <command>tis("Nereid")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Fishing Ship</name>
+      <displayname>$$21465$$Multiple Fishing Ship</displayname>
+      <event>shift-f</event>
+      <context>DockAccel</context>
+      <command>tis("UtilityShip",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Transport Ship</name>
+      <displayname>$$21466$$Multiple Transport Ship</displayname>
+      <event>shift-t</event>
+      <context>DockAccel</context>
+      <command>tis("TransportShip",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Archer Ships</name>
+      <displayname>$$21467$$Multiple Archer Ships</displayname>
+      <event>shift-a</event>
+      <context>DockAccel</context>
+      <command>tis("ArcherShip",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Ramming Ship</name>
+      <displayname>$$21468$$Multiple Ramming Ship</displayname>
+      <event>shift-r</event>
+      <context>DockAccel</context>
+      <command>tis("HammerShip",5) tis("Fire Ship Atlantean",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Siege Ship</name>
+      <displayname>$$21469$$Multiple Siege Ship</displayname>
+      <event>shift-s</event>
+      <context>DockAccel</context>
+      <command>tis("SiegeShip",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Kraken</name>
+      <displayname>$$21470$$Multiple Kraken</displayname>
+      <event>shift-k</event>
+      <context>DockAccel</context>
+      <command>tis("Kraken",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Scylla</name>
+      <displayname>$$21471$$Multiple Scylla</displayname>
+      <event>shift-y</event>
+      <context>DockAccel</context>
+      <command>tis("Scylla",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Leviathan</name>
+      <displayname>$$21472$$Multiple Leviathan</displayname>
+      <event>shift-l</event>
+      <context>DockAccel</context>
+      <command>tis("Leviathan",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Sea Turtle</name>
+      <displayname>$$21473$$Multiple Sea Turtle</displayname>
+      <event>shift-u</event>
+      <context>DockAccel</context>
+      <command>tis("Sea Turtle",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Jormund Elver</name>
+      <displayname>$$21474$$Multiple Jormund Elver</displayname>
+      <event>shift-j</event>
+      <context>DockAccel</context>
+      <command>tis("Jormund Elver",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Carcinos</name>
+      <displayname>$$21475$$Multiple Carcinos</displayname>
+      <event>shift-c</event>
+      <context>DockAccel</context>
+      <command>tis("Carcinos",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Man O War</name>
+      <displayname>$$23322$$Multiple Man O War</displayname>
+      <event>shift-m</event>
+      <context>DockAccel</context>
+      <command>tis("Man O War",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Servant</name>
+      <displayname>$$23323$$Multiple Servant</displayname>
+      <event>shift-v</event>
+      <context>DockAccel</context>
+      <command>tis("Servant",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Nereid</name>
+      <displayname>$$24262$$Multiple Nereid</displayname>
+      <event>shift-n</event>
+      <context>DockAccel</context>
+      <command>tis("Nereid",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Market" displayname="$$21541$$Market Unit Training">
+    <keymapdata>
+      <name>Caravan</name>
+      <displayname>$$21476$$Caravan</displayname>
+      <event>c</event>
+      <context>MarketAccel</context>
+      <command>tis("Caravan Greek") tis("Caravan Egyptian") tis("Caravan Norse") tis("Caravan Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Caravan</name>
+      <displayname>$$21477$$Multiple Caravan</displayname>
+      <event>shift-c</event>
+      <context>MarketAccel</context>
+      <command>tis("Caravan Greek",5) tis("Caravan Egyptian",5) tis("Caravan Norse",5) tis("Caravan Atlantean",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Greek Academy" displayname="$$21542$$Greek Academy Unit Training">
+    <keymapdata>
+      <name>Hoplite</name>
+      <displayname>$$21478$$Hoplite</displayname>
+      <event>p</event>
+      <context>GreekAcademyAccel</context>
+      <command>tis("Hoplite")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Hypaspist</name>
+      <displayname>$$21479$$Hypaspist</displayname>
+      <event>y</event>
+      <context>GreekAcademyAccel</context>
+      <command>tis("Hypaspist")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hoplite</name>
+      <displayname>$$21480$$Multiple Hoplite</displayname>
+      <event>shift-p</event>
+      <context>GreekAcademyAccel</context>
+      <command>tis("Hoplite",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hypaspist</name>
+      <displayname>$$21481$$Multiple Hypaspist</displayname>
+      <event>shift-y</event>
+      <context>GreekAcademyAccel</context>
+      <command>tis("Hypaspist",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Greek Archery Range" displayname="$$21543$$Greek Archery Range Unit Training">
+    <keymapdata>
+      <name>Toxotes</name>
+      <displayname>$$21482$$Toxotes</displayname>
+      <event>t</event>
+      <context>GreekArcheryRangeAccel</context>
+      <command>tis("Toxotes")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Peltast</name>
+      <displayname>$$21483$$Peltast</displayname>
+      <event>p</event>
+      <context>GreekArcheryRangeAccel</context>
+      <command>tis("Peltast")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Toxotes</name>
+      <displayname>$$21484$$Multiple Toxotes</displayname>
+      <event>shift-t</event>
+      <context>GreekArcheryRangeAccel</context>
+      <command>tis("Toxotes",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Peltast</name>
+      <displayname>$$21485$$Multiple Peltast</displayname>
+      <event>shift-p</event>
+      <context>GreekArcheryRangeAccel</context>
+      <command>tis("Peltast",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Greek Stable" displayname="$$21544$$Greek Stable Unit Training">
+    <keymapdata>
+      <name>Hippikon</name>
+      <displayname>$$21486$$Hippikon</displayname>
+      <event>c</event>
+      <context>GreekStableAccel</context>
+      <command>tis("Hippikon")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Prodromos</name>
+      <displayname>$$21487$$Prodromos</displayname>
+      <event>p</event>
+      <context>GreekStableAccel</context>
+      <command>tis("Prodromos")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hippikon</name>
+      <displayname>$$21488$$Multiple Hippikon</displayname>
+      <event>shift-c</event>
+      <context>GreekStableAccel</context>
+      <command>tis("Hippikon",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Prodromos</name>
+      <displayname>$$21489$$Multiple Prodromos</displayname>
+      <event>shift-p</event>
+      <context>GreekStableAccel</context>
+      <command>tis("Prodromos",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Greek Fortress" displayname="$$21545$$Greek Fortress Training">
+    <keymapdata>
+      <name>Age 1 Greek Hero</name>
+      <displayname>$$21490$$Age 1 Greek Hero</displayname>
+      <event>a</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Hero Greek Ajax") tis("Hero Greek Jason") tis("Hero Greek Theseus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 2 Greek Hero</name>
+      <displayname>$$21492$$Age 2 Greek Hero</displayname>
+      <event>s</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Hero Greek Odysseus") tis("Hero Greek Chiron") tis("Hero Greek Hippolyta")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 3 Greek Hero</name>
+      <displayname>$$21493$$Age 3 Greek Hero</displayname>
+      <event>d</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Hero Greek Achilles") tis("Hero Greek Atalanta") tis("Hero Greek Heracles")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Age 4 Greek Hero</name>
+      <displayname>$$21494$$Age 4 Greek Hero</displayname>
+      <event>f</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Hero Greek Perseus") tis("Hero Greek Bellerophon") tis("Hero Greek Polyphemus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Greek Unique Unit</name>
+      <displayname>$$21495$$Greek Unique Unit</displayname>
+      <event>u</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Crossbowman") tis("Hetairoi") tis("Myrmidon")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Helepolis</name>
+      <displayname>$$21496$$Helepolis</displayname>
+      <event>r</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Helepolis")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Petrobolos</name>
+      <displayname>$$21497$$Petrobolos</displayname>
+      <event>c</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Petrobolos")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Unique Unit</name>
+      <displayname>$$21498$$Multiple Unique Unit</displayname>
+      <event>shift-u</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Crossbowman",5) tis("Hetairoi",5) tis("Myrmidon",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Helepolis</name>
+      <displayname>$$21499$$Multiple Helepolis</displayname>
+      <event>shift-r</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Helepolis",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Petrobolos</name>
+      <displayname>$$21500$$Multiple Petrobolos</displayname>
+      <event>shift-c</event>
+      <context>GreekFortressAccel</context>
+      <command>tis("Petrobolos",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Temple Greek" displayname="$$22278$$Greek Temple Unit Training">
+    <keymapdata>
+      <name>Centaur</name>
+      <displayname>$$21536$$Centaur</displayname>
+      <event>c</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Centaur")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Chimera</name>
+      <displayname>$$22224$$Chimera</displayname>
+      <event>i</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Chimera")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Colossus</name>
+      <displayname>$$22225$$Colossus</displayname>
+      <event>o</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Colossus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Cyclops</name>
+      <displayname>$$21535$$Cyclops</displayname>
+      <event>y</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Cyclops")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Hydra</name>
+      <displayname>$$22226$$Hydra</displayname>
+      <event>r</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Hydra")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Manticore</name>
+      <displayname>$$21538$$Manticore</displayname>
+      <event>m</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Manticore")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Medusa</name>
+      <displayname>$$22227$$Medusa</displayname>
+      <event>d</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Medusa")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Minotaur</name>
+      <displayname>$$21537$$Minotaur</displayname>
+      <event>t</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Minotaur")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Nemean Lion</name>
+      <displayname>$$22228$$Nemean Lion</displayname>
+      <event>n</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Nemean Lion")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Pegasus</name>
+      <displayname>$$21534$$Pegasus</displayname>
+      <event>p</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Pegasus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Centaur</name>
+      <displayname>$$22229$$Multiple Centaur</displayname>
+      <event>shift-c</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Centaur",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Chimera</name>
+      <displayname>$$22230$$Multiple Chimera</displayname>
+      <event>shift-i</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Chimera",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Colossus</name>
+      <displayname>$$22231$$Multiple Colossus</displayname>
+      <event>shift-o</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Colossus",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Cyclops</name>
+      <displayname>$$22232$$Multiple Cyclops</displayname>
+      <event>shift-y</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Cyclops",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hydra</name>
+      <displayname>$$22233$$Multiple Hydra</displayname>
+      <event>shift-r</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Hydra",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Manticore</name>
+      <displayname>$$22234$$Multiple Manticore</displayname>
+      <event>shift-m</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Manticore",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Medusa</name>
+      <displayname>$$22235$$Multiple Medusa</displayname>
+      <event>shift-d</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Medusa",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Minotaur</name>
+      <displayname>$$22236$$Multiple Minotaur</displayname>
+      <event>shift-t</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Minotaur",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Nemean Lion</name>
+      <displayname>$$22237$$Multiple Nemean Lion</displayname>
+      <event>shift-n</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Nemean Lion",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Pegasus</name>
+      <displayname>$$22238$$Multiple Pegasus</displayname>
+      <event>shift-p</event>
+      <context>TempleGreekAccel</context>
+      <command>tis("Pegasus",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Egypt Barracks" displayname="$$21546$$Egypt Barracks Unit Training">
+    <keymapdata>
+      <name>Spearman</name>
+      <displayname>$$21501$$Spearman</displayname>
+      <event>s</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Spearman")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Axeman</name>
+      <displayname>$$21502$$Axeman</displayname>
+      <event>a</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Axeman")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Slinger</name>
+      <displayname>$$21503$$Slinger</displayname>
+      <event>l</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Slinger")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Spearman</name>
+      <displayname>$$21504$$Multiple Spearman</displayname>
+      <event>shift-s</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Spearman",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Axeman</name>
+      <displayname>$$21505$$Multiple Axeman</displayname>
+      <event>shift-a</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Axeman",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Slinger</name>
+      <displayname>$$21506$$Multiple Slinger</displayname>
+      <event>shift-l</event>
+      <context>EgyptBarracksAccel</context>
+      <command>tis("Slinger",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Egypt Migdol" displayname="$$21547$$Egypt Migdol Unit Training">
+    <keymapdata>
+      <name>Chariot Archer</name>
+      <displayname>$$21507$$Chariot Archer</displayname>
+      <event>a</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("Chariot Archer")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Camelry</name>
+      <displayname>$$21508$$Camelry</displayname>
+      <event>c</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("Camelry")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>War Elephant</name>
+      <displayname>$$21509$$War Elephant</displayname>
+      <event>w</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("War Elephant")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Chariot Archer</name>
+      <displayname>$$21510$$Multiple Chariot Archer</displayname>
+      <event>shift-a</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("Chariot Archer",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Camelry</name>
+      <displayname>$$21511$$Multiple Camelry</displayname>
+      <event>shift-c</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("Camelry",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple War Elephant</name>
+      <displayname>$$21512$$Multiple War Elephant</displayname>
+      <event>shift-w</event>
+      <context>EgyptMigdolAccel</context>
+      <command>tis("War Elephant",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Egypt Siege Camp" displayname="$$21548$$Egypt Siege Camp Unit Training">
+    <keymapdata>
+      <name>Siege Tower</name>
+      <displayname>$$21513$$Siege Tower</displayname>
+      <event>r</event>
+      <context>EgyptSiegeCampAccel</context>
+      <command>tis("Siege Tower")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Catapult</name>
+      <displayname>$$21514$$Catapult</displayname>
+      <event>c</event>
+      <context>EgyptSiegeCampAccel</context>
+      <command>tis("Catapult")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Siege Tower</name>
+      <displayname>$$21515$$Multiple Siege Tower</displayname>
+      <event>shift-r</event>
+      <context>EgyptSiegeCampAccel</context>
+      <command>tis("Siege Tower",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Catapult</name>
+      <displayname>$$21516$$Multiple Catapult</displayname>
+      <event>shift-c</event>
+      <context>EgyptSiegeCampAccel</context>
+      <command>tis("Catapult",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Temple Egyptian" displayname="$$22280$$Egypt Temple Unit Training">
+    <keymapdata>
+      <name>Anubite</name>
+      <displayname>$$22239$$Anubite</displayname>
+      <event>a</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Anubite")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Avenger</name>
+      <displayname>$$22240$$Avenger</displayname>
+      <event>v</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Avenger")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Petsuchos</name>
+      <displayname>$$22241$$Petsuchos</displayname>
+      <event>c</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Petsuchos")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Priest</name>
+      <displayname>$$22242$$Priest</displayname>
+      <event>p</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Priest")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Mummy</name>
+      <displayname>$$22243$$Mummy</displayname>
+      <event>u</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Mummy")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Phoenix</name>
+      <displayname>$$22244$$Phoenix</displayname>
+      <event>n</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Phoenix")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Roc</name>
+      <displayname>$$22245$$Roc</displayname>
+      <event>r</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Roc")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Scarab</name>
+      <displayname>$$22246$$Scarab</displayname>
+      <event>s</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Scarab")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Scorpion Man</name>
+      <displayname>$$22247$$Scorpion Man</displayname>
+      <event>m</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Scorpion Man")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Sphinx</name>
+      <displayname>$$22248$$Sphinx</displayname>
+      <event>x</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Sphinx")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Wadjet</name>
+      <displayname>$$22249$$Wadjet</displayname>
+      <event>w</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Wadjet")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Anubite</name>
+      <displayname>$$22250$$Multiple Anubite</displayname>
+      <event>shift-a</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Anubite",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Avenger</name>
+      <displayname>$$22251$$Multiple Avenger</displayname>
+      <event>shift-v</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Avenger",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Petsuchos</name>
+      <displayname>$$22252$$Multiple Petsuchos</displayname>
+      <event>shift-c</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Petsuchos",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Priest</name>
+      <displayname>$$22253$$Multiple Priest</displayname>
+      <event>shift-p</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Priest",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Mummy</name>
+      <displayname>$$22254$$Multiple Mummy</displayname>
+      <event>shift-u</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Mummy",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Phoenix</name>
+      <displayname>$$22255$$Multiple Phoenix</displayname>
+      <event>shift-n</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Phoenix",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Roc</name>
+      <displayname>$$22256$$Multiple Roc</displayname>
+      <event>shift-r</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Roc",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Scarab</name>
+      <displayname>$$22257$$Multiple Scarab</displayname>
+      <event>shift-s</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Scarab",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Scorpion Man</name>
+      <displayname>$$22258$$Multiple Scorpion Man</displayname>
+      <event>shift-m</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Scorpion Man",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Sphinx</name>
+      <displayname>$$22259$$Multiple Sphinx</displayname>
+      <event>shift-x</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Sphinx",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Wadjet</name>
+      <displayname>$$22260$$Multiple Wadjet</displayname>
+      <event>shift-w</event>
+      <context>TempleEgyptianAccel</context>
+      <command>tis("Wadjet",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Norse LongHouse" displayname="$$21549$$Norse LongHouse Unit Training">
+    <keymapdata>
+      <name>Ulfsark</name>
+      <displayname>$$21517$$Ulfsark</displayname>
+      <event>u</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Ulfsark")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Throwing Axeman</name>
+      <displayname>$$21519$$Throwing Axeman</displayname>
+      <event>t</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Throwing Axeman")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Hero Norse</name>
+      <displayname>$$21520$$Hero Norse</displayname>
+      <event>r</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Hero Norse")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Raiding Cavalry</name>
+      <displayname>$$21521$$Raiding Cavalry</displayname>
+      <event>c</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Raiding Cavalry")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Ulfsark</name>
+      <displayname>$$21522$$Multiple Ulfsark</displayname>
+      <event>shift-u</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Ulfsark",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Throwing Axeman</name>
+      <displayname>$$21523$$Multiple Throwing Axeman</displayname>
+      <event>shift-t</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Throwing Axeman",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hero Norse</name>
+      <displayname>$$21524$$Multiple Hero Norse</displayname>
+      <event>shift-r</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Hero Norse",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Raiding Cavalry</name>
+      <displayname>$$21525$$Multiple Raiding Cavalry</displayname>
+      <event>shift-c</event>
+      <context>NorseLongHouseAccel</context>
+      <command>tis("Raiding Cavalry",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Norse HillFort" displayname="$$21550$$Norse HillFort Unit Training">
+    <keymapdata>
+      <name>Huskarl</name>
+      <displayname>$$21526$$Huskarl</displayname>
+      <event>k</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Huskarl")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Jarl</name>
+      <displayname>$$21527$$Jarl</displayname>
+      <event>j</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Jarl")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Portable Ram</name>
+      <displayname>$$21528$$Portable Ram</displayname>
+      <event>r</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Portable Ram")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Ballista</name>
+      <displayname>$$21529$$Ballista</displayname>
+      <event>b</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Ballista")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Huskarl</name>
+      <displayname>$$21530$$Multiple Huskarl</displayname>
+      <event>shift-k</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Huskarl",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Jarl</name>
+      <displayname>$$21531$$Multiple Jarl</displayname>
+      <event>shift-j</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Jarl",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Portable Ram</name>
+      <displayname>$$21532$$Multiple Portable Ram</displayname>
+      <event>shift-r</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Portable Ram",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Ballista</name>
+      <displayname>$$21533$$Multiple Ballista</displayname>
+      <event>shift-b</event>
+      <context>NorseFortAccel</context>
+      <command>tis("Ballista",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Temple Norse" displayname="$$22279$$Norse Temple Unit Training">
+    <keymapdata>
+      <name>Battle Boar</name>
+      <displayname>$$22261$$Battle Boar</displayname>
+      <event>b</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Battle Boar")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Einheriar</name>
+      <displayname>$$22262$$Einheriar</displayname>
+      <event>e</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Einheriar")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Fenris Wolf</name>
+      <displayname>$$22263$$Fenris Wolf</displayname>
+      <event>w</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Fenris Wolf")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Fire Giant</name>
+      <displayname>$$22264$$Fire Giant</displayname>
+      <event>f</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Fire Giant")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Frost Giant</name>
+      <displayname>$$22265$$Frost Giant</displayname>
+      <event>g</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Frost Giant")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Hero Norse</name>
+      <displayname>$$21520$$Hero Norse</displayname>
+      <event>r</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Hero Norse")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>$$22266$$Mountain Giant</name>
+      <displayname>$$22266$$Mountain Giant</displayname>
+      <event>m</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Mountain Giant")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Troll</name>
+      <displayname>$$22267$$Troll</displayname>
+      <event>t</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Troll")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Valkyrie</name>
+      <displayname>$$22268$$Valkyrie</displayname>
+      <event>v</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Valkyrie")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Battle Boar</name>
+      <displayname>$$22269$$Multiple Battle Boar</displayname>
+      <event>shift-b</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Battle Boar",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Einheriar</name>
+      <displayname>$$22270$$Multiple Einheriar</displayname>
+      <event>shift-e</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Einheriar",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Fenris Wolf</name>
+      <displayname>$$22271$$Multiple Fenris Wolf</displayname>
+      <event>shift-w</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Fenris Wolf",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Fire Giant</name>
+      <displayname>$$22272$$Multiple Fire Giant</displayname>
+      <event>shift-f</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Fire Giant",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Frost Giant</name>
+      <displayname>$$22273$$Multiple Frost Giant</displayname>
+      <event>shift-g</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Frost Giant",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Hero Norse</name>
+      <displayname>$$22274$$Multiple Hero Norse</displayname>
+      <event>shift-r</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Hero Norse",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Mountain Giant</name>
+      <displayname>$$22275$$Multiple Mountain Giant</displayname>
+      <event>shift-m</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Mountain Giant",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Troll</name>
+      <displayname>$$22276$$Multiple Troll</displayname>
+      <event>shift-t</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Troll",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Valkyrie</name>
+      <displayname>$$22277$$Multiple Valkyrie</displayname>
+      <event>shift-v</event>
+      <context>TempleNorseAccel</context>
+      <command>tis("Valkyrie",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Atlantean Barracks" displayname="$$23324$$Atlantean Barracks Unit Training">
+    <keymapdata>
+      <name>Murmillo</name>
+      <displayname>$$23325$$Murmillo</displayname>
+      <event>m</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Swordsman")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Contarius</name>
+      <displayname>$$23326$$Contarius</displayname>
+      <event>c</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Lancer")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Arcus</name>
+      <displayname>$$23327$$Arcus</displayname>
+      <event>a</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Archer Atlantean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Murmillo</name>
+      <displayname>$$23328$$Multiple Murmillo</displayname>
+      <event>shift-m</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Swordsman",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Contarius</name>
+      <displayname>$$23329$$Multiple Contarius</displayname>
+      <event>shift-c</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Lancer",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Arcus</name>
+      <displayname>$$23330$$Multiple Arcus</displayname>
+      <event>shift-a</event>
+      <context>AtlanteanBarracksAccel</context>
+      <command>tis("Archer Atlantean",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Atlantean Specialist Barracks" displayname="$$23331$$Atlantean Specialist Barracks Unit Training">
+    <keymapdata>
+      <name>Katapeltes</name>
+      <displayname>$$23332$$Katapeltes</displayname>
+      <event>k</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Maceman")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Tuma</name>
+      <displayname>$$23333$$Tuma</displayname>
+      <event>t</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Javelin Cavalry")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Chieroballista</name>
+      <displayname>$$23334$$Chieroballista</displayname>
+      <event>b</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Chieroballista")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Katapeltes</name>
+      <displayname>$$23335$$Multiple Katapeltes</displayname>
+      <event>shift-k</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Maceman",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Tuma</name>
+      <displayname>$$23336$$Multiple Tuma</displayname>
+      <event>shift-t</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Javelin Cavalry",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Chieroballista</name>
+      <displayname>$$23337$$Multiple Chieroballista</displayname>
+      <event>shift-b</event>
+      <context>AtlanteanCounterAccel</context>
+      <command>tis("Chieroballista",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Atlantean Palace" displayname="$$23343$$Atlantean Palace Training">
+    <keymapdata>
+      <name>Destroyer</name>
+      <displayname>$$23344$$Destroyer</displayname>
+      <event>d</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Trident Soldier")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Fanatic</name>
+      <displayname>$$23345$$Fanatic</displayname>
+      <event>f</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Royal Guard")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Destroyer</name>
+      <displayname>$$23346$$Multiple Destroyer</displayname>
+      <event>shift-d</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Trident Soldier",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Fanatic</name>
+      <displayname>$$23347$$Multiple Fanatic</displayname>
+      <event>shift-f</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Royal Guard",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Fire Siphon</name>
+      <displayname>$$23339$$Fire Siphon</displayname>
+      <event>s</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Fire Siphon")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Fire Siphon</name>
+      <displayname>$$23340$$Multiple Fire Siphon</displayname>
+      <event>shift-s</event>
+      <context>AtlanteanPalaceAccel</context>
+      <command>tis("Fire Siphon",5)</command>
+    </keymapdata>
+  </keymapgroup>
+  <keymapgroup name="Temple Atlantean" displayname="$$23348$$Atlantean Temple Unit Training">
+    <keymapdata>
+      <name>Automaton</name>
+      <displayname>$$23349$$Automaton</displayname>
+      <event>a</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Automaton")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Argus</name>
+      <displayname>$$23350$$Argus</displayname>
+      <event>r</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Argus")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Behemoth</name>
+      <displayname>$$23351$$Behemoth</displayname>
+      <event>b</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Behemoth")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Caladrius</name>
+      <displayname>$$23352$$Caladrius</displayname>
+      <event>c</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Flying Medic")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Heka Gigantes</name>
+      <displayname>$$23353$$Heka Gigantes</displayname>
+      <event>g</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Heka Gigantes")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Lampades</name>
+      <displayname>$$23354$$Lampades</displayname>
+      <event>l</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Lampades")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Promethean</name>
+      <displayname>$$23355$$Promethean</displayname>
+      <event>p</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Promethean")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Satyr</name>
+      <displayname>$$23356$$Satyr</displayname>
+      <event>s</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Satyr")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Stymphalian Bird</name>
+      <displayname>$$23357$$Stymphalian Bird</displayname>
+      <event>t</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Stymphalian Bird")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Oracle</name>
+      <displayname>$$23816$$Oracle</displayname>
+      <event>o</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Oracle Scout")</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Automaton</name>
+      <displayname>$$23358$$Multiple Automaton</displayname>
+      <event>shift-a</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Automaton",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Argus</name>
+      <displayname>$$23359$$Multiple Argus</displayname>
+      <event>shift-r</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Argus",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Behemoth</name>
+      <displayname>$$23360$$Multiple Behemoth</displayname>
+      <event>shift-b</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Behemoth",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Caladrius</name>
+      <displayname>$$23361$$Multiple Caladrius</displayname>
+      <event>shift-c</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Flying Medic",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Heka Gigantes</name>
+      <displayname>$$23362$$Multiple Heka Gigantes</displayname>
+      <event>shift-g</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Heka Gigantes",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Lampades</name>
+      <displayname>$$23363$$Multiple Lampades</displayname>
+      <event>shift-l</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Lampades",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Promethean</name>
+      <displayname>$$23364$$Multiple Promethean</displayname>
+      <event>shift-p</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Promethean",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Satyr</name>
+      <displayname>$$23365$$Multiple Satyr</displayname>
+      <event>shift-s</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Satyr",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Stymphalian Bird</name>
+      <displayname>$$23366$$Multiple Stymphalian Bird</displayname>
+      <event>shift-t</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Stymphalian Bird",5)</command>
+    </keymapdata>
+    <keymapdata>
+      <name>Multiple Oracle</name>
+      <displayname>$$23817$$Multiple Oracle</displayname>
+      <event>shift-o</event>
+      <context>TempleAtlanteanAccel</context>
+      <command>tis("Oracle Scout",5)</command>
+    </keymapdata>
+  </keymapgroup>
+</defaultkeymap>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="soundgadget" type="soundgadget" size1024="100 200 600 750" closebutton="" titlebar="Sound Control" background="ui\ui_med_gray" tilebackground="">
+    <gadget type="textBox" name="soundgadget-typetitle" textcenterhoriz="" textcentervert="" a-dtype="textFontSize number Z number" sizerel1024="10 10 245 30">Sound Types</gadget>
+    <gadget type="list" name="soundgadget-typelist" buttonsize1024="200 30" showselect="" columnorder="" selectedcolor="0 0 255" sizerel1024="10 35 245 470" background="ui\ui_dark_gray" scrollvert=""></gadget>
+    <gadget type="textField" name="soundgadget-logicfield" buttonsize1024="200 30" showselect="" columnorder="" selectedcolor="0 0 255" sizerel1024="255 35 490 65" background="ui\ui_dark_gray" scrollvert="">Logic:<dropdown></dropdown></gadget>
+    <gadget type="list" name="soundgadget-choicelist" buttonsize1024="200 30" showselect="" columnorder="" selectedcolor="0 0 255" sizerel1024="255 75 490 400" background="ui\ui_dark_gray" scrollvert=""></gadget>
+    <gadget type="textField" name="soundgadget-soundsetfield" buttonsize1024="200 30" showselect="" columnorder="" selectedcolor="0 0 255" sizerel1024="255 410 490 440" background="ui\ui_dark_gray" scrollvert="">SoundSet:<dropdown></dropdown></gadget>
+    <gadget type="button" name="soundgadget-addbutton" bevelbutton="" sizerel1024="255 480 345 510">add</gadget>
+    <gadget type="button" name="soundgadget-removebutton" bevelbutton="" sizerel1024="355 480 445 510">remove</gadget>
+    <gadget type="button" name="soundgadget-savebutton" bevelbutton="" sizerel1024="10 480 90 510">save</gadget>
+    <gadget name="soundgadget-choicedlg" type="dialog" size1024="100 200 400 320" closebutton="" titlebar="New Choice" background="ui\ui_med_gray" tilebackground="">
+      <gadget type="textField" name="soundgadget-choicedlg-choicename" buttonsize1024="200 30" showselect="" columnorder="" selectedcolor="0 0 255" sizerel1024="10 10 290 40" background="ui\ui_dark_gray" scrollvert="">Choice:</gadget>
+      <gadget type="button" name="soundgadget-choicedlg-cancel" bevelbutton="" sizerel1024="50 50 140 80">Cancel</gadget>
+      <gadget type="button" name="soundgadget-choicedlg-ok" bevelbutton="" sizerel1024="150 50 240 80">Ok</gadget>
+    </gadget>
+  </gadget>
+</layout>

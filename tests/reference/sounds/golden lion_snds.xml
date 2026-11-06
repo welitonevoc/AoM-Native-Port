@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Golden Lion">
+    <soundtype name="Select">
+      <soundset name="NemeanLionSelect"></soundset>
+    </soundtype>
+    <soundtype name="Grunt">
+      <soundset name="NemeanLionGrunt"></soundset>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Crush">
+          <soundset name="CrushFlesh"></soundset>
+        </choice>
+        <choice name="Fire">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Hack">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceFlesh"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="NemeanLionDeath"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="MythUnitBirth"></soundset>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <soundset name="NemeanLionAcknowledge"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

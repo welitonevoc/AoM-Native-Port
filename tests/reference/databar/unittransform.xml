@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<unittransforms>
+  <transform>
+    <from>Wall Long</from>
+    <to>Gate</to>
+  </transform>
+  <transform>
+    <from>Villager Norse</from>
+    <to>Ulfsark</to>
+  </transform>
+  <transform>
+    <from>Dwarf</from>
+    <to>Ulfsark</to>
+  </transform>
+</unittransforms>

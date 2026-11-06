@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>icons\icon object stat empty Egyptian</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>icons\icon object stat empty Norse</texture>
+  </culture>
+</definition>

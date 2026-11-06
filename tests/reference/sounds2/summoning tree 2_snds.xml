@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Summoning Tree 2">
+    <soundtype name="Select">
+      <soundset name="WalkingWoodsSelect"></soundset>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Crush">
+          <soundset name="CrushWood"></soundset>
+        </choice>
+        <choice name="Fire">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+        <choice name="Hack">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceWood"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="TreeFalling"></soundset>
+    </soundtype>
+    <soundtype name="Exists">
+      <soundset name="GaiaPool"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

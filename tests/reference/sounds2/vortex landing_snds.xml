@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Vortex landing">
+    <soundtype name="Exists">
+      <soundset name="VortexExist"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

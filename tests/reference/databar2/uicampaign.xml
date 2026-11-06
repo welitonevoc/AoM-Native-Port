@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="Campaign" type="gadget" size1024="0 0 1024 768" background="ui\background_d1" tilebackground="">
+    <gadget name="Campaign-screen-background" type="gadget">
+      <gadget name="Campaign-screen-BG1" type="gadget" size1024="0 0 256 256" clampbackground="" background="ui\screen shot A_01" z="1"></gadget>
+      <gadget name="Campaign-screen-BG2" type="gadget" size1024="256 0 512 256" clampbackground="" background="ui\screen shot A_02" z="1"></gadget>
+      <gadget name="Campaign-screen-BG3" type="gadget" size1024="512 0 768 256" clampbackground="" background="ui\screen shot A_03" z="1"></gadget>
+      <gadget name="Campaign-screen-BG4" type="gadget" size1024="768 0 1024 256" clampbackground="" background="ui\screen shot A_04" z="1"></gadget>
+      <gadget name="Campaign-screen-BG5" type="gadget" size1024="0 256 256 512" clampbackground="" background="ui\screen shot A_05" z="1"></gadget>
+      <gadget name="Campaign-screen-BG6" type="gadget" size1024="256 256 512 512" clampbackground="" background="ui\screen shot A_06" z="1"></gadget>
+      <gadget name="Campaign-screen-BG7" type="gadget" size1024="512 256 768 512" clampbackground="" background="ui\screen shot A_07" z="1"></gadget>
+      <gadget name="Campaign-screen-BG8" type="gadget" size1024="768 256 1024 512" clampbackground="" background="ui\screen shot A_08" z="1"></gadget>
+      <gadget name="Campaign-screen-BG9" type="gadget" size1024="0 512 256 768" clampbackground="" background="ui\screen shot A_09" z="1"></gadget>
+      <gadget name="Campaign-screen-BG10" type="gadget" size1024="256 512 512 768" clampbackground="" background="ui\screen shot A_10" z="1"></gadget>
+      <gadget name="Campaign-screen-BG11" type="gadget" size1024="512 512 768 768" clampbackground="" background="ui\screen shot A_11" z="1"></gadget>
+      <gadget name="Campaign-screen-BG12" type="gadget" size1024="768 512 1024 768" clampbackground="" background="ui\screen shot A_12" z="1"></gadget>
+    </gadget>
+    <gadget name="Campaign-Label" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="52 22 327 47" z="60">$$20064$$Single Player - Campaign</gadget>
+    <gadget name="Campaign-ScreenSeparator" type="gadget" size1024="34 51 351 54" background="ui\ui line yellow" z="60"></gadget>
+    <gadget name="PlaySelectedScenarioButton" type="stateButton" size1024="518 712 678 744" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="MainMenuButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$20189$$Start<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MainMenuButton" type="stateButton" size1024="686 712 846 744" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="MainMenuButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$18445$$Quit<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry><command>campaignQuit modeEnter("Pregame")</command></gadget>
+    <gadget name="Campaign-Background" type="gadget" size1024="24 15 353 758" background="ui\ui pregame transparency background" tilebackground="" z="50">
+      <gadget tilebackgroundhoriz="" name="Campaign-BordersTop" type="gadget" background="ui\ui border top middle" size1024="30 8 360 24"></gadget>
+      <gadget tilebackgroundhoriz="" name="Campaign-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="30 750 360 766"></gadget>
+      <gadget tilebackgroundvert="" name="Campaign-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="14 40 46 677"></gadget>
+      <gadget tilebackgroundvert="" name="Campaign-BordersRight" type="gadget" background="ui\ui border right middle" size1024="351 38 383 677"></gadget>
+      <gadget name="Campaign-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="0 8 64 136" z="65" clampbackground=""></gadget>
+      <gadget name="Campaign-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="0 632 64 760" z="65" clampbackground=""></gadget>
+      <gadget name="Campaign-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="321 632 385 760" z="65" clampbackground=""></gadget>
+      <gadget name="Campaign-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="335 8 399 136" z="65" clampbackground=""></gadget>
+    </gadget>
+    <gadget name="Campaign-Borders-topline" type="gadget" size1024="48 121 342 736" background="" outlinecolor="255 208 0" transparent="" z="60"></gadget>
+    <gadget name="Campaign-Borders-middleline" type="gadget" size1024="48 535 342 736" background="" outlinecolor="255 208 0" transparent="" z="60"></gadget>
+    <gadget name="CampaignSelection" type="scrollList" size1024="56 60 329 114" z="60" textfontsize="16" textfont="ScrollFont" textcolor="1 49 32" background="ui\ui scroll middle tile" tilebackground="" topcapart="ui\ui scroll top tile" bottomcapart="ui\ui scroll bottom tile" leftcapart="ui\ui scroll cap left" rightcapart="ui\ui scroll cap right" border1024="3 0" listitemheight="20">
+      <listitem>Arkantos At Sea</listitem>
+    </gadget>
+    <gadget name="ScenarioList" type="list" textcolor="255 208 0" textfontsize="14" textfont="CampaignListItem" size1024="55 121 342 534" scrollvert="" z="60" selectedcolor="255 255 255" listitemheight="25">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 1" background="ui\ui background yellow opaque"></vertscrollbar>
+    </gadget>
+    <gadget name="DifficultySetting" type="radioset" size1024="57 571 244 733" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" radiosetbuttonsize1024="180 36" radiosetdefaultbuttonindex="0" z="60" radiocheckedart="ui\ui button radial 32x32 clicked" radiouncheckedart="ui\ui button radial 32x32" radiobtnborder1024="2 2" mouseovertext="$$19947$$" radiohighlightart="ui\ui button radial 32x32 rollover" sound="ui_wind">
+      <button>$$18297$$Easy</button>
+      <button>$$18298$$Moderate</button>
+      <button>$$18299$$Hard</button>
+      <button>$$18300$$Titan</button>
+    </gadget>
+    <gadget name="Campaign-DifficultyLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="68 551 169 571" z="60">$$18691$$Difficulty:</gadget>
+    <gadget name="Campaign-Map-Section" type="gadget" size1024="747 11 1005 205" background="ui\ui background opaque 1" z="45" hidden="" outlinecolor="255 208 0"></gadget>
+    <gadget name="Campaign-Detail" type="gadget" size1024="359 478 1024 624" z="45">
+      <gadget name="Campaign-ScreenSeparator" type="gadget" size1024="369 578 1024 580" background="ui\ui background yellow opaque" z="11"></gadget>
+      <gadget name="Campaign-Background-Blur" type="gadget" size1024="369 580 1024 623" backgroundcolor="1 49 32" z="11"></gadget>
+      <gadget name="Campaign-ScreenSeparator" type="gadget" size1024="369 623 1024 625" background="ui\ui background yellow opaque" z="11"></gadget>
+      <gadget name="Scenario-Title" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="24" textfont="ScenarioTitle" type="formatText" size1024="389 580 1004 623" z="15">Chiron's Special Moment in the Valley of the Kings</gadget>
+    </gadget>
+    <gadget name="ScenarioDetails-Background" type="gadget" size1024="369 625 1024 768" background="ui\ui pregame transparency background" z="11"></gadget>
+    <gadget name="ScenarioDetails" textcentervert="" texttextcenterhoriz="" textcolor="255 208 0" textfontsize="15" textfont="CampaignDescription" textwrapon="" type="formatText" size1024="399 605 996 690" z="16">This is a big long description on how the scenario is going to allow you to make your wishes come true.</gadget>
+  </gadget>
+</layout>

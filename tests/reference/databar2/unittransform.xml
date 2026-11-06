@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<unittransforms>
+  <transform>
+    <from>Wall Long</from>
+    <to>Gate</to>
+  </transform>
+  <transform>
+    <from>Villager Norse</from>
+    <to>Ulfsark</to>
+  </transform>
+  <transform>
+    <from>Dwarf</from>
+    <to>Ulfsark</to>
+  </transform>
+  <transform>
+    <from>Villager Atlantean</from>
+    <to>Villager Atlantean Hero</to>
+  </transform>
+  <transform>
+    <from>Swordsman</from>
+    <to>Swordsman Hero</to>
+  </transform>
+  <transform>
+    <from>Trident Soldier</from>
+    <to>Trident Soldier Hero</to>
+  </transform>
+  <transform>
+    <from>Javelin Cavalry</from>
+    <to>Javelin Cavalry Hero</to>
+  </transform>
+  <transform>
+    <from>Lancer</from>
+    <to>Lancer Hero</to>
+  </transform>
+  <transform>
+    <from>Royal Guard</from>
+    <to>Royal Guard Hero</to>
+  </transform>
+  <transform>
+    <from>Maceman</from>
+    <to>Maceman Hero</to>
+  </transform>
+  <transform>
+    <from>Archer Atlantean</from>
+    <to>Archer Atlantean Hero</to>
+  </transform>
+  <transform>
+    <from>Oracle Scout</from>
+    <to>Oracle Hero</to>
+  </transform>
+</unittransforms>

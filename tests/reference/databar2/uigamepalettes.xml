@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="GameProtoPalette" type="palette" size1024="256 550 800 768" palettecontentsize1024="40 40" paletteelemsize1024="120 60" palettetitlebottom="" bevel="" background="ui\ui_med_gray" tilebackground="" paletteusedropdown="" alphasort="" refreshonreal="" z="20" hidden="" titlebar="Objects" resizevert="" resizehorz="" closebutton="" windowzstyle=""></gadget>
+</layout>

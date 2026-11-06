@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Titan Bad">
+    <soundtype name="Select">
+      <soundset name="CyclopsSelect"></soundset>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Crush">
+          <soundset name="GatherMine"></soundset>
+        </choice>
+        <choice name="Fire">
+          <soundset name="GatherMine"></soundset>
+        </choice>
+        <choice name="Hack">
+          <soundset name="GatherMine"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="GatherMine"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="GatherMine"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="CyclopsDeath"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="MythUnitBirth"></soundset>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <targetlogic>
+        <choice name="default">
+          <soundset name="CyclopsAcknowledge"></soundset>
+        </choice>
+        <choice name="enemy">
+          <soundset name="CyclopsAttack"></soundset>
+        </choice>
+      </targetlogic>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

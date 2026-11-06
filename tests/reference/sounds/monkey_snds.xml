@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Monkey">
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceFlesh"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="CrushFlesh"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="MonkeyDeath"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

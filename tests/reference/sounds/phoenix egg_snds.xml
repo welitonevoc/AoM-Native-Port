@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Phoenix Egg">
+    <soundtype name="Death">
+      <soundset name="FireGiantDeath"></soundset>
+    </soundtype>
+    <soundtype name="Exists">
+      <soundset name="FireGiantExist"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

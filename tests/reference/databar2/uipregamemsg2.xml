@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget type="dialog" name="pregame-messagedialog2" size1024="346 195 678 421" bevel="" background="ui\ui background opaque 1" tilebackground="" texturereplace="" windowzstyle="" hidden="" dialogdefaultbuttonindex="1" z="99">
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog2-BordersTop" type="gadget" background="ui\ui border top middle" size1024="349 187 675 203" z="5"></gadget>
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog2-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="349 418 675 434" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog2-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="330 252 362 364" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog2-BordersRight" type="gadget" background="ui\ui border right middle" size1024="674 248 706 360" z="5"></gadget>
+    <gadget name="pregame-messagedialog2-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="315 185 379 313" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog2-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="315 304 379 432" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog2-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="643 304 707 432" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog2-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="658 185 722 313" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog2-prompt" type="formatText" textcolor="255 208 0" textfont="PregameEntry" textfontsize="15" textcenterhoriz="" size1024="367 235 657 350">Message Text Goes Here</gadget>
+    <gadget name="pregame-messagedialog2-OKButton" type="stateButton" size1024="380 372 508 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$18465$$OK<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="pregame-messagedialog2-CancelButton" type="stateButton" size1024="516 372 644 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$18466$$Cancel<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry><command>gadgetUnreal("pregame-messagedialog2")</command></gadget>
+  </gadget>
+</layout>

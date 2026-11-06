@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<meteor>
+  <delaytime>0.1</delaytime>
+  <minthrowdistance>3.0</minthrowdistance>
+  <maxthrowdistance>10.0</maxthrowdistance>
+  <minthrowheightfactor>0.75</minthrowheightfactor>
+  <maxthrowheightfactor>1.25</maxthrowheightfactor>
+  <minthrowvelocity>15.0</minthrowvelocity>
+  <maxthrowvelocity>25.0</maxthrowvelocity>
+</meteor>

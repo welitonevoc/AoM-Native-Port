@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>minimap_border_e</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>minimap_border_n</texture>
+  </culture>
+</definition>

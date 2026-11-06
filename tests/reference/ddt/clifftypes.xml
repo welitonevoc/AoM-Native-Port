@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cliffs>
+  <cliff name="Norse" iconname="ui\NCliff64" top="snowB" side="CliffNorseA" edge="CliffNorseB"></cliff>
+  <cliff name="Greek" iconname="ui\GCliff64" top="grassdirt25" side="CliffGreekA" edge="grassdirt50"></cliff>
+  <cliff name="Greek Rock" iconname="ui\GCliff64" top="CliffGreekA" side="CliffGreekA" edge="CliffGreekB"></cliff>
+  <cliff name="Egyptian" iconname="ui\ECliff64" top="sandA" side="CliffEgyptianA" edge="sanddirt50"></cliff>
+  <cliff name="Hades" iconname="ui\NCliff64" top="Hades9" side="HadesCliff" edge="hadesbuildable2"></cliff>
+</cliffs>

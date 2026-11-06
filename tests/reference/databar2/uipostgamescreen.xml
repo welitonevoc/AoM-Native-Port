@@ -1,0 +1,1242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="postgame-screen" type="gadget" windowzstyle="" blockmoderendering="" size1024="0 0 1024 768">
+    <gadget name="postgame-screen-background" type="gadget" size1024="25 15 1000 754" background="ui\ui background opaque 1" tilebackground="" z="1" transparent="">
+      <gadget tilebackgroundhoriz="" name="postgame-BordersTop" type="gadget" background="ui\ui border top middle" size1024="25 10 992 26"></gadget>
+      <gadget tilebackgroundhoriz="" name="postgame-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="25 751 992 765"></gadget>
+      <gadget tilebackgroundvert="" name="postgame-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="14 87 46 696"></gadget>
+      <gadget tilebackgroundvert="" name="postgame-BordersRight" type="gadget" background="ui\ui border right middle" size1024="992 90 1024 696"></gadget>
+      <gadget name="postgame-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="0 8 64 136"></gadget>
+      <gadget name="postgame-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="0 634 64 762"></gadget>
+      <gadget name="postgame-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="960 634 1024 762"></gadget>
+      <gadget name="postgame-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="975 8 1039 136" z="11"></gadget>
+    </gadget>
+    <gadget name="postgame-MainMenuButton" type="stateButton" size1024="592 710 784 742" bevelbutton="" z="20" statebuttonuseinternalstates="" texturecoords="0 0 .75 1" textfont="PostgameButton" textfontsize="18" textcolor="18 44 66" mouseovertext="$$20030$$">$$18445$$Quit<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192x32 clicked"></stateentry><stateentry background="ui\ui button long 192x32 rollover"></stateentry><stateentry background=""></stateentry><command>leaveGame</command></gadget>
+    <gadget name="postgame-ViewMapButton" type="stateButton" size1024="792 710 984 742" bevelbutton="" z="20" statebuttonuseinternalstates="" texturecoords="0 0 .75 1" textfont="PostgameButton" textfontsize="18" textcolor="18 44 66" mouseovertext="$$20932$$Click this button to view the map that you just played on.">$$19029$$View Map<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192x32 clicked"></stateentry><stateentry background="ui\ui button long 192x32 rollover"></stateentry><stateentry background=""></stateentry><command>showGameFromPostGame</command></gadget>
+    <gadget name="PlayAgainButton" type="button" size1024="699 703 827 735" mouseovertext="Click this button to play again with the same game settings." bevelbutton="" textfont="ButtonFont" textfontsize="14" textcolor="0 0 0" hidden="" foreground="pg_button">$$19028$$Play Again<command>postGamePlayAgain</command></gadget>
+    <gadget name="SummaryTab" type="gadget" size1024="818 50 946 82" mouseovertext="$$19031$$View a summary of the game, including the game settings." hidden="">
+      <gadget z="1" name="SummaryTabIn" type="button" donthighlight="" foreground="UI\button_tab_C" size1024="818 50 946 82" sound="UI_latch">
+        <command>gadgetReal("SummaryTabOut") gadgetUnreal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetReal("SummaryPage") gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnReal("ResearchPage") gadgetUnReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget hidden="" name="SummaryTabOut" type="gadget" background="UI\button_tab_C rollover" z="1" size1024="818 50 946 82"></gadget>
+      <gadget name="SummaryTabText" type="gadget" textcolor="0 0 0" textfont="TabFont" textfontsize="14" textcenterhoriz="" z="2" transparent="" size1024="818 57 946 77">$$19032$$Ratings</gadget>
+    </gadget>
+    <gadget name="ScoreTab" type="gadget" size1024="50 21 202 53" mouseovertext="$$19033$$View an overview of the scores in the game.">
+      <gadget name="ScoreTabOut" type="gadget" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="10" size1024="50 21 202 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 56 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="196 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="10" name="ScoreTabIn" hidden="" type="button" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" donthighlight="" size1024="50 21 202 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetReal("ScoreTabOut") gadgetUnReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage") gadgetReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnReal("ResearchPage")  gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="ScoreTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="12" transparent="" size1024="50 23 202 53">$$19034$$Score</gadget>
+    </gadget>
+    <gadget name="EconomyTab" type="gadget" size1024="204 21 356 53" mouseovertext="$$19035$$View detail on the economy scores.">
+      <gadget name="EconomyTabOut" type="gadget" hidden="" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="1" size1024="204 21 356 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 210 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="350 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="1" donthighlight="" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" name="EconomyTabIn" type="button" size1024="204 21 356 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetReal("EconomyTabOut") gadgetUnReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnReal("ResearchPage")  gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="EconomyTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="12" transparent="" size1024="204 23 356 53">$$19036$$Economy</gadget>
+    </gadget>
+    <gadget name="MilitaryTab" type="gadget" size1024="358 21 510 53" mouseovertext="$$19037$$View detail on the military scores.">
+      <gadget name="MilitaryTabOut" type="gadget" hidden="" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="1" size1024="358 21 510 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 364 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="504 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="1" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" donthighlight="" name="MilitaryTabIn" type="button" size1024="358 21 510 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetReal("MilitaryTabOut") gadgetUnReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnReal("ResearchPage")  gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="MilitaryTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="12" transparent="" size1024="358 23 510 53">$$19038$$Military</gadget>
+    </gadget>
+    <gadget name="ResearchTab" type="gadget" size1024="512 21 664 53" mouseovertext="$$19042$$View detail on the research scores.">
+      <gadget name="ResearchTabOut" type="gadget" hidden="" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="1" size1024="512 21 664 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 518 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="658 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="1" donthighlight="" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" name="ResearchTabIn" type="button" size1024="512 21 664 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetReal("ResearchTabOut") gadgetUnReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetReal("ResearchPage") gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="ResearchTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="12" transparent="" size1024="512 23 664 53">$$19185$$Improvements</gadget>
+    </gadget>
+    <gadget name="MythologyTab" type="gadget" size1024="666 21 818 53" mouseovertext="$$19039$$View detail on the mythology scores.">
+      <gadget name="MythologyTabOut" type="gadget" hidden="" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="1" size1024="666 21 818 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 672 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="812 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="1" donthighlight="" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" name="MythologyTabIn" type="button" size1024="666 21 818 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetReal("MythologyTabOut") gadgetUnReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnReal("ResearchPage")  gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="MythologyTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="2" transparent="" size1024="666 23 818 53">$$19040$$Mythology</gadget>
+    </gadget>
+    <gadget name="TimelineTab" type="gadget" size1024="820 21 972 53" mouseovertext="$$19044$$View a timeline.">
+      <gadget name="TimelineTabOut" type="gadget" hidden="" background="ui\ui button tab up 152x32" texturecoords="0 0 .594 1" z="1" size1024="820 21 972 53">
+        <gadget name="mpsetupcustom-ScreenSeparator" type="gadget" size1024="33 53 826 54" background="ui\ui background yellow opaque" z="11"></gadget>
+        <gadget name="mpsetupcustom-ScreenSeparator2" type="gadget" size1024="966 53 991 54" background="ui\ui background yellow opaque" z="11"></gadget>
+      </gadget>
+      <gadget z="1" donthighlight="" foreground="ui\ui button tab down 152x32" texturecoords="0 0 .594 1" name="TimelineTabIn" type="button" size1024="820 21 972 53" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetUnReal("HardcoreTabOut") gadgetReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetReal("TimelineTabOut") gadgetUnreal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetUnReal("HardcorePage") gadgetUnreal("ResearchPage") gadgetUnReal("GenericScorePage") gadgetReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="TimelineTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" z="12" transparent="" size1024="820 23 972 53">$$19045$$Timeline</gadget>
+    </gadget>
+    <gadget name="HardcoreTab" type="gadget" size1024="666 20 818 52" mouseovertext="$$19041$$View more advanced game statistics." hidden="">
+      <gadget name="HardcoreTabOut" type="gadget" hidden="" background="UI\button_tab_C rollover" z="1" size1024="666 22 818 54"></gadget>
+      <gadget z="1" foreground="UI\button_tab_C" donthighlight="" hidden="" name="HardcoreTabIn" type="button" size1024="666 22 818 54" sound="UI_latch">
+        <command>gadgetUnReal("SummaryTabOut") gadgetReal("SummaryTabIn") gadgetUnReal("ScoreTabOut") gadgetReal("ScoreTabIn") gadgetUnReal("EconomyTabOut") gadgetReal("EconomyTabIn") gadgetUnReal("MilitaryTabOut") gadgetReal("MilitaryTabIn") gadgetUnReal("MythologyTabOut") gadgetReal("MythologyTabIn") gadgetReal("HardcoreTabOut") gadgetUnReal("HardcoreTabIn") gadgetUnReal("ResearchTabOut") gadgetReal("ResearchTabIn") gadgetUnReal("TimelineTabOut") gadgetReal("TimelineTabIn") gadgetUnReal("SummaryPage")gadgetUnReal("ScorePage") gadgetUnReal("EconomyPage") gadgetUnReal("MilitaryPage") gadgetUnReal("MythologyPage") gadgetReal("HardcorePage") gadgetUnReal("ResearchPage")  gadgetReal("GenericScorePage") gadgetUnReal("TimelinePage")</command>
+      </gadget>
+      <gadget name="HardcoreTabText" type="gadget" textcolor="255 208 0" textfont="PostgameTab" textfontsize="14" textcenterhoriz="" textcentervert="" z="12" transparent="" size1024="666 22 818 54">$$18580$$Advanced</gadget>
+    </gadget>
+    <gadget name="ChatDisplay" type="simpleTextBox" size1024="41 576 576 680" texturereplace="" textcolor="255 208 0" scrollvert="" showselect="" textfontsize="14" textfont="PregameChat" wordwrap="" z="40" background="ui\ui background opaque 2" tilebackground="">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 2" background="ui\ui background yellow opaque"></vertscrollbar>
+      <gadget name="postgame-ChatDisplay-Border" type="gadget" size1024="40 576 573 679" transparent="" outlinecolor="255 208 0" z="10"></gadget>
+      <gadget name="postgame-ChatInput-Background" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="39 672 573 705" z="45"></gadget>
+    </gadget>
+    <gadget name="ChatInput" type="editBox" size1024="41 679 573 703" textfont="PregameChat" textfontsize="14" textcolor="0 0 58" enterkey="" editboxmaxchars="200" enableime="" z="50"></gadget>
+    <gadget name="SummaryPage" type="gadget" size1024="44 82 972 550" z="20" hidden="">
+      <gadget name="OtherPlayersRatings" type="gadget" size1024="44 92 444 550">
+        <gadget name="OtherPlayersDisplayText" type="formatText" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" textwrapon="" size1024="54 102 996 162">$$19046$$Rate each of the following players and settings.  Your ratings determine the likelihood that you will be placed in a game with the player or the setting in the future:</gadget>
+        <gadget name="Player1" type="gadget" size1024="150 165 370 185">
+          <gadget name="Player1Name" type="formatText" textcolor="0 0 0" textfont="PostGameTableEntries" textfontsize="14" size1024="175 165 370 185">$$19047$$Player 1</gadget>
+          <gadget name="Player1Rating" type="stateButton" bevel="" statebuttondefaultstate="0" z="20" size1024="150 165 166 181">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player2" type="gadget" size1024="150 195 370 215">
+          <gadget name="Player2Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 195 370 215">$$19048$$Player 2</gadget>
+          <gadget name="Player2Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 195 166 211">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player3" type="gadget" size1024="150 225 370 245">
+          <gadget name="Player3Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 225 370 245">$$19049$$Player 3</gadget>
+          <gadget name="Player3Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 225 166 241">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player4" type="gadget" size1024="150 255 370 275">
+          <gadget name="Player4Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 255 370 275">$$19050$$Player 4</gadget>
+          <gadget name="Player4Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 255 166 271">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player5" type="gadget" size1024="150 285 370 305">
+          <gadget name="Player5Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 285 370 305">$$19051$$Player 5</gadget>
+          <gadget name="Player5Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 285 166 301">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player6" type="gadget" size1024="150 315 370 335">
+          <gadget name="Player6Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 315 370 335">$$19052$$Player 6</gadget>
+          <gadget name="Player6Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 315 166 331">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player7" type="gadget" size1024="150 345 370 365">
+          <gadget name="Player7Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 345 370 365">$$19053$$Player 7</gadget>
+          <gadget name="Player7Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 345 166 361">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player8" type="gadget" size1024="150 375 370 395">
+          <gadget name="Player8Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 375 370 395">$$19054$$Player 8</gadget>
+          <gadget name="Player8Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 375 166 391">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player9" type="gadget" size1024="150 405 370 425">
+          <gadget name="Player9Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 405 370 425">$$19055$$Player 9</gadget>
+          <gadget name="Player9Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 405 166 421">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player10" type="gadget" size1024="150 435 370 455">
+          <gadget name="Player10Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 435 370 455">$$19056$$Player 10</gadget>
+          <gadget name="Player10Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 435 166 451">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player11" type="gadget" size1024="150 465 370 485">
+          <gadget name="Player11Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 465 370 485">$$19057$$Player 11</gadget>
+          <gadget name="Player11Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 465 166 481">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Player12" type="gadget" size1024="150 495 370 515">
+          <gadget name="Player12Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="175 495 370 515">$$19058$$Player 12</gadget>
+          <gadget name="Player12Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="150 495 166 511">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+      </gadget>
+      <gadget name="GameSettingRatings" type="gadget" size1024="494 92 1016 550">
+        <gadget name="Setting1" type="gadget" size1024="450 165 670 185">
+          <gadget name="Setting1Name" textfontsize="14" textfont="PostgameTableEntry" textcolor="0 0 0" type="formatText" size1024="475 165 670 185">$$19059$$A Game Setting</gadget>
+          <gadget name="Setting1Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="450 165 466 181">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Setting2" type="gadget" size1024="450 195 670 215">
+          <gadget name="Setting2Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="475 195 670 215">$$19059$$A Game Setting</gadget>
+          <gadget name="Setting2Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="450 195 466 211">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Setting3" type="gadget" size1024="450 225 670 245">
+          <gadget name="PopSettingName" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="475 225 670 245">$$19059$$A Game Setting</gadget>
+          <gadget name="Setting3Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="450 225 466 241">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Setting4" type="gadget" size1024="450 255 670 275">
+          <gadget name="Setting4Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="475 255 670 275">$$19059$$A Game Setting</gadget>
+          <gadget name="Setting4Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="450 255 466 271">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+        <gadget name="Setting5" type="gadget" size1024="450 285 670 305">
+          <gadget name="Setting5Name" type="formatText" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="475 285 670 305">$$19059$$A Game Setting</gadget>
+          <gadget name="Setting5Rating" type="stateButton" bevel="" statebuttondefaultstate="0" size1024="450 285 466 301">
+            <stateentry background="UI\check_box_on"></stateentry>
+            <stateentry background="UI\check_box_off"></stateentry>
+          </gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="GenericScorePage" type="gadget" size1024="44 62 972 530" z="18">
+      <gadget name="ScorePlayersNames" type="gadget" size1024="44 82 212 530">
+        <gadget name="ScorePage-MainTable-Border" type="gadget" size1024="40 62 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+        <gadget name="Player1" type="gadget" size1024="54 103 212 133">
+          <gadget name="Player1Name" z="2" type="textBox" textfont="PostgameTableEntry" textfontsize="14" size1024="59 106 212 133" textcentervert="">Player 1</gadget>
+          <gadget name="Player1background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 103 983 133" z="1"></gadget>
+        </gadget>
+        <gadget name="Player2" type="gadget" size1024="59 142 212 172">
+          <gadget name="Player2Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 145 212 172" textcentervert="">Player 2</gadget>
+          <gadget name="Player2background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 142 983 172" z="1"></gadget>
+        </gadget>
+        <gadget name="Player3" type="gadget" size1024="54 181 212 211">
+          <gadget name="Player3Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 184 212 211" textcentervert="">Player 3</gadget>
+          <gadget name="Player3background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 181 983 211" z="1"></gadget>
+        </gadget>
+        <gadget name="Player4" type="gadget" size1024="54 220 212 250">
+          <gadget name="Player4Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 223 212 250">Player 4</gadget>
+          <gadget name="Player4background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 220 983 250" z="1"></gadget>
+        </gadget>
+        <gadget name="Player5" type="gadget" size1024="54 259 212 289">
+          <gadget name="Player5Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 262 212 289">Player 5</gadget>
+          <gadget name="Player5background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 259 983 289" z="1"></gadget>
+        </gadget>
+        <gadget name="Player6" type="gadget" size1024="54 298 212 328">
+          <gadget name="Player6Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 301 212 328">Player 6</gadget>
+          <gadget name="Player6background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 298 983 328" z="1"></gadget>
+        </gadget>
+        <gadget name="Player7" type="gadget" size1024="54 337 212 367">
+          <gadget name="Player7Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 340 212 367">Player 7</gadget>
+          <gadget name="Player7background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 337 983 367" z="1"></gadget>
+        </gadget>
+        <gadget name="Player8" type="gadget" size1024="54 376 212 406">
+          <gadget name="Player8Name" z="2" type="textBox" textfont="PostgameTableEntry" textfontsize="14" size1024="59 379 212 406" textcentervert="">Player 8</gadget>
+          <gadget name="Player8background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 376 983 406" z="1"></gadget>
+        </gadget>
+        <gadget name="Player9" type="gadget" size1024="54 415 212 445">
+          <gadget name="Player9Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 418 212 445" z="2">Player 9</gadget>
+          <gadget name="Player9background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 415 983 445" z="1"></gadget>
+        </gadget>
+        <gadget name="Player10" type="gadget" size1024="54 454 212 484">
+          <gadget name="Player10Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 457 212 484">Player 9</gadget>
+          <gadget name="Player10background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 454 983 484" z="1"></gadget>
+        </gadget>
+        <gadget name="Player11" type="gadget" size1024="54 493 212 523">
+          <gadget name="Player11Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 496 212 523">Player 10</gadget>
+          <gadget name="Player11background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 493 983 523" z="1"></gadget>
+        </gadget>
+        <gadget name="Player12" type="gadget" size1024="54 532 212 562">
+          <gadget name="Player12Name" type="textBox" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" size1024="59 535 212 562">Player 12</gadget>
+          <gadget name="Player12background" type="gadget" background="ui\ui background opaque 2" tilebackground="" size1024="41 532 983 562" z="1"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="ScorePage" type="gadget" size1024="212 97 972 550" z="20">
+      <gadget name="ScoreColumnHeadings" type="gadget" size1024="197 65 981 106">
+        <gadget name="TotalScore" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" textcentervert="" size1024="281 63 407 101">$$19060$$Total Score</gadget>
+        <gadget name="EconomicScore" textcenterhoriz="" textcentervert="" textwrapon="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="425 63 551 101">$$19036$$Economy</gadget>
+        <gadget name="MilitaryScore" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="569 63 695 101">$$19038$$Military</gadget>
+        <gadget name="TechScore" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="713 63 839 101">$$19043$$Improvements</gadget>
+        <gadget name="HardcoreScore" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="857 63 983 101">$$19040$$Mythology</gadget>
+      </gadget>
+      <gadget name="ScorePage-Table-TopBorder" type="gadget" size1024="40 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScorePage-Name-RightBorder" type="gadget" size1024="280 102 408 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScorePage-Economy-LeftBorder" type="gadget" size1024="424 102 552 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScorePage-Military-LeftBorder" type="gadget" size1024="568 102 696 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScorePage-Improvements-LeftBorder" type="gadget" size1024="712 102 840 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScorePage-Mythology-LeftBorder" type="gadget" size1024="856 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ScoreData" type="gadget" size1024="212 119 972 529">
+        <gadget name="Player1Data" type="gadget" size1024="212 103 972 127" z="2" transparent="">
+          <gadget name="P1C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" textcentervert="" z="5" size1024="281 103 407 133">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 103 551 133">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 103 695 133">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 103 839 133">$$19062$$N/A</gadget>
+          <gadget name="P1C5" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 103 983 133">$$19062$$N/A</gadget>
+          <gadget name="P1C1Award" type="gadget" textcentervert="" size1024="281 103 407 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C2Award" type="gadget" textcentervert="" size1024="425 103 551 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C3Award" type="gadget" textcentervert="" size1024="569 103 695 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C4Award" type="gadget" textcentervert="" size1024="713 103 839 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C5Award" type="gadget" textcentervert="" size1024="857 103 983 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 143 972 167">
+          <gadget name="P2C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 142 407 172">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 142 551 172">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 142 695 172">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 142 839 172">$$19062$$N/A</gadget>
+          <gadget name="P2C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 142 983 172">$$19062$$N/A</gadget>
+          <gadget name="P2C1Award" type="gadget" size1024="281 142 407 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C2Award" type="gadget" size1024="425 142 551 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C3Award" type="gadget" size1024="569 142 695 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C4Award" type="gadget" size1024="713 142 839 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C5Award" type="gadget" size1024="857 142 983 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 183 972 207">
+          <gadget name="P3C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 181 407 211">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 181 551 211">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 181 695 211">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 181 839 211">$$19062$$N/A</gadget>
+          <gadget name="P3C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 181 983 211">$$19062$$N/A</gadget>
+          <gadget name="P3C1Award" type="gadget" size1024="281 181 407 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C2Award" type="gadget" size1024="425 181 551 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C3Award" type="gadget" size1024="569 181 695 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C4Award" type="gadget" size1024="713 181 839 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C5Award" type="gadget" size1024="857 181 983 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 223 972 247">
+          <gadget name="P4C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 220 407 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 220 551 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 220 695 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 220 839 250">$$19062$$N/A</gadget>
+          <gadget name="P4C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 220 983 250">$$19062$$N/A</gadget>
+          <gadget name="P4C1Award" type="gadget" size1024="281 220 407 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C2Award" type="gadget" size1024="425 220 551 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C3Award" type="gadget" size1024="569 220 695 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C4Award" type="gadget" size1024="713 220 839 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C5Award" type="gadget" size1024="857 220 983 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 263 972 287">
+          <gadget name="P5C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 259 407 289">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 259 551 289">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 259 695 289">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 259 839 289">$$19062$$N/A</gadget>
+          <gadget name="P5C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 259 983 289">$$19062$$N/A</gadget>
+          <gadget name="P5C1Award" type="gadget" size1024="281 259 407 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C2Award" type="gadget" size1024="425 259 551 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C3Award" type="gadget" size1024="569 259 695 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C4Award" type="gadget" size1024="713 259 839 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C5Award" type="gadget" size1024="857 259 983 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 303 972 327">
+          <gadget name="P6C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 298 407 328">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 298 551 328">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 298 695 328">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 298 839 328">$$19062$$N/A</gadget>
+          <gadget name="P6C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 298 983 328">$$19062$$N/A</gadget>
+          <gadget name="P6C1Award" type="gadget" size1024="281 298 407 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C2Award" type="gadget" size1024="425 298 551 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C3Award" type="gadget" size1024="569 298 695 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C4Award" type="gadget" size1024="713 298 839 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C5Award" type="gadget" size1024="857 298 983 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 343 972 367">
+          <gadget name="P7C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 337 407 367">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 337 551 367">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 337 695 367">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 337 839 367">$$19062$$N/A</gadget>
+          <gadget name="P7C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 337 983 367">$$19062$$N/A</gadget>
+          <gadget name="P7C1Award" type="gadget" size1024="281 337 407 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C2Award" type="gadget" size1024="425 337 551 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C3Award" type="gadget" size1024="569 337 695 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C4Award" type="gadget" size1024="713 337 839 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .974" z="2"></gadget>
+          <gadget name="P7C5Award" type="gadget" size1024="857 337 983 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 383 972 407">
+          <gadget name="P8C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 376 407 406">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 376 551 406">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 376 695 406">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 376 839 406">$$19062$$N/A</gadget>
+          <gadget name="P8C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 376 983 406">$$19062$$N/A</gadget>
+          <gadget name="P8C1Award" type="gadget" size1024="281 376 407 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C2Award" type="gadget" size1024="425 376 551 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C3Award" type="gadget" size1024="569 376 695 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C4Award" type="gadget" size1024="713 376 839 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .974" z="2"></gadget>
+          <gadget name="P8C5Award" type="gadget" size1024="857 376 983 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 423 972 447">
+          <gadget name="P9C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 415 407 445">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 415 551 445">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 415 695 445">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 415 839 445">$$19062$$N/A</gadget>
+          <gadget name="P9C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 415 983 445">$$19062$$N/A</gadget>
+          <gadget name="P9C1Award" type="gadget" size1024="281 415 407 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C2Award" type="gadget" size1024="425 415 551 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C3Award" type="gadget" size1024="569 415 695 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C4Award" type="gadget" size1024="713 415 839 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C5Award" type="gadget" size1024="857 415 983 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 454 972 487">
+          <gadget name="P10C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 454 407 484">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 454 551 484">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 454 695 484">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 454 839 484">$$19062$$N/A</gadget>
+          <gadget name="P10C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 454 983 484">$$19062$$N/A</gadget>
+          <gadget name="P10C1Award" type="gadget" size1024="281 454 407 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C2Award" type="gadget" size1024="425 454 551 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C3Award" type="gadget" size1024="569 454 695 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C4Award" type="gadget" size1024="713 454 839 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C5Award" type="gadget" size1024="857 454 983 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 503 972 527">
+          <gadget name="P11C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 493 407 523">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 493 551 523">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 493 695 523">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 493 839 523">$$19062$$N/A</gadget>
+          <gadget name="P11C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 493 983 523">$$19062$$N/A</gadget>
+          <gadget name="P11C1Award" type="gadget" size1024="281 493 407 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C2Award" type="gadget" size1024="425 493 551 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C3Award" type="gadget" size1024="569 493 695 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C4Award" type="gadget" size1024="713 493 839 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .974" z="2"></gadget>
+          <gadget name="P11C5Award" type="gadget" size1024="857 493 983 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 543 972 567">
+          <gadget name="P12C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 532 407 562">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 532 551 562">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 532 695 562">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 532 839 562">$$19062$$N/A</gadget>
+          <gadget name="P12C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 532 983 562">$$19062$$N/A</gadget>
+          <gadget name="P12C1Award" type="gadget" size1024="281 532 407 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C2Award" type="gadget" size1024="425 532 551 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C3Award" type="gadget" size1024="569 532 695 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C4Award" type="gadget" size1024="713 532 839 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C5Award" type="gadget" size1024="857 532 983 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="EconomyPage" type="gadget" size1024="212 97 972 550" z="20" hidden="">
+      <gadget name="EconomyColumnHeadings" type="gadget" size1024="212 97 972 137">
+        <gadget name="FoodGathered" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" size1024="281 63 372 103">$$18900$$Food</gadget>
+        <gadget name="WoodGathered" type="formatText" textcenterhoriz="" textwrapon="" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="382 63 473 103">$$18899$$Wood</gadget>
+        <gadget name="GoldGathered" type="formatText" textcenterhoriz="" textwrapon="" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="483 63 574 103">$$18129$$Gold</gadget>
+        <gadget name="GoldTradeGathered" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" size1024="584 63 675 103">$$19063$$Gold from Trade</gadget>
+        <gadget name="FavorGathered" type="formatText" textcenterhoriz="" textwrapon="" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="685 63 776 103">$$18901$$Favor</gadget>
+        <gadget name="ResourcesTributed" type="formatText" textcenterhoriz="" textwrapon="" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="786 63 879 103">$$19064$$Resources Tributed</gadget>
+        <gadget name="CivUnitHighTributed" type="formatText" textcenterhoriz="" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" size1024="889 63 983 103">$$19065$$Civilian Unit High</gadget>
+      </gadget>
+      <gadget name="EconomyPage-MainTable-Border" type="gadget" size1024="40 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Name-RightBorder" type="gadget" size1024="280 102 373 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Economy-LeftBorder" type="gadget" size1024="381 102 474 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Economy-LeftBorder" type="gadget" size1024="482 102 575 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Military-LeftBorder" type="gadget" size1024="583 102 676 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Improvements-LeftBorder" type="gadget" size1024="684 102 777 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Mythology-LeftBorder" type="gadget" size1024="785 102 880 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyPage-Mythology-LeftBorder" type="gadget" size1024="888 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="EconomyData" type="gadget" size1024="212 140 972 550">
+        <gadget name="Player1Data" type="gadget" size1024="212 103 972 127" z="2" transparent="">
+          <gadget name="P1C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" textcentervert="" z="5" size1024="281 103 372 133">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 103 473 133">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 103 574 133">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 103 675 133">$$19062$$N/A</gadget>
+          <gadget name="P1C5" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 103 776 133">$$19062$$N/A</gadget>
+          <gadget name="P1C6" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 103 879 133">$$19062$$N/A</gadget>
+          <gadget name="P1C7" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 103 983 133">$$19062$$N/A</gadget>
+          <gadget name="P1C1Award" type="gadget" textcentervert="" size1024="281 103 372 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C2Award" type="gadget" textcentervert="" size1024="382 103 473 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C3Award" type="gadget" textcentervert="" size1024="483 103 574 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C4Award" type="gadget" textcentervert="" size1024="584 103 675 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C5Award" type="gadget" textcentervert="" size1024="685 103 776 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C6Award" type="gadget" textcentervert="" size1024="786 103 879 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C7Award" type="gadget" textcentervert="" size1024="889 103 983 133" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 143 972 167">
+          <gadget name="P2C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 142 372 172">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 142 473 172">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 142 574 172">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 142 675 172">$$19062$$N/A</gadget>
+          <gadget name="P2C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 142 776 172">$$19062$$N/A</gadget>
+          <gadget name="P2C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 142 879 172">$$19062$$N/A</gadget>
+          <gadget name="P2C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 142 983 172">$$19062$$N/A</gadget>
+          <gadget name="P2C1Award" type="gadget" size1024="281 142 372 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C2Award" type="gadget" size1024="382 142 473 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C3Award" type="gadget" size1024="483 142 574 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C4Award" type="gadget" size1024="584 142 675 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C5Award" type="gadget" size1024="685 142 776 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C6Award" type="gadget" size1024="786 142 879 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C7Award" type="gadget" size1024="889 142 983 172" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 183 972 207">
+          <gadget name="P3C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 181 372 211">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 181 473 211">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 181 574 211">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 181 675 211">$$19062$$N/A</gadget>
+          <gadget name="P3C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 181 776 211">$$19062$$N/A</gadget>
+          <gadget name="P3C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 181 879 211">$$19062$$N/A</gadget>
+          <gadget name="P3C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 181 983 211">$$19062$$N/A</gadget>
+          <gadget name="P3C1Award" type="gadget" size1024="281 181 372 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C2Award" type="gadget" size1024="382 181 473 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C3Award" type="gadget" size1024="483 181 574 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C4Award" type="gadget" size1024="584 181 675 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P3C5Award" type="gadget" size1024="685 181 776 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P3C6Award" type="gadget" size1024="786 181 879 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C7Award" type="gadget" size1024="889 181 983 211" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 223 972 247">
+          <gadget name="P4C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 220 372 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 220 473 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 220 574 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 220 675 250">$$19062$$N/A</gadget>
+          <gadget name="P4C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 220 776 250">$$19062$$N/A</gadget>
+          <gadget name="P4C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 220 879 250">$$19062$$N/A</gadget>
+          <gadget name="P4C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 220 983 250">$$19062$$N/A</gadget>
+          <gadget name="P4C1Award" type="gadget" size1024="281 220 372 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C2Award" type="gadget" size1024="382 220 473 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C3Award" type="gadget" size1024="483 220 574 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P4C4Award" type="gadget" size1024="584 220 675 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C5Award" type="gadget" size1024="685 220 776 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C6Award" type="gadget" size1024="786 220 879 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P4C7Award" type="gadget" size1024="889 220 983 250" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 263 972 287">
+          <gadget name="P5C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 259 372 289">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 259 473 289">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 259 574 289">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 259 675 289">$$19062$$N/A</gadget>
+          <gadget name="P5C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 259 776 289">$$19062$$N/A</gadget>
+          <gadget name="P5C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 259 879 289">$$19062$$N/A</gadget>
+          <gadget name="P5C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 259 983 289">$$19062$$N/A</gadget>
+          <gadget name="P5C1Award" type="gadget" size1024="281 259 372 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C2Award" type="gadget" size1024="382 259 473 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C3Award" type="gadget" size1024="483 259 574 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C4Award" type="gadget" size1024="584 259 675 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C5Award" type="gadget" size1024="685 259 776 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P5C6Award" type="gadget" size1024="786 259 879 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C7Award" type="gadget" size1024="889 259 983 289" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 303 972 327">
+          <gadget name="P6C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 298 372 328">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 298 473 328">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 298 574 328">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 298 675 328">$$19062$$N/A</gadget>
+          <gadget name="P6C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 298 776 328">$$19062$$N/A</gadget>
+          <gadget name="P6C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 298 879 328">$$19062$$N/A</gadget>
+          <gadget name="P6C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 298 983 328">$$19062$$N/A</gadget>
+          <gadget name="P6C1Award" type="gadget" size1024="281 298 372 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P6C2Award" type="gadget" size1024="382 298 473 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C3Award" type="gadget" size1024="483 298 574 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C4Award" type="gadget" size1024="584 298 675 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C5Award" type="gadget" size1024="685 298 776 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C6Award" type="gadget" size1024="786 298 879 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C7Award" type="gadget" size1024="889 298 983 328" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 343 972 367">
+          <gadget name="P7C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 337 372 367">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 337 473 367">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 337 574 367">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 337 675 367">$$19062$$N/A</gadget>
+          <gadget name="P7C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 337 776 367">$$19062$$N/A</gadget>
+          <gadget name="P7C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 337 879 367">$$19062$$N/A</gadget>
+          <gadget name="P7C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 337 983 367">$$19062$$N/A</gadget>
+          <gadget name="P7C1Award" type="gadget" size1024="281 337 372 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C2Award" type="gadget" size1024="382 337 473 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P7C3Award" type="gadget" size1024="483 337 574 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C4Award" type="gadget" size1024="584 337 675 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C5Award" type="gadget" size1024="685 337 776 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C6Award" type="gadget" size1024="786 337 879 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C7Award" type="gadget" size1024="889 337 983 367" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 383 972 407">
+          <gadget name="P8C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 376 372 406">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 376 473 406">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 376 574 406">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 376 675 406">$$19062$$N/A</gadget>
+          <gadget name="P8C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 376 776 406">$$19062$$N/A</gadget>
+          <gadget name="P8C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 376 879 406">$$19062$$N/A</gadget>
+          <gadget name="P8C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 376 983 406">$$19062$$N/A</gadget>
+          <gadget name="P8C1Award" type="gadget" size1024="281 376 372 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C2Award" type="gadget" size1024="382 376 473 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C3Award" type="gadget" size1024="483 376 574 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P8C4Award" type="gadget" size1024="584 376 675 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C5Award" type="gadget" size1024="685 376 776 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C6Award" type="gadget" size1024="786 376 879 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C7Award" type="gadget" size1024="889 376 983 406" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 423 972 447">
+          <gadget name="P9C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 415 372 445">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 415 473 445">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 415 574 445">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 415 675 445">$$19062$$N/A</gadget>
+          <gadget name="P9C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 415 776 445">$$19062$$N/A</gadget>
+          <gadget name="P9C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 415 879 445">$$19062$$N/A</gadget>
+          <gadget name="P9C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 415 983 445">$$19062$$N/A</gadget>
+          <gadget name="P9C1Award" type="gadget" size1024="281 415 372 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C2Award" type="gadget" size1024="382 415 473 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P9C3Award" type="gadget" size1024="483 415 574 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C4Award" type="gadget" size1024="584 415 675 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P9C5Award" type="gadget" size1024="685 415 776 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P9C6Award" type="gadget" size1024="786 415 879 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C7Award" type="gadget" size1024="889 415 983 445" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 463 972 487">
+          <gadget name="P10C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 454 372 484">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 454 473 484">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 454 574 484">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 454 675 484">$$19062$$N/A</gadget>
+          <gadget name="P10C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 454 776 484">$$19062$$N/A</gadget>
+          <gadget name="P10C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 454 879 484">$$19062$$N/A</gadget>
+          <gadget name="P10C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 454 983 484">$$19062$$N/A</gadget>
+          <gadget name="P10C1Award" type="gadget" size1024="281 454 372 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C2Award" type="gadget" size1024="382 454 473 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P10C3Award" type="gadget" size1024="483 454 574 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P10C4Award" type="gadget" size1024="584 454 675 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C5Award" type="gadget" size1024="685 454 776 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C6Award" type="gadget" size1024="786 454 879 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C7Award" type="gadget" size1024="889 454 983 484" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 503 972 527">
+          <gadget name="P11C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 493 372 523">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 493 473 523">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 493 574 523">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 493 675 523">$$19062$$N/A</gadget>
+          <gadget name="P11C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 493 776 523">$$19062$$N/A</gadget>
+          <gadget name="P11C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 493 879 523">$$19062$$N/A</gadget>
+          <gadget name="P11C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 493 983 523">$$19062$$N/A</gadget>
+          <gadget name="P11C1Award" type="gadget" size1024="281 493 372 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C2Award" type="gadget" size1024="382 493 473 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P11C3Award" type="gadget" size1024="483 493 574 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C4Award" type="gadget" size1024="584 493 675 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C5Award" type="gadget" size1024="685 493 776 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C6Award" type="gadget" size1024="786 493 879 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C7Award" type="gadget" size1024="889 493 983 523" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 543 972 567">
+          <gadget name="P12C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 532 372 562">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="382 532 473 562">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="483 532 574 562">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="584 532 675 562">$$19062$$N/A</gadget>
+          <gadget name="P12C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="685 532 776 562">$$19062$$N/A</gadget>
+          <gadget name="P12C6" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="786 532 879 562">$$19062$$N/A</gadget>
+          <gadget name="P12C7" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="889 532 983 562">$$19062$$N/A</gadget>
+          <gadget name="P12C1Award" type="gadget" size1024="281 532 372 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C2Award" type="gadget" size1024="382 532 473 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C3Award" type="gadget" size1024="483 532 574 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C4Award" type="gadget" size1024="584 532 675 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C5Award" type="gadget" size1024="685 532 776 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C6Award" type="gadget" size1024="786 532 879 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .977" z="2"></gadget>
+          <gadget name="P12C7Award" type="gadget" size1024="889 532 983 562" background="ui\top score star" hidden="" texturecoords=".29 .03 1 .97" z="2"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="MilitaryPage" type="gadget" size1024="212 97 972 550" z="20" hidden="">
+      <gadget name="MilitaryColumnHeadings" type="gadget" size1024="212 97 972 137">
+        <gadget name="MilitaryCount" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" textcentervert="" size1024="281 63 407 101">$$19066$$Military Count</gadget>
+        <gadget name="UnitsKilled" textcenterhoriz="" textcentervert="" textwrapon="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="425 63 551 101">$$19067$$Units Killed</gadget>
+        <gadget name="Buildings Razed" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="569 63 695 101">$$19068$$Buildings Razed</gadget>
+        <gadget name="UnitsLost" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="713 63 839 101">$$19069$$Units Lost</gadget>
+        <gadget name="BuildingsLost" textwrapon="" textcenterhoriz="" textcentervert="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="857 63 983 101">$$19070$$Buildings Lost</gadget>
+      </gadget>
+      <gadget name="MilitaryPage-Table-TopBorder" type="gadget" size1024="40 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryPage-Name-RightBorder" type="gadget" size1024="280 102 408 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryPage-UnitsKilled-LeftBorder" type="gadget" size1024="424 102 552 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryPage-UnitsLost-LeftBorder" type="gadget" size1024="568 102 696 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryPage-Improvements-LeftBorder" type="gadget" size1024="712 102 840 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryPage-Mythology-LeftBorder" type="gadget" size1024="856 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MilitaryData" type="gadget" size1024="212 140 972 550">
+        <gadget name="Player1Data" type="gadget" size1024="212 103 972 127" z="2" transparent="">
+          <gadget name="P1C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" textcentervert="" z="5" size1024="281 103 407 133">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 103 551 133">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 103 695 133">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 103 839 133">$$19062$$N/A</gadget>
+          <gadget name="P1C5" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 103 983 133">$$19062$$N/A</gadget>
+          <gadget name="P1C1Award" type="gadget" textcentervert="" size1024="281 103 407 133" background="ui\top score star" hidden="" texturecoords=".02 .03 .99 .97" z="2"></gadget>
+          <gadget name="P1C2Award" type="gadget" textcentervert="" size1024="425 103 551 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C3Award" type="gadget" textcentervert="" size1024="569 103 695 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C4Award" type="gadget" textcentervert="" size1024="713 103 839 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C5Award" type="gadget" textcentervert="" size1024="857 103 983 133" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 143 972 167">
+          <gadget name="P2C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 142 407 172">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 142 551 172">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 142 695 172">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 142 839 172">$$19062$$N/A</gadget>
+          <gadget name="P2C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 142 983 172">$$19062$$N/A</gadget>
+          <gadget name="P2C1Award" type="gadget" size1024="281 142 407 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C2Award" type="gadget" size1024="425 142 551 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C3Award" type="gadget" size1024="569 142 695 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C4Award" type="gadget" size1024="713 142 839 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C5Award" type="gadget" size1024="857 142 983 172" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 183 972 207">
+          <gadget name="P3C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 181 407 211">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 181 551 211">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 181 695 211">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 181 839 211">$$19062$$N/A</gadget>
+          <gadget name="P3C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 181 983 211">$$19062$$N/A</gadget>
+          <gadget name="P3C1Award" type="gadget" size1024="281 181 407 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C2Award" type="gadget" size1024="425 181 551 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C3Award" type="gadget" size1024="569 181 695 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C4Award" type="gadget" size1024="713 181 839 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C5Award" type="gadget" size1024="857 181 983 211" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 220 972 250">
+          <gadget name="P4C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 220 407 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 220 551 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 220 695 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 220 839 250">$$19062$$N/A</gadget>
+          <gadget name="P4C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 220 983 250">$$19062$$N/A</gadget>
+          <gadget name="P4C1Award" type="gadget" size1024="281 220 407 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C2Award" type="gadget" size1024="425 220 551 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C3Award" type="gadget" size1024="569 220 695 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C4Award" type="gadget" size1024="713 220 839 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C5Award" type="gadget" size1024="857 220 983 250" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 263 972 287">
+          <gadget name="P5C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 259 407 289">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 259 551 289">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 259 695 289">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 259 839 289">$$19062$$N/A</gadget>
+          <gadget name="P5C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 259 983 289">$$19062$$N/A</gadget>
+          <gadget name="P5C1Award" type="gadget" size1024="281 259 407 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C2Award" type="gadget" size1024="425 259 551 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C3Award" type="gadget" size1024="569 259 695 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C4Award" type="gadget" size1024="713 259 839 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C5Award" type="gadget" size1024="857 259 983 289" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 303 972 327">
+          <gadget name="P6C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 298 407 328">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 298 551 328">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 298 695 328">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 298 839 328">$$19062$$N/A</gadget>
+          <gadget name="P6C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 298 983 328">$$19062$$N/A</gadget>
+          <gadget name="P6C1Award" type="gadget" size1024="281 298 407 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C2Award" type="gadget" size1024="425 298 551 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C3Award" type="gadget" size1024="569 298 695 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C4Award" type="gadget" size1024="713 298 839 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .977" z="2"></gadget>
+          <gadget name="P6C5Award" type="gadget" size1024="857 298 983 328" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 343 972 367">
+          <gadget name="P7C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 337 407 367">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 337 551 367">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 337 695 367">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 337 839 367">$$19062$$N/A</gadget>
+          <gadget name="P7C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 337 983 367">$$19062$$N/A</gadget>
+          <gadget name="P7C1Award" type="gadget" size1024="281 337 407 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C2Award" type="gadget" size1024="425 337 551 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C3Award" type="gadget" size1024="569 337 695 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C4Award" type="gadget" size1024="713 337 839 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C5Award" type="gadget" size1024="857 337 983 367" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 383 972 407">
+          <gadget name="P8C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 376 407 406">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 376 551 406">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 376 695 406">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 376 839 406">$$19062$$N/A</gadget>
+          <gadget name="P8C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 376 983 406">$$19062$$N/A</gadget>
+          <gadget name="P8C1Award" type="gadget" size1024="281 376 407 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C2Award" type="gadget" size1024="425 376 551 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C3Award" type="gadget" size1024="569 376 695 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C4Award" type="gadget" size1024="713 376 839 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C5Award" type="gadget" size1024="857 376 983 406" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 423 972 447">
+          <gadget name="P9C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 415 407 445">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 415 551 445">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 415 695 445">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 415 839 445">$$19062$$N/A</gadget>
+          <gadget name="P9C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 415 983 445">$$19062$$N/A</gadget>
+          <gadget name="P9C1Award" type="gadget" size1024="281 415 407 445" background="ui\top score star" hidden="" texturecoords="0 .03 ..99 .97" z="2"></gadget>
+          <gadget name="P9C2Award" type="gadget" size1024="425 415 551 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C3Award" type="gadget" size1024="569 415 695 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C4Award" type="gadget" size1024="713 415 839 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C5Award" type="gadget" size1024="857 415 983 445" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 463 972 487">
+          <gadget name="P10C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 454 407 484">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 454 551 484">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 454 695 484">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 454 839 484">$$19062$$N/A</gadget>
+          <gadget name="P10C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 454 983 484">$$19062$$N/A</gadget>
+          <gadget name="P10C1Award" type="gadget" size1024="281 454 407 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C2Award" type="gadget" size1024="425 454 551 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C3Award" type="gadget" size1024="569 454 695 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C4Award" type="gadget" size1024="713 454 839 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C5Award" type="gadget" size1024="857 454 983 484" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 503 972 527">
+          <gadget name="P11C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 493 407 523">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 493 551 523">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 493 695 523">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 493 839 523">$$19062$$N/A</gadget>
+          <gadget name="P11C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 493 983 523">$$19062$$N/A</gadget>
+          <gadget name="P11C1Award" type="gadget" size1024="281 493 407 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C2Award" type="gadget" size1024="425 493 551 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C3Award" type="gadget" size1024="569 493 695 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C4Award" type="gadget" size1024="713 493 839 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C5Award" type="gadget" size1024="857 493 983 523" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 543 972 567">
+          <gadget name="P12C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 532 407 562">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="425 532 551 562">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="569 532 695 562">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="713 532 839 562">$$19062$$N/A</gadget>
+          <gadget name="P12C5" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="857 532 983 562">$$19062$$N/A</gadget>
+          <gadget name="P12C1Award" type="gadget" size1024="281 532 407 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C2Award" type="gadget" size1024="425 532 551 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C3Award" type="gadget" size1024="569 532 695 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C4Award" type="gadget" size1024="713 532 839 562" background="ui\top score star" hidden="" texturecoords=".02 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C5Award" type="gadget" size1024="857 532 983 562" background="ui\top score star" hidden="" texturecoords=".01 .03 1 .97" z="2"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="MythologyPage" type="gadget" size1024="212 97 972 550" z="20" hidden="">
+      <gadget name="MythologyColumnHeadings" type="gadget" size1024="212 97 972 137">
+        <gadget name="RelicsCaptured" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" size1024="281 68 363 101">$$19071$$Relics Captured</gadget>
+        <gadget name="SettlementsCaptured" textcenterhoriz="" textwrapon="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="380 68 462 101">$$19072$$Settlements Captured</gadget>
+        <gadget name="FavoriteSoldier" textwrapon="" textcenterhoriz="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="480 68 731 101">$$19073$$Favorite Soldier (Count)</gadget>
+        <gadget name="FavoriteMyth" textwrapon="" textcenterhoriz="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="749 68 983 101">$$19074$$Favorite Myth Unit (Count)</gadget>
+      </gadget>
+      <gadget name="MythologyPage-Table-TopBorder" type="gadget" size1024="40 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MythologyPage-Name-RightBorder" type="gadget" size1024="280 102 364 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MythologyPage-SettlementsCaptured-LeftBorder" type="gadget" size1024="380 102 463 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MythologyPage-FavoriteSoldier-LeftBorder" type="gadget" size1024="479 102 732 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MythologyPage-FavoriteMyth-LeftBorder" type="gadget" size1024="748 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="MythologyData" type="gadget" size1024="212 140 972 550">
+        <gadget name="Player1Data" type="gadget" size1024="212 103 972 127" z="2" transparent="">
+          <gadget name="P1C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" textcentervert="" z="5" size1024="281 103 363 133">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 103 462 133">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 103 731 133">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 103 983 133">$$19062$$N/A</gadget>
+          <gadget name="P1C1Award" type="gadget" textcentervert="" size1024="281 103 363 133" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C2Award" type="gadget" textcentervert="" size1024="380 103 462 133" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C3Award" type="gadget" textcentervert="" size1024="603 103 731 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C4Award" type="gadget" textcentervert="" size1024="855 103 983 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 143 972 167">
+          <gadget name="P2C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 142 363 172">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 142 462 172">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 142 731 172">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 142 983 172">$$19062$$N/A</gadget>
+          <gadget name="P2C1Award" type="gadget" size1024="281 142 363 172" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C2Award" type="gadget" size1024="380 142 462 172" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C3Award" type="gadget" size1024="603 142 731 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C4Award" type="gadget" size1024="855 142 983 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 183 972 207">
+          <gadget name="P3C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 181 363 211">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 181 462 211">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 181 731 211">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 181 983 211">$$19062$$N/A</gadget>
+          <gadget name="P3C1Award" type="gadget" size1024="281 181 363 211" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C2Award" type="gadget" size1024="380 181 462 211" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C3Award" type="gadget" size1024="603 181 731 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C4Award" type="gadget" size1024="855 181 983 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 181 972 211">
+          <gadget name="P4C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 220 363 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 220 462 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 220 731 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 220 983 250">$$19062$$N/A</gadget>
+          <gadget name="P4C1Award" type="gadget" size1024="281 220 363 250" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C2Award" type="gadget" size1024="380 220 462 250" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C3Award" type="gadget" size1024="603 220 731 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C4Award" type="gadget" size1024="855 220 983 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 263 972 287">
+          <gadget name="P5C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 259 363 289">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 259 462 289">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 259 731 289">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 259 983 289">$$19062$$N/A</gadget>
+          <gadget name="P5C1Award" type="gadget" size1024="281 259 363 289" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C2Award" type="gadget" size1024="380 259 462 289" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C3Award" type="gadget" size1024="603 259 731 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C4Award" type="gadget" size1024="855 259 983 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 303 972 327">
+          <gadget name="P6C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 298 363 328">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 298 462 328">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 298 731 328">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 298 983 328">$$19062$$N/A</gadget>
+          <gadget name="P6C1Award" type="gadget" size1024="281 298 363 328" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C2Award" type="gadget" size1024="380 298 462 328" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C3Award" type="gadget" size1024="603 298 731 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C4Award" type="gadget" size1024="855 298 983 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 343 972 367">
+          <gadget name="P7C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 337 363 367">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 337 462 367">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 337 731 367">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 337 983 367">$$19062$$N/A</gadget>
+          <gadget name="P7C1Award" type="gadget" size1024="281 337 363 367" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C2Award" type="gadget" size1024="380 337 462 367" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C3Award" type="gadget" size1024="603 337 731 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C4Award" type="gadget" size1024="855 337 983 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 383 972 407">
+          <gadget name="P8C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 376 363 406">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 376 462 406">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 376 731 406">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 376 983 406">$$19062$$N/A</gadget>
+          <gadget name="P8C1Award" type="gadget" size1024="281 376 363 406" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C2Award" type="gadget" size1024="380 376 462 406" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C3Award" type="gadget" size1024="603 376 731 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C4Award" type="gadget" size1024="855 376 983 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 423 972 447">
+          <gadget name="P9C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 415 363 445">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 415 462 445">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 415 731 445">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 415 983 445">$$19062$$N/A</gadget>
+          <gadget name="P9C1Award" type="gadget" size1024="281 415 363 445" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C2Award" type="gadget" size1024="380 415 462 445" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C3Award" type="gadget" size1024="603 415 731 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C4Award" type="gadget" size1024="855 415 983 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 463 972 487">
+          <gadget name="P10C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 454 363 484">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 454 462 484">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 454 731 484">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 454 983 484">$$19062$$N/A</gadget>
+          <gadget name="P10C1Award" type="gadget" size1024="281 454 363 484" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C2Award" type="gadget" size1024="380 454 462 484" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C3Award" type="gadget" size1024="603 454 731 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C4Award" type="gadget" size1024="855 454 983 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 503 972 527">
+          <gadget name="P11C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 493 363 523">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 493 462 523">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 493 731 523">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 493 983 523">$$19062$$N/A</gadget>
+          <gadget name="P11C1Award" type="gadget" size1024="281 493 363 523" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C2Award" type="gadget" size1024="380 493 462 523" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C3Award" type="gadget" size1024="603 493 731 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C4Award" type="gadget" size1024="855 493 983 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 543 972 567">
+          <gadget name="P12C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 532 363 562">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="380 532 462 562">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="480 532 731 562">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="749 532 983 562">$$19062$$N/A</gadget>
+          <gadget name="P12C1Award" type="gadget" size1024="281 532 363 562" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C2Award" type="gadget" size1024="380 532 462 562" background="ui\top score star" hidden="" texturecoords=".36 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C3Award" type="gadget" size1024="603 532 731 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C4Award" type="gadget" size1024="855 532 983 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="HardcorePage" type="gadget" size1024="212 97 972 550" z="20" hidden="">
+      <gadget name="HardcoreColumnHeadings" type="gadget" size1024="212 97 972 137" hidden="">
+        <gadget name="AttackNotifications" type="textBox" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" textwrapon="" textcenterhoriz="" size1024="212 97 339 137">$$19075$$Attack Notifications Caused:Received</gadget>
+        <gadget name="AverageInventory" type="textBox" textcenterhoriz="" textwrapon="" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" size1024="339 97 466 137">$$19076$$Average Resource Inventory</gadget>
+        <gadget name="VillagersActive" type="textBox" textcenterhoriz="" textwrapon="" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" size1024="466 97 593 137">$$19077$$% Villagers Active</gadget>
+        <gadget name="WalkTime" type="textBox" textcenterhoriz="" textwrapon="" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" size1024="593 97 720 137">$$19078$$% Villager Walk Time</gadget>
+        <gadget name="AverageCommands" type="textBox" textcenterhoriz="" textwrapon="" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" size1024="720 97 847 137">$$19079$$Average Commands/Minute</gadget>
+        <gadget name="MouseDistance" type="textBox" textcenterhoriz="" textcolor="0 0 0" textfont="PostgameColumnHeader" textfontsize="14" textwrapon="" size1024="847 97 972 137">$$19080$$Mouse Roll Distance (Dekameters)</gadget>
+      </gadget>
+      <gadget name="HardcoreData" type="gadget" size1024="212 140 972 550" hidden="">
+        <gadget name="Player1Data" type="gadget" size1024="212 140 972 160">
+          <gadget name="P1C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 140 339 160">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 140 466 160">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 140 593 160">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 140 720 160">$$19062$$N/A</gadget>
+          <gadget name="P1C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 140 847 160">$$19062$$N/A</gadget>
+          <gadget name="P1C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 140 972 160">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 170 972 190">
+          <gadget name="P2C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 170 339 190">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 170 466 190">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 170 593 190">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 170 720 190">$$19062$$N/A</gadget>
+          <gadget name="P2C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 170 847 190">$$19062$$N/A</gadget>
+          <gadget name="P2C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 170 972 190">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 200 972 220">
+          <gadget name="P3C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 200 339 220">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 200 466 220">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 200 593 220">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 200 720 220">$$19062$$N/A</gadget>
+          <gadget name="P3C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 200 847 220">$$19062$$N/A</gadget>
+          <gadget name="P3C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 200 972 220">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 230 972 250">
+          <gadget name="P4C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 230 339 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 230 466 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 230 593 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 230 720 250">$$19062$$N/A</gadget>
+          <gadget name="P4C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 230 847 250">$$19062$$N/A</gadget>
+          <gadget name="P4C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 230 972 250">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 260 972 280">
+          <gadget name="P5C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 260 339 280">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 260 466 280">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 260 593 280">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 260 720 280">$$19062$$N/A</gadget>
+          <gadget name="P5C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 260 847 280">$$19062$$N/A</gadget>
+          <gadget name="P5C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 260 972 280">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 290 972 310">
+          <gadget name="P6C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 290 339 310">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 290 466 310">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 290 593 310">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 290 720 310">$$19062$$N/A</gadget>
+          <gadget name="P6C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 290 847 310">$$19062$$N/A</gadget>
+          <gadget name="P6C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 290 972 310">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 320 972 340">
+          <gadget name="P7C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 320 339 340">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 320 466 340">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 320 593 340">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 320 720 340">$$19062$$N/A</gadget>
+          <gadget name="P7C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 320 847 340">$$19062$$N/A</gadget>
+          <gadget name="P7C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 320 972 340">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 350 972 370">
+          <gadget name="P8C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 350 339 370">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 350 466 370">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 350 593 370">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 350 720 370">$$19062$$N/A</gadget>
+          <gadget name="P8C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 350 847 370">$$19062$$N/A</gadget>
+          <gadget name="P8C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 350 972 370">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" size1024="212 380 972 400">
+          <gadget name="P9C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 380 339 400">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 380 466 400">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 380 593 400">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 380 720 400">$$19062$$N/A</gadget>
+          <gadget name="P9C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 380 847 400">$$19062$$N/A</gadget>
+          <gadget name="P9C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 380 972 400">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" size1024="212 410 972 430">
+          <gadget name="P10C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 410 339 430">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 410 466 430">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 410 593 430">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 410 720 430">$$19062$$N/A</gadget>
+          <gadget name="P10C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 410 847 430">$$19062$$N/A</gadget>
+          <gadget name="P10C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 410 972 430">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" size1024="212 440 972 460">
+          <gadget name="P11C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 440 339 460">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 440 466 460">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 440 593 460">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 440 720 460">$$19062$$N/A</gadget>
+          <gadget name="P11C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 440 847 460">$$19062$$N/A</gadget>
+          <gadget name="P11C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 440 972 460">$$19062$$N/A</gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" size1024="212 470 972 490">
+          <gadget name="P12C1" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 470 339 490">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="339 470 466 490">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="466 470 593 490">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="593 470 720 490">$$19062$$N/A</gadget>
+          <gadget name="P12C5" textcenterhoriz="" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="720 470 847 490">$$19062$$N/A</gadget>
+          <gadget name="P12C6" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="847 470 972 490">$$19062$$N/A</gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="ResearchPage" type="gadget" size1024="212 97 972 550" z="20" hidden="">
+      <gadget name="ResearchColumnHeadings" type="gadget" size1024="212 97 972 137">
+        <gadget name="Age2Time" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" textwrapon="" textcenterhoriz="" size1024="281 68 444 101">$$19081$$Time to Classical Age</gadget>
+        <gadget name="Age3Time" textcenterhoriz="" textwrapon="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="462 68 624 101">$$19082$$Time to Heroic Age</gadget>
+        <gadget name="Age4Time" textwrapon="" textcenterhoriz="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="641 68 803 101">$$19083$$Time to Mythic Age</gadget>
+        <gadget name="ResearchCount" textwrapon="" textcenterhoriz="" type="formatText" textcolor="255 208 0" textfont="PostgameColumnHeader" textfontsize="12" size1024="821 68 983 101">$$19084$$Research Count</gadget>
+      </gadget>
+      <gadget name="ResearchPage-Table-TopBorder" type="gadget" size1024="40 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ResearchPage-Name-RightBorder" type="gadget" size1024="280 102 445 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ResearchPage-HeroicTime-LeftBorder" type="gadget" size1024="461 102 625 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ResearchPage-MythicTime-LeftBorder" type="gadget" size1024="639 102 804 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ResearchPage-ResearchCount-LeftBorder" type="gadget" size1024="820 102 984 568" outlinecolor="255 208 0" transparent="" z="20"></gadget>
+      <gadget name="ResearchData" type="gadget" size1024="212 140 972 550">
+        <gadget name="Player1Data" type="gadget" size1024="212 103 972 127" z="2" transparent="">
+          <gadget name="P1C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" textcentervert="" z="5" size1024="281 103 444 133">$$19062$$N/A</gadget>
+          <gadget name="P1C2" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 103 624 133">$$19062$$N/A</gadget>
+          <gadget name="P1C3" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 103 803 133">$$19062$$N/A</gadget>
+          <gadget name="P1C4" textcenterhoriz="" textcentervert="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 103 983 133">$$19062$$N/A</gadget>
+          <gadget name="P1C1Award" type="gadget" textcentervert="" size1024="316 103 444 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C2Award" type="gadget" textcentervert="" size1024="496 103 624 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C3Award" type="gadget" textcentervert="" size1024="675 103 803 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P1C4Award" type="gadget" textcentervert="" size1024="855 103 983 133" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player2Data" type="gadget" size1024="212 143 972 167">
+          <gadget name="P2C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 142 444 172">$$19062$$N/A</gadget>
+          <gadget name="P2C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 142 624 172">$$19062$$N/A</gadget>
+          <gadget name="P2C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 142 803 172">$$19062$$N/A</gadget>
+          <gadget name="P2C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 142 983 172">$$19062$$N/A</gadget>
+          <gadget name="P2C1Award" type="gadget" size1024="316 142 444 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C2Award" type="gadget" size1024="496 142 624 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C3Award" type="gadget" size1024="675 142 803 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P2C4Award" type="gadget" size1024="855 142 983 172" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player3Data" type="gadget" size1024="212 183 972 207">
+          <gadget name="P3C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 181 444 211">$$19062$$N/A</gadget>
+          <gadget name="P3C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 181 624 211">$$19062$$N/A</gadget>
+          <gadget name="P3C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 181 803 211">$$19062$$N/A</gadget>
+          <gadget name="P3C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 181 983 211">$$19062$$N/A</gadget>
+          <gadget name="P3C1Award" type="gadget" size1024="316 181 444 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C2Award" type="gadget" size1024="496 181 624 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C3Award" type="gadget" size1024="675 181 803 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P3C4Award" type="gadget" size1024="855 181 983 211" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player4Data" type="gadget" size1024="212 223 972 247">
+          <gadget name="P4C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 220 444 250">$$19062$$N/A</gadget>
+          <gadget name="P4C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 220 624 250">$$19062$$N/A</gadget>
+          <gadget name="P4C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 220 803 250">$$19062$$N/A</gadget>
+          <gadget name="P4C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 220 983 250">$$19062$$N/A</gadget>
+          <gadget name="P4C1Award" type="gadget" size1024="316 220 444 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C2Award" type="gadget" size1024="496 220 624 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C3Award" type="gadget" size1024="675 220 803 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P4C4Award" type="gadget" size1024="855 220 983 250" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player5Data" type="gadget" size1024="212 263 972 287">
+          <gadget name="P5C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 259 444 289">$$19062$$N/A</gadget>
+          <gadget name="P5C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 259 624 289">$$19062$$N/A</gadget>
+          <gadget name="P5C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 259 803 289">$$19062$$N/A</gadget>
+          <gadget name="P5C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 259 983 289">$$19062$$N/A</gadget>
+          <gadget name="P5C1Award" type="gadget" size1024="316 259 444 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C2Award" type="gadget" size1024="496 259 624 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C3Award" type="gadget" size1024="675 259 803 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P5C4Award" type="gadget" size1024="855 259 983 289" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player6Data" type="gadget" size1024="212 303 972 327">
+          <gadget name="P6C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 298 444 328">$$19062$$N/A</gadget>
+          <gadget name="P6C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 298 624 328">$$19062$$N/A</gadget>
+          <gadget name="P6C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 298 803 328">$$19062$$N/A</gadget>
+          <gadget name="P6C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 298 983 328">$$19062$$N/A</gadget>
+          <gadget name="P6C1Award" type="gadget" size1024="316 298 444 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C2Award" type="gadget" size1024="496 298 624 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C3Award" type="gadget" size1024="675 298 803 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P6C4Award" type="gadget" size1024="855 298 983 328" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player7Data" type="gadget" size1024="212 343 972 367">
+          <gadget name="P7C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 337 444 367">$$19062$$N/A</gadget>
+          <gadget name="P7C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 337 624 367">$$19062$$N/A</gadget>
+          <gadget name="P7C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 337 803 367">$$19062$$N/A</gadget>
+          <gadget name="P7C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 337 983 367">$$19062$$N/A</gadget>
+          <gadget name="P7C1Award" type="gadget" size1024="316 337 444 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C2Award" type="gadget" size1024="496 337 624 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C3Award" type="gadget" size1024="675 337 803 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P7C4Award" type="gadget" size1024="855 337 983 367" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player8Data" type="gadget" size1024="212 383 972 407">
+          <gadget name="P8C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 376 444 406">$$19062$$N/A</gadget>
+          <gadget name="P8C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 376 624 406">$$19062$$N/A</gadget>
+          <gadget name="P8C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 376 803 406">$$19062$$N/A</gadget>
+          <gadget name="P8C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 376 983 406">$$19062$$N/A</gadget>
+          <gadget name="P8C1Award" type="gadget" size1024="316 376 444 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C2Award" type="gadget" size1024="496 376 624 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C3Award" type="gadget" size1024="675 376 803 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P8C4Award" type="gadget" size1024="855 376 983 406" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player9Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 423 972 447">
+          <gadget name="P9C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 415 444 445">$$19062$$N/A</gadget>
+          <gadget name="P9C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 415 624 445">$$19062$$N/A</gadget>
+          <gadget name="P9C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 415 803 445">$$19062$$N/A</gadget>
+          <gadget name="P9C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 415 983 445">$$19062$$N/A</gadget>
+          <gadget name="P9C1Award" type="gadget" size1024="281 415 444 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C2Award" type="gadget" size1024="496 415 624 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C3Award" type="gadget" size1024="641 415 803 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P9C4Award" type="gadget" size1024="821 415 983 445" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player10Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 463 972 487">
+          <gadget name="P10C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 454 444 484">$$19062$$N/A</gadget>
+          <gadget name="P10C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 454 624 484">$$19062$$N/A</gadget>
+          <gadget name="P10C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 454 803 484">$$19062$$N/A</gadget>
+          <gadget name="P10C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 454 983 484">$$19062$$N/A</gadget>
+          <gadget name="P10C1Award" type="gadget" size1024="316 454 444 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C2Award" type="gadget" size1024="496 454 624 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C3Award" type="gadget" size1024="675 454 803 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P10C4Award" type="gadget" size1024="855 454 983 484" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player11Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 503 972 527">
+          <gadget name="P11C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 493 444 523">$$19062$$N/A</gadget>
+          <gadget name="P11C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 493 624 523">$$19062$$N/A</gadget>
+          <gadget name="P11C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 493 803 523">$$19062$$N/A</gadget>
+          <gadget name="P11C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 493 983 523">$$19062$$N/A</gadget>
+          <gadget name="P11C1Award" type="gadget" size1024="316 493 444 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C2Award" type="gadget" size1024="496 493 624 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C3Award" type="gadget" size1024="675 493 803 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P11C4Award" type="gadget" size1024="855 493 983 523" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+        <gadget name="Player12Data" type="gadget" textcolor="0 0 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="212 543 972 567">
+          <gadget name="P12C1" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" textcenterhoriz="" size1024="281 532 444 562">$$19062$$N/A</gadget>
+          <gadget name="P12C2" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="462 532 624 562">$$19062$$N/A</gadget>
+          <gadget name="P12C3" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="641 532 803 562">$$19062$$N/A</gadget>
+          <gadget name="P12C4" textcenterhoriz="" type="gadget" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" z="5" size1024="821 532 983 562">$$19062$$N/A</gadget>
+          <gadget name="P12C1Award" type="gadget" size1024="316 532 444 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C2Award" type="gadget" size1024="496 532 624 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C3Award" type="gadget" size1024="675 532 803 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+          <gadget name="P12C4Award" type="gadget" size1024="855 532 983 562" background="ui\top score star" hidden="" texturecoords="0 .03 1 .97" z="2"></gadget>
+        </gadget>
+      </gadget>
+    </gadget>
+    <gadget name="TimelinePage" type="gadget" size1024="50 97 972 550" z="20" hidden="">
+      <gadget name="TimelineGraph" type="timeline" size1024="230 140 924 551"></gadget>
+      <gadget name="Timeline-Player-Button-1" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 127 230 149" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-2" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 163 230 185" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-3" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 199 230 221" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-4" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 235 230 257" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-5" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 271 230 293" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-6" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 307 230 329" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-7" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 343 230 365" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-8" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 379 230 401" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-9" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 415 230 437" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-10" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 451 230 473" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-11" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 487 230 509" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Button-12" texturecoords="0 0 .69 .69" checkborder1024="5 0" checkhighlightart="ui\ui button check box 32x32 rollover" checkuncheckedart="ui\ui button check box 32x32" checkcheckedart="ui\ui button check box 32x32 clicked" textcolor="255 208 0" type="checkButton" textfont="PostgameTableEntry" textfontsize="14" z="11" size1024="50 523 230 545" sound="UI_jewel"></gadget>
+      <gadget name="Timeline-Player-Label-1" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 127 230 149" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-2" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 163 230 185" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-3" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 199 230 221" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-4" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 235 230 257" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-5" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 271 230 293" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-6" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 307 230 329" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-7" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 343 230 365" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-8" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 379 230 401" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-9" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 415 230 437" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-10" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 451 230 473" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-11" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 487 230 509" z="11"></gadget>
+      <gadget name="Timeline-Player-Label-12" textcentervert="" textcolor="255 208 0" textfont="PostgameTableEntry" textfontsize="14" type="formatText" size1024="85 523 230 545" z="11"></gadget>
+      <gadget name="Timeline-ShowLabel" textcentervert="" textcolor="255 208 0" textfont="PostgameLabel" textfontsize="14" type="formatText" size1024="700 75 791 92" z="11" textjustifyright="" mouseovertext="$$20993$$">$$19087$$Show:</gadget>
+      <gadget name="Timeline-Dropdown" type="scrollList" tilebackground="" size1024="800 56 968 110" z="51" fieldval="1" textfontsize="16" textfont="ScrollFont" textcolor="1 49 32" background="ui\ui scroll middle tile" topcapart="ui\ui scroll top tile" bottomcapart="ui\ui scroll bottom tile" leftcapart="ui\ui scroll cap left" rightcapart="ui\ui scroll cap right" border1024="3 0" listitemheight="20" mouseovertext="$$20993$$">
+        <listitem>$$19088$$All Population</listitem>
+        <listitem>$$19341$$Civilian Units</listitem>
+        <listitem>$$19342$$Military Units</listitem>
+        <listitem>$$19091$$Buildings</listitem>
+        <listitem>$$19092$$Settlements</listitem>
+        <listitem>$$19034$$Score</listitem>
+        <listitem>$$19093$$All Resources</listitem>
+        <listitem>$$18900$$Food</listitem>
+        <listitem>$$18899$$Wood</listitem>
+        <listitem>$$18129$$Gold</listitem>
+        <listitem>$$18901$$Favor</listitem>
+        <listitem>$$19758$$All Resources Total</listitem>
+        <listitem>$$19759$$Food Total</listitem>
+        <listitem>$$19760$$Wood Total</listitem>
+        <listitem>$$19761$$Gold Total</listitem>
+        <listitem>$$19762$$Favor Total</listitem>
+      </gadget>
+      <gadget name="Timeline-StatsSelection" type="radioset" size1024="50 70 450 102" textcolor="255 208 0" textfont="PostgameLabel" textfontsize="14" radiosetbuttonsize1024="170 32" radiosetdefaultbuttonindex="0" z="12" radiocheckedart="ui\ui button radial 32x32 clicked" radiouncheckedart="ui\ui button radial 32x32" radiobtnborder1024="2 2" mouseovertext="$$20992$$" radiohighlightart="ui\ui button radial 32x32 rollover" radiosethorizlayout="" sound="UI_wind">
+        <button>$$20986$$Individual Stats</button>
+        <button>$$20987$$Team Stats</button>
+      </gadget>
+    </gadget>
+    <gadget name="postgame-RolloverHelp-Background" type="gadget" size1024="581 576 984 703" background="ui\ui background opaque 2" tilebackground="" z="20" outlinecolor="255 208 0" transparent=""></gadget>
+    <gadget name="HelpDisplay" size1024="592 587 973 692" z="30" textmarkup="" textwrapon="" textcolor="255 208 0" type="formatText" textfont="PostgameRollover" textfontsize="14"></gadget>
+  </gadget>
+</layout>

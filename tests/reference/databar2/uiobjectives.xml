@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="objectivesDlg" type="gadget" size1024="133 54 827 738" background="ui\ui_med_gray" bevel="" titlebar="$$20493$$Objectives Editor" closebutton="" moveable="" closeonesc="">
+    <gadget name="label1" type="gadget" size1024="140 157 250 178">$$20104$$Objectives</gadget>
+    <gadget name="objectivesList" type="list" background="ui\ui_light_gray" showselect="" selectedcolor="255 255 255" buttonsize1024="125 15" scrollvert="" sunkenbevel="" size1024="148 178 248 488"></gadget>
+    <gadget name="objectivesIns" type="button" bevel="" textfont="Arial nodrop" textfontsize="12" size1024="148 498 248 518">$$20488$$Insert</gadget>
+    <gadget name="objectivesDel" type="button" bevel="" textfont="Arial nodrop" textfontsize="12" size1024="148 528 248 548">$$18574$$Delete</gadget>
+    <gadget name="label2" type="gadget" size1024="258 158 600 182">$$20494$$Text:</gadget>
+    <gadget name="objectivesText" type="formatText" background="ui\ui_med_gray" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12" sunkenbevel="" textmarkup="" border1024="3 2" formattextconvertuserlf="" size1024="258 183 807 352"></gadget>
+    <gadget name="objectivesTextEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="258 363 810 388"></gadget>
+    <gadget name="label3" type="gadget" size1024="258 393 600 418">$$20495$$Hint</gadget>
+    <gadget name="objectivesHintText" type="formatText" background="ui\ui_med_gray" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12" sunkenbevel="" textmarkup="" border1024="3 2" formattextconvertuserlf="" size1024="258 420 811 512"></gadget>
+    <gadget name="objectivesHintTextEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="257 522 810 547"></gadget>
+    <gadget name="objectivesClose" type="button" bevel="" textfont="Arial nodrop" textfontsize="12" size1024="648 711 808 731">$$18457$$Close</gadget>
+    <gadget name="label4" type="gadget" size1024="137 111 338 136">$$20496$$Goal</gadget>
+    <gadget name="objectivesGoalEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="342 111 822 136"></gadget>
+    <gadget name="label5" type="gadget" size1024="137 83 338 108">$$20497$$Title</gadget>
+    <gadget name="objectivesTitleEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="342 83 822 108"></gadget>
+    <gadget name="label6" type="gadget" size1024="149 557 208 578">$$20498$$SL Pic</gadget>
+    <gadget name="label7" type="gadget" size1024="464 557 529 576">$$20499$$SL Title</gadget>
+    <gadget name="spotlightText" type="formatText" background="ui\ui_med_gray" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12" sunkenbevel="" textmarkup="" border1024="3 2" formattextconvertuserlf="" size1024="151 616 809 701"></gadget>
+    <gadget name="spotlightTextEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="149 587 809 612"></gadget>
+    <gadget name="spotlightFilenameEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="210 557 460 582"></gadget>
+    <gadget name="spotlightHeaderEdit" type="textField" enableime="" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" size1024="531 557 809 582"></gadget>
+  </gadget>
+</layout>

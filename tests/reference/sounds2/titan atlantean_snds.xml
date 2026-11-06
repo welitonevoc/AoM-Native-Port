@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Titan Atlantean">
+    <soundtype name="Select">
+      <culturelogic>
+        <choice name="Greek">
+          <soundset name="TitanGreekSelect"></soundset>
+        </choice>
+        <choice name="Egyptian">
+          <soundset name="TitanEgyptianSelect"></soundset>
+        </choice>
+        <choice name="Norse">
+          <soundset name="TitanNorseSelect"></soundset>
+        </choice>
+        <choice name="Atlantean">
+          <soundset name="TitanSelect"></soundset>
+        </choice>
+      </culturelogic>
+    </soundtype>
+    <soundtype name="Grunt">
+      <culturelogic>
+        <choice name="Greek">
+          <soundset name="TitanGreekGrunt"></soundset>
+        </choice>
+        <choice name="Egyptian">
+          <soundset name="TitanEgyptianGrunt"></soundset>
+        </choice>
+        <choice name="Norse">
+          <soundset name="TitanNorseGrunt"></soundset>
+        </choice>
+        <choice name="Atlantean">
+          <soundset name="TitanGrunt"></soundset>
+        </choice>
+      </culturelogic>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Crush">
+          <soundset name="TitanPunch"></soundset>
+        </choice>
+        <choice name="Fire">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Hack">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceFlesh"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <culturelogic>
+        <choice name="Greek">
+          <soundset name="TitanGreekDeath"></soundset>
+        </choice>
+        <choice name="Egyptian">
+          <soundset name="TitanEgyptianDeath"></soundset>
+        </choice>
+        <choice name="Norse">
+          <soundset name="TitanNorseDeath"></soundset>
+        </choice>
+        <choice name="Atlantean">
+          <soundset name="TitanDeath"></soundset>
+        </choice>
+      </culturelogic>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <culturelogic>
+        <choice name="Greek">
+          <soundset name="TitanGreekAcknowledge"></soundset>
+        </choice>
+        <choice name="Egyptian">
+          <soundset name="TitanEgyptianAcknowledge"></soundset>
+        </choice>
+        <choice name="Norse">
+          <soundset name="TitanNorseAcknowledge"></soundset>
+        </choice>
+        <choice name="Atlantean">
+          <soundset name="TitanAcknowledge"></soundset>
+        </choice>
+      </culturelogic>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

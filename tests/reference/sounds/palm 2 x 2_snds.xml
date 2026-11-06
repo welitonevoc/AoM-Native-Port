@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Palm 2 x 2">
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="TreeHit"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

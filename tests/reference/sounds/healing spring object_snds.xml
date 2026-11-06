@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Healing Spring Object">
+    <soundtype name="Exists">
+      <soundset name="HealingSpringExist"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

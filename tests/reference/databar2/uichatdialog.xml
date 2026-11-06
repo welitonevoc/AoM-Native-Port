@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="ChatDialog" type="dialog" size1024="212 23 812 616" bevel="" background="ui\background greek opaque" tilebackground="" texturereplace="" hidden="">
+    <gadget tilebackgroundhoriz="" name="ChatDialog-BordersTop" type="gadget" background="ui\ui border greek top middle" texturereplace="" size1024="221 7 792 23" z="3" transparent=""></gadget>
+    <gadget tilebackgroundhoriz="" name="ChatDialog-BordersBottom" type="gadget" background="ui\ui border greek bottom middle" texturereplace="" size1024="235 616 788 632" z="3" transparent=""></gadget>
+    <gadget name="ChatDialog-BordersLeft" type="gadget" background="ui\ui border greek left middle" size1024="204 39 212 601" texturereplace="" tilebackgroundvert="" transparent="" z="9"></gadget>
+    <gadget name="ChatDialog-BordersRight" type="gadget" background="ui\ui border greek right middle" size1024="812 39 820 601" texturereplace="" tilebackgroundvert="" z="3" transparent=""></gadget>
+    <gadget name="ChatDialog-BordersRightTop" type="gadget" background="ui\ui border greek top right corner" size1024="788 7 820 39" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+    <gadget name="ChatDialog-BordersLeftTop" type="gadget" background="ui\ui border greek top left corner" size1024="204 7 236 39" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+    <gadget name="ChatDialog-BordersRightBottom" type="gadget" background="ui\ui border greek bottom right corner" size1024="788 600 820 632" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+    <gadget name="ChatDialog-BordersLeftBottom" type="gadget" background="ui\ui border greek bottom left corner" size1024="204 600 236 632" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    <gadget name="ChatDialog-Header" type="gadget" size1024="232 30 718 61">
+      <gadget name="ChatDialog-ScreenLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="232 30 525 55">$$20243$$Chat to Players</gadget>
+      <gadget name="ChatDialog-ScreenSeparator" type="gadget" size1024="222 59 802 61" background="ui\ui line yellow"></gadget>
+    </gadget>
+    <gadget name="ChatDialog-SendButton" type="stateButton" size1024="380 572 508 604" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="IngameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$19008$$Send<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="ChatDialog-CloseButton" type="stateButton" size1024="516 572 644 604" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="InGameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$18457$$Close<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="ChatDialog-ChatSelection" type="radioset" size1024="631 71 803 248" textcolor="255 208 0" textfontsize="18" textfont="InGameLabels" radiosetbuttonsize1024="165 36" radiosetdefaultbuttonindex="0" radiocheckedart="ui\ui button radial 32x32 clicked" radiouncheckedart="ui\ui button radial 32x32" radiobtnborder1024="2 2" sound="ui_jewel">
+      <button>$$20179$$Allies Only</button>
+      <button>$$20180$$Enemies Only</button>
+      <button>$$20178$$Select All</button>
+      <button>$$18757$$Custom</button>
+    </gadget>
+    <gadget name="ChatDialog-PlayerSelection" type="list" size1024="226 72 627 243" background="ui\background greek transparent" tilebackground="" texturereplace="" checkbutton="" textcolor="255 208 0" scrollvert="" z="10">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 1" background="ui\ui background yellow opaque"></vertscrollbar>
+    </gadget>
+    <gadget name="ChatDialog-PlayerSelection-Border" type="gadget" size1024="225 71 624 247" background="" outlinecolor="255 208 0" z="20" transparent=""></gadget>
+    <gadget name="ChatDialog-QuickChatsLabel" type="formatText" textcolor="255 208 0" textmarkup="" usehyperlinks="" textfontsize="18" textfont="InGameLabels" size1024="225 263 499 283" z="25">$$21097$$Quick Chats:</gadget>
+    <gadget name="ChatDialog-FormattedChats" type="list" size1024="226 283 808 389" background="ui\background greek transparent" tilebackground="" texturereplace="" textcolor="255 208 0" scrollvert="" showselect="">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 1" background="ui\ui background yellow opaque"></vertscrollbar>
+    </gadget>
+    <gadget name="ChatDialog-FormattedChats-Border" type="gadget" size1024="225 284 803 391" background="" outlinecolor="255 208 0" z="20" transparent=""></gadget>
+    <gadget name="ChatDialog-ChatDisplay" type="formatText" size1024="225 403 805 531" bevel="" background="ui\background greek transparent" tilebackground="" texturereplace="" textcolor="255 208 0" textfont="ChatInput" textfontsize="12" textmarkup="" textwrapon="" textscrollbar="" formattextscrolltobottom="" z="10" formattextusedatareplace="">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 1" background="ui\ui background yellow opaque"></vertscrollbar>
+    </gadget>
+    <gadget name="ChatDialog-ChatDisplay-Border" type="gadget" size1024="225 403 802 532" background="" outlinecolor="255 208 0" z="20" transparent=""></gadget>
+    <gadget name="ChatDialog-ChatEntry-Group" type="gadget" size1024="226 526 804 565" z="30">
+      <gadget name="ChatDialog-ChatEntry-Background" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="224 526 802 559" z="30"></gadget>
+      <gadget name="ChatDialog-ChatEntry" type="editBox" size1024="225 536 803 557" textfont="ChatInput" textfontsize="12" textcolor="0 0 58" enterkey="" editboxmaxchars="200" enableime="" z="35"></gadget>
+    </gadget>
+  </gadget>
+</layout>

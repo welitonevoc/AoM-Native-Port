@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget type="dialog" name="pregame-messagedialog" size1024="345 196 679 420" bevel="" background="ui\ui background opaque 1" tilebackground="" texturereplace="" windowzstyle="" hidden="" dialogdefaultbuttonindex="0" z="99" closeonesc="">
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog-BordersTop" type="gadget" background="ui\ui border top middle" size1024="349 190 675 206" z="5"></gadget>
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="349 416 675 432" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="330 252 362 364" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog-BordersRight" type="gadget" background="ui\ui border right middle" size1024="676 252 708 364" z="5"></gadget>
+    <gadget name="pregame-messagedialog-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="315 188 379 316" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="315 300 379 428" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="645 300 709 428" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="661 188 725 316" clampbackground="" z="10"></gadget>
+    <gadget name="pregame-messagedialog-prompt" type="formatText" textcolor="255 208 0" textfont="PregameEntry" textfontsize="15" textcenterhoriz="" size1024="367 220 657 350">Message Text Goes Here</gadget>
+    <gadget name="pregame-messagedialog-OKButton" type="stateButton" size1024="432 372 592 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$18465$$OK<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+  </gadget>
+</layout>

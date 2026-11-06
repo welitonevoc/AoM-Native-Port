@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<combatcomparison>
+  <techlevel level="0"></techlevel>
+  <techlevel level="1">
+    <tech>Age 2</tech>
+    <tech>Medium Infantry</tech>
+    <tech>Medium Archers</tech>
+    <tech>Medium Cavalry</tech>
+    <tech>Medium Spearmen</tech>
+    <tech>Medium Axemen</tech>
+    <tech>Medium Slingers</tech>
+    <tech>Medium Slingers</tech>
+    <tech>Medium Migdol Shadow</tech>
+  </techlevel>
+  <techlevel level="2">
+    <tech>Copper Mail</tech>
+    <tech>Copper Shields</tech>
+    <tech>Copper Weapons</tech>
+  </techlevel>
+  <techlevel level="3">
+    <tech>Age 3</tech>
+    <tech>Heavy Infantry</tech>
+    <tech>Heavy Archers</tech>
+    <tech>Heavy Cavalry</tech>
+    <tech>Heavy Spearmen</tech>
+    <tech>Heavy Axemen</tech>
+    <tech>Heavy Slingers</tech>
+    <tech>Heavy Chariots</tech>
+    <tech>Heavy Camelry</tech>
+    <tech>Heavy Elephants</tech>
+  </techlevel>
+  <techlevel level="4">
+    <tech>Bronze Mail</tech>
+    <tech>Bronze Shields</tech>
+    <tech>Bronze Weapons</tech>
+    <tech>Draft Horses</tech>
+  </techlevel>
+  <techlevel level="5">
+    <tech>Age 4</tech>
+    <tech>Champion Infantry</tech>
+    <tech>Champion Archers</tech>
+    <tech>Champion Cavalry</tech>
+    <tech>Champion Spearmen</tech>
+    <tech>Champion Axemen</tech>
+    <tech>Champion Slingers</tech>
+    <tech>Champion Camelry</tech>
+    <tech>Champion Chariots</tech>
+    <tech>Champion Elephants</tech>
+    <tech>Engineers</tech>
+  </techlevel>
+  <techlevel level="6">
+    <tech>Iron Mail</tech>
+    <tech>Iron Shields</tech>
+    <tech>Iron Weapons</tech>
+  </techlevel>
+</combatcomparison>

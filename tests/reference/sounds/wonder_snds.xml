@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Wonder">
+    <soundtype name="Select">
+      <soundset name="Wonder"></soundset>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="HackWood"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceWood"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="CrushWood"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="WonderDeath"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="Wonder"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

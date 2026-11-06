@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Hero Egyptian">
+    <soundtype name="Select">
+      <soundset name="HeroEgyptianSelect"></soundset>
+    </soundtype>
+    <soundtype name="Attack">
+      <soundset name="PlaceHolder"></soundset>
+    </soundtype>
+    <soundtype name="Grunt">
+      <soundset name="MaleGrunt"></soundset>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="GenericFleshHitHack"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="GenericFleshHitSlash"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="GenericFleshHitPierce"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="GenericFleshHitCrush"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Death">
+      <soundset name="GenericMilitaryDeath"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="GenericHeroCreation"></soundset>
+    </soundtype>
+    <soundtype name="Move">
+      <soundset name="PlaceHolder"></soundset>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <soundset name="HeroEgyptianAcknowledge"></soundset>
+    </soundtype>
+    <soundtype name="GodPowerFailed">
+      <soundset name="GenericGodPowerFailed"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

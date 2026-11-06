@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget type="gadget" name="ingame-messagedialog" size1024="350 196 680 420" bevel="" background="ui/Dialogs G Tileable 256" tilebackground="" texturereplace="" windowzstyle="">
+    <gadget name="ingame-messagedialog-prompt" type="formatText" textcolor="0 0 0" textfont="EntryFields" textfontsize="12" textcentervert="" textcenterhoriz="" size1024="382 240 654 365">Message Text Goes Here</gadget>
+    <gadget name="ingame-messagedialog-OKButton" texturereplace="" z="12" textcolor="0 0 0" textfontsize="14" textfont="ButtonFont" type="button" foreground="UI/button_Greek" size1024="454 380 584 410">$$18465$$OK</gadget>
+  </gadget>
+</layout>

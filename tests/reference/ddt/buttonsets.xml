@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<buttonsets>
+  <set name="checkBtn" texturecoords="0 0 0.72 0.72">
+    <normal>ui\ui button check box 32x32</normal>
+    <depressed>ui\ui button check box 32x32 clicked</depressed>
+    <highlight>ui\ui button check box 32x32 rollover</highlight>
+    <disabled>ui\ui button check box 32x32 grey</disabled>
+  </set>
+  <set name="buttonLong" texturecoords="0 0 0.75 1">
+    <normal>ui\ui button long 96X32</normal>
+    <depressed>ui\ui button long 96X32 clicked</depressed>
+    <highlight>ui\ui button long 96X32 rollover</highlight>
+    <disabled>ui\ui button long 96X32 grey</disabled>
+  </set>
+  <set name="sliderRightBtn" texturecoords="0 0 0.625 0.625">
+    <normal>ui\ui button slider arrow right 32x32</normal>
+    <depressed>ui\ui button slider arrow right 32x32 clicked</depressed>
+    <highlight>ui\ui button slider arrow right 32x32 rollover</highlight>
+    <disabled>ui\ui button slider arrow right 32x32 grey</disabled>
+  </set>
+  <set name="sliderLeftBtn" texturecoords="0 0 0.625 0.625">
+    <normal>ui\ui button slider arrow Left 32x32</normal>
+    <depressed>ui\ui button slider arrow Left 32x32 clicked</depressed>
+    <highlight>ui\ui button slider arrow Left 32x32 rollover</highlight>
+    <disabled>ui\ui button slider arrow Left 32x32 grey</disabled>
+  </set>
+  <set name="sliderUpBtn" texturecoords="0 0 0.625 0.625">
+    <normal>ui\ui button slider arrow Up 32x32</normal>
+    <depressed>ui\ui button slider arrow Up 32x32 clicked</depressed>
+    <highlight>ui\ui button slider arrow Up 32x32 rollover</highlight>
+    <disabled>ui\ui button slider arrow Up 32x32 grey</disabled>
+  </set>
+  <set name="sliderDownBtn" texturecoords="0 0 0.625 0.625">
+    <normal>ui\ui button slider arrow Down 32x32</normal>
+    <depressed>ui\ui button slider arrow Down 32x32 clicked</depressed>
+    <highlight>ui\ui button slider arrow Down 32x32 rollover</highlight>
+    <disabled>ui\ui button slider arrow Down 32x32 grey</disabled>
+  </set>
+  <set name="defaultSliderRightBtn" bevel="">
+    <normal>ui\ui_rightarrow_m</normal>
+    <depressed>ui\ui_rightarrow_m</depressed>
+    <highlight>ui\ui_rightarrow_m</highlight>
+    <disabled>ui\ui_rightarrow_m</disabled>
+  </set>
+  <set name="defaultSliderLeftBtn" bevel="">
+    <normal>ui\ui_leftarrow_m</normal>
+    <depressed>ui\ui_leftarrow_m</depressed>
+    <highlight>ui\ui_leftarrow_m</highlight>
+    <disabled>ui\ui_leftarrow_m</disabled>
+  </set>
+  <set name="defaultSliderUpBtn" bevel="">
+    <normal>ui\ui_uparrow_m</normal>
+    <depressed>ui\ui_uparrow_m</depressed>
+    <highlight>ui\ui_uparrow_m</highlight>
+    <disabled>ui\ui_uparrow_m</disabled>
+  </set>
+  <set name="defaultSliderDownBtn" bevel="">
+    <normal>ui\ui_downarrow_m</normal>
+    <depressed>ui\ui_downarrow_m</depressed>
+    <highlight>ui\ui_downarrow_m</highlight>
+    <disabled>ui\ui_downarrow_m</disabled>
+  </set>
+</buttonsets>

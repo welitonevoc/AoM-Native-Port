@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="trEditor" type="gadget" size1024="0 550 254 768" background="ui\ui_med_gray" bevel="" a-dtype="textFontSize number Z number" titlebar="$$20517$$Trigger Editor" locktitlebarmove="">
+    <gadget name="trEdit-Trigger-group" type="textField" sizerel1024="10 07 240 30" textcolor="0 0 0" bevel="" dropdowndistance="132" dropdownvisitems="5">$$20518$$Group:<dropdown>1</dropdown></gadget>
+    <gadget name="trEdit-Trigger-list" type="list" sizerel1024="10 34 160 180" background="ui\ui_dark_gray" sunkenbevel="" showselect="" selectedcolor="255 255 255" buttonsize1024="125 15" scrollvert="" alphasort="" listactivateonalphajump=""></gadget>
+    <gadget name="trEdit-Trigger-insbtn" type="button" sizerel1024="168 40 245 60" bevel="">$$20488$$Insert</gadget>
+    <gadget name="trEdit-Trigger-delbtn" type="button" sizerel1024="168 65 245 85" bevel="">$$18574$$Delete</gadget>
+    <gadget name="trEdit-Trigger-RadioButtonsLabel" type="textBox" sizerel1024="165 90 200 100" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20489$$Edit:</gadget>
+    <gadget name="trEdit-Trigger-RadioButtons" type="radioset" sizerel1024="160 105 200 145" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" background="UI\ui_med_gray" radiosetbuttonsize1024="70 25" radiosetdefaultbuttonindex="0">
+      <button>$$20287$$Triggers</button>
+      <button>$$18264$$Conditions</button>
+      <button>$$18265$$Effects</button>
+    </gadget>
+    <gadget name="trEdit-Triggers" type="gadget" size1024="256 550 800 768" bevel="" background="ui\ui_med_gray" tilebackground="" titlebar="$$20287$$Triggers" locktitlebarmove="">
+      <gadget type="textBox" name="trEdit-Trigger-nametext" sizerel1024="10 10 170 20" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20001$$Name:</gadget>
+      <gadget type="textField" name="trEdit-Trigger-name" sizerel1024="10 25 170 50 " textcolor="0 0 0" fieldrequireenter=""></gadget>
+      <gadget type="checkButton" name="trEdit-Trigger-activebtn" sizerel1024="10 60 170 80" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$20519$$Active</gadget>
+      <gadget type="checkButton" name="trEdit-Trigger-loopbtn" sizerel1024="10 80 170 100" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$19007$$Loop</gadget>
+      <gadget type="checkButton" name="trEdit-Trigger-runimmediatelybtn" sizerel1024="10 100 170 120" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$20522$$RunImmediately</gadget>
+      <gadget type="textBox" name="trEdit-Trigger-prioritytext" sizerel1024="10 120 170 140" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20520$$Priority:</gadget>
+      <gadget type="slider" name="trEdit-Trigger-priority" sizerel1024="10 140 170 160" textcolor="0 0 0"></gadget>
+      <gadget type="textBox" name="trEdit-Trigger-Lowtext" sizerel1024="10 160 40 180" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$18579$$Low</gadget>
+      <gadget type="textBox" name="trEdit-Trigger-Normaltext" sizerel1024="70 160 120 180" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$18294$$Normal</gadget>
+      <gadget type="textBox" name="trEdit-Trigger-Hightext" sizerel1024="140 160 170 180" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">$$18578$$High</gadget>
+      <gadget type="list" name="trEdit-Condition-list" titlebar="$$18264$$Conditions" sizerel1024="180 10 350 180" textcolor="0 0 0" background="ui\ui_dark_gray" scrollvert="" locktitlebarmove="" sunkenbevel="" alphasort=""></gadget>
+      <gadget type="list" name="trEdit-Effect-list" titlebar="$$18265$$Effects" sizerel1024="360 10 530 180" textcolor="0 0 0" background="ui\ui_dark_gray" scrollvert="" locktitlebarmove="" sunkenbevel="" alphasort=""></gadget>
+    </gadget>
+    <gadget name="trEdit-CondEffPanel" type="gadget" size1024="256 550 800 768" bevel="" background="ui\ui_med_gray" tilebackground="" titlebar="$$18264$$Conditions" locktitlebarmove="" hidden="">
+      <gadget name="trEdit-CondEffPanel-name" type="textField" sizerel1024="10 10 160 35 " textcolor="0 0 0"></gadget>
+      <gadget name="trEdit-CondEffPanel-list" type="list" sizerel1024="10 40 160 180" background="ui\ui_dark_gray" sunkenbevel="" showselect="" selectedcolor="255 255 255" scrollvert=""></gadget>
+      <gadget name="trEdit-CondEffPanel-insbtn" type="button" sizerel1024="168 10 225 30" bevel="">$$20488$$Insert</gadget>
+      <gadget name="trEdit-CondEffPanel-delbtn" type="button" sizerel1024="168 35 225 55" bevel="">$$18574$$Delete</gadget>
+      <gadget type="textField" name="trEdit-CondEffPanel-type" sizerel1024="235 10 530 33" textcolor="0 0 0" bevel="" dropdowndistance="132" fieldreadonly="">$$20347$$Type:<dropdown>1</dropdown></gadget>
+      <gadget type="gadget" name="trEdit-CondEffPanel-custom" sizerel1024="285 35 530 180"></gadget>
+    </gadget>
+  </gadget>
+</layout>

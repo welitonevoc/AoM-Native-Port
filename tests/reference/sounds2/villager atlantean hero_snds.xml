@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Villager Atlantean Hero">
+    <soundtype name="Select">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="VillagerAtlanteanSelects"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="VillagerAtlanteanFemaleSelect"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Grunt">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="MaleGrunt"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="FemaleGrunt"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Death">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="MaleDeath"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="FemaleDeath"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceFlesh"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="CrushFlesh"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="HeroBirth"></soundset>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <variationlogic>
+        <choice name="0">
+          <targetlogic>
+            <choice name="default">
+              <soundset name="VillagerAtlanteanAcknowledge"></soundset>
+            </choice>
+            <choice name="enemy">
+              <soundset name="VillagerAtlanteanAttack"></soundset>
+            </choice>
+            <choice name="Berry Bush">
+              <soundset name="VillagerAtlanteanForage"></soundset>
+            </choice>
+            <choice name="Farm">
+              <soundset name="VillagerAtlanteanFarm"></soundset>
+            </choice>
+            <choice name="Tree">
+              <soundset name="VillagerAtlanteanLumberjack"></soundset>
+            </choice>
+            <choice name="Gold">
+              <soundset name="VillagerAtlanteanMine"></soundset>
+            </choice>
+            <choice name="Fish">
+              <soundset name="VillagerAtlanteanFish"></soundset>
+            </choice>
+            <choice name="Huntable">
+              <soundset name="VillagerAtlanteanHunt"></soundset>
+            </choice>
+            <choice name="Building">
+              <soundset name="VillagerAtlanteanRepair"></soundset>
+            </choice>
+          </targetlogic>
+        </choice>
+        <choice name="1">
+          <targetlogic>
+            <choice name="default">
+              <soundset name="VillagerAtlanteanFemaleAcknowledge"></soundset>
+            </choice>
+            <choice name="enemy">
+              <soundset name="VillagerAtlanteanFemaleAttack"></soundset>
+            </choice>
+            <choice name="Berry Bush">
+              <soundset name="VillagerAtlanteanFemaleForage"></soundset>
+            </choice>
+            <choice name="Farm">
+              <soundset name="VillagerAtlanteanFemaleFarm"></soundset>
+            </choice>
+            <choice name="Tree">
+              <soundset name="VillagerAtlanteanFemaleLumberjack"></soundset>
+            </choice>
+            <choice name="Gold">
+              <soundset name="VillagerAtlanteanFemaleMine"></soundset>
+            </choice>
+            <choice name="Fish">
+              <soundset name="VillagerAtlanteanFemaleFish"></soundset>
+            </choice>
+            <choice name="Huntable">
+              <soundset name="VillagerAtlanteanFemaleHunt"></soundset>
+            </choice>
+            <choice name="Building">
+              <soundset name="VillagerAtlanteanFemaleRepair"></soundset>
+            </choice>
+          </targetlogic>
+        </choice>
+      </variationlogic>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<minorgods>
+  <god dbid="0" nameid="17150" techname="Age 2 Athena" portrait="god minor portrait greek Athena" position="2" age="2"></god>
+  <god dbid="1" nameid="17151" techname="Age 2 Ares" portrait="god minor portrait greek Ares" position="1" age="2"></god>
+  <god dbid="2" nameid="19154" techname="Age 2 Hermes" portrait="god minor portrait greek Hermes" position="3" age="2"></god>
+  <god dbid="3" nameid="17153" techname="Age 3 Dionysos" portrait="god minor portrait greek Dionysus" position="3" age="3"></god>
+  <god dbid="4" nameid="17155" techname="Age 3 Apollo" portrait="god minor portrait greek Apollo" position="2" age="3"></god>
+  <god dbid="5" nameid="17156" techname="Age 3 Aphrodite" portrait="god minor portrait greek Aphrodite" position="1" age="3"></god>
+  <god dbid="6" nameid="17157" techname="Age 4 Hera" portrait="god minor portrait greek Hera" position="3" age="4"></god>
+  <god dbid="7" nameid="17158" techname="Age 4 Artemis" portrait="god minor portrait greek Artemis" position="1" age="4"></god>
+  <god dbid="8" nameid="17159" techname="Age 4 Hephaestus" portrait="god minor portrait greek Hephaestus" position="2" age="4"></god>
+  <god dbid="9" nameid="17160" techname="Age 2 Anubis" portrait="god minor portrait egypt Anubis" position="1" age="2"></god>
+  <god dbid="10" nameid="17161" techname="Age 2 Bast" portrait="god minor portrait egypt Bast" position="2" age="2"></god>
+  <god dbid="11" nameid="17162" techname="Age 2 Ptah" portrait="god minor portrait egypt Ptah" position="3" age="2"></god>
+  <god dbid="12" nameid="17163" techname="Age 3 Hathor" portrait="god minor portrait egypt Hathor" position="1" age="3"></god>
+  <god dbid="13" nameid="17164" techname="Age 3 Nephthys" portrait="god minor portrait egypt Nephthys" position="2" age="3"></god>
+  <god dbid="14" nameid="17165" techname="Age 3 Sekhmet" portrait="god minor portrait egypt Sekhmet" position="3" age="3"></god>
+  <god dbid="15" nameid="17166" techname="Age 4 Thoth" portrait="god minor portrait egypt Thoth" position="3" age="4"></god>
+  <god dbid="16" nameid="17167" techname="Age 4 Osiris" portrait="god minor portrait egypt Osiris" position="2" age="4"></god>
+  <god dbid="17" nameid="17168" techname="Age 4 Horus" portrait="god minor portrait egypt Horus" position="1" age="4"></god>
+  <god dbid="18" nameid="17169" techname="Age 2 Forseti" portrait="god minor portrait norse Forseti" position="1" age="2"></god>
+  <god dbid="19" nameid="17170" techname="Age 2 Heimdall" portrait="god minor portrait norse Heimdall" position="3" age="2"></god>
+  <god dbid="20" nameid="17171" techname="Age 2 Freyja" portrait="god minor portrait norse Freyja" position="2" age="2"></god>
+  <god dbid="21" nameid="17172" techname="Age 3 Skadi" portrait="god minor portrait norse Skadi" position="2" age="3"></god>
+  <god dbid="22" nameid="17173" techname="Age 3 Bragi" portrait="god minor portrait norse Bragi" position="1" age="3"></god>
+  <god dbid="23" nameid="17174" techname="Age 3 Njord" portrait="god minor portrait norse Njord" position="3" age="3"></god>
+  <god dbid="24" nameid="17175" techname="Age 4 Hel" portrait="god minor portrait norse Hel" position="2" age="4"></god>
+  <god dbid="25" nameid="17176" techname="Age 4 Baldr" portrait="god minor portrait norse Baldr" position="1" age="4"></god>
+  <god dbid="26" nameid="17177" techname="Age 4 Tyr" portrait="god minor portrait norse Tyr" position="3" age="4"></god>
+  <god dbid="27" nameid="22823" techname="Age 2 Okeanus" portrait="god minor portrait atlantis okeanus" position="1" age="2"></god>
+  <god dbid="28" nameid="22824" techname="Age 2 Prometheus" portrait="god minor portrait atlantis prometheus" position="3" age="2"></god>
+  <god dbid="29" nameid="22825" techname="Age 2 Leto" portrait="god minor portrait atlantis leto" position="2" age="2"></god>
+  <god dbid="30" nameid="22826" techname="Age 3 Hyperion" portrait="god minor portrait atlantis hyperion" position="2" age="3"></god>
+  <god dbid="31" nameid="22827" techname="Age 3 Theia" portrait="god minor portrait atlantis theia" position="1" age="3"></god>
+  <god dbid="32" nameid="22828" techname="Age 3 Rheia" portrait="god minor portrait atlantis rheia" position="3" age="3"></god>
+  <god dbid="33" nameid="22829" techname="Age 4 Helios" portrait="god minor portrait atlantis helios" position="2" age="4"></god>
+  <god dbid="34" nameid="22830" techname="Age 4 Hekate" portrait="god minor portrait atlantis hekate" position="1" age="4"></god>
+  <god dbid="35" nameid="22831" techname="Age 4 Atlas" portrait="god minor portrait atlantis atlas" position="3" age="4"></god>
+</minorgods>

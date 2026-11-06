@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<uitexturedefinition>
+  <idlecount name="Villager" count="10">
+    <texture>icons\ui_n_idlevillager_banner_10</texture>
+  </idlecount>
+  <idlecount name="Villager" count="5">
+    <texture>icons\ui_n_idlevillager_banner_5</texture>
+  </idlecount>
+  <idlecount name="Villager" count="2">
+    <texture>icons\ui_n_idlevillager_banner_2</texture>
+  </idlecount>
+  <idlecount name="Villager" count="1">
+    <texture>icons\ui_n_idlevillager_banner</texture>
+  </idlecount>
+</uitexturedefinition>

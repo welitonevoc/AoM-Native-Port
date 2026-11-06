@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="campaignEditorScreen" type="gadget" size1024="197 109 827 659" background="ui\ui_med_gray" bevel="" titlebar="Campaign Maker" closebutton="" moveable="">
+    <gadget name="campaignList" type="textField" enableime="" sizerel1024="10 10 205 30" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">
+      <dropdown>1</dropdown>
+    </gadget>
+    <gadget name="campaignInsert" type="button" sizerel1024="215 10 265 30" bevel="" textfont="Arial nodrop" textfontsize="12">Insert</gadget>
+    <gadget name="campaignDelete" type="button" sizerel1024="215 35 265 55" bevel="" textfont="Arial nodrop" textfontsize="12">Delete</gadget>
+    <gadget name="campaignName" enableime="" type="textField" sizerel1024="285 10 565 30" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">Name:</gadget>
+    <gadget name="campaignSave" type="button" sizerel1024="570 10 620 30 " bevel="" textfont="Arial nodrop" textfontsize="12">Save</gadget>
+    <gadget name="label1" type="gadget" sizerel1024="7 50 67 70">Scenarios</gadget>
+    <gadget name="campaignScenarios" type="list" sizerel1024="10 70 265 430" background="ui\ui_light_gray" showselect="" selectedcolor="255 255 255" buttonsize1024="230 15" scrollvert="" sunkenbevel=""></gadget>
+    <gadget name="campaignInsScenario" type="button" sizerel1024="25 435 125 455" bevel="" textfont="Arial nodrop" textfontsize="12">Insert</gadget>
+    <gadget name="campaignDelScenario" type="button" sizerel1024="145 435 240 455" bevel="" textfont="Arial nodrop" textfontsize="12">Delete</gadget>
+    <gadget name="label2" type="gadget" sizerel1024="7 465 37 485">File</gadget>
+    <gadget name="campaignFilePath" type="textField" sizerel1024="10 485 210 505" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" fieldreadonly=""></gadget>
+    <gadget name="campaignFileBrowse" type="button" sizerel1024="215 485 265 505 " bevel="" textfont="Arial nodrop" textfontsize="12">Browse</gadget>
+    <gadget name="campaignScenarioDescription" type="textField" enableime="" sizerel1024="285 70 620 90" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">Scenario Name:</gadget>
+    <gadget name="campaignImageArea" type="gadget" sizerel1024="285 120 620 280" background="ui\ui_med_gray" sunkenbevel=""></gadget>
+    <gadget name="campaingImageFile" type="textField" sizerel1024="285 285 560 305" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" fieldreadonly="">Image</gadget>
+    <gadget name="campaignImageBrowse" type="button" sizerel1024="570 285 620 305" bevel="" textfont="Arial nodrop" textfontsize="12">Browse</gadget>
+    <gadget name="campaignDetails" type="formatText" sizerel1024="285 330 620 480" background="ui\ui_med_gray" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12" sunkenbevel="" textmarkup="" border1024="3 2" formattextconvertuserlf=""></gadget>
+    <gadget name="campaignDetailsEdit" type="textField" enableime="" sizerel1024="285 485 620 505" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12">Details</gadget>
+  </gadget>
+</layout>

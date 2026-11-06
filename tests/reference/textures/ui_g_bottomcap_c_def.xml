@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <civilization name="Hades">
+    <texture>ui_g_bottomcap_c_hades</texture>
+  </civilization>
+  <civilization name="Poseidon">
+    <texture>ui_g_bottomcap_c_poseidon</texture>
+  </civilization>
+  <civilization name="Zeus">
+    <texture>ui_g_bottomcap_c_zeus</texture>
+  </civilization>
+  <civilization name="Thor">
+    <texture>ui_n_bottomcap_c_thor</texture>
+  </civilization>
+  <civilization name="Odin">
+    <texture>ui_n_bottomcap_c_odin</texture>
+  </civilization>
+  <civilization name="Loki">
+    <texture>ui_n_bottomcap_c_loki</texture>
+  </civilization>
+  <civilization name="Isis">
+    <texture>ui_e_bottomcap_c_isis</texture>
+  </civilization>
+  <civilization name="Ra">
+    <texture>ui_e_bottomcap_c_ra</texture>
+  </civilization>
+  <civilization name="Set">
+    <texture>ui_e_bottomcap_c_set</texture>
+  </civilization>
+</definition>

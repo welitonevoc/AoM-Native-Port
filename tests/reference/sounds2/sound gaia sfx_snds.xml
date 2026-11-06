@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Sound Gaia SFX">
+    <soundtype name="Exists">
+      <soundset name="GaiaSparkle"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

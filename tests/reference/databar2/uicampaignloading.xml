@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="CampaignLoading" type="gadget" size1024="0 0 1024 768" background="ui\background_d1" tilebackground="">
+    <gadget name="CampaignLoading-screen-background" type="gadget">
+      <gadget name="CampaignLoading-screen-BG1" type="gadget" size1024="0 0 256 256" clampbackground="" background="ui\screen shot A_01"></gadget>
+      <gadget name="CampaignLoading-screen-BG2" type="gadget" size1024="256 0 512 256" clampbackground="" background="ui\screen shot A_02"></gadget>
+      <gadget name="CampaignLoading-screen-BG3" type="gadget" size1024="512 0 768 256" clampbackground="" background="ui\screen shot A_03"></gadget>
+      <gadget name="CampaignLoading-screen-BG4" type="gadget" size1024="768 0 1024 256" clampbackground="" background="ui\screen shot A_04"></gadget>
+      <gadget name="CampaignLoading-screen-BG5" type="gadget" size1024="0 256 256 512" clampbackground="" background="ui\screen shot A_05"></gadget>
+      <gadget name="CampaignLoading-screen-BG6" type="gadget" size1024="256 256 512 512" clampbackground="" background="ui\screen shot A_06"></gadget>
+      <gadget name="CampaignLoading-screen-BG7" type="gadget" size1024="512 256 768 512" clampbackground="" background="ui\screen shot A_07"></gadget>
+      <gadget name="CampaignLoading-screen-BG8" type="gadget" size1024="768 256 1024 512" clampbackground="" background="ui\screen shot A_08"></gadget>
+      <gadget name="CampaignLoading-screen-BG9" type="gadget" size1024="0 512 256 768" clampbackground="" background="ui\screen shot A_09"></gadget>
+      <gadget name="CampaignLoading-screen-BG10" type="gadget" size1024="256 512 512 768" clampbackground="" background="ui\screen shot A_10"></gadget>
+      <gadget name="CampaignLoading-screen-BG11" type="gadget" size1024="512 512 768 768" clampbackground="" background="ui\screen shot A_11"></gadget>
+      <gadget name="CampaignLoading-screen-BG12" type="gadget" size1024="768 512 1024 768" clampbackground="" background="ui\screen shot A_12"></gadget>
+    </gadget>
+    <gadget name="CampaignLoading-Detail" type="gadget" size1024="189 286 834 432" z="45">
+      <gadget name="CampaignLoading-ScreenSeparator" type="gadget" size1024="0 354 1024 356" background="ui\ui background yellow opaque" z="11"></gadget>
+      <gadget name="CampaignLoading-Background-Blur" type="gadget" size1024="0 356 1024 399" backgroundcolor="1 49 32" z="11"></gadget>
+      <gadget name="CampaignLoading-ScreenSeparator" type="gadget" size1024="0 399 1024 401" background="ui\ui background yellow opaque" z="11"></gadget>
+      <gadget name="CampaignLoading-Title" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="24" textfont="ScenarioTitle" type="formatText" size1024="189 356 834 399" z="15">Chiron's Special Moment in the Valley of the Kings</gadget>
+    </gadget>
+  </gadget>
+</layout>

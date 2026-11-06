@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<foresttypes>
+  <forest name="Oak Forest" iconname="ui\GForest64" floor="ForestFloorOak">
+    <protounit>Oak Tree</protounit>
+  </forest>
+  <forest name="Palm Forest" iconname="ui\EForest64" floor="ForestFloorPalm">
+    <protounit>Palm</protounit>
+  </forest>
+  <forest name="Pine Forest" iconname="ui\pine forest 64" floor="ForestFloorPine">
+    <protounit>Pine</protounit>
+  </forest>
+  <forest name="Snow Pine Forest" iconname="ui\NForest64" floor="ForestFloorPineSnow">
+    <protounit>Pine Snow</protounit>
+  </forest>
+  <forest name="Autumn Oak Forest" iconname="ui\GForest64" floor="ForestFloorOak">
+    <protounit>Oak Autumn</protounit>
+  </forest>
+  <forest name="Mixed Oak Forest" iconname="ui\GForest64" floor="ForestFloorPine">
+    <protounit>Pine</protounit>
+    <protounit>Oak Tree</protounit>
+  </forest>
+  <forest name="Mixed Pine Forest" iconname="ui\NForest64" floor="ForestFloorPineSnow">
+    <protounit>Pine</protounit>
+    <protounit>Pine Snow</protounit>
+  </forest>
+  <forest name="Hades Forest" iconname="ui\hades forest 64" floor="ForestFloorDeadPine">
+    <protounit>Pine Dead</protounit>
+  </forest>
+  <forest name="Mixed Palm Forest" iconname="ui\EForest64" floor="ForestFloorPalm">
+    <protounit>Palm</protounit>
+    <protounit>Oak Tree</protounit>
+  </forest>
+  <forest name="Savannah Forest" iconname="ui\savannah forest 64" floor="ForestFloorSavannah">
+    <protounit>Savannah Tree</protounit>
+  </forest>
+  <forest name="Tundra Forest" iconname="ui\tundra forest 64" floor="ForestFloorTundra">
+    <protounit>Tundra Tree</protounit>
+  </forest>
+  <forest name="Marsh Forest" iconname="ui\marsh forest 64" floor="ForestFloorMarsh">
+    <protounit>Marsh Tree</protounit>
+  </forest>
+</foresttypes>

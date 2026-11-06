@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>Egypt God Background 256</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>Norse God Background 256</texture>
+  </culture>
+</definition>

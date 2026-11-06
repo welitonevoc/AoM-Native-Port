@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="scenarioSettingsDlg" type="dialog" size1024="98 132 410 410" background="ui\ui_med_gray" closebutton="" titlebar="$$20500$$Scenario Settings" closeonesc="">
+    <gadget name="scenarioSettingsDlg-playerCount" type="textField" size1024="104 159 384 184" textfont="Arial nobold nodrop" textfontsize="12" textcolor="0 0 0" bevel="">$$20501$$Player Count<dropdown>$$20524$$1</dropdown><dropdown>$$20525$$2</dropdown><dropdown>$$20526$$3</dropdown><dropdown>$$20527$$4</dropdown><dropdown>$$20528$$5</dropdown><dropdown>$$20529$$6</dropdown><dropdown>$$20530$$7</dropdown><dropdown>$$20531$$8</dropdown><dropdown>$$20532$$9</dropdown><dropdown>$$20533$$10</dropdown><dropdown>$$20534$$11</dropdown><dropdown>$$20535$$12</dropdown></gadget>
+    <gadget name="scenarioSettingsDlg-stringid" type="textField" size1024="104 194 384 219" textfont="Arial nobold nodrop" textfontsize="12">$$20502$$String ID:</gadget>
+    <gadget name="scenarioSettingsDlg-bonuspop" type="textField" size1024="104 228 384 253" textfont="Arial nobold nodrop" textfontsize="12">$$20503$$Bonus Pop:</gadget>
+    <gadget name="scenarioSettingsDlg-poplimit" type="textField" size1024="104 264 384 289" textfont="Arial nobold nodrop" textfontsize="12">$$20504$$Popcap Limit:</gadget>
+    <gadget type="checkButton" name="scenarioSettingsDlg-vcCheck" size1024="104 300 334 320" textfont="Arial nobold nodrop" textfontsize="12">$$20505$$Use Victory Conditions</gadget>
+    <gadget type="textField" name="scenarioSettingsDlg-vcfile" size1024="104 330 334 355" textfont="Arial nobold nodrop" textfontsize="12" textcolor="0 0 0" bevel="">$$20506$$Filename:</gadget>
+    <gadget type="button" name="scenarioSettingsDlg-vcclearbtn" size1024="337 330 407 355" bevelbutton="" textfont="Arial nobold nodrop" textfontsize="12" textcolor="0 0 0">$$19009$$Clear</gadget>
+    <button>$$18465$$OK</button>
+  </gadget>
+</layout>

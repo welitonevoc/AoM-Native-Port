@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="MainMenu" type="gadget" size1024="0 0 1024 768" a-dtype="textFontSize number Z number" background="">
+    <gadget name="PregameBackground" type="gadget" size1024="0 0 1024 768" background="" a-dtype="textFontSize number Z number" z="4">
+      <gadget clampbackground="" name="PregameBackground_A" type="gadget" sizerel1024="0 0 128 256" background="UI\mainmenu_a"></gadget>
+      <gadget clampbackground="" name="PregameBackground_B" type="gadget" sizerel1024="128 0 384 64" background="UI\mainmenu_b" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_C" type="gadget" sizerel1024="384 0 640 128" background="UI\mainmenu_c" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_D" type="gadget" sizerel1024="640 0 896 128" background="UI\mainmenu_d" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_E" type="gadget" sizerel1024="896 0 1024 64" background="UI\mainmenu_e" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_F" type="gadget" sizerel1024="0 256 128 512" background="UI\mainmenu_f" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_g" type="gadget" sizerel1024="896 256 1024 512" background="UI\mainmenu_g" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_h" type="gadget" sizerel1024="0 512 128 768" background="UI\mainmenu_h" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_i" type="gadget" sizerel1024="128 640 384 768" background="UI\mainmenu_i" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_J" type="gadget" sizerel1024="384 640 640 704" background="UI\mainmenu_J" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_k" type="gadget" sizerel1024="640 640 896 768" background="UI\mainmenu_k" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_l" type="gadget" sizerel1024="896 512 1024 768" background="UI\mainmenu_l" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_EE" type="gadget" sizerel1024="896 64 1024 128" background="UI\mainmenu_ee" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_EEE" type="gadget" sizerel1024="896 128 1024 256" background="UI\mainmenu_eee" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_jj" type="gadget" sizerel1024="384 704 512 768" background="UI\mainmenu_jj" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_jjj" type="gadget" sizerel1024="512 704 640 768" background="UI\mainmenu_jjj" a-dtype="textFontSize number Z number"></gadget>
+      <gadget clampbackground="" name="PregameBackground_edge1" type="gadget" sizerel1024="-2 -2 1024 0" background="UI\black2x2" a-dtype="textFontSize number Z number" tilebackground=""></gadget>
+      <gadget clampbackground="" name="PregameBackground_edge2" type="gadget" sizerel1024="-2 -2 0 768" background="UI\black2x2" a-dtype="textFontSize number Z number" tilebackground=""></gadget>
+    </gadget>
+    <gadget name="PlayButton" type="stateButton" size1024="384 640 640 704" bevelbutton="" z="10" statebuttonuseinternalstates="">
+      <command>gadgetReal("PlayBanner") gadgetUnReal("MoreBanner")</command>
+      <stateentry background=""></stateentry>
+      <stateentry background=""></stateentry>
+      <stateentry background="UI\mainmenu_J rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="PlayBanner" type="gadget" size1024="302 100 942 484" hidden="" z="12">
+      <gadget name="PlayBannerBackground" type="gadget" a-dtype="textFontSize number Z number">
+        <gadget clampbackground="" name="PlayBannerBackground_A" type="gadget" background="UI\playmenu_a" a-dtype="textFontSize number Z number" size1024="128 640 384 704"></gadget>
+        <gadget size1024="384 640 640 672" clampbackground="" name="PlayBannerBackground_B" type="gadget" background="UI\playmenu_b" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="640 640 896 704" clampbackground="" name="PlayBannerBackground_c" type="gadget" background="UI\playmenu_c" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="384 672 640 704" clampbackground="" name="PlayBannerBackground_d" type="gadget" background="UI\playmenu_d" a-dtype="textFontSize number Z number"></gadget>
+        <gadget clampbackground="" name="PlayBannerBackground_e" type="gadget" background="UI\playmenu_e" a-dtype="textFontSize number Z number" size1024="128 704 384 736"></gadget>
+        <gadget size1024="384 704 640 736" clampbackground="" name="PlayBannerBackground_f" type="gadget" background="UI\playmenu_f" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="640 704 896 736" clampbackground="" name="PlayBannerBackground_g" type="gadget" background="UI\playmenu_g" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="128 736 384 768" clampbackground="" name="PlayBannerBackground_h" type="gadget" background="UI\playmenu_h" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="384 736 640 768" clampbackground="" name="PlayBannerBackground_i" type="gadget" background="UI\playmenu_i" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="640 736 896 768" clampbackground="" name="PlayBannerBackground_j" type="gadget" background="UI\playmenu_j" a-dtype="textFontSize number Z number"></gadget>
+      </gadget>
+      <gadget name="SinglePlayerButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="128 704 384 736">
+        <command>modeEnter("SinglePlayerSetup")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\playmenu_e rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="MultiplayerButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="384 704 640 736">
+        <command>doMPSetup()</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\playmenu_f rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="CampaignButton" type="stateButton" a-dtype="textFontSize number Z number" statebuttonuseinternalstates="" background="" size1024="384 736 640 768">
+        <command>modeEnter("Campaign")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\playmenu_i rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget statebuttonuseinternalstates="" size1024="128 736 384 768" name="ArenaButton" type="stateButton" a-dtype="textFontSize number Z number" background="">
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <command>modeEnter("Arena")</command>
+      </gadget>
+      <gadget background="" statebuttonuseinternalstates="" name="LoadSavedGameButton" type="stateButton" a-dtype="textFontSize number Z number" size1024="640 704 896 736">
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <command>uiOpenSavedGameBrowser</command>
+      </gadget>
+      <gadget name="LoadScenarioButton" type="stateButton" statebuttonuseinternalstates="" background="" a-dtype="textFontSize number Z number" size1024="640 736 896 768">
+        <command>uiOpenScenarioBrowser</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\playmenu_J rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="PlayBackButton" type="stateButton" statebuttonuseinternalstates="" background="" a-dtype="textFontSize number Z number" size1024="384 672 640 704">
+        <command>gadgetUnReal("PlayBanner")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\playmenu_D rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+    </gadget>
+    <gadget name="ExitButton" type="stateButton" size1024="896 0 1024 64" statebuttonuseinternalstates="" clampbackground="" background="" bevelbutton="">
+      <command>exit(false)</command>
+      <stateentry background=""></stateentry>
+      <stateentry background=""></stateentry>
+      <stateentry background="UI\mainmenu_e rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="LearnButton" type="stateButton" size1024="384 704 512 768" statebuttonuseinternalstates="" clampbackground="" bevelbutton="" background="">
+      <command>campaignStart("Learn To Play") campaignResetCurScenario() campaignPlayCurrent()</command>
+      <stateentry background=""></stateentry>
+      <stateentry background=""></stateentry>
+      <stateentry background="UI\mainmenu_JJ rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="LearnBanner" type="gadget" size1024="302 100 942 484" hidden="" z="12" a-dtype="textFontSize number Z number">
+      <gadget name="LearnBannerBackground" type="gadget" a-dtype="textFontSize number Z number">
+        <gadget clampbackground="" name="LearnBannerBackground_A" type="gadget" background="UI\learnmenu_a" a-dtype="textFontSize number Z number" size1024="128 640 384 768"></gadget>
+        <gadget size1024="384 640 640 672" clampbackground="" name="LearnBannerBackground_B" type="gadget" background="UI\learnmenu_b" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="640 640 896 768" clampbackground="" name="LearnBannerBackground_c" type="gadget" background="UI\learnmenu_c" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="384 672 640 704" clampbackground="" name="LearnBannerBackground_d" type="gadget" background="UI\learnmenu_d" a-dtype="textFontSize number Z number"></gadget>
+        <gadget clampbackground="" name="LearnBannerBackground_e" type="gadget" background="UI\learnmenu_e" a-dtype="textFontSize number Z number" size1024="384 704 640 736"></gadget>
+        <gadget size1024="384 736 640 768" clampbackground="" name="LearnBannerBackground_f" type="gadget" background="UI\learnmenu_f" a-dtype="textFontSize number Z number"></gadget>
+      </gadget>
+      <gadget name="LearntoPlayButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="384 704 640 736">
+        <command>campaignStart("Learn To Play") campaignResetCurScenario() campaignPlayCurrent()</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\learnmenu_e rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="HistoryButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="384 736 640 768">
+        <command>gadgetUnReal("LearnBanner") uiTopicDetailHelp("history")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\learnmenu_f rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="LearnBackButton" type="stateButton" statebuttonuseinternalstates="" background="" a-dtype="textFontSize number Z number" size1024="384 672 640 704">
+        <command>gadgetUnReal("LearnBanner")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\learnmenu_D rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+    </gadget>
+    <gadget name="MoreButton" type="stateButton" size1024="512 704 640 768" statebuttonuseinternalstates="" clampbackground="" bevelbutton="">
+      <command>gadgetReal("MoreBanner") gadgetUnReal("PlayBanner") </command>
+      <stateentry background=""></stateentry>
+      <stateentry background=""></stateentry>
+      <stateentry background="UI\mainmenu_JJJ rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="MoreBanner" type="gadget" size1024="302 100 942 484" hidden="" z="12" a-dtype="textFontSize number Z number">
+      <gadget name="MoreBannerBackground" type="gadget" a-dtype="textFontSize number Z number">
+        <gadget clampbackground="" name="MoreBannerBackground_A" type="gadget" background="UI\Moremenu_a" a-dtype="textFontSize number Z number" size1024="128 640 384 704"></gadget>
+        <gadget size1024="384 640 640 672" clampbackground="" name="MoreBannerBackground_B" type="gadget" background="UI\moremenu_b" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="640 640 896 768" clampbackground="" name="MoreBannerBackground_c" type="gadget" background="UI\moremenu_c" a-dtype="textFontSize number Z number"></gadget>
+        <gadget size1024="384 672 640 704" clampbackground="" name="MoreBannerBackground_d" type="gadget" background="UI\moremenu_d" a-dtype="textFontSize number Z number"></gadget>
+        <gadget clampbackground="" name="MoreBannerBackground_e" type="gadget" background="UI\moremenu_e" a-dtype="textFontSize number Z number" size1024="384 704 640 736"></gadget>
+        <gadget size1024="384 736 640 768" clampbackground="" name="MoreBannerBackground_f" type="gadget" background="UI\moremenu_f" a-dtype="textFontSize number Z number"></gadget>
+        <gadget clampbackground="" name="MoreBannerBackground_cd" type="gadget" background="UI\Moremenu_cd" a-dtype="textFontSize number Z number" size1024="128 704 384 736"></gadget>
+        <gadget clampbackground="" name="MoreBannerBackground_ef" type="gadget" background="UI\Moremenu_ef" a-dtype="textFontSize number Z number" size1024="128 736 384 768"></gadget>
+      </gadget>
+      <gadget name="OptionsButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="384 704 640 736">
+        <command>modeEnter("Options")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\moremenu_e rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="ScenarioEditorButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="384 736 640 768">
+        <command>startRandomGame() subModeClear("Simulation") subModeEnter("Simulation", "Editor")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\moremenu_f rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="MoreBackButton" type="stateButton" statebuttonuseinternalstates="" background="" a-dtype="textFontSize number Z number" size1024="384 672 640 704">
+        <command>gadgetUnReal("MoreBanner")</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\moremenu_D rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+      <gadget name="WatchRecordedButton" type="stateButton" statebuttonuseinternalstates="" a-dtype="textFontSize number Z number" background="" size1024="128 704 384 736">
+        <command>uiOpenRecordGameBrowser()</command>
+        <stateentry background=""></stateentry>
+        <stateentry background=""></stateentry>
+        <stateentry background="UI\moremenu_cd rollover"></stateentry>
+        <stateentry background=""></stateentry>
+      </gadget>
+    </gadget>
+    <gadget name="Login" type="dialog" size1024="350 275 673 450" background="Egypt God Background" a-dtype="textFontSize number Z number" hidden="">
+      <gadget name="UserName" type="textField" textfont="Arial nobold nodrop" textfontsize="12" a-dtype="textFontSize number Z number" textcolor="256 256 256" textcenterhoriz="" textcentervert="" sizerel1024="20 30 303 50">User Name:</gadget>
+      <gadget name="Password" type="textField" textfont="Arial nobold nodrop" textfontsize="12" a-dtype="textFontSize number Z number" textcolor="256 256 256" textcenterhoriz="" textcentervert="" sizerel1024="20 60 303 80">Password:</gadget>
+      <gadget name="LoginButton" type="button" foreground="Egypt Button Background" textfont="Arial nobold nodrop" textfontsize="12" a-dtype="textFontSize number Z number" textcolor="256 256 256" textcenterhoriz="" textcentervert="" sizerel1024="111 150 211 170" bevelbutton="">Log In<command>gadgetUnReal("Login")</command></gadget>
+    </gadget>
+  </gadget>
+  <gadget name="VersionString" type="textBox" size1024="0 700 200 740" background="" transparent="" textcolor="255 255 255" a-dtype="textFontSize number Z number"></gadget>
+</layout>

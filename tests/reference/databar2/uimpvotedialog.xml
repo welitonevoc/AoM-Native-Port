@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="MPVoteDialog" type="dialog" size1024="0 0 1024 768" background="" windowzstyle="" dontautoclose="">
+    <gadget name="MPVoteDialog-Background" type="gadget" size1024="157 16 868 752" background="ui\background greek opaque" tilebackground="" texturereplace="" z="9">
+      <gadget tilebackgroundhoriz="" name="MPVoteDialog-BordersTop" type="gadget" background="ui\ui border greek top middle" texturereplace="" size1024="181 0 844 16" z="3" transparent=""></gadget>
+      <gadget tilebackgroundhoriz="" name="MPVoteDialog-BordersBottom" type="gadget" background="ui\ui border greek bottom middle" texturereplace="" size1024="181 752 844 768" z="3" transparent=""></gadget>
+      <gadget name="MPVoteDialog-BordersLeft" type="gadget" background="ui\ui border greek left middle" size1024="149 32 157 736" texturereplace="" tilebackgroundvert="" transparent="" z="9"></gadget>
+      <gadget name="MPVoteDialog-BordersRight" type="gadget" background="ui\ui border greek right middle" size1024="868 32 876 736" texturereplace="" tilebackgroundvert="" z="3" transparent=""></gadget>
+      <gadget name="MPVoteDialog-BordersRightTop" type="gadget" background="ui\ui border greek top right corner" size1024="844 0 876 32" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+      <gadget name="MPVoteDialog-BordersLeftTop" type="gadget" background="ui\ui border greek top left corner" size1024="149 0 181 32" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+      <gadget name="MPVoteDialog-BordersRightBottom" type="gadget" background="ui\ui border greek bottom right corner" size1024="844 736 876 768" texturereplace="" z="4" transparent="" clampbackground=""></gadget>
+      <gadget name="MPVoteDialog-BordersLeftBottom" type="gadget" background="ui\ui border greek bottom left corner" size1024="149 736 181 768" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    </gadget>
+    <gadget name="MPVoteDialog-ScreenLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="196 23 758 48" z="11">$$20160$$Player has dropped out</gadget>
+    <gadget name="MPVoteDialog-ScreenSeparator" type="gadget" size1024="157 58 868 60" background="ui\ui line yellow" z="11"></gadget>
+    <gadget name="MPVoteDialog-Swirl-Top" type="gadget" size1024="480 76 544 108" background="ui\ui ornate gold swirl 64x32" z="11"></gadget>
+    <gadget name="MPVoteDialog-SwirlSeparator-Top" type="gadget" size1024="166 109 858 111" background="ui\ui line yellow" z="11"></gadget>
+    <gadget name="MPVoteDialog-RedFade" type="gadget" size1024="166 112 858 155" background="ui\background fade red" z="11"></gadget>
+    <gadget name="MPVoteDialog-SwirlSeparator-Bottom" type="gadget" size1024="166 157 858 159" background="ui\ui line yellow" z="11"></gadget>
+    <gadget name="MPVoteDialog-Swirl-Bottom" type="gadget" size1024="480 160 544 192" background="ui\ui ornate gold swirl 64x32" z="11" texturecoords="0 1 1 0"></gadget>
+    <gadget name="MPVoteDialog-WhoDropped" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="246 111 778 157" z="15">$$20161$$JerrytheJerk Has Lost Connection</gadget>
+    <gadget name="MPVoteDialog-Vote-Text" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="266 207 758 229" z="15">$$20162$$Vote to Continue Game</gadget>
+    <gadget name="MPVoteDialog-VoteUnanimous-Text" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="18" textfont="PregameLabels" type="formatText" size1024="266 236 758 256" z="15">$$20163$$There must be an unanimous decision to continue.</gadget>
+    <gadget name="MPVoteDialog-Continue-Background" type="gadget" size1024="157 264 868 352" background="ui\background greek opaque dark" texturereplace="" tilebackground=""></gadget>
+    <gadget name="MPVoteDialog-ContinueButton" type="stateButton" size1024="432 301 592 333" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="IngameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$22677$$Drop Player<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPVoteDialog-SaveButton" type="stateButton" size1024="604 301 764 333" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="IngameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$20164$$Save and Exit<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPVoteDialog-ResignButton" type="stateButton" size1024="432 711 592 743" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="IngameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$18445$$Quit<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPVoteDialog-WaitButton" type="stateButton" size1024="263 301 423 333" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="IngameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$22642$$Wait<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPVoteDialog-Column1" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="PregameLabels" type="formatText" size1024="102 369 421 590" z="20">
+      <gadget name="MPVoteDialog-Name1-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="158 369 516 405" z="20">
+        <gadget name="MPVoteDialog-Name1-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 369 264 401" z="25" textjustifyright="">"Not Voted"</gadget>
+        <gadget name="MPVoteDialog-Name1-God" type="gadget" size1024="268 369 300 401" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name1-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 369 516 401" z="25">WWWWWWWWWWWWWWWM</gadget>
+        <gadget name="MPVoteDialog-Name1-Dropped-Background" type="gadget" size1024="160 369 516 401" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name3-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="110 406 421 442" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name3-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 406 264 438" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name3-God" type="gadget" size1024="268 406 300 438" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name3-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 406 496 438" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name3-Dropped-Background" type="gadget" size1024="160 406 516 438" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name5-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="110 443 421 479" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name5-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 443 264 475" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name5-God" type="gadget" size1024="268 443 300 475" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name5-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 443 496 475" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name5-Dropped-Background" type="gadget" size1024="160 443 516 475" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name7-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="110 479 421 515" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name7-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 479 264 511" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name7-God" type="gadget" size1024="268 479 300 511" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name7-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 479 496 511" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name7-Dropped-Background" type="gadget" size1024="160 479 516 511" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name9-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="110 516 421 552" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name9-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 516 264 548" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name9-God" type="gadget" size1024="268 516 300 548" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name9-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 516 496 548" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name9-Dropped-Background" type="gadget" size1024="160 516 516 548" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name11-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="110 553 421 589" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name11-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="160 553 264 585" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name11-God" type="gadget" size1024="268 553 300 585" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name11-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="304 553 496 585" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name11-Dropped-Background" type="gadget" size1024="160 553 516 585" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+    </gadget>
+    <gadget name="MPVoteDialog-Column2" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="PregameLabels" type="formatText" size1024="506 369 773 590" z="20">
+      <gadget name="MPVoteDialog-Name2-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 369 867 405" z="20">
+        <gadget name="MPVoteDialog-Name2-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 369 616 401" z="25" textjustifyright="">Continue</gadget>
+        <gadget name="MPVoteDialog-Name2-God" type="gadget" size1024="620 369 652 401" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name2-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 369 866 401" z="25">WWWWWWWWWWWWWWWM</gadget>
+        <gadget name="MPVoteDialog-Name2-Dropped-Background" type="gadget" size1024="520 369 866 401" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name4-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="506 406 773 442" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name4-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 406 616 438" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name4-God" type="gadget" size1024="620 406 652 438" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name4-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 406 866 438" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name4-Dropped-Background" type="gadget" size1024="520 406 866 438" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name6-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="506 443 773 479" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name6-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 443 616 475" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name6-God" type="gadget" size1024="620 443 652 475" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name6-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 443 866 475" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name6-Dropped-Background" type="gadget" size1024="520 443 866 475" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name8-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="RegularIngame" type="formatText" size1024="506 479 773 515" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name8-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="RegularIngame" type="formatText" size1024="522 479 616 511" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name8-God" type="gadget" size1024="620 479 652 511" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name8-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 479 866 511" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name6-Dropped-Background" type="gadget" size1024="520 479 866 511" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name10-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="506 516 773 552" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name10-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 516 616 548" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name10-God" type="gadget" size1024="620 516 652 548" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name10-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 516 866 548" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name10-Dropped-Background" type="gadget" size1024="520 516 866 548" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+      <gadget name="MPVoteDialog-Name12-Group" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="506 553 773 589" z="20" hidden="">
+        <gadget name="MPVoteDialog-Name12-VoteSelection" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="522 553 616 585" z="25" textjustifyright="">Save</gadget>
+        <gadget name="MPVoteDialog-Name12-God" type="gadget" size1024="620 553 652 585" background="ui\ui god poseidon 32x32" z="25"></gadget>
+        <gadget name="MPVoteDialog-Name12-Name" textcentervert="" textcolor="255 208 0" textfontsize="12" textfont="VoteIngame" type="formatText" size1024="656 553 866 585" z="25">DefaultName</gadget>
+        <gadget name="MPVoteDialog-Name12-Dropped-Background" type="gadget" size1024="520 553 866 585" background="ui\ui background blue transparent" tilebackground="" hidden="" z="30"></gadget>
+      </gadget>
+    </gadget>
+    <gadget name="MPVoteDialog-chat-area-container" type="gadget" size1024="215 542 810 717">
+      <gadget enableime="" tilebackground="" background="ui\ui text chat box" name="MPVoteDialog-chat-area-chatinput" type="editBox" size1024="180 679 844 703" textcolor="0 0 58" textcentervert="" enterkey="" textfont="PregameChat" textfontsize="14" editboxmaxchars="200" z="15"></gadget>
+      <gadget name="MPVoteDialog-chat-area-background" type="gadget" size1024="181 592 844 684" background="ui\background greek opaque dark" texturereplace="" tilebackground="" z="10" outlinecolor="255 208 0"></gadget>
+      <gadget name="MPVoteDialog-chat-area-chatoutput" type="formatText" size1024="181 594 844 680" textcolor="45 160 255" textfont="ChatInput" textfontsize="12" textmarkup="" textwrapon="" textscrollbar="" formattextscrolltobottom="" z="10">
+        <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background dark blue opaque" background="ui\ui background yellow opaque"></vertscrollbar>
+      </gadget>
+    </gadget>
+  </gadget>
+</layout>

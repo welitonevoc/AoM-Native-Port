@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>icons\ui_E_bottom tab out</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>icons\ui_N_bottom tab out</texture>
+  </culture>
+</definition>

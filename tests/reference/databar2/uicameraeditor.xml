@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="camEditor" type="gadget" size1024="0 565 798 767" titlebar="$$20507$$Camera Track Editor" background="ui\ui_med_gray" tilebackground="" locktitlebarmove="">
+    <gadget type="button" name="camEdit-newbtn" size1024="159 598 209 623" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$19009$$Clear<command>trackClear</command></gadget>
+    <gadget type="button" name="camEdit-hidebtn" size1024="160 719 210 744" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20508$$Show<command>trackToggleShow</command></gadget>
+    <gadget type="list" name="camEdit-Track-list" titlebar="$$20523$$Tracks" size1024="11 598 152 753" textcolor="0 0 0" background="ui\ui_dark_gray" showselect="" selectedcolor="255 255 255" buttonsize1024="115 15" scrollvert="" locktitlebarmove=""></gadget>
+    <gadget type="button" name="camEdit-Track-insbtn" size1024="159 627 209 652" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20488$$Insert<command>trackInsert</command></gadget>
+    <gadget type="button" name="camEdit-Track-delbtn" size1024="159 657 209 682" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$18574$$Delete<command>trackRemove</command></gadget>
+    <gadget type="textField" name="camEdit-Name" size1024="219 598 401 623" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="">$$20509$$Name</gadget>
+    <gadget type="textField" name="camEdit-Duration" size1024="219 627 401 652" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="" numberfield="">$$20510$$Duration</gadget>
+    <gadget type="slider" name="camEdit-progress" size1024="240 687 373 712" textcolor="0 0 0"></gadget>
+    <gadget type="button" name="camEdit-backbtn" size1024="240 719 265 744" bevelbutton="" textcolor="0 0 0" foreground="icons\icon camera step backward">
+      <command>trackStepBackward</command>
+    </gadget>
+    <gadget type="button" name="camEdit-pausebtn" size1024="267 719 292 744" bevelbutton="" textcolor="0 0 0" foreground="icons\icon camera pause">
+      <command>trackPause</command>
+    </gadget>
+    <gadget type="button" name="camEdit-stopbtn" size1024="294 719 319 744" bevelbutton="" textcolor="0 0 0" foreground="icons\icon camera stop">
+      <command>trackStop</command>
+    </gadget>
+    <gadget type="button" name="camEdit-playbtn" size1024="321 719 346 744" bevelbutton="" textcolor="0 0 0" foreground="icons\icon camera play">
+      <command>trackPlay(10.0)</command>
+    </gadget>
+    <gadget type="button" name="camEdit-fwdbtn" size1024="348 719 373 744" bevelbutton="" textcolor="0 0 0" foreground="icons\icon camera step forward">
+      <command>trackStepForward</command>
+    </gadget>
+    <gadget type="list" name="camEdit-Waypoint-list" titlebar="$$20511$$Waypoints" size1024="414 598 555 753" textcolor="0 0 0" background="ui\ui_dark_gray" showselect="" selectedcolor="255 255 255" buttonsize1024="115 15" scrollvert="" locktitlebarmove="" allowdoubleclick=""></gadget>
+    <gadget type="button" name="camEdit-addbtn" size1024="562 598 612 623" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$18573$$Add<command>trackAddWaypoint</command></gadget>
+    <gadget type="button" name="camEdit-delbtn" size1024="562 627 612 652" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$18574$$Delete<command>trackRemoveWaypoint</command></gadget>
+    <gadget type="button" name="camEdit-applybtn" size1024="562 657 612 682" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$20512$$Update<command>trackEditWaypoint</command></gadget>
+    <gadget type="textField" name="camEdit-Time" size1024="623 598 788 623" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="" numberfield="">$$20513$$Time</gadget>
+    <gadget type="textField" name="camEdit-Tension" size1024="623 627 788 652" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="" numberfield="">$$20514$$Tension</gadget>
+    <gadget type="textField" name="camEdit-Continuity" size1024="623 657 788 682" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="" numberfield="">$$20515$$Continuity</gadget>
+    <gadget type="textField" name="camEdit-Bias" size1024="623 687 788 712" textcolor="0 0 0" textfont="Arial nobold nodrop" textfontsize="12" history="" numberfield="">$$20516$$Bias</gadget>
+    <gadget type="gadget" name="gadgettohideevents" hidden="">
+      <gadget type="list" name="camEdit-Event-list" titlebar="Events" size1024="815 600 955 750" textcolor="0 0 0" background="ui\ui_dark_gray" showselect="" selectedcolor="255 255 255" buttonsize1024="115 15" scrollvert="" locktitlebarmove="" allowdoubleclick=""></gadget>
+      <gadget type="button" name="camEdit-event-addbtn" size1024="960 600 1010 625" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$18573$$Add</gadget>
+      <gadget type="button" name="camEdit-event-delbtn" size1024="960 630 1010 655" bevelbutton="" textcolor="0 0 0" textfont="Arial nodrop" textfontsize="12">$$18574$$Delete</gadget>
+    </gadget>
+  </gadget>
+</layout>

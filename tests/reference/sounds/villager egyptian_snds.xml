@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Villager Egyptian">
+    <soundtype name="Select">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="VillagerEgyptianSelect"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="VillagerEgyptianFemaleSelect"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Grunt">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="MaleGrunt"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="FemaleGrunt"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Death">
+      <variationlogic>
+        <choice name="0">
+          <soundset name="MaleDeath"></soundset>
+        </choice>
+        <choice name="1">
+          <soundset name="FemaleDeath"></soundset>
+        </choice>
+      </variationlogic>
+    </soundtype>
+    <soundtype name="Hit">
+      <damagetypelogic>
+        <choice name="Hack">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Slash">
+          <soundset name="HackFlesh"></soundset>
+        </choice>
+        <choice name="Pierce">
+          <soundset name="PierceFlesh"></soundset>
+        </choice>
+        <choice name="Crush">
+          <soundset name="CrushFlesh"></soundset>
+        </choice>
+      </damagetypelogic>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="VillagerBirth"></soundset>
+    </soundtype>
+    <soundtype name="Acknowledge">
+      <variationlogic>
+        <choice name="0">
+          <targetlogic>
+            <choice name="default">
+              <soundset name="VillagerEgyptianAcknowledge"></soundset>
+            </choice>
+            <choice name="enemy">
+              <soundset name="VillagerEgyptianAttack"></soundset>
+            </choice>
+            <choice name="Berry Bush">
+              <soundset name="VillagerEgyptianForage"></soundset>
+            </choice>
+            <choice name="Farm">
+              <soundset name="VillagerEgyptianFarm"></soundset>
+            </choice>
+            <choice name="Tree">
+              <soundset name="VillagerEgyptianLumberjack"></soundset>
+            </choice>
+            <choice name="Gold">
+              <soundset name="VillagerEgyptianMine"></soundset>
+            </choice>
+            <choice name="Fish">
+              <soundset name="VillagerEgyptianFish"></soundset>
+            </choice>
+            <choice name="Huntable">
+              <soundset name="VillagerEgyptianHunt"></soundset>
+            </choice>
+            <choice name="Building">
+              <soundset name="VillagerEgyptianRepair"></soundset>
+            </choice>
+          </targetlogic>
+        </choice>
+        <choice name="1">
+          <targetlogic>
+            <choice name="default">
+              <soundset name="VillagerEgyptianFemaleAcknowledge"></soundset>
+            </choice>
+            <choice name="enemy">
+              <soundset name="VillagerEgyptianFemaleAttack"></soundset>
+            </choice>
+            <choice name="Berry Bush">
+              <soundset name="VillagerEgyptianFemaleForage"></soundset>
+            </choice>
+            <choice name="Farm">
+              <soundset name="VillagerEgyptianFemaleFarm"></soundset>
+            </choice>
+            <choice name="Tree">
+              <soundset name="VillagerEgyptianFemaleLumberjack"></soundset>
+            </choice>
+            <choice name="Gold">
+              <soundset name="VillagerEgyptianFemaleMine"></soundset>
+            </choice>
+            <choice name="Fish">
+              <soundset name="VillagerEgyptianFemaleFish"></soundset>
+            </choice>
+            <choice name="Huntable">
+              <soundset name="VillagerEgyptianFemaleHunt"></soundset>
+            </choice>
+            <choice name="Building">
+              <soundset name="VillagerEgyptianFemaleRepair"></soundset>
+            </choice>
+          </targetlogic>
+        </choice>
+      </variationlogic>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

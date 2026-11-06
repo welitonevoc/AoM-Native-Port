@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <culture name="Egyptian">
+    <texture>UI\boarder egypt middle right</texture>
+  </culture>
+  <culture name="Norse">
+    <texture>UI\boarder norse middle right</texture>
+  </culture>
+</definition>

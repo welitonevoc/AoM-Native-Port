@@ -1,0 +1,599 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<costoverridetable>
+  <override proto="Settlement Level 1" culture="Egyptian">
+    <food>100</food>
+    <gold>400</gold>
+    <wood>0</wood>
+  </override>
+  <override proto="House" culture="Egyptian">
+    <wood>0</wood>
+  </override>
+  <override proto="Granary" culture="Egyptian">
+    <wood>0</wood>
+  </override>
+  <override proto="Farm" culture="Egyptian">
+    <wood>0</wood>
+    <gold>70</gold>
+  </override>
+  <override proto="Dock" culture="Egyptian">
+    <wood>0</wood>
+    <gold>50</gold>
+  </override>
+  <override proto="Temple" culture="Egyptian">
+    <wood>0</wood>
+  </override>
+  <override proto="Tower" culture="Egyptian">
+    <wood>0</wood>
+    <gold>200</gold>
+  </override>
+  <override proto="Armory" culture="Egyptian">
+    <wood>0</wood>
+  </override>
+  <override proto="Market" culture="Egyptian">
+    <wood>0</wood>
+  </override>
+  <override proto="Wonder" culture="Egyptian">
+    <wood>0</wood>
+    <gold>1500</gold>
+  </override>
+  <override proto="House" culture="Norse">
+    <wood>40</wood>
+  </override>
+  <override proto="Dock" culture="Norse">
+    <wood>117</wood>
+  </override>
+  <override proto="Temple" culture="Norse">
+    <wood>80</wood>
+  </override>
+  <override proto="Market" culture="Norse">
+    <wood>240</wood>
+  </override>
+  <override proto="Ox Cart" civ="Loki">
+    <food>25</food>
+    <wood>25</wood>
+  </override>
+  <override proto="Troll" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Einheria" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Valkyrie" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Battle Boar" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Mountain Giant" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Kraken" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Fire Giant" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Frost Giant" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Fenris Wolf" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Jormund Elver" civ="Loki">
+    <favorfactor>0.9</favorfactor>
+  </override>
+  <override proto="Monument" civ="Ra">
+    <food>45</food>
+    <gold>45</gold>
+  </override>
+  <override proto="Monument 2" civ="Ra">
+    <food>90</food>
+    <gold>90</gold>
+  </override>
+  <override proto="Monument 3" civ="Ra">
+    <food>180</food>
+    <gold>180</gold>
+  </override>
+  <override proto="Monument 4" civ="Ra">
+    <food>270</food>
+    <gold>270</gold>
+  </override>
+  <override proto="Monument 5" civ="Ra">
+    <food>360</food>
+    <gold>360</gold>
+  </override>
+  <override proto="Dwarf" civ="Thor">
+    <gold>60</gold>
+  </override>
+  <override proto="Hippikon" civ="Poseidon">
+    <food>36</food>
+    <gold>72</gold>
+  </override>
+  <override proto="Prodromos" civ="Poseidon">
+    <food>63</food>
+    <gold>36</gold>
+  </override>
+  <override proto="Hetairoi" civ="Poseidon">
+    <food>54</food>
+    <gold>90</gold>
+  </override>
+  <override proto="Stable" civ="Poseidon">
+    <wood>75</wood>
+  </override>
+  <override tech="Husbandry" civ="Isis">
+    <gold>45</gold>
+    <wood>90</wood>
+  </override>
+  <override tech="Plow" civ="Isis">
+    <gold>90</gold>
+    <wood>45</wood>
+  </override>
+  <override tech="Irrigation" civ="Isis">
+    <gold>225</gold>
+    <wood>135</wood>
+  </override>
+  <override tech="Copper Weapons" civ="Isis">
+    <food>180</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Bronze Weapons" civ="Isis">
+    <food>270</food>
+    <gold>270</gold>
+  </override>
+  <override tech="Iron Weapons" civ="Isis">
+    <food>540</food>
+    <gold>540</gold>
+  </override>
+  <override tech="Copper Mail" civ="Isis">
+    <food>135</food>
+    <gold>135</gold>
+  </override>
+  <override tech="Bronze Mail" civ="Isis">
+    <food>270</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Iron Mail" civ="Isis">
+    <food>450</food>
+    <gold>450</gold>
+  </override>
+  <override tech="Copper Shields" civ="Isis">
+    <gold>135</gold>
+    <wood>135</wood>
+  </override>
+  <override tech="Bronze Shields" civ="Isis">
+    <gold>180</gold>
+    <wood>270</wood>
+  </override>
+  <override tech="Iron Shields" civ="Isis">
+    <gold>360</gold>
+    <wood>450</wood>
+  </override>
+  <override tech="Ambassadors" civ="Isis">
+    <gold>225</gold>
+  </override>
+  <override tech="Tax Collectors" civ="Isis">
+    <food>180</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Coinage" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="Guard Tower" civ="Isis">
+    <gold>270</gold>
+    <wood>270</wood>
+  </override>
+  <override tech="Ballista Tower" civ="Isis">
+    <food>450</food>
+    <wood>720</wood>
+  </override>
+  <override tech="Boiling Oil" civ="Isis">
+    <food>90</food>
+    <wood>270</wood>
+  </override>
+  <override tech="Burning Pitch" civ="Isis">
+    <gold>180</gold>
+    <wood>450</wood>
+  </override>
+  <override tech="Masons" civ="Isis">
+    <food>180</food>
+    <wood>270</wood>
+  </override>
+  <override tech="Pickaxe" civ="Isis">
+    <food>45</food>
+    <gold>135</gold>
+  </override>
+  <override tech="Hand Axe" civ="Isis">
+    <food>135</food>
+    <gold>45</gold>
+  </override>
+  <override tech="Shaft Mine" civ="Isis">
+    <food>135</food>
+    <wood>225</wood>
+  </override>
+  <override tech="Bow Saw" civ="Isis">
+    <food>225</food>
+    <gold>135</gold>
+  </override>
+  <override tech="Quarry" civ="Isis">
+    <food>180</food>
+    <wood>270</wood>
+  </override>
+  <override tech="Carpenters" civ="Isis">
+    <food>270</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Valley of the Kings" civ="Isis">
+    <gold>540</gold>
+  </override>
+  <override tech="Draft Horses" civ="Isis">
+    <food>270</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Engineers" civ="Isis">
+    <food>270</food>
+    <gold>450</gold>
+  </override>
+  <override tech="Architects" civ="Isis">
+    <food>360</food>
+    <wood>450</wood>
+  </override>
+  <override tech="Bone Bow" civ="Isis">
+    <wood>225</wood>
+  </override>
+  <override tech="Axe of Vengeance" civ="Isis">
+    <wood>270</wood>
+  </override>
+  <override tech="Desert Wind" civ="Isis">
+    <gold>360</gold>
+  </override>
+  <override tech="Enclosed Deck" civ="Isis">
+    <food>180</food>
+    <wood>180</wood>
+  </override>
+  <override tech="Cladding" civ="Isis">
+    <gold>180</gold>
+    <wood>180</wood>
+  </override>
+  <override tech="Fortified Wall" civ="Isis">
+    <food>450</food>
+  </override>
+  <override tech="Sacred Cats" civ="Isis">
+    <gold>99</gold>
+  </override>
+  <override tech="Criosphinx" civ="Isis">
+    <wood>225</wood>
+  </override>
+  <override tech="Hieracosphinx" civ="Isis">
+    <wood>360</wood>
+  </override>
+  <override tech="Hunting Dogs" civ="Isis">
+    <gold>90</gold>
+    <wood>90</wood>
+  </override>
+  <override tech="Age 2 Anubis" civ="Isis">
+    <food>360</food>
+  </override>
+  <override tech="Age 2 Bast" civ="Isis">
+    <food>360</food>
+  </override>
+  <override tech="Age 2 Ptah" civ="Isis">
+    <food>360</food>
+  </override>
+  <override tech="Age 3 Hathor" civ="Isis">
+    <food>900</food>
+    <gold>450</gold>
+  </override>
+  <override tech="Age 3 Nephthys" civ="Isis">
+    <food>900</food>
+    <gold>450</gold>
+  </override>
+  <override tech="Age 3 Sekhmet" civ="Isis">
+    <food>900</food>
+    <gold>450</gold>
+  </override>
+  <override tech="Age 4 Thoth" civ="Isis">
+    <food>1080</food>
+    <gold>900</gold>
+  </override>
+  <override tech="Age 4 Osiris" civ="Isis">
+    <food>1080</food>
+    <gold>900</gold>
+  </override>
+  <override tech="Age 4 Horus" civ="Isis">
+    <food>1080</food>
+    <gold>900</gold>
+  </override>
+  <override tech="Feet of the Jackal" civ="Isis">
+    <gold>225</gold>
+  </override>
+  <override tech="Signal Fires" civ="Isis">
+    <wood>135</wood>
+  </override>
+  <override tech="Stone Wall" civ="Isis">
+    <food>180</food>
+  </override>
+  <override tech="Book of Thoth" civ="Isis">
+    <wood>360</wood>
+  </override>
+  <override tech="Citadel Wall" civ="Isis">
+    <food>720</food>
+  </override>
+  <override tech="Carrier Pigeons" civ="Isis">
+    <wood>360</wood>
+  </override>
+  <override tech="Flood Control" civ="Isis">
+    <gold>315</gold>
+    <wood>225</wood>
+  </override>
+  <override tech="Serpent Spear" civ="Isis">
+    <food>225</food>
+  </override>
+  <override tech="Flood of the Nile" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="Scalloped Axe" civ="Isis">
+    <food>90</food>
+  </override>
+  <override tech="Heavy Camelry" civ="Isis">
+    <food>135</food>
+    <gold>135</gold>
+  </override>
+  <override tech="Champion Camelry" civ="Isis">
+    <food>360</food>
+    <gold>180</gold>
+  </override>
+  <override tech="New Kingdom" civ="Isis">
+    <food>180</food>
+  </override>
+  <override tech="Medjay" civ="Isis">
+    <food>225</food>
+  </override>
+  <override tech="Funeral Rites" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="Spirit of Maat" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="City of the Dead" civ="Isis">
+    <wood>270</wood>
+  </override>
+  <override tech="Fortify Town Center" civ="Isis">
+    <gold>360</gold>
+    <wood>360</wood>
+  </override>
+  <override tech="Shaduf" civ="Isis">
+    <wood>180</wood>
+  </override>
+  <override tech="Purse Seine" civ="Isis">
+    <gold>135</gold>
+    <wood>135</wood>
+  </override>
+  <override tech="Reinforced Hull" civ="Isis">
+    <gold>180</gold>
+    <wood>270</wood>
+  </override>
+  <override tech="Crocodopolis" civ="Isis">
+    <wood>360</wood>
+  </override>
+  <override tech="Leather Frame Shield" civ="Isis">
+    <wood>180</wood>
+  </override>
+  <override tech="Electrum Bullets" civ="Isis">
+    <gold>135</gold>
+  </override>
+  <override tech="Stones of Red Linen" civ="Isis">
+    <wood>270</wood>
+  </override>
+  <override tech="Spear on the Horizon" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="Atef Crown" civ="Isis">
+    <gold>270</gold>
+  </override>
+  <override tech="Conscript Sailors" civ="Isis">
+    <food>450</food>
+  </override>
+  <override tech="Naval Oxybeles" civ="Isis">
+    <gold>180</gold>
+    <wood>450</wood>
+  </override>
+  <override tech="Champion Elephants" civ="Isis">
+    <food>450</food>
+    <gold>360</gold>
+  </override>
+  <override tech="Adze of Wepwawet" civ="Isis">
+    <gold>90</gold>
+  </override>
+  <override tech="Slings of the Sun" civ="Isis">
+    <gold>180</gold>
+  </override>
+  <override tech="Ram of the West Wind" civ="Isis">
+    <gold>360</gold>
+  </override>
+  <override tech="Sundried Mud Brick" civ="Isis">
+    <wood>270</wood>
+  </override>
+  <override tech="Funeral Barge" civ="Isis">
+    <wood>450</wood>
+  </override>
+  <override tech="Necropolis" civ="Isis">
+    <gold>225</gold>
+  </override>
+  <override tech="Tusks of Apedemak" civ="Isis">
+    <gold>270</gold>
+  </override>
+  <override tech="Omniscience" civ="Isis">
+    <gold>90</gold>
+  </override>
+  <override tech="Medium Axemen" civ="Isis">
+    <food>90</food>
+    <gold>90</gold>
+  </override>
+  <override tech="Heavy Axemen" civ="Isis">
+    <food>270</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Champion Axemen" civ="Isis">
+    <food>360</food>
+    <gold>270</gold>
+  </override>
+  <override tech="Medium Spearmen" civ="Isis">
+    <food>100</food>
+    <gold>100</gold>
+  </override>
+  <override tech="Heavy Spearmen" civ="Isis">
+    <food>270</food>
+    <gold>180</gold>
+  </override>
+  <override tech="Champion Spearmen" civ="Isis">
+    <food>360</food>
+    <gold>270</gold>
+  </override>
+  <override tech="Heavy Chariots" civ="Isis">
+    <gold>135</gold>
+    <wood>135</wood>
+  </override>
+  <override tech="Champion Chariots" civ="Isis">
+    <gold>180</gold>
+    <wood>360</wood>
+  </override>
+  <override tech="Heavy Elephants" civ="Isis">
+    <food>180</food>
+    <gold>135</gold>
+  </override>
+  <override tech="Levy Barracks Soldiers" civ="Isis">
+    <food>270</food>
+  </override>
+  <override tech="Conscript Barracks Soldiers" civ="Isis">
+    <food>450</food>
+  </override>
+  <override tech="Levy Migdol Soldiers" civ="Isis">
+    <food>180</food>
+  </override>
+  <override tech="Conscript Migdol Soldiers" civ="Isis">
+    <food>360</food>
+  </override>
+  <override tech="Medium Slingers" civ="Isis">
+    <gold>90</gold>
+    <wood>90</wood>
+  </override>
+  <override tech="Heavy Slingers" civ="Isis">
+    <gold>180</gold>
+    <wood>270</wood>
+  </override>
+  <override tech="Champion Slingers" civ="Isis">
+    <gold>270</gold>
+    <wood>360</wood>
+  </override>
+  <override tech="Salt Amphora" civ="Isis">
+    <gold>270</gold>
+    <wood>180</wood>
+  </override>
+  <override tech="Greatest of Fifty" civ="Isis">
+    <food>270</food>
+  </override>
+  <override tech="Crenellations" civ="Isis">
+    <food>135</food>
+    <wood>135</wood>
+  </override>
+  <override tech="Copper Weapons" civ="Thor">
+    <food>150</food>
+    <gold>150</gold>
+  </override>
+  <override tech="Copper Mail" civ="Thor">
+    <food>100</food>
+    <gold>100</gold>
+  </override>
+  <override tech="Copper Shields" civ="Thor">
+    <wood>100</wood>
+    <gold>100</gold>
+  </override>
+  <override tech="Bronze Weapons" civ="Thor">
+    <food>200</food>
+    <gold>200</gold>
+  </override>
+  <override tech="Bronze Mail" civ="Thor">
+    <food>200</food>
+    <gold>100</gold>
+  </override>
+  <override tech="Bronze Shields" civ="Thor">
+    <wood>300</wood>
+    <gold>100</gold>
+  </override>
+  <override tech="Iron Weapons" civ="Thor">
+    <food>500</food>
+    <gold>500</gold>
+  </override>
+  <override tech="Iron Mail" civ="Thor">
+    <food>400</food>
+    <gold>400</gold>
+  </override>
+  <override tech="Iron Shields" civ="Thor">
+    <wood>400</wood>
+    <gold>300</gold>
+  </override>
+  <override tech="Burning Pitch" civ="Thor">
+    <wood>400</wood>
+    <gold>200</gold>
+  </override>
+  <override proto="Settlement Level 1" culture="Atlantean">
+    <food>100</food>
+    <wood>200</wood>
+    <gold>200</gold>
+  </override>
+  <override tech="Husbandry" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Plow" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Irrigation" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Hunting Dogs" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Pickaxe" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Hand Axe" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Shaft Mine" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Bow Saw" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Quarry" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Carpenters" civ="Gaia" costfactor="0.8"></override>
+  <override tech="Flood Control" civ="Gaia" costfactor="0.8"></override>
+  <override proto="Fishing Ship Atlantean" civ="Gaia" costfactor="0.8"></override>
+  <override proto="Caravan Atlantean" civ="Gaia" costfactor="0.8"></override>
+  <override proto="Promethean" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Automaton" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Satyr" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Nereid" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Behemoth" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Man O War" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Heka Gigantes" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Argus" civ="Kronos" costfactor="0.85"></override>
+  <override proto="Trident Soldier" civ="Kronos">
+    <foodfactor>0.85</foodfactor>
+    <goldfactor>0.85</goldfactor>
+  </override>
+  <override proto="Chieroballista" civ="Kronos">
+    <woodfactor>0.8</woodfactor>
+    <goldfactor>0.8</goldfactor>
+  </override>
+  <override proto="Siege Ship Atlantean" civ="Kronos">
+    <woodfactor>0.8</woodfactor>
+    <goldfactor>0.8</goldfactor>
+  </override>
+  <override proto="Fire Siphon" civ="Kronos">
+    <woodfactor>0.8</woodfactor>
+    <goldfactor>0.8</goldfactor>
+  </override>
+  <override proto="Migdol Stronghold" civ="Set">
+    <food>0</food>
+    <wood>0</wood>
+    <gold>300</gold>
+    <favor>10</favor>
+  </override>
+  <override proto="Migdol Stronghold" civ="Ra">
+    <food>0</food>
+    <wood>0</wood>
+    <gold>400</gold>
+    <favor>10</favor>
+  </override>
+  <override proto="Migdol Stronghold" civ="Isis">
+    <food>0</food>
+    <wood>0</wood>
+    <gold>400</gold>
+    <favor>10</favor>
+  </override>
+</costoverridetable>

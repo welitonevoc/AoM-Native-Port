@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Lightning Cloud">
+    <soundtype name="Exists">
+      <soundset name="Rain"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

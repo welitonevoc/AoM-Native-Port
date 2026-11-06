@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Fire Object Big">
+    <soundtype name="Exists">
+      <soundset name="FireLoop"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

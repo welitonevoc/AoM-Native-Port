@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="ESOLogin" type="gadget" size1024="3 2 1027 770" background="" windowzstyle="" z="99">
+    <gadget name="ESOLogin-Background" type="gadget" size1024="241 214 785 460" background="ui\ui pregame transparency background" tilebackground="" z="5">
+      <gadget tilebackgroundhoriz="" name="ESOLogin-BordersTop" type="gadget" background="ui\ui border top middle" size1024="245 208 779 224" z="6"></gadget>
+      <gadget tilebackgroundhoriz="" name="ESOLogin-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="245 450 779 466" z="6"></gadget>
+      <gadget tilebackgroundvert="" name="ESOLogin-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="224 284 256 435" z="6"></gadget>
+      <gadget tilebackgroundvert="" name="ESOLogin-BordersRight" type="gadget" background="ui\ui border right middle" size1024="783 284 815 435" z="6"></gadget>
+      <gadget name="ESOLogin-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="209 206 273 334" z="7"></gadget>
+      <gadget name="ESOLogin-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="209 397 273 461" z="7"></gadget>
+      <gadget name="ESOLogin-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="752 397 816 461" z="7"></gadget>
+      <gadget name="ESOLogin-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="768 206 832 334" z="7"></gadget>
+    </gadget>
+    <gadget name="ESOLogin-ScreenLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="261 221 573 246">$$22075$$Online Login</gadget>
+    <gadget name="ESOLogin-ScreenSeparator" type="gadget" size1024="242 250 783 252" background="ui\ui line yellow"></gadget>
+    <gadget name="ESOLogin-ESOLogo" type="gadget" size1024="517 218 773 250" background="ui\es online logo long"></gadget>
+    <gadget name="ESOLogin-ESRB-Notice" textcentervert="" textcolor="255 208 0" textfontsize="15" textfont="CampaignDescription" type="formatText" size1024="275 417 749 442" textcenterhoriz="">ESRB Notice: Game Experience May Change During Online Play</gadget>
+    <gadget name="ESOLogin-LoginButton" type="stateButton" size1024="316 370 508 402" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" mouseovertext="$$19939$$">$$18465$$OK<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="ESOLogin-CancelButton" type="stateButton" size1024="516 370 708 402" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" mouseovertext="$$19940$$">$$18466$$Cancel<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry><command>modeEnter("PreGame")</command></gadget>
+    <gadget name="ESOLogin-NewAccountButton" type="stateButton" size1024="581 276 773 308" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtonsSmall" textfontsize="16" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" z="20">$$20979$$Need Account?<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="ESOLogin-ForgotPasswordButton" type="stateButton" size1024="581 316 773 348" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtonsSmall" textfontsize="16" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" z="20">$$20980$$Forgot Password?<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="ESOLogin-NameLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="228 281 362 302" textjustifyright="">$$20001$$Name:</gadget>
+    <gadget name="ESOLogin-PasswordLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="228 321 362 342" textjustifyright="">$$22111$$Password:</gadget>
+    <gadget name="ESOLogin-EntryFields" type="gadget" size1024="407 276 659 364" z="10">
+      <gadget name="ESOLogin-Left-NameEntry" type="gadget" background="ui\ui text box left" size1024="363 276 379 308"></gadget>
+      <gadget name="ESOLogin-UserName" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="379 276 557 308"></gadget>
+      <gadget name="ESOLogin-UserName-Text" type="editBox" size1024="379 282 557 306" textfont="PregameEntry" textfontsize="15" textcolor="1 49 32" enterkey="" z="11" enableime=""></gadget>
+      <gadget name="ESOLogin-Right-NameEntry" type="gadget" background="ui\ui text box right" size1024="557 276 573 308"></gadget>
+      <gadget name="ESOLogin-Left-PasswordEntry" type="gadget" background="ui\ui text box left" size1024="363 316 379 348"></gadget>
+      <gadget name="ESOLogin-Password" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="379 316 557 348"></gadget>
+      <gadget name="ESOLogin-Password-Text" type="editBox" size1024="379 322 557 346" textfont="PregameEntry" textfontsize="15" textcolor="1 49 32" editboxmaskchars="" enterkey="" z="11"></gadget>
+      <gadget name="ESOLogin-Right-PasswordEntry" type="gadget" background="ui\ui text box right" size1024="557 316 573 348"></gadget>
+    </gadget>
+  </gadget>
+  <gadget name="LANLogin" type="gadget" size1024="3 2 1027 770" background="" windowzstyle="" z="99" hidden="">
+    <gadget name="LANLogin-Backgroun" type="gadget" size1024="241 214 785 418" background="ui\ui pregame transparency background" tilebackground="" z="5">
+      <gadget tilebackgroundhoriz="" name="LANLogin-BordersTop" type="gadget" background="ui\ui border top middle" size1024="250 206 777 222" z="6"></gadget>
+      <gadget tilebackgroundhoriz="" name="LANLogin-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="250 417 777 433" z="6"></gadget>
+      <gadget tilebackgroundvert="" name="LANLogin-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="224 284 256 400" z="6"></gadget>
+      <gadget tilebackgroundvert="" name="LANLogin-BordersRight" type="gadget" background="ui\ui border right middle" size1024="783 284 815 400" z="6"></gadget>
+      <gadget name="LANLogin-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="209 206 273 334" z="7"></gadget>
+      <gadget name="LANLogin-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="209 362 273 426" z="7"></gadget>
+      <gadget name="LANLogin-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="752 362 816 426" z="7"></gadget>
+      <gadget name="LANLogin-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="768 206 832 334" z="7"></gadget>
+    </gadget>
+    <gadget name="LANLogin-ScreenLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="261 221 573 246">$$22076$$LAN/Direct IP Login</gadget>
+    <gadget name="LANLogin-ScreenSeparator" type="gadget" size1024="242 250 783 252" background="ui\ui line yellow"></gadget>
+    <gadget name="LANLogin-LoginButton" type="stateButton" size1024="316 370 508 402" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" mouseovertext="$$19939$$">$$18465$$OK<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="LANLogin-CancelButton" type="stateButton" size1024="516 370 708 402" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .75 1" mouseovertext="$$19940$$">$$18466$$Cancel<stateentry background="ui\ui button long 192x32"></stateentry><stateentry background="ui\ui button long 192X32 clicked"></stateentry><stateentry background="ui\ui button long 192X32 rollover"></stateentry><stateentry background=""></stateentry><command>modeEnter("PreGame")</command></gadget>
+    <gadget name="LANLogin-NameLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="262 297 406 318" textjustifyright="">$$22077$$Nickname:</gadget>
+    <gadget name="LANLogin-EntryFields" type="gadget" size1024="407 276 659 364">
+      <gadget name="LANLogin-Left-NameEntry" type="gadget" background="ui\ui text box left" size1024="407 292 423 324"></gadget>
+      <gadget name="LANLogin-UserName" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="423 292 601 324"></gadget>
+      <gadget name="LANLogin-UserName-Text" type="editBox" size1024="423 298 601 322" textfont="PregameEntry" textfontsize="15" textcolor="1 49 32" enterkey="" z="11" enableime=""></gadget>
+      <gadget name="LANLogin-Right-NameEntry" type="gadget" background="ui\ui text box right" size1024="601 292 617 324"></gadget>
+    </gadget>
+  </gadget>
+  <gadget type="dialog" name="MPLogin-LoggingInPanel" size1024="242 252 783 450" bevel="" background="ui\ui pregame transparency background" tilebackground="" texturereplace="" windowzstyle="" hidden="">
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog-BordersTop" type="gadget" background="ui\ui border top middle" size1024="245 208 779 224" z="6"></gadget>
+    <gadget tilebackgroundhoriz="" name="pregame-messagedialog-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="245 450 779 466" z="6"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="224 284 256 435" z="6"></gadget>
+    <gadget tilebackgroundvert="" name="pregame-messagedialog-BordersRight" type="gadget" background="ui\ui border right middle" size1024="783 284 815 435" z="6"></gadget>
+    <gadget name="pregame-messagedialog-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="209 206 273 334" z="7"></gadget>
+    <gadget name="pregame-messagedialog-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="209 397 273 461" z="7"></gadget>
+    <gadget name="pregame-messagedialog-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="752 397 816 461" z="7"></gadget>
+    <gadget name="pregame-messagedialog-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="768 206 832 334" z="7"></gadget>
+    <gadget name="MPLogin-LoggingInPanel-prompt" type="formatText" textcolor="255 208 0" textfont="PregameHeaders" textfontsize="22" textcentervert="" textcenterhoriz="" size1024="367 252 657 416">$$19399$$Logging In...</gadget>
+  </gadget>
+  <gadget type="dialog" name="playerroom-badlogindialog" size1024="347 196 677 420" bevel="" background="ui\ui background opaque 1" tilebackground="" texturereplace="" windowzstyle="" hidden="">
+    <gadget tilebackgroundhoriz="" name="playerroom-badlogindialog-BordersTop" type="gadget" background="ui\ui border top middle" size1024="353 189 693 205" z="5"></gadget>
+    <gadget tilebackgroundhoriz="" name="playerroom-badlogindialog-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="353 417 693 433" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="playerroom-badlogindialog-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="330 220 362 364" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="playerroom-badlogindialog-BordersRight" type="gadget" background="ui\ui border right middle" size1024="676 220 708 364" z="5"></gadget>
+    <gadget name="playerroom-badlogindialog-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="315 188 379 316" clampbackground="" z="7"></gadget>
+    <gadget name="playerroom-badlogindialog-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="315 300 379 428" clampbackground="" z="7"></gadget>
+    <gadget name="playerroom-badlogindialog-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="645 300 709 428" clampbackground="" z="7"></gadget>
+    <gadget name="playerroom-badlogindialog-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="660 188 724 316" clampbackground="" z="7"></gadget>
+    <gadget name="playerroom-badlogindialog-msg" type="formatText" textcolor="255 208 0" textfont="PregameErrorText" textfontsize="16" textcenterhoriz="" size1024="367 220 657 372">Message Text Goes Here</gadget>
+    <gadget name="playerroom-badlogindialog-button-0" type="stateButton" size1024="380 372 508 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$18451$$Yes<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="playerroom-badlogindialog-button-1" type="stateButton" size1024="516 372 644 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 1 1">$$18452$$No<stateentry background="ui\ui button long 128X32"></stateentry><stateentry background="ui\ui button long 128X32 clicked"></stateentry><stateentry background="ui\ui button long 128X32 rollover"></stateentry><stateentry background=""></stateentry><command>gadgetUnreal("playerroom-badlogindialog")</command></gadget>
+  </gadget>
+  <gadget type="dialog" name="playerroom-createfaileddialog" size1024="347 196 677 420" bevel="" background="ui\ui background opaque 1" tilebackground="" texturereplace="" windowzstyle="" hidden="">
+    <gadget tilebackgroundhoriz="" name="playerroom-createfaileddialog-BordersTop" type="gadget" background="ui\ui border top middle" size1024="330 190 675 206" z="5"></gadget>
+    <gadget tilebackgroundhoriz="" name="playerroom-createfaileddialog-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="330 416 675 432" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="playerroom-createfaileddialog-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="330 250 362 364" z="5"></gadget>
+    <gadget tilebackgroundvert="" name="playerroom-createfaileddialog-BordersRight" type="gadget" background="ui\ui border right middle" size1024="676 250 708 364" z="5"></gadget>
+    <gadget name="playerroom-createfaileddialog-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="315 188 379 316" clampbackground="" z="10"></gadget>
+    <gadget name="playerroom-createfaileddialog-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="315 300 379 428" clampbackground="" z="10"></gadget>
+    <gadget name="playerroom-createfaileddialog-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="645 300 709 428" clampbackground="" z="10"></gadget>
+    <gadget name="playerroom-createfaileddialog-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="660 188 724 316" clampbackground="" z="10"></gadget>
+    <gadget name="playerroom-createfaileddialog-msg" type="formatText" textcolor="255 208 0" textfont="PregameErrorText" textfontsize="16" textcenterhoriz="" size1024="367 220 657 350">Message Text Goes Here</gadget>
+    <gadget name="playerroom-createfaileddialog-button-0" type="stateButton" size1024="432 372 592 404" bevelbutton="" z="51" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1">$$18465$$OK<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry><command>gadgetUnreal("playerroom-createfaileddialog")</command></gadget>
+  </gadget>
+</layout>

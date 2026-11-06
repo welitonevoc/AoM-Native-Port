@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ambient timemin="9" timemax="17">
+  <sound type="Oak Tree" num="6">AmbientBirds</sound>
+  <sound type="Oak Autumn" num="6">AmbientBirds</sound>
+  <sound type="Palm" num="6">AmbientWind</sound>
+  <sound type="Pine" num="6">AmbientSnowyWind</sound>
+  <sound type="Pine Snow" num="6">AmbientSnowyWind</sound>
+  <sound type="tundra tree" num="6">AmbientSnowyWind</sound>
+  <sound type="boar" num="1">BoarAmbient</sound>
+  <sound type="pig" num="1">PigAmbient</sound>
+  <sound type="Pig Special" num="1">PigAmbient</sound>
+  <sound type="dock" num="1">DockAmbient</sound>
+  <sound type="Ghost Ship" num="1">ShipAmbient</sound>
+  <sound type="kebenit" num="1">ShipAmbient</sound>
+  <sound type="Pirate Ship" num="1">ShipAmbient</sound>
+  <sound type="ramming ship egyptian" num="1">ShipAmbient</sound>
+  <sound type="ramming ship greek" num="1">ShipAmbient</sound>
+  <sound type="ramming ship norse" num="1">ShipAmbient</sound>
+  <sound type="siege ship egyptian" num="1">ShipAmbient</sound>
+  <sound type="siege ship greek" num="1">ShipAmbient</sound>
+  <sound type="siege ship norse" num="1">ShipAmbient</sound>
+  <sound type="transport ship egyptian" num="1">ShipAmbient</sound>
+  <sound type="transport ship greek" num="1">ShipAmbient</sound>
+  <sound type="transport ship norse" num="1">ShipAmbient</sound>
+  <sound type="trireme" num="1">ShipAmbient</sound>
+  <sound type="longboat" num="1">ShipAmbient</sound>
+  <sound type="bireme" num="1">ShipAmbient</sound>
+  <sound type="fire ship atlantean" num="1">ShipAmbient</sound>
+  <sound type="fishing ship atlantean" num="1">ShipAmbient</sound>
+  <sound type="siege bireme" num="1">ShipAmbient</sound>
+  <sound type="transport ship atlantean" num="1">ShipAmbient</sound>
+  <sound type="chicken" num="1">ChickenAmbient</sound>
+  <sound type="monkey" num="1">MonkeyAmbient</sound>
+  <sound type="whale" num="1">WhaleAmbient</sound>
+  <sound type="elephant" num="1">ElephantAmbient</sound>
+  <sound type="hyena" num="1">HyenaAmbient</sound>
+  <sound type="crane" num="1">CraneAmbient</sound>
+  <sound type="wolf" num="1">WolfAmbient</sound>
+  <sound type="Fibulwinter Wolf" num="1">WolfAmbient</sound>
+  <sound type="Lava Bubbling" num="5">UnderworldPassageExist</sound>
+  <sound type="Hades Door Small" num="1">UnderworldPassageExist</sound>
+  <sound type="Charon Ferry" num="1">ShipAmbient</sound>
+  <sound type="gaia forest tree" num="6">GaiaForestAmbient</sound>
+</ambient>

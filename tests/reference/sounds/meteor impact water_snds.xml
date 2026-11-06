@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Meteor Impact Water">
+    <soundtype name="Creation">
+      <soundset name="MeteorSplash"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

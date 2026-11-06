@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="MPLanIP" type="gadget" size1024="0 0 1024 768" background="">
+    <gadget name="MPLanIP-Background" type="gadget" size1024="215 141 810 625" background="ui\ui pregame transparency background" tilebackground="" z="9">
+      <gadget tilebackgroundhoriz="" name="MPLanIP-BordersTop" type="gadget" background="ui\ui border top middle" size1024="220 136 807 152" z="9"></gadget>
+      <gadget tilebackgroundhoriz="" name="MPLanIP-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="220 621 817 637" z="9"></gadget>
+      <gadget tilebackgroundvert="" name="MPLanIP-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="198 185 230 569" z="9"></gadget>
+      <gadget tilebackgroundvert="" name="MPLanIP-BordersRight" type="gadget" background="ui\ui border right middle" size1024="807 185 839 569" z="9"></gadget>
+      <gadget name="MPLanIP-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="183 133 247 261" z="9"></gadget>
+      <gadget name="MPLanIP-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="183 505 247 633" z="9"></gadget>
+      <gadget name="MPLanIP-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="776 505 840 633" z="10"></gadget>
+      <gadget name="MPLanIP-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="791 133 855 261" z="10"></gadget>
+    </gadget>
+    <gadget name="MPLanIP-ScreenLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="238 147 531 172">$$19978$$Lan / Direct IP</gadget>
+    <gadget name="MPLanIP-ScreenSeparator" type="gadget" size1024="217 176 806 178" background="ui\ui line yellow" z="50"></gadget>
+    <gadget name="MPLanIP-HostButton" type="stateButton" size1024="638 201 798 233" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$21128$$Host<stateentry background="ui\ui button long 160X32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPLanIP-JoinLanButton" type="stateButton" size1024="638 272 798 304" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$21129$$Join<stateentry background="ui\ui button long 160X32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPLanIP-RefreshButton" type="stateButton" size1024="638 312 798 344" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$21130$$Refresh<stateentry background="ui\ui button long 160X32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPLanIP-JoinIPButton" type="stateButton" size1024="638 518 798 550" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$22639$$Connect<stateentry background="ui\ui button long 160X32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="MPLanIP-CancelButton" type="stateButton" size1024="432 575 592 607" bevelbutton="" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="18 44 66" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$18466$$Cancel<stateentry background="ui\ui button long 160X32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry><command>gadgetUnreal("MPLanIP") modeEnter("Pregame")</command></gadget>
+    <gadget name="MPLanIP-HostLanGameLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="224 208 393 229" textjustifyright="">$$21131$$Host a Lan Game:</gadget>
+    <gadget name="MPLanIP-HostGameEntry" type="gadget" size1024="395 201 648 249">
+      <gadget name="MPLanIP-Left-HostGameEntry" type="gadget" background="ui\ui text box left" size1024="396 201 412 233"></gadget>
+      <gadget name="MPLanIP-Center-HostGameEntry" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="412 201 611 233"></gadget>
+      <gadget name="MPLanIP-HostGameEditBox" type="editBox" size1024="412 207 611 231" textfont="PregameEntry" textfontsize="15" textcolor="1 49 32" enterkey="" enableime="" z="11"></gadget>
+      <gadget name="MPLanIP-Right-HostGameEntry" type="gadget" background="ui\ui text box right" size1024="611 201 627 233"></gadget>
+    </gadget>
+    <gadget name="MPLanIP-LanGamesLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="236 250 407 271">$$21132$$Lan Games:</gadget>
+    <gadget name="MPLanIP-LanGamesList-Background" type="gadget" size1024="236 272 627 500" background="ui\ui background opaque 1" tilebackground="" transparent="" outlinecolor="255 208 0" z="10"></gadget>
+    <gadget name="MPLanIP-LanGamesList" type="list" size1024="236 272 627 500" textfontsize="14" textfont="PeopleListItems" texturereplace="" textcolor="255 208 0" scrollvert="" showselect="" z="15" buttonsize1024="391 45">
+      <vertscrollbar sliderbuttons="" slidervertical="" sliderupbtnset="sliderUpBtn" sliderdownbtnset="sliderDownBtn" sliderpipart="ui\ui slider pip verticle" sliderpiptexturecoords="0 0 0.5 0.5" sliderareaart="ui\ui background opaque 2" background="ui\ui background yellow opaque"></vertscrollbar>
+    </gadget>
+    <gadget name="MPLanIP-DirectIPLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="226 525 393 546" textjustifyright="">$$21133$$Enter a Direct IP:</gadget>
+    <gadget name="MPLanIP-DirectIPEntry" type="gadget" size1024="397 518 648 562">
+      <gadget name="MPLanIP-Left-DirectIPEntry" type="gadget" background="ui\ui text box left" size1024="396 518 412 550"></gadget>
+      <gadget name="MPLanIP-Center-DirectIPEntry" type="gadget" tilebackgroundhoriz="" background="ui\ui text box middle" size1024="412 518 611 550"></gadget>
+      <gadget name="MPLanIP-DirectIPEditBox" type="editBox" size1024="412 524 611 548" textfont="PregameEntry" textfontsize="15" textcolor="1 49 32" enterkey="" z="11"></gadget>
+      <gadget name="MPLanIP-Right-DirectIPEntry" type="gadget" background="ui\ui text box right" size1024="611 518 627 550"></gadget>
+    </gadget>
+    <gadget name="MPLanIP-CountDown" type="gadget" size1024="638 358 798 422" textfont="PregameEntry" textfontsize="15" textcolor="255 208 0" z="11" textcentervert="" textcenterhoriz="" hidden="">Count Down:</gadget>
+  </gadget>
+</layout>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Hades Door Small">
+    <soundtype name="Exists">
+      <soundset name="HadesGateExist"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

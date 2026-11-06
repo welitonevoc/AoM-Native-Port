@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<armybanners>
+  <banner proto="UI Army Banner Villager" type="AbstractVillager"></banner>
+  <banner proto="UI Army Banner Infantry" type="AbstractInfantry"></banner>
+  <banner proto="UI Army Banner Archer" type="AbstractArcher"></banner>
+  <banner proto="UI Army Banner Cavalry" type="LogicalTypeCavalryAndScout"></banner>
+  <banner proto="UI Army Banner Myth" type="MythUnit"></banner>
+  <banner proto="UI Army Banner Siege" type="AbstractSiegeWeapon"></banner>
+  <banner proto="UI Army Banner Gaia" type="Huntable"></banner>
+  <banner proto="UI Army Banner Naval" type="Ship"></banner>
+  <banner proto="UI Army Banner Hero" type="Hero"></banner>
+  <banner proto="UI Army Banner Oxcart" type="AbstractCart"></banner>
+  <banner proto="UI Army Banner Caravan" type="AbstractTradeUnit"></banner>
+  <banner proto="UI Army Banner Building" type="Building"></banner>
+</armybanners>

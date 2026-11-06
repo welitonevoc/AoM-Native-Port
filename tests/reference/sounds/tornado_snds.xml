@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Tornado">
+    <soundtype name="Death">
+      <soundset name="TornadoDeath"></soundset>
+    </soundtype>
+    <soundtype name="Creation">
+      <soundset name="TornadoBirth"></soundset>
+    </soundtype>
+    <soundtype name="Exists">
+      <soundset name="TornadoExist"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

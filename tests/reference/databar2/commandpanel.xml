@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<commandpanel>
+  <commandbutton category="market" x="2" y="0">
+    <command>resourceMarket(-1,"food",100.0,"gold")</command>
+    <icon>icons\buyFood</icon>
+    <helptextid>19222</helptextid>
+    <valuetext>{marketBuy(food)}</valuetext>
+  </commandbutton>
+  <commandbutton category="market" x="3" y="0">
+    <command>resourceMarket(-1,"wood",100.0,"gold")</command>
+    <icon>icons\buyWood</icon>
+    <helptextid>19223</helptextid>
+    <valuetext>{marketBuy(wood)}</valuetext>
+  </commandbutton>
+  <commandbutton category="market" x="2" y="1">
+    <command>resourceMarket(-1,"food",-100.0,"gold")</command>
+    <icon>icons\sellFood</icon>
+    <helptextid>19224</helptextid>
+    <valuetext>{marketSell(food)}</valuetext>
+  </commandbutton>
+  <commandbutton category="market" x="3" y="1">
+    <command>resourceMarket(-1,"wood",-100.0,"gold")</command>
+    <icon>icons\sellWood</icon>
+    <helptextid>19225</helptextid>
+    <valuetext>{marketSell(wood)}</valuetext>
+  </commandbutton>
+  <commandbutton category="market2" x="0" y="0">
+    <command>resourceMarket(-1,"food",100.0,"favor")</command>
+    <icon>icons\icon resource food</icon>
+    <helptextid>19226</helptextid>
+  </commandbutton>
+  <commandbutton category="market2" x="1" y="0">
+    <command>resourceMarket(-1,"wood",100.0,"favor")</command>
+    <icon>icons\icon resource wood</icon>
+    <helptextid>19227</helptextid>
+  </commandbutton>
+  <commandbutton category="market2" x="2" y="0">
+    <command>resourceMarket(-1,"gold",100.0,"favor")</command>
+    <icon>icons\icon resource gold</icon>
+    <helptextid>19228</helptextid>
+  </commandbutton>
+  <commandbutton category="setGather" x="6" y="1">
+    <icon>icons\command set gather icon</icon>
+    <command>editMode("gatherPoint") uiSetProtoCursor("Waypoint Flag", false)</command>
+    <helptextid>19229</helptextid>
+  </commandbutton>
+  <commandbutton category="eject" x="5" y="2">
+    <icon>icons\command ungarrison icon</icon>
+    <command>uiEjectGarrisonedUnits</command>
+    <helptextid>19230</helptextid>
+  </commandbutton>
+  <commandbutton category="garrison" x="6" y="2">
+    <icon>icons\command Garrison icon</icon>
+    <command>editMode("garrison")</command>
+    <helptextid>19231</helptextid>
+  </commandbutton>
+  <commandbutton category="transform" x="0" y="1">
+    <icon>icons\gate</icon>
+    <command>echo("transform command not set!")</command>
+    <helpproto>19232</helpproto>
+  </commandbutton>
+  <commandbutton category="townbell" x="6" y="2">
+    <command>unitTownBell</command>
+    <icon>icons\Command Town Bell icon</icon>
+    <helptextid>19233</helptextid>
+  </commandbutton>
+  <commandbutton category="returntowork" x="6" y="2">
+    <command>unitReturnToWork</command>
+    <icon>icons\Command back to work icon</icon>
+    <helptextid>19234</helptextid>
+  </commandbutton>
+  <commandbutton category="repair" x="6" y="1">
+    <icon>icons\Command repair icon</icon>
+    <command>editMode("repair")</command>
+    <helptextid>19309</helptextid>
+  </commandbutton>
+  <commandbutton category="empower" x="0" y="0">
+    <icon>icons\command empower icon</icon>
+    <command>editMode("empower")</command>
+    <helptextid>19236</helptextid>
+  </commandbutton>
+  <commandbutton category="AgeUp1" x="0" y="1">
+    <command>uiAgeUpDialog("Age 2 Fake")</command>
+    <icon>icons\icon achievement age 2</icon>
+    <helptextid>19237</helptextid>
+    <helptext2id>19238</helptext2id>
+    <fakecost>Age 2 Fake</fakecost>
+  </commandbutton>
+  <commandbutton category="AgeUp2" x="0" y="1">
+    <command>uiAgeUpDialog("Age 3 Fake")</command>
+    <icon>icons\icon achievement age 3</icon>
+    <helptextid>19239</helptextid>
+    <helptext2id>19240</helptext2id>
+    <fakecost>Age 3 Fake</fakecost>
+  </commandbutton>
+  <commandbutton category="AgeUp3" x="0" y="1">
+    <command>uiAgeUpDialog("Age 4 Fake")</command>
+    <icon>icons\icon achievement age 4</icon>
+    <helptextid>19241</helptextid>
+    <helptext2id>19242</helptext2id>
+    <fakecost>Age 4 Fake</fakecost>
+  </commandbutton>
+  <commandbutton category="Guard" x="2" y="0">
+    <command>editMode("guard")</command>
+    <icon>icons\Command Defend Unit Icon</icon>
+    <helptextid>21021</helptextid>
+  </commandbutton>
+  <commandbutton category="Patrol" x="3" y="0">
+    <command>editMode("patrol")</command>
+    <icon>icons\Command Patrol icon</icon>
+    <helptext>Instruct your unit to patrol an area.</helptext>
+    <helptextid>21022</helptextid>
+  </commandbutton>
+  <commandbutton category="Stop" x="4" y="0">
+    <command>uiStopSelectedUnits</command>
+    <icon>icons\command stop icon</icon>
+    <helptextid>21023</helptextid>
+  </commandbutton>
+  <commandbutton category="Delete" x="5" y="0">
+    <command>uiDeleteSelectedUnit(1) uiDeleteSelectedUnit(0)</command>
+    <icon>icons\delete</icon>
+    <helptextid>21024</helptextid>
+  </commandbutton>
+  <commandbutton category="CombatOn" x="6" y="0">
+    <command>uiSetCombatCommands(true)</command>
+    <icon>icons\command panel combat icon</icon>
+    <helptextid>21025</helptextid>
+  </commandbutton>
+  <commandbutton category="CombatOff" x="6" y="0">
+    <command>uiSetCombatCommands(false)</command>
+    <icon>icons\command return to main icon</icon>
+    <helptextid>21026</helptextid>
+  </commandbutton>
+  <commandbutton category="stance1" x="3" y="2">
+    <icon>icons\aggressive</icon>
+    <command>unitSetStanceAggressive</command>
+    <helptextid>19143</helptextid>
+    <helptext2id>19153</helptext2id>
+    <helptopic>stances</helptopic>
+  </commandbutton>
+  <commandbutton category="stance2" x="4" y="2">
+    <icon>icons\defensive</icon>
+    <command>unitSetStanceDefensive</command>
+    <helptextid>19187</helptextid>
+    <helptext2id>19146</helptext2id>
+    <helptopic>stances</helptopic>
+  </commandbutton>
+  <commandbutton category="stance3" x="5" y="2">
+    <icon>icons\passive</icon>
+    <command>unitSetStancePassive</command>
+    <helptextid>19147</helptextid>
+    <helptext2id>19148</helptext2id>
+    <helptopic>stances</helptopic>
+  </commandbutton>
+  <commandbutton category="Formation1" x="2" y="1">
+    <command>unitSetFormationDefault</command>
+    <icon>icons\Formation Line Icon</icon>
+    <helptextid>21028</helptextid>
+  </commandbutton>
+  <commandbutton category="Formation2" x="3" y="1">
+    <command>unitSetFormationBox</command>
+    <icon>icons\Formation Box Icon</icon>
+    <helptextid>21030</helptextid>
+  </commandbutton>
+  <commandbutton category="Formation3" x="4" y="1">
+    <command>unitSetFormationMixed</command>
+    <icon>icons\Formation Mixed Icon</icon>
+    <helptextid>21031</helptextid>
+  </commandbutton>
+  <commandbutton category="Formation4" x="5" y="1">
+    <command>unitSetFormationSpread</command>
+    <icon>icons\Formation Spread Icon</icon>
+    <helptextid>21032</helptextid>
+  </commandbutton>
+  <commandbutton category="unbuild" x="5" y="1">
+    <command>uiUnbuildSelectedUnit</command>
+    <icon>icons\command time shift icons 32</icon>
+    <helptextid>22994</helptextid>
+    <helptext2id>22994</helptext2id>
+    <fakecost>Time Shift Fake</fakecost>
+  </commandbutton>
+  <commandbutton category="unbuild2" x="5" y="1">
+    <command>uiUnbuildSelectedUnit</command>
+    <icon>icons\command time shift icons 32</icon>
+    <helptextid>22994</helptextid>
+    <helptext2id>22994</helptext2id>
+    <fakecost>Time Shift Fake 2</fakecost>
+  </commandbutton>
+  <commandbutton category="summonworkers" x="5" y="1">
+    <command>uiSummonWorkersToSelectedUnit</command>
+    <icon>icons\Command summon all workers icon</icon>
+    <helptextid>23919</helptextid>
+  </commandbutton>
+</commandpanel>

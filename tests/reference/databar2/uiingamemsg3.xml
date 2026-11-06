@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget type="gadget" name="ingame-messagedialog3" size1024="347 263 677 373" bevel="" background="ui\background greek opaque" tilebackground="" texturereplace="" windowzstyle="" hidden="" closeonesc="">
+    <gadget tilebackgroundhoriz="" name="ingame-messagedialog3-BordersTop" type="gadget" background="ui\ui border greek top middle" texturereplace="" size1024="371 247 653 263" z="3" transparent=""></gadget>
+    <gadget tilebackgroundhoriz="" name="ingame-messagedialog3-BordersBottom" type="gadget" background="ui\ui border greek bottom middle" texturereplace="" size1024="371 373 654 389" z="3" transparent=""></gadget>
+    <gadget name="ingame-messagedialog3-BordersLeft" type="gadget" background="ui\ui border greek left middle" size1024="339 279 347 357" texturereplace="" tilebackgroundvert="" transparent="" z="9"></gadget>
+    <gadget name="ingame-messagedialog3-BordersRight" type="gadget" background="ui\ui border greek right middle" size1024="677 278 685 357" texturereplace="" tilebackgroundvert="" z="3" transparent=""></gadget>
+    <gadget name="ingame-messagedialog3-BordersRightTop" type="gadget" background="ui\ui border greek top right corner" size1024="653 247 685 279" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    <gadget name="ingame-messagedialog3-BordersLeftTop" type="gadget" background="ui\ui border greek top left corner" size1024="339 247 371 279" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    <gadget name="ingame-messagedialog3-BordersRightBottom" type="gadget" background="ui\ui border greek bottom right corner" size1024="653 357 685 389" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    <gadget name="ingame-messagedialog3-BordersLeftBottom" type="gadget" background="ui\ui border greek bottom left corner" size1024="339 357 371 389" texturereplace="" z="10" transparent="" clampbackground=""></gadget>
+    <gadget name="ingame-messagedialog3-prompt" type="formatText" textcolor="255 208 0" textfont="InGameDialogs" textfontsize="16" textcentervert="" textcenterhoriz="" size1024="367 274 656 361">Message Text Goes Here</gadget>
+  </gadget>
+</layout>

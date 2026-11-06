@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<protounitsounddef>
+  <protounit name="Fountain">
+    <soundtype name="Exists">
+      <soundset name="Fountain"></soundset>
+    </soundtype>
+  </protounit>
+</protounitsounddef>

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget resizevert="" resizehorz="" name="EditorTexturePalette" type="palette" size1024="256 550 800 768" palettecontentsize1024="40 40" paletteelemsize1024="90 60" palettetitlebottom="" bevel="" background="ui\ui_med_gray" tilebackground="" paletteusedropdown="" alphasort="" refreshonreal="" a-dtype="textFontSize number Z number" hidden="" titlebar="$$20275$$Terrain" windowzstyle=""></gadget>
+  <gadget resizevert="" resizehorz="" name="EditorProtoPalette" type="palette" size1024="256 550 800 768" palettecontentsize1024="40 40" paletteelemsize1024="120 60" palettetitlebottom="" bevel="" background="ui\ui_med_gray" tilebackground="" paletteusedropdown="" alphasort="" refreshonreal="" a-dtype="textFontSize number Z number" hidden="" titlebar="$$20281$$Objects" windowzstyle=""></gadget>
+</layout>

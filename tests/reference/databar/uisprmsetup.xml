@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<layout>
+  <gadget name="SinglePlayerSetup" type="gadget" size1024="0 0 1024 768" background="">
+    <gadget name="SinglePlayerSetup-Background" type="gadget" size1024="25 15 1000 758" background="ui\ui background blue transparent" tilebackground="">
+      <gadget tilebackgroundhoriz="" name="BasicOptions-BordersTop" type="gadget" background="ui\ui border top middle" size1024="60 8 967 16"></gadget>
+      <gadget tilebackgroundhoriz="" name="BasicOptions-BordersBottom" type="gadget" background="ui\ui border bottom middle" size1024="60 752 967 760"></gadget>
+      <gadget tilebackgroundvert="" name="BasicOptions-BordersLeft" type="gadget" background="ui\ui border left middle" size1024="16 40 32 696"></gadget>
+      <gadget tilebackgroundvert="" name="BasicOptions-BordersRight" type="gadget" background="ui\ui border right middle" size1024="992 40 1008 696"></gadget>
+      <gadget name="BasicOptions-BordersLeftTop" type="gadget" background="ui\ui border top left corner" size1024="0 8 64 40"></gadget>
+      <gadget name="BasicOptions-BordersLeftBottom" type="gadget" background="ui\ui border bottom left corner" size1024="0 696 64 760"></gadget>
+      <gadget name="AdvancedOptions-BordersRightBottom" type="gadget" background="ui\ui border bottom right corner" size1024="960 696 1024 760"></gadget>
+      <gadget name="AdvancedOptions-BordersRightTop" type="gadget" background="ui\ui border top right corner" size1024="960 8 1024 40" z="11"></gadget>
+    </gadget>
+    <gadget name="SinglePlayerSetup-SPRMLabel" textcentervert="" textcolor="255 208 0" textfontsize="22" textfont="PregameHeaders" type="formatText" size1024="52 22 390 47" z="11">$$19802$$Single Player - Random Map</gadget>
+    <gadget name="SinglePlayerSetup-ScreenSeparator" type="gadget" size1024="32 52 992 54" background="ui\ui line yellow" z="11"></gadget>
+    <gadget name="SinglePlayerSetup-PlayersLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="34 78 162 103" z="11" textjustifyright="">$$19803$$Players:</gadget>
+    <gadget name="SinglePlayerSetup-NumberPlayers" type="scrollList" size1024="164 68 255 122" z="51" textfontsize="16" textfont="ScrollFont" textcolor="0 0 58" background="ui\ui scroll middle tile" tilebackground="" topcapart="ui\ui scroll top tile" bottomcapart="ui\ui scroll bottom tile" leftcapart="ui\ui scroll cap left" rightcapart="ui\ui scroll cap right" border1024="3 0" listitemheight="20" mouseovertext="$$19935$$">
+      <listitem>$$21012$$1v1</listitem>
+      <listitem>$$21013$$1v2</listitem>
+      <listitem>$$21014$$1v3</listitem>
+      <listitem>$$21015$$2v2</listitem>
+      <listitem>$$18757$$Custom</listitem>
+    </gadget>
+    <gadget name="SinglePlayerSetup-OpponentsButton" type="stateButton" size1024="369 77 593 109" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="255 208 0" textcenterhoriz="" textcentervert="" texturecoords="0 0 .875 1" mouseovertext="$$19936$$">$$19810$$Customize Opponents<stateentry background="ui\ui button long 224x32"></stateentry><stateentry background="ui\ui button long 224X32 clicked"></stateentry><stateentry background="ui\ui button long 224X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="SinglePlayerSetup-SelectCivButton" type="stateButton" size1024="66 156 290 188" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="255 208 0" textcenterhoriz="" textcentervert="" texturecoords="0 0 .875 1" mouseovertext="$$19937$$">$$19811$$Select Civilization<stateentry background="ui\ui button long 224x32"></stateentry><stateentry background="ui\ui button long 224X32 clicked"></stateentry><stateentry background="ui\ui button long 224X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="SinglePlayerSetup-SelectMapButton" type="stateButton" size1024="368 156 592 188" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="255 208 0" textcenterhoriz="" textcentervert="" texturecoords="0 0 .875 1" mouseovertext="$$19938$$">$$19812$$Select Map<stateentry background="ui\ui button long 224x32"></stateentry><stateentry background="ui\ui button long 224X32 clicked"></stateentry><stateentry background="ui\ui button long 224X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="SinglePlayerSetup-StartButton" type="stateButton" size1024="315 709 475 741" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="255 208 0" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19939$$" sound="UI_lightning">$$20189$$Start<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="SinglePlayerSetup-QuitButton" type="stateButton" size1024="483 709 643 741" bevelbutton="" z="101" statebuttonuseinternalstates="" textfont="PregameButtons" textfontsize="18" textcolor="255 208 0" textcenterhoriz="" textcentervert="" texturecoords="0 0 .625 1" mouseovertext="$$19940$$">$$18445$$Quit<stateentry background="ui\ui button long 160x32"></stateentry><stateentry background="ui\ui button long 160X32 clicked"></stateentry><stateentry background="ui\ui button long 160X32 rollover"></stateentry><stateentry background=""></stateentry></gadget>
+    <gadget name="SinglePlayerSetup-CivDisplay" type="button" size1024="49 189 305 445" donthighlight="" z="11" background="ui\ui god isis 256x256" mouseovertext="$$19941$$" sound="UI_thunder"></gadget>
+    <gadget name="SinglePlayerSetup-CivDisplay-UpButton" type="stateButton" size1024="306 267 332 315" bevelbutton="" z="101" statebuttonuseinternalstates="" mouseovertext="$$19942$$" texturecoords="0 0 .81 .75" sound="ui_thunder">
+      <stateentry background="ui\ui button arrow up 32x64"></stateentry>
+      <stateentry background="ui\ui button arrow up 32x64 clicked"></stateentry>
+      <stateentry background="ui\ui button arrow up 32x64 rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-CivDisplay-DownButton" type="stateButton" size1024="306 316 332 364" bevelbutton="" z="101" statebuttonuseinternalstates="" mouseovertext="$$19942$$" texturecoords="0 0 .81 .75" sound="ui_thunder">
+      <stateentry background="ui\ui button arrow down 32x64"></stateentry>
+      <stateentry background="ui\ui button arrow down 32x64 clicked"></stateentry>
+      <stateentry background="ui\ui button arrow down 32x64 rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-GodName" textcentervert="" textcolor="255 208 0" textfontsize="30" textfont="Pregamelarge" type="formatText" size1024="37 437 317 472" z="11" textcenterhoriz="">Isis</gadget>
+    <gadget name="SinglePlayerSetup-MapDisplay" type="button" size1024="351 189 607 445" donthighlight="" z="11" background="ui\ui map ghost lake 256x256" mouseovertext="$$19943$$" sound="UI_brick"></gadget>
+    <gadget name="SinglePlayerSetup-MapDisplay-Border" type="gadget" size1024="351 189 607 445" transparent="" z="12" background="ui\ui map boarder template 256x256"></gadget>
+    <gadget name="SinglePlayerSetup-MapDisplay-UpButton" type="stateButton" size1024="608 267 634 315" bevelbutton="" z="101" statebuttonuseinternalstates="" mouseovertext="$$19944$$" texturecoords="0 0 .81 .75" sound="ui_brick">
+      <stateentry background="ui\ui button arrow up 32x64"></stateentry>
+      <stateentry background="ui\ui button arrow up 32x64 clicked"></stateentry>
+      <stateentry background="ui\ui button arrow up 32x64 rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-MapDisplay-DownButton" type="stateButton" size1024="608 317 634 365" bevelbutton="" z="101" statebuttonuseinternalstates="" mouseovertext="$$19944$$" texturecoords="0 0 .81 .75" sound="ui_brick">
+      <stateentry background="ui\ui button arrow down 32x64"></stateentry>
+      <stateentry background="ui\ui button arrow down 32x64 clicked"></stateentry>
+      <stateentry background="ui\ui button arrow down 32x64 rollover"></stateentry>
+      <stateentry background=""></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-MapName" textcenterhoriz="" textcentervert="" textcolor="255 208 0" textfontsize="30" textfont="Pregamelarge" type="formatText" size1024="328 437 638 472" z="12">Ghost Lake</gadget>
+    <gadget name="SinglePlayerSetup-NormalMap" type="stateButton" size1024="379 566 471 640" z="101" donthighlight="" sound="ui_earthmove" texturecoords=".26 .13 .98 .70" mouseovertext="$$19945$$">
+      <stateentry background="ui\ui map size select normal"></stateentry>
+      <stateentry background="ui\ui map size select normal clicked"></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-LargeMap" type="stateButton" size1024="487 541 612 640" z="101" donthighlight="" sound="ui_earthmove" mouseovertext="$$19946$$" texturecoords=".01 .02 .98 .79">
+      <stateentry background="ui\ui map size select large"></stateentry>
+      <stateentry background="ui\ui map size select large clicked"></stateentry>
+    </gadget>
+    <gadget name="SinglePlayerSetup-WorldSizeLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="375 508 600 528" z="11" textcenterhoriz="">$$19816$$World Size:</gadget>
+    <gadget name="SinglePlayerSetup-WorldSize-NormalLabel" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="375 647 476 667" z="11">$$18294$$Normal</gadget>
+    <gadget name="SinglePlayerSetup-WorldSize-LargeLabel" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="499 647 600 667" z="11">$$18847$$Large</gadget>
+    <gadget name="SinglePlayerSetup-DifficultySelection" type="radioset" size1024="86 530 349 691" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" radiosetbuttonsize1024="125 36" radiosetdefaultbuttonindex="0" z="12" sound="ui_wind" radiocheckedart="ui\ui button radial 32x32 clicked" radiouncheckedart="ui\ui button radial 32x32" radiobtnborder1024="2 2" mouseovertext="$$19947$$" radiohighlightart="ui\ui button radial 32x32 rollover">
+      <button>$$18297$$Easy</button>
+      <button>$$18298$$Moderate</button>
+      <button>$$18299$$Hard</button>
+      <button>$$18300$$Nightmare</button>
+    </gadget>
+    <gadget name="SinglePlayerSetup-DifficultyLabel" textcentervert="" textcenterhoriz="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="25 508 289 528" z="11">$$18691$$Difficulty:</gadget>
+    <gadget name="SinglePlayerSetup-GameTypeLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="668 81 800 106" z="11" textjustifyright="">$$19121$$Game Type:</gadget>
+    <gadget name="SinglePlayerSetup-VisibilityLabel" textcentervert="" textcolor="255 208 0" textfontsize="18" textfont="Pregamelabels" type="formatText" size1024="668 151 800 176" z="11" textjustifyright="">$$19123$$Visibility:</gadget>
+    <gadget name="SinglePlayerSetup-GameType" type="scrollList" tilebackground="" size1024="806 69 934 123" z="51" fieldval="1" textfontsize="16" textfont="ScrollFont" textcolor="0 0 58" background="ui\ui scroll middle tile" topcapart="ui\ui scroll top tile" bottomcapart="ui\ui scroll bottom tile" leftcapart="ui\ui scroll cap left" rightcapart="ui\ui scroll cap right" border1024="3 0" listitemheight="20" mouseovertext="$$19949$$">
+      <listitem>$$18864$$Supremacy</listitem>
+      <listitem>$$18865$$Conquest</listitem>
+      <listitem>$$18866$$Lightning</listitem>
+      <listitem>$$18867$$Deathmatch</listitem>
+    </gadget>
+    <gadget name="SinglePlayerSetup-Visibility" type="scrollList" tilebackground="" size1024="806 139 934 193" z="51" fieldval="1" textfontsize="16" textfont="ScrollFont" textcolor="0 0 58" background="ui\ui scroll middle tile" topcapart="ui\ui scroll top tile" bottomcapart="ui\ui scroll bottom tile" leftcapart="ui\ui scroll cap left" rightcapart="ui\ui scroll cap right" border1024="3 0" listitemheight="20" mouseovertext="$$19122$$">
+      <listitem>$$18853$$Normal</listitem>
+      <listitem>$$18854$$Revealed</listitem>
+    </gadget>
+    <gadget name="SinglePlayerSetup-Rollover-Section" type="gadget" size1024="668 522 976 691" background="ui\ui background dark blue opaque" outlinecolor="255 208 0" z="50">
+      <gadget name="SinglePlayerSetup-RolloverHelp" type="formatText" size1024="678 532 966 681" textfont="PregameRollover" textfontsize="14" textcolor="255 208 0" z="12">Here is some sample rollover</gadget>
+    </gadget>
+  </gadget>
+</layout>
