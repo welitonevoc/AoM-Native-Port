@@ -2715,6 +2715,63 @@ void Engine::create_campaign_menu() {
                     [this]() { return_to_main_menu(); }, 0xAA221105, 0xAA44220A);
 }
 
+// ── Layouts de UI do data.bar (Passo 4) ──────────────────────────────────
+
+bool Engine::load_ui_layout(const std::string& xmb_name) {
+    if (!data_bar_) {
+        LOGW("load_ui_layout: data_bar_ nao disponível");
+        return false;
+    }
+    auto result = ui_layout_manager_.load_layout(*data_bar_, xmb_name);
+    if (!result.success) {
+        LOGE("load_ui_layout: %s", result.error_message.c_str());
+        return false;
+    }
+    LOGI("load_ui_layout: '%s' carregado (%zu gadgets)", xmb_name.c_str(),
+         result.root_gadgets.size());
+    return true;
+}
+
+size_t Engine::show_ui_layout(const std::string& layout_name) {
+    if (!ui_) return 0;
+
+    const auto* layout = ui_layout_manager_.get_layout(layout_name);
+    if (!layout) {
+        LOGW("show_ui_layout: layout '%s' não encontrado — tente load_ui_layout() primeiro",
+             layout_name.c_str());
+        return 0;
+    }
+
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                         static_cast<int>(vw), static_cast<int>(vh));
+
+    LOGI("show_ui_layout: '%s' exibido (%zu elementos)", layout_name.c_str(), created);
+    return created;
+}
+
+bool Engine::show_techtree() {
+    if (!load_ui_layout("uitechtree.xmb")) return false;
+    show_ui_layout("uitechtree.xmb");
+    return true;
+}
+
+bool Engine::show_tribute() {
+    if (!load_ui_layout("uitributedlg.xmb")) return false;
+    show_ui_layout("uitributedlg.xmb");
+    return true;
+}
+
+bool Engine::show_sound_settings() {
+    if (!load_ui_layout("uisoundsetdlg.xmb")) return false;
+    show_ui_layout("uisoundsetdlg.xmb");
+    return true;
+}
+
 void Engine::start_campaign_mission(size_t scenario_idx) {
     if (!campaign_mgr_) {
         LOGW("start_campaign_mission: campaign_mgr_ nao inicializado");

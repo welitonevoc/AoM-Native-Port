@@ -13,6 +13,7 @@
 #include "assets/brg_model.h"
 #include "data/game_data.h"
 #include "ui/ui.h"
+#include "ui/ui_layout.h"
 #include "audio/audio.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
@@ -169,6 +170,28 @@ public:
     [[nodiscard]] GodPowerSystem& god_powers() { return god_powers_; }
     [[nodiscard]] CampaignMissionManager* mission_manager() { return mission_mgr_.get(); }
 
+    // ── Layouts de UI do data.bar (Passo 4) ──────────────────────────────────
+
+    /// Carrega um layout XMB do data.bar (ex: "uitechtree.xmb", "uitributedlg.xmb").
+    /// O layout fica disponível para ser exibido via show_ui_layout().
+    bool load_ui_layout(const std::string& xmb_name);
+
+    /// Limpa a UI atual e aplica um layout previamente carregado.
+    /// Retorna o número de elementos criados.
+    size_t show_ui_layout(const std::string& layout_name);
+
+    /// Exibe a árvore de tecnologias (uitechtree.xmb).
+    bool show_techtree();
+
+    /// Exibe a tela de tributo (uitributedlg.xmb).
+    bool show_tribute();
+
+    /// Exibe as configurações de som (uisoundsetdlg.xmb).
+    bool show_sound_settings();
+
+    /// Retorna o gerenciador de layouts para inspeção.
+    [[nodiscard]] UILayoutManager& ui_layout_manager() { return ui_layout_manager_; }
+
     /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
     /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
     [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name) {
@@ -285,6 +308,9 @@ private:
     std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<UIManager> ui_;
     std::unique_ptr<AudioEngine> audio_;
+
+    /// Gerenciador de layouts de UI do data.bar (XMB: uitechtree.xml, uitributedlg.xml, etc.)
+    UILayoutManager ui_layout_manager_;
 
     std::unordered_map<std::string, aom::TextureHandle> texture_cache_;
     std::unordered_map<std::string, std::string> strings_;

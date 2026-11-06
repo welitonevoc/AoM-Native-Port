@@ -18,6 +18,7 @@ set(AOM_SOURCES
     src/renderer/gles_renderer.cpp
     src/renderer/camera_track.cpp
     src/ui/ui.cpp
+    src/ui/ui_layout.cpp
     src/ai/ai_system.cpp
     src/video/video_player.cpp
     src/video/media_decoder.cpp
@@ -373,6 +374,21 @@ target_include_directories(test_water_bodies PRIVATE
 )
 target_link_libraries(test_water_bodies PRIVATE
     ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_ui_layout
+    src/tests/test_ui_layout.cpp
+    src/ui/ui_layout.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_ui_layout PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_ui_layout PRIVATE
     log
 )
 

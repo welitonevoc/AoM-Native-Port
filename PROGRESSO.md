@@ -1,6 +1,6 @@
 # AoM Native Port - Registro de Progresso
 
-Ultima atualizacao: 2026-11-06 (Sprint 13 - Integracao data.bar)
+Ultima atualizacao: 2026-11-06 (Sprint 14 - Layouts UI data.bar)
 
 - Commit realizado em 2026-11-05, hash: 407eacc
 
@@ -153,6 +153,57 @@ Referência: `docs/IMPORTACAO_DADOS.md`.
 | `src/tests/test_water_bodies.cpp` | Novo teste de regressão |
 | `src/tests/ui_test.cpp` / `src/tests/test_particles_anim.cpp` | Mocks atualizados |
 | `CMakeLists.txt` | Novos fontes + alvo de teste |
+
+---
+
+## Sprint 14: Layouts de UI do `data.bar` — XMB para Telas Autênticas (Passo 4) (2026-11-06)
+
+**Status:** Implementado. Os XMLs de UI do `data.bar` (`uitechtree.xmb`, `uitributedlg.xmb`, `uisoundsetdlg.xmb`, etc.) agora são consumidos pela engine nativa via `UILayoutManager`, gerando elementos do `UIManager` (botões, labels, sliders) com dados autênticos do Age of Mythology em vez de UI procedural.
+
+### 1. `UILayoutManager` — Parser de layouts XMB de UI
+- `include/ui/ui_layout.h` / `src/ui/ui_layout.cpp`: `UILayoutManager` parseia arquivos XMB de UI do `data.bar` e armazena a hierarquia de gadgets com `name`, `type`, `rect` (convertido de `size1024`), cores, fontes, texturas de fundo e gadgets aninhados.
+- `convert_size1024()`: converte coordenadas base 1024x768 para pixels reais da tela.
+- `parse_color()` / `parse_color_rgba()`: converte strings de cor "r g b" para `glm::vec3` e `uint32_t RGBA`.
+- `load_layout(BarArchive&, nome_xmb)`: carrega e faz parse de um XMB do `data.bar`.
+- `get_layout(nome)`: retorna um layout previamente carregado.
+
+### 2. Aplicação de layouts ao UIManager
+- `apply_layout_to_ui()`: aplica um layout carregado ao `UIManager`, criando:
+  - `button` / `gadget` → `ui_->add_button()` com label, cor e texto
+  - `textBox` / `textField` → `ui_->add_label()` com texto, cor e tamanho
+  - `slider` → `ui_->add_slider()` com valor inicial
+  - Gadgets aninhados são aplicados recursivamente com offset de posição
+- Retorna o número de elementos criados.
+
+### 3. Integração no Engine (Passo 4)
+- `include/engine/engine.h`: Membro `UILayoutManager ui_layout_manager_`; métodos `load_ui_layout()`, `show_ui_layout()`, `show_techtree()`, `show_tribute()`, `show_sound_settings()`, `ui_layout_manager()`.
+- `src/engine/engine.cpp`:
+  - `load_ui_layout(xmb_name)`: carrega um XMB do `data.bar` via `ui_layout_manager_`.
+  - `show_ui_layout(layout_name)`: limpa a UI atual (`clear_ui()`) e aplica o layout.
+  - `show_techtree()`: exibe `uitechtree.xmb` (árvore de tecnologias).
+  - `show_tribute()`: exibe `uitributedlg.xmb` (tela de tributo).
+  - `show_sound_settings()`: exibe `uisoundsetdlg.xmb` (configurações de som).
+
+### 4. Testes automatizados
+- `src/tests/test_ui_layout.cpp`: novo alvo CMake `test_ui_layout` validando:
+  - Carregamento de múltiplos layouts (`uitechtree.xmb`, `uitributedlg.xmb`, `uisoundsetdlg.xmb`, `uiwaterdialog.xml`, `uisingleplayersetup.xml`)
+  - Contagem de gadgets raiz e total (com filhos)
+  - Presença de coordenadas `size1024`
+  - Conversão de coordenadas (1024x768 e 1920x1080)
+  - Parse de cores (`0 50 170`, `255 208 0`)
+  - `SKIP` se dados do jogo indisponíveis
+
+### 5. `CMakeLists.txt`
+- Adicionado `src/ui/ui_layout.cpp` à biblioteca principal.
+- Novo alvo `test_ui_layout`.
+
+### Arquivos alterados
+| Arquivo | Alteração |
+|---|---|
+| `include/ui/ui_layout.h` / `src/ui/ui_layout.cpp` | Novo: `UILayoutManager`, `UIGadgetDef`, `UILayoutResult`, `apply_layout_to_ui()` |
+| `include/engine/engine.h` / `src/engine/engine.cpp` | `UILayoutManager` membro; `load_ui_layout()`, `show_ui_layout()`, `show_techtree()`, `show_tribute()`, `show_sound_settings()` |
+| `src/tests/test_ui_layout.cpp` | Novo teste de regressão |
+| `CMakeLists.txt` | Novo fonte + alvo de teste |
 
 ---
 
