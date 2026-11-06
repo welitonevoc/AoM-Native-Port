@@ -166,12 +166,20 @@ public:
                            TextureHandle texture, BlendMode blend = BlendMode::OPAQUE) = 0;
 
     /// Draw terrain
+    /// @param base_texture     Textura base do terreno (grama/direto)
+    /// @param blend_texture    Textura de mistura/encosta (cliff)
+    /// @param bank_texture     Textura da beira interna da água (waterbodies.xmb bank)
+    /// @param outer_bank_texture  Textura da beira externa da água (waterbodies.xmb outer_bank)
     virtual void draw_terrain(MeshHandle mesh, TextureHandle base_texture,
-                               TextureHandle blend_texture) = 0;
+                               TextureHandle blend_texture,
+                               TextureHandle bank_texture = INVALID_TEXTURE,
+                               TextureHandle outer_bank_texture = INVALID_TEXTURE) = 0;
 
     /// Draw water plane
+    /// @param water_color  RGB 0-255 color of the water (from waterbodies.xmb)
     virtual void draw_water(const glm::vec4& water_plane,
-                            TextureHandle normal_map, float time) = 0;
+                            TextureHandle normal_map, float time,
+                            const glm::vec3& water_color = glm::vec3(0, 50, 170)) = 0;
 
     /// Draw a skybox / cubemap using 6 face textures.
     /// @param faces  Array of 6 texture handles in order: [up, down, front, back, left, right]

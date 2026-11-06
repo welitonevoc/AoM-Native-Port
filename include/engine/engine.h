@@ -168,6 +168,19 @@ public:
     [[nodiscard]] GameDataManager& game_data() { return game_data_; }
     [[nodiscard]] GodPowerSystem& god_powers() { return god_powers_; }
     [[nodiscard]] CampaignMissionManager* mission_manager() { return mission_mgr_.get(); }
+
+    /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
+    /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
+    [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name) {
+        if (gameplay_world_) return gameplay_world_->transform_unit(from_entity, target_name);
+        return INVALID_ENTITY;
+    }
+
+    /// Retorna as transformacoes disponiveis para uma entidade (do unittransform.xmb).
+    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const {
+        if (gameplay_world_) return gameplay_world_->available_transforms(entity);
+        return {};
+    }
     [[nodiscard]] MeshHandle model_mesh() const { return model_mesh_; }
     [[nodiscard]] TextureHandle model_texture() const { return model_texture_; }
 
@@ -300,14 +313,29 @@ private:
                                       INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE};
     MeshHandle skybox_mesh_ = INVALID_MESH;
     bool load_skybox_faces(const std::string& cub_name);
+
+    /// Define a cor da água com base em um corpo d'água do waterbodies.xmb
+    void set_water_color_from_body(const std::string& body_name);
+
+    /// Carrega texturas de beira (bottom/bank/outer_bank) de um corpo d'água
+    /// do waterbodies.xmb a partir do textures.bar
+    void load_water_body_textures(const std::string& body_name);
+
+    /// Spawna clusters de objetos (rochas, árvores) na beira de um corpo d'água,
+    /// usando as regras de objectplacement do waterbodies.xmb.
+    void spawn_water_body_clusters(const std::string& body_name, const glm::vec3& center);
+
     MeshHandle terrain_mesh_ = INVALID_MESH;
     void generate_skydome();
     void generate_terrain_from_heightmap(const std::vector<float>& heightmap, int width, int height, float scale);
     bool load_scenario_heightmap(const std::string& scenario_path);
     TextureHandle terrain_texture_ = INVALID_TEXTURE;
     TextureHandle terrain_blend_tex_ = INVALID_TEXTURE;
+    TextureHandle terrain_bank_tex_ = INVALID_TEXTURE;      ///< Textura da beira interna (waterbodies.xmb bank)
+    TextureHandle terrain_outer_bank_tex_ = INVALID_TEXTURE;///< Textura da beira externa (waterbodies.xmb outer_bank)
     TextureHandle water_normal_tex_ = INVALID_TEXTURE;
     glm::vec4 water_plane_{0.0f, 1.0f, 0.0f, 0.4f}; ///< Plane equation Ax+By+Cz+D = 0, y = -0.4f
+    glm::vec3 water_color_{0, 50, 170};             ///< Cor da água do waterbodies.xmb (RGB 0-255)
     int heightmap_width_ = 0;
     int heightmap_height_ = 0;
     float heightmap_scale_ = 1.0f;

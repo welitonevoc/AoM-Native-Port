@@ -103,6 +103,29 @@ bool XmbElement::has_attribute(const std::string& target_name) const {
     return false;
 }
 
+float XmbElement::get_attribute_as_float(const std::string& name, float default_val) const {
+    std::string s = get_attribute(name);
+    if (s.empty()) return default_val;
+    try {
+        return std::stof(s);
+    } catch (...) {
+        return default_val;
+    }
+}
+
+bool XmbElement::get_attribute_as_bool(const std::string& name, bool default_val) const {
+    std::string s = get_attribute(name);
+    if (s.empty()) return default_val;
+    std::string lower;
+    lower.reserve(s.size());
+    for (char c : s) {
+        lower.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+    }
+    if (lower == "true" || lower == "1" || lower == "yes") return true;
+    if (lower == "false" || lower == "0" || lower == "no") return false;
+    return default_val;
+}
+
 int XmbElement::text_as_int(int default_val) const {
     std::string s = trim(text);
     if (s.empty()) return default_val;

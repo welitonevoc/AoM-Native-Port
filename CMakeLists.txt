@@ -28,6 +28,8 @@ set(AOM_SOURCES
     src/campaign/campaign.cpp
     src/campaign/campaign_mission.cpp
     src/data/game_data.cpp
+    src/data/water_bodies.cpp
+    src/data/unit_transform.cpp
     src/fonts/font_system.cpp
     src/graphics/gfx_config.cpp
     src/game/god_powers.cpp
@@ -353,6 +355,23 @@ target_include_directories(test_bar_overlay PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_bar_overlay PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_water_bodies
+    src/tests/test_water_bodies.cpp
+    src/data/water_bodies.cpp
+    src/data/unit_transform.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_water_bodies PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_water_bodies PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )

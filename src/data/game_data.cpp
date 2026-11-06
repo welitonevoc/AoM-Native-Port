@@ -52,6 +52,12 @@ bool GameDataManager::load_from_bar(const BarArchive& bar) {
     // techtreex.xmb — árvore tecnológica da expansão The Titans
     load_xmb("techtreex.xmb", &GameDataManager::load_techtree_xmb);
 
+    // waterbodies.xmb — corpos d'água (rios, oceanos, lagos)
+    load_xmb("waterbodies.xmb", &GameDataManager::load_waterbodies_xmb);
+
+    // unittransform.xmb — transformações de unidades
+    load_xmb("unittransform.xmb", &GameDataManager::load_unittransform_xmb);
+
     return ok;
 }
 
@@ -176,6 +182,14 @@ bool GameDataManager::load_techtree_xmb(const XmbElement& root) {
         techs_.push_back(std::move(t));
     }
     return !techs_.empty();
+}
+
+bool GameDataManager::load_waterbodies_xmb(const XmbElement& root) {
+    return water_bodies_.load_from_xmb(root);
+}
+
+bool GameDataManager::load_unittransform_xmb(const XmbElement& root) {
+    return unit_transforms_.load_from_xmb(root);
 }
 
 const ProtoUnitData* GameDataManager::find_unit(const std::string& name) const {

@@ -204,6 +204,15 @@ struct ResourceNode {
     int remaining = 1000;
 };
 
+/// Objeto decorativo de cenário (rocha, árvore na beira da água, etc.)
+/// Extraído dos object_clusters do waterbodies.xmb.
+struct SceneryObject {
+    std::string name;           ///< Nome do protounit (ex: "Rock River Sandy", "Oak Tree")
+    glm::vec3 position{0.0f};   ///< Posição no mundo
+    float scale = 1.0f;         ///< Escala do objeto
+    TextureHandle texture = INVALID_TEXTURE;  ///< Textura do objeto (carregada do textures.bar)
+};
+
 struct MinimapBlip {
     glm::vec3 position{0.0f};
     uint32_t color = 0xFFFFFFFF; // 0xRRGGBBAA format
@@ -610,7 +619,8 @@ public:
 
     explicit GameplayWorld(const XmbElement* proto_root = nullptr)
         : proto_root_(proto_root),
-          ecs_world_() {
+          ecs_world_(),
+          unit_transforms_(nullptr) {
         combat_.on_combat_hit = [this](Entity a, Entity t, const glm::vec3& p) {
             if (on_combat_hit) on_combat_hit(a, t, p);
         };
@@ -671,6 +681,108 @@ public:
             w_stats.name = "Villager Greek";
         }
         return spawn_unit(Team::FRIENDLY, position, w_stats);
+    }
+
+    Entity spawn_scenery_object(const std::string& name, const glm::vec3& position,
+                                 float scale = 1.0f, TextureHandle texture = INVALID_TEXTURE) {
+        SceneryObject so;
+        so.name = name;
+        so.position = position;
+        so.scale = scale;
+        so.texture = texture;
+        scenery_objects_.push_back(std::move(so));
+        // Cria uma entidade ECS leve para o objeto (transform apenas, sem unidade/edifício)
+        Entity id = ecs_world_.create_entity();
+        auto& tr = ecs_world_.transforms_mut()[id];
+        tr.position = position;
+        tr.scale = glm::vec3(scale);
+        return id;
+    }
+
+    /// Injeta o gerenciador de transformacoes de unidade (carregado do unittransform.xmb).
+    void set_unit_transform_manager(const UnitTransformManager* utm) {
+        unit_transforms_ = utm;
+    }
+
+    /// Verifica se existe alguma transformacao disponível para a entidade dada.
+    /// Retorna a lista de transformacoes possíveis (from -> to).
+    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const {
+        std::vector<UnitTransform> result;
+        if (!unit_transforms_) return result;
+        auto u_it = units_.find(entity);
+        if (u_it == units_.end()) return result;
+        return unit_transforms_->find_from(u_it->second.unit_type_name);
+    }
+
+    /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate").
+    /// Procura no unittransform.xmb se existe uma transformacao de from -> to.
+    /// Preserva posicao, time, HP, selecao e ordem de movimento quando possivel.
+    /// Retorna a entidade resultante (nova) ou INVALID_ENTITY se nao houver transformacao valida.
+    Entity transform_unit(Entity from_entity, const std::string& target_name) {
+        if (!unit_transforms_) return INVALID_ENTITY;
+
+        auto u_it = units_.find(from_entity);
+        if (u_it == units_.end()) return INVALID_ENTITY;
+
+        const auto& from_unit = u_it->second;
+
+        // Verifica se existe transformacao de from -> target_name
+        bool found = false;
+        for (const auto& t : unit_transforms_->find_from(from_unit.unit_type_name)) {
+            if (t.to == target_name) { found = true; break; }
+        }
+        if (!found) return INVALID_ENTITY;
+
+        // Salva estado da entidade original
+        glm::vec3 position{0.0f};
+        Team team = from_unit.team;
+        float hp_ratio = 1.0f;
+        bool selected = false;
+        bool has_move = from_unit.has_move_order;
+        glm::vec3 move_target = from_unit.move_target;
+        Entity attack_target = from_unit.attack_target;
+
+        auto t_it = ecs_world_.transforms().find(from_entity);
+        if (t_it != ecs_world_.transforms().end()) position = t_it->second.position;
+
+        auto h_it = ecs_world_.healths().find(from_entity);
+        if (h_it != ecs_world_.healths().end() && h_it->second.max_hp > 0) {
+            hp_ratio = static_cast<float>(h_it->second.current_hp) / h_it->second.max_hp;
+        }
+
+        auto s_it = selections_.find(from_entity);
+        if (s_it != selections_.end()) selected = s_it->second.selected;
+
+        // Spawn a nova unidade com stats do proto.xmb (ou defaults se ausente)
+        UnitStats stats = extract_unit_stats_from_xmb(proto_root_, target_name);
+        Entity new_id = spawn_unit(team, position, stats);
+
+        // Aplica HP proporcional
+        auto new_h_it = ecs_world_.healths().find(new_id);
+        if (new_h_it != ecs_world_.healths().end()) {
+            new_h_it->second.current_hp = static_cast<int>(new_h_it->second.max_hp * hp_ratio);
+            if (new_h_it->second.current_hp <= 0) new_h_it->second.current_hp = 1;
+        }
+
+        // Restaura selecao
+        if (selected) selections_[new_id].selected = true;
+
+        // Restaura ordem de ataque/movimento se houver
+        if (has_move) {
+            units_[new_id].has_move_order = true;
+            units_[new_id].move_target = move_target;
+            units_[new_id].attack_target = attack_target;
+            auto path = navigation_.find_path(position, move_target);
+            if (!path.empty()) {
+                units_[new_id].waypoints = path;
+                units_[new_id].waypoint_index = 0;
+            }
+        }
+
+        // Remove a entidade original (limpa transforms, health, units, selections, animations)
+        remove_entity(from_entity);
+
+        return new_id;
     }
 
     int current_population(Team team) const {
@@ -976,6 +1088,7 @@ public:
         selections_.clear();
         animations_.clear();
         resources_nodes_.clear();
+        scenery_objects_.clear();
     }
 
     /// Remove todas as unidades e edificios, preservando os nos de recursos
@@ -1490,6 +1603,14 @@ public:
                                           0xFFFFFF00u);
             }
         }
+
+        // ── Scenery objects (rochas, árvores na beira da água, etc.) ──────────
+        for (const auto& so : scenery_objects_) {
+            if (so.texture == INVALID_TEXTURE) continue;
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), so.position);
+            model = glm::scale(model, glm::vec3(so.scale));
+            renderer->draw_mesh(mesh, model, so.texture, BlendMode::OPAQUE);
+        }
     }
 private:
     const XmbElement* proto_root_ = nullptr;
@@ -1529,6 +1650,7 @@ private:
         return base;
     }
     std::vector<ResourceNode> resources_nodes_;
+    std::vector<SceneryObject> scenery_objects_;
     MovementSystem movement_{ecs_world_.transforms_mut()};
     CombatSystem combat_{ecs_world_.transforms_mut(), ecs_world_.healths_mut(), units_};
     SelectionSystem selection_{ecs_world_.transforms_mut(), selections_};
@@ -1538,6 +1660,7 @@ private:
     IRenderer* anim_renderer_ = nullptr;
     const aom::anim::BrgAnimationClip* default_clip_ = nullptr;
     TextureHandle default_clip_tex_ = INVALID_TEXTURE;
+    const UnitTransformManager* unit_transforms_ = nullptr;
 
     void update_orders() {
         for (auto& [entity, unit] : units_) {

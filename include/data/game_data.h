@@ -9,6 +9,8 @@
 #include <memory>
 #include "assets/bar_archive.h"
 #include "assets/xmb_parser.h"
+#include "data/water_bodies.h"
+#include "data/unit_transform.h"
 
 namespace aom {
 
@@ -59,6 +61,12 @@ public:
     /// Parse techtree.xmb root element
     bool load_techtree_xmb(const XmbElement& root);
 
+    /// Parse waterbodies.xmb root element
+    bool load_waterbodies_xmb(const XmbElement& root);
+
+    /// Parse unittransform.xmb root element
+    bool load_unittransform_xmb(const XmbElement& root);
+
     /// Find unit definition by case-insensitive name
     [[nodiscard]] const ProtoUnitData* find_unit(const std::string& name) const;
 
@@ -72,6 +80,14 @@ public:
     [[nodiscard]] size_t god_count() const { return gods_.size(); }
     [[nodiscard]] size_t tech_count() const { return techs_.size(); }
 
+    /// Water bodies access
+    [[nodiscard]] const WaterBodyManager& water_bodies() const { return water_bodies_; }
+    [[nodiscard]] WaterBodyManager& water_bodies() { return water_bodies_; }
+
+    /// Unit transforms access
+    [[nodiscard]] const UnitTransformManager& unit_transforms() const { return unit_transforms_; }
+    [[nodiscard]] UnitTransformManager& unit_transforms() { return unit_transforms_; }
+
     [[nodiscard]] const std::vector<ProtoUnitData>& all_units() const { return units_; }
     [[nodiscard]] const std::vector<MajorGodData>& all_gods() const { return gods_; }
 
@@ -84,6 +100,9 @@ private:
 
     std::vector<TechData> techs_;
     std::unordered_map<std::string, size_t> tech_index_;
+
+    WaterBodyManager water_bodies_;
+    UnitTransformManager unit_transforms_;
 };
 
 } // namespace aom

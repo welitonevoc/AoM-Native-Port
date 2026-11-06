@@ -1,6 +1,6 @@
 # AoM Native Port - Registro de Progresso
 
-Ultima atualizacao: 2026-11-06
+Ultima atualizacao: 2026-11-06 (Sprint 13 - Integracao data.bar)
 
 - Commit realizado em 2026-11-05, hash: 407eacc
 
@@ -103,6 +103,56 @@ Referência: `docs/IMPORTACAO_DADOS.md`.
 - A carga inicial dos archives levou ~24 s no emulador (indexação/`mmap` dos
   BARs de 1,3 GB). Ocorre na thread do jogo, sem travar a UI, mas convém medir
   em hardware ARM64.
+
+---
+
+## Sprint 13: Integração de Dados do `data.bar` — Water Bodies, Scenery e UnitTransform (2026-11-06)
+
+**Status:** Implementado. Os dados originais do `data.bar` (XMB: `waterbodies.xmb`, `unittransform.xmb`, XMLs de UI) agora são consumidos pela engine nativa via `BarArchive` + `XmbParser` + `GameDataManager`, substituindo valores hard-coded por definições autênticas do AoM.
+
+### 1. `WaterBodyManager` — Corpos d'água autênticos (`waterbodies.xmb`)
+- `include/data/water_bodies.h/.cpp`: `WaterBodyManager` parseia `waterbodies.xmb` e armazena rios, oceanos e lagos com `color` (RGB 0-255), `depth`, `bottom`, `bank`, `outer_bank`, `texture_placements` e `object_clusters`.
+- `include/data/game_data.h/.cpp`: `GameDataManager::load_from_bar()` agora carrega `waterbodies.xmb`; acessível via `game_data().water_bodies()`.
+- Medido com dados reais: `Greek River`, `Mediterranean Sea` (cor 0,50,170), `Watering Hole`, etc. com texturas de beira (`ShorelineMediterraneanB/C`) e clusters de objetos (`Rock River Sandy`, `Oak Tree`, `Wave`).
+
+### 2. Passo 1 — Texturas de beira no terreno/água
+- `include/renderer/renderer.h`: `draw_terrain()` estendido com `bank_texture` e `outer_bank_texture`.
+- `src/renderer/gles_renderer.cpp`: Shader de terreno com `uBankTex` (textura 2) e `uOuterBankTex` (textura 3); splatting por altura aplica `bank` próximo ao nível da água (`y ≈ -0.40`) e `outer_bank` na transição.
+- `include/engine/engine.h/.cpp`: `set_water_color_from_body()`, `load_water_body_textures()`, membros `water_color_`, `terrain_bank_tex_`, `terrain_outer_bank_tex_`.
+- Fluxo da campanha: ao iniciar missão (Omens/genérica), aplica cor e texturas de beira do corpo d'água selecionado (Mediterranean Sea → Greek River → primeiro disponível).
+
+### 3. Passo 2 — Clusters de objetos na beira (`object_clusters`)
+- `include/ecs/gameplay.h`: Struct `SceneryObject` (`name`, `position`, `scale`, `texture`); `spawn_scenery_object()` cria entidade ECS leve; renderização no `render()` via `draw_mesh()`; limpeza em `clear_all_entities()`.
+- `include/engine/engine.h/.cpp`: `spawn_water_body_clusters(body_name, center)` gera posições em círculo usando `distance_between`, `distance_variation`, `curve_angle` do `objectplacement` e spawn cada protounit do cluster com textura do `textures.bar`.
+- Chamada integrada na campanha após o Passo 1.
+
+### 4. Passo 3 — UnitTransform no gameplay (`unittransform.xmb`)
+- `include/data/unit_transform.h/.cpp`: `UnitTransformManager` parseia `unittransform.xmb` e mapeia transformações `from → to` (ex: `Wall Long → Gate`, `Villager Norse → Ulfsark`).
+- `include/data/game_data.h/.cpp`: `GameDataManager` carrega `unittransform.xmb`; acessível via `game_data().unit_transforms()`.
+- `include/ecs/gameplay.h`: `set_unit_transform_manager()`, `available_transforms()`, `transform_unit()` — preserva posição, time, HP, seleção e ordem de movimento; remove entidade original.
+- `include/engine/engine.h/.cpp`: `Engine::transform_unit()` e `Engine::available_transforms()` expõem a funcionalidade; injeção do `UnitTransformManager` no `GameplayWorld` em ambos os pontos de criação (`start_game` e `start_campaign_mission`).
+
+### 5. Testes automatizados
+- `src/tests/test_water_bodies.cpp`: novo alvo CMake `test_water_bodies` validando parsing de `waterbodies.xmb` (rios, oceanos, lagos, cores, texturas de beira, object_clusters) e `unittransform.xmb` (transformações conhecidas); `SKIP` se dados do jogo indisponíveis.
+- `src/tests/ui_test.cpp` / `src/tests/test_particles_anim.cpp`: mocks de `draw_terrain` e `draw_water` atualizados para nova assinatura.
+
+### 6. `CMakeLists.txt`
+- Adicionados `src/data/water_bodies.cpp` e `src/data/unit_transform.cpp` à biblioteca principal.
+- Novo alvo `test_water_bodies`.
+
+### Arquivos alterados
+| Arquivo | Alteração |
+|---|---|
+| `include/data/water_bodies.h` / `src/data/water_bodies.cpp` | Novo: `WaterBodyManager` |
+| `include/data/unit_transform.h` / `src/data/unit_transform.cpp` | Novo: `UnitTransformManager` |
+| `include/data/game_data.h` / `src/data/game_data.cpp` | Carrega `waterbodies.xmb` e `unittransform.xmb` |
+| `include/assets/xmb_parser.h` / `src/assets/xmb_parser.cpp` | `get_attribute_as_float()`, `get_attribute_as_bool()` |
+| `include/renderer/renderer.h` / `src/renderer/gles_renderer.cpp` | `draw_terrain` com bank/outer_bank; shader splatting por altura |
+| `include/engine/engine.h` / `src/engine/engine.cpp` | Água: cor + texturas de beira; clusters; UnitTransform exposto |
+| `include/ecs/gameplay.h` | `SceneryObject`, `spawn_scenery_object`, `transform_unit`, `available_transforms` |
+| `src/tests/test_water_bodies.cpp` | Novo teste de regressão |
+| `src/tests/ui_test.cpp` / `src/tests/test_particles_anim.cpp` | Mocks atualizados |
+| `CMakeLists.txt` | Novos fontes + alvo de teste |
 
 ---
 

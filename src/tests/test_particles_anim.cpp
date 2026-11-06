@@ -36,8 +36,10 @@ public:
     void set_camera(const aom::Camera&) override {}
     void set_light(const aom::DirectionalLight&) override {}
     void draw_mesh(aom::MeshHandle, const glm::mat4&, aom::TextureHandle, aom::BlendMode) override {}
-    void draw_terrain(aom::MeshHandle, aom::TextureHandle, aom::TextureHandle) override {}
-    void draw_water(const glm::vec4&, aom::TextureHandle, float) override {}
+    void draw_terrain(aom::MeshHandle, aom::TextureHandle, aom::TextureHandle,
+                      aom::TextureHandle, aom::TextureHandle) override {}
+    void draw_water(const glm::vec4&, aom::TextureHandle, float,
+                    const glm::vec3& = glm::vec3(0, 50, 170)) override {}
 
     void begin_ui() override {}
     void draw_ui_quad(const glm::vec2&, const glm::vec2&, aom::TextureHandle, uint32_t) override {}

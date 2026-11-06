@@ -53,3 +53,6 @@ __pycache__/
 /.claude/
 *.device-*
 *.bak
+
+# Proprietary game reference data (extracted from original AoM BARs) — not for distribution
+/tests/reference/

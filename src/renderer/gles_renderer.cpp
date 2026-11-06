@@ -153,8 +153,12 @@ in vec4 vColor;
 
 uniform sampler2D uBaseTex;
 uniform sampler2D uBlendTex;
+uniform sampler2D uBankTex;
+uniform sampler2D uOuterBankTex;
 uniform int uHasBaseTex;
 uniform int uHasBlendTex;
+uniform int uHasBankTex;
+uniform int uHasOuterBankTex;
 uniform vec3 uLightDir;
 uniform vec3 uLightColor;
 uniform vec3 uAmbient;
@@ -174,7 +178,30 @@ void main() {
     vec4 baseColor = (uHasBaseTex != 0) ? texture(uBaseTex, vTex) : vec4(0.35, 0.58, 0.25, 1.0);
     vec4 cliffColor = (uHasBlendTex != 0) ? texture(uBlendTex, vTex * 2.5) : vec4(0.48, 0.44, 0.40, 1.0);
 
-    vec4 mixedTex = mix(baseColor, cliffColor, blendFactor);
+    // Water bank textures: near water level (y <= -0.35) use bank, slightly above use outer_bank.
+    float water_level = -0.40f;
+    float bankZone = smoothstep(water_level, water_level + 0.6f, vWorldPos.y);
+    float outerZone = smoothstep(water_level + 0.6f, water_level + 1.4f, vWorldPos.y);
+
+    vec4 bankColor = vec4(0.0);
+    if (uHasBankTex != 0) {
+        bankColor = texture(uBankTex, vTex * 3.0);
+    }
+    vec4 outerBankColor = vec4(0.0);
+    if (uHasOuterBankTex != 0) {
+        outerBankColor = texture(uOuterBankTex, vTex * 3.0);
+    }
+
+    // Camadas: base -> outer_bank (transicao) -> bank (agua) -> cliff (encosta)
+    vec4 mixedTex = baseColor;
+    if (uHasOuterBankTex != 0) {
+        mixedTex = mix(mixedTex, outerBankColor, outerZone * (1.0 - blendFactor));
+    }
+    if (uHasBankTex != 0) {
+        mixedTex = mix(mixedTex, bankColor, bankZone * (1.0 - blendFactor));
+    }
+    mixedTex = mix(mixedTex, cliffColor, blendFactor);
+
     vec3 finalRgb = mixedTex.rgb * vColor.rgb * lighting;
     fragColor = vec4(finalRgb, 1.0);
 }
@@ -806,7 +833,9 @@ public:
     }
 
     void draw_terrain(MeshHandle mesh, TextureHandle base_texture,
-                      TextureHandle blend_texture) override {
+                      TextureHandle blend_texture,
+                      TextureHandle bank_texture,
+                      TextureHandle outer_bank_texture) override {
         auto it = meshes_.find(mesh);
         if (it == meshes_.end() || !terrain_program_) return;
 
@@ -847,6 +876,24 @@ public:
             glUniform1i(terrain_uHasBlendTex_, 0);
         }
 
+        if (bank_texture != INVALID_TEXTURE) {
+            glUniform1i(terrain_uHasBankTex_, 1);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(bank_texture));
+            glUniform1i(terrain_uBankTex_, 2);
+        } else {
+            glUniform1i(terrain_uHasBankTex_, 0);
+        }
+
+        if (outer_bank_texture != INVALID_TEXTURE) {
+            glUniform1i(terrain_uHasOuterBankTex_, 1);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(outer_bank_texture));
+            glUniform1i(terrain_uOuterBankTex_, 3);
+        } else {
+            glUniform1i(terrain_uHasOuterBankTex_, 0);
+        }
+
         glBindVertexArray(it->second.vao);
         glDrawElements(GL_TRIANGLES, it->second.index_count, GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
@@ -857,6 +904,14 @@ public:
         }
         if (blend_texture != INVALID_TEXTURE) {
             glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        if (bank_texture != INVALID_TEXTURE) {
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        if (outer_bank_texture != INVALID_TEXTURE) {
+            glActiveTexture(GL_TEXTURE3);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         glActiveTexture(GL_TEXTURE0);
@@ -961,6 +1016,7 @@ public:
         glUniform3fv(water_uLightColor_, 1, &light_.color[0]);
         glUniform3fv(water_uAmbient_, 1, &light_.ambient[0]);
         glUniform1f(water_uTime_, time);
+        glUniform3fv(water_uWaterColor_, 1, &water_color[0]);
 
         if (normal_map != INVALID_TEXTURE) {
             glUniform1i(water_uHasNormalMap_, 1);
@@ -1401,8 +1457,12 @@ private:
         terrain_uAmbient_ = glGetUniformLocation(terrain_program_, "uAmbient");
         terrain_uHasBaseTex_ = glGetUniformLocation(terrain_program_, "uHasBaseTex");
         terrain_uHasBlendTex_ = glGetUniformLocation(terrain_program_, "uHasBlendTex");
+        terrain_uHasBankTex_ = glGetUniformLocation(terrain_program_, "uHasBankTex");
+        terrain_uHasOuterBankTex_ = glGetUniformLocation(terrain_program_, "uHasOuterBankTex");
         terrain_uBaseTex_ = glGetUniformLocation(terrain_program_, "uBaseTex");
         terrain_uBlendTex_ = glGetUniformLocation(terrain_program_, "uBlendTex");
+        terrain_uBankTex_ = glGetUniformLocation(terrain_program_, "uBankTex");
+        terrain_uOuterBankTex_ = glGetUniformLocation(terrain_program_, "uOuterBankTex");
         return true;
     }
 
@@ -1444,6 +1504,7 @@ private:
         water_uTime_ = glGetUniformLocation(water_program_, "uTime");
         water_uHasNormalMap_ = glGetUniformLocation(water_program_, "uHasNormalMap");
         water_uNormalMap_ = glGetUniformLocation(water_program_, "uNormalMap");
+        water_uWaterColor_ = glGetUniformLocation(water_program_, "uWaterColor");
         return true;
     }
 
@@ -1553,8 +1614,12 @@ private:
     GLint terrain_uAmbient_ = -1;
     GLint terrain_uHasBaseTex_ = -1;
     GLint terrain_uHasBlendTex_ = -1;
+    GLint terrain_uHasBankTex_ = -1;
+    GLint terrain_uHasOuterBankTex_ = -1;
     GLint terrain_uBaseTex_ = -1;
     GLint terrain_uBlendTex_ = -1;
+    GLint terrain_uBankTex_ = -1;
+    GLint terrain_uOuterBankTex_ = -1;
 
     // Water Plane Program & Uniforms
     GLuint water_program_ = 0;
@@ -1567,6 +1632,7 @@ private:
     GLint water_uTime_ = -1;
     GLint water_uHasNormalMap_ = -1;
     GLint water_uNormalMap_ = -1;
+    GLint water_uWaterColor_ = -1;
     GLuint water_vao_ = 0;
     GLuint water_vbo_ = 0;
     GLuint water_ebo_ = 0;

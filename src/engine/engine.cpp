@@ -749,6 +749,7 @@ void Engine::start_game() {
     // --- Initialize GameplayWorld ---
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
+    gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
@@ -1146,6 +1147,8 @@ void Engine::shutdown() {
     terrain_mesh_ = INVALID_MESH;
     terrain_texture_ = INVALID_TEXTURE;
     terrain_blend_tex_ = INVALID_TEXTURE;
+    terrain_bank_tex_ = INVALID_TEXTURE;
+    terrain_outer_bank_tex_ = INVALID_TEXTURE;
     water_normal_tex_ = INVALID_TEXTURE;
     skydome_mesh_ = INVALID_MESH;
     model_mesh_ = INVALID_MESH;
@@ -1390,9 +1393,10 @@ void Engine::render() {
 
         // 2. Authentic AoM 3D Terrain & Water Plane
         if (terrain_mesh_ != INVALID_MESH) {
-            renderer_->draw_terrain(terrain_mesh_, terrain_texture_, terrain_blend_tex_);
+            renderer_->draw_terrain(terrain_mesh_, terrain_texture_, terrain_blend_tex_,
+                                 terrain_bank_tex_, terrain_outer_bank_tex_);
         }
-        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_);
+        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_);
 
         if (model_mesh_ != INVALID_MESH) {
             glm::mat4 model_transform = glm::mat4(1.0f);
@@ -2173,6 +2177,155 @@ bool Engine::load_skybox_faces(const std::string& cub_name) {
     return true;
 }
 
+void Engine::set_water_color_from_body(const std::string& body_name) {
+    const auto& wb = game_data_.water_bodies();
+    glm::vec3 color{0, 50, 170}; // default
+
+    if (const auto* river = wb.find_river(body_name); river) {
+        color = river->color / 255.0f;
+    } else if (const auto* ocean = wb.find_ocean(body_name); ocean) {
+        color = ocean->color / 255.0f;
+    } else if (const auto* lake = wb.find_lake(body_name); lake) {
+        color = lake->color / 255.0f;
+    }
+
+    water_color_ = color;
+    LOGI("set_water_color_from_body: '%s' -> RGB(%.0f, %.0f, %.0f)",
+         body_name.c_str(), water_color_.r * 255.0f, water_color_.g * 255.0f, water_color_.b * 255.0f);
+}
+
+void Engine::load_water_body_textures(const std::string& body_name) {
+    if (!textures_bar_) return;
+
+    const auto& wb = game_data().water_bodies();
+    std::string bank_name, outer_bank_name;
+
+    if (const auto* river = wb.find_river(body_name); river) {
+        bank_name = river->bank;
+        outer_bank_name = river->outer_bank;
+        LOGI("load_water_body_textures: rio '%s' bank='%s' outer_bank='%s'",
+             body_name.c_str(), bank_name.c_str(), outer_bank_name.c_str());
+    } else if (const auto* ocean = wb.find_ocean(body_name); ocean) {
+        bank_name = ocean->bank;
+        outer_bank_name = ocean->outer_bank;
+        LOGI("load_water_body_textures: oceano '%s' bank='%s' outer_bank='%s'",
+             body_name.c_str(), bank_name.c_str(), outer_bank_name.c_str());
+    } else if (const auto* lake = wb.find_lake(body_name); lake) {
+        bank_name = lake->bank;
+        outer_bank_name = lake->outer_bank;
+        LOGI("load_water_body_textures: lago '%s' bank='%s' outer_bank='%s'",
+             body_name.c_str(), bank_name.c_str(), outer_bank_name.c_str());
+    } else {
+        LOGW("load_water_body_textures: corpo d'agua '%s' nao encontrado no waterbodies.xmb",
+             body_name.c_str());
+        return;
+    }
+
+    if (!bank_name.empty()) {
+        terrain_bank_tex_ = load_ddt_texture(bank_name);
+        if (terrain_bank_tex_ != INVALID_TEXTURE) {
+            LOGI("load_water_body_textures: bank texture '%s' -> handle %u",
+                 bank_name.c_str(), terrain_bank_tex_);
+        }
+    }
+    if (!outer_bank_name.empty()) {
+        terrain_outer_bank_tex_ = load_ddt_texture(outer_bank_name);
+        if (terrain_outer_bank_tex_ != INVALID_TEXTURE) {
+            LOGI("load_water_body_textures: outer_bank texture '%s' -> handle %u",
+                 outer_bank_name.c_str(), terrain_outer_bank_tex_);
+        }
+    }
+}
+
+void Engine::spawn_water_body_clusters(const std::string& body_name, const glm::vec3& center) {
+    if (!gameplay_world_ || !textures_bar_) return;
+
+    const auto& wb = game_data().water_bodies();
+    const RiverDef* river = wb.find_river(body_name);
+    const OceanDef* ocean = wb.find_ocean(body_name);
+    const LakeDef* lake = wb.find_lake(body_name);
+
+    const std::vector<ObjectCluster>* clusters = nullptr;
+    float curve_angle = 15.0f;
+    float distance_between = 30.0f;
+    float distance_variation = 10.0f;
+    bool lock_to_water_edge = false;
+
+    if (river) {
+        clusters = &river->object_clusters;
+        curve_angle = river->curve_angle;
+        distance_between = river->distance_between;
+        distance_variation = river->distance_variation;
+        lock_to_water_edge = river->lock_to_water_edge;
+    } else if (ocean) {
+        clusters = &ocean->object_clusters;
+        curve_angle = 0.0f; // oceanos não têm objectplacement no XML de referência
+        distance_between = 30.0f;
+        distance_variation = 10.0f;
+    } else if (lake) {
+        clusters = &lake->object_clusters;
+        curve_angle = lake->curve_angle;
+        distance_between = lake->distance_between;
+        distance_variation = lake->distance_variation;
+        lock_to_water_edge = lake->lock_to_water_edge;
+    } else {
+        LOGW("spawn_water_body_clusters: corpo d'agua '%s' nao encontrado", body_name.c_str());
+        return;
+    }
+
+    if (clusters->empty()) return;
+
+    // Número de posições ao redor do centro: baseado no perímetro e distance_between.
+    // Usamos um raio de referência de ~distance_between * 2 para clusters próximos à beira.
+    const float radius = distance_between * 1.5f;
+    const int num_positions = std::max(4, static_cast<int>(6.28318f * radius / distance_between));
+
+    // Semente determinística baseada no nome do corpo d'água
+    uint32_t seed = 0;
+    for (char c : body_name) seed = seed * 31u + static_cast<uint8_t>(c);
+
+    int spawned = 0;
+    for (const auto& cluster : *clusters) {
+        for (int i = 0; i < num_positions; ++i) {
+            // Ângulo distribuído ao redor do centro, com variação baseada em curve_angle
+            float angle = (6.28318f * i) / static_cast<float>(num_positions);
+            if (curve_angle > 0.0f) {
+                angle += glm::radians(curve_angle * 0.5f);
+            }
+
+            // Variação de distância determinística
+            seed = seed * 1103515245u + 12345u;
+            float dist_var = (static_cast<float>(seed % 1000) / 1000.0f - 0.5f) * 2.0f * distance_variation;
+            float dist = radius + dist_var;
+
+            // Posição no mundo (Y = 0, o terreno vai ajustar via heightmap se necessário)
+            glm::vec3 pos = center + glm::vec3(
+                std::cos(angle) * dist,
+                0.0f,
+                std::sin(angle) * dist
+            );
+
+            // Limita ao mundo jogável (aprox. ±16 unidades conforme is_walkable)
+            if (std::abs(pos.x) > 15.0f || std::abs(pos.z) > 15.0f) continue;
+
+            for (const auto& proto_name : cluster.protounits) {
+                // Tenta carregar a textura do protounit do textures.bar
+                TextureHandle tex = load_ddt_texture(proto_name);
+                if (tex == INVALID_TEXTURE) {
+                    // Fallback: tenta com sufixo .ddt
+                    tex = load_ddt_texture(proto_name + ".ddt");
+                }
+
+                gameplay_world_->spawn_scenery_object(proto_name, pos, 1.0f, tex);
+                ++spawned;
+            }
+        }
+    }
+
+    LOGI("spawn_water_body_clusters: '%s' -> %d objetos spawnados (%d clusters, %d posicoes)",
+         body_name.c_str(), spawned, static_cast<int>(clusters->size()), num_positions);
+}
+
 void Engine::create_skybox_mesh() {
     if (!renderer_) return;
     if (skybox_mesh_ != INVALID_MESH) return;
@@ -2598,6 +2751,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     // --- Initialize GameplayWorld ---
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
+    gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
@@ -2718,6 +2872,37 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
             generate_terrain();
         }
     }
+
+    // Passo 1: aplicar cor e texturas de beira do waterbodies.xmb ao terreno/agua
+    // Passo 2: spawnar clusters de objetos (rochas, árvores) na beira da água
+    const auto& wb = game_data().water_bodies();
+    if (wb.ocean_count() > 0 || wb.river_count() > 0 || wb.lake_count() > 0) {
+        // Tenta Mediterrâneo primeiro (cenário Omens/Atena), depois qualquer outro
+        if (wb.find_ocean("Mediterranean Sea")) {
+            set_water_color_from_body("Mediterranean Sea");
+            load_water_body_textures("Mediterranean Sea");
+            spawn_water_body_clusters("Mediterranean Sea", glm::vec3(0.0f));
+        } else if (wb.find_river("Greek River")) {
+            set_water_color_from_body("Greek River");
+            load_water_body_textures("Greek River");
+            spawn_water_body_clusters("Greek River", glm::vec3(0.0f));
+        } else {
+            const auto& oceans = wb.all_oceans();
+            if (!oceans.empty()) {
+                set_water_color_from_body(oceans[0].name);
+                load_water_body_textures(oceans[0].name);
+                spawn_water_body_clusters(oceans[0].name, glm::vec3(0.0f));
+            } else {
+                const auto& rivers = wb.all_rivers();
+                if (!rivers.empty()) {
+                    set_water_color_from_body(rivers[0].name);
+                    load_water_body_textures(rivers[0].name);
+                    spawn_water_body_clusters(rivers[0].name, glm::vec3(0.0f));
+                }
+            }
+        }
+    }
+
     if (skydome_mesh_ == INVALID_MESH) generate_skydome();
 
     create_in_game_hud();
