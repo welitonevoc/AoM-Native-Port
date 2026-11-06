@@ -2977,18 +2977,24 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
 
     // Amostragem rápida: descarta o offset logo que um valor fora da faixa
     // aparece, sem varrer a grade inteira (o .scn tem ~1 MB e a busca é feita
-    // sobre cada byte).
+    // sobre cada byte). A amostragem também exige variação entre os valores
+    // — regiões de padding (zeros) são rejeitadas de imediato, o que evita
+    // varreduras completas sobre áreas chapadas do arquivo.
     auto sample_is_sane = [&](size_t offset, bool as_int16) -> bool {
         static const size_t kSamples[] = {0, 1, 1023, 1024, 2047, 2048, 4094, 4095};
-        for (size_t index : kSamples) {
-            const float v = read_value(offset, index, as_int16);
+        float lo = 0.0f;
+        float hi = 0.0f;
+        for (size_t i = 0; i < sizeof(kSamples) / sizeof(kSamples[0]); ++i) {
+            const float v = read_value(offset, kSamples[i], as_int16);
             if (as_int16) {
                 if (v < -5000.0f || v > 30000.0f) return false;
             } else if (!std::isfinite(v) || v < kMinElevation || v > kMaxElevation) {
                 return false;
             }
+            if (i == 0) { lo = hi = v; }
+            else { lo = std::min(lo, v); hi = std::max(hi, v); }
         }
-        return true;
+        return (hi - lo) > kMinVariation;
     };
 
     auto grid_is_sane = [&](size_t offset, bool as_int16) -> bool {
@@ -3010,7 +3016,15 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
 
     size_t hm_offset = std::string::npos;
     bool hm_is_int16 = false;
-    for (size_t offset = 128; offset + HM_DATA_SIZE <= data.size(); offset += 4) {
+
+    // A busca fica restrita aos primeiros 512 KB do .scn: no archive do AoM
+    // os dados do mapa estão nessa faixa, e limitar a janela mantém o custo
+    // previsível na thread da UI (o setup da partida não pode se aproximar
+    // do limite de ANR do Android).
+    constexpr size_t kScanWindow = 512 * 1024;
+    const size_t scan_end = std::min(data.size(), kScanWindow);
+
+    for (size_t offset = 128; offset + HM_DATA_SIZE <= scan_end; offset += 4) {
         if (!sample_is_sane(offset, false)) continue;
         if (grid_is_sane(offset, false)) {
             hm_offset = offset;
@@ -3021,7 +3035,7 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
     if (hm_offset == std::string::npos) {
         // Tentar ler como int16 (formato alternativo)
         const size_t HM_DATA_SIZE_16 = HM_COUNT * sizeof(int16_t);
-        for (size_t offset = 128; offset + HM_DATA_SIZE_16 <= data.size(); offset += 2) {
+        for (size_t offset = 128; offset + HM_DATA_SIZE_16 <= scan_end; offset += 2) {
             if (!sample_is_sane(offset, true)) continue;
             if (grid_is_sane(offset, true)) {
                 hm_offset = offset;
