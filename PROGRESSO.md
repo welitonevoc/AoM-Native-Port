@@ -82,16 +82,19 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
    - Arquitetura: novos métodos em engine.h e engine.cpp (pending full implementation)
 
 ### Próximos Passos (Motor do Jogo):
-10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction - EM ANDAMENTO
-    - Após Tech Tree framework disponível
-    - Objetivos variados: destruir TC, eliminar rei, conquistar relíquias,
-      acumulular certo quantidade de recursos, etc.
-    - Arquitetura planejada em `src/engine/engine.cpp`
+10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction - CONCLUÍDO
+    - 3 tipos de missões implementados:
+      0 = Destroy Town Center (padrão)
+      1 = Eliminar Rei/Herói inimigo
+      2 = Acumular recursos alvo (1000 unidades)
+    - Tracking de objetivos (completed/failed) e progresso
+    - Timer de exibição de vitória/derrota
+    - Integração com sistema de vitória existente e HUD
 
-11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game?
-    - Após Missões
+11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game? - EM ANDAMENTO
     - Hotkey/radial menu para selecionar powers divinas durante o jogo
     - Integração com o God Power System já existente em game/god_powers.cpp
+    - Usar a seleção do God Picker (civilização/deus) para determinar powers disponíveis
 
 12. 📋 Teste de Jogo Completo - Playthrough da campanha + God Picker → Jogo
     - Validação final end-to-end: campanha → God Picker → IA de unidades 
