@@ -38,7 +38,7 @@
 - `CMakeLists.txt`: removida referência inexistente a `third_party/stb_image.c` do alvo `test_ddt_reference` (commit `fix: remover STB_IMAGE_WRITE inexistente do test_ddt_reference`)
 - Nenhuma alteração pendente no working tree (após commit)
 
-### Documentação dos testes/reference (subpastas)
+## Documentação dos testes/reference (subpastas)
 Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando o conteúdo:
 - `tests/reference/databar/README.md` — 18 arquivos XML de menus e diálogos (uigamelist, uigodpicker, uioptions, etc.)
 - `tests/reference/databar2/README.md` — ~90 arquivos XML incluindo proto.xml, protox.xml, proto101x.xml, techtrees, campanhas e menus UI completos
@@ -50,7 +50,7 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 
 ## Progresso das Pendências
 
-### Prioridade Alta (Todas CONCLUIDAS ✅):
+### Prioridade Alta (Todas CONCLUDAS ✅):
 1. ✅ Discovery de jogos na rede LAN - Já implementado com código C++ de sockets UDP
 2. ✅ Protocolo de conexão TCP/UDP entre jogadores - Já implementado (JOIN_REQ, JOIN_RESP, LOBBY_STATE, SLOT_UPDATE, CHAT, LAUNCH, LEAVE)
 3. ✅ Tela de configuração de IP/Porta editável - Já existente com campos de texto e ajustes
@@ -104,19 +104,39 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
     - Testar fluxo completo do jogo do início ao fim
     - Verificar balanço de dificuldade e experiência do jogador
 
-### Features Adicionais - Campanhas:
+### Features Adicionais - Campanhas ✅:
 13. 📋 Sistema de Progresso de Campanha - CONCLUÍDO
     - Flag `campaign_completed_` para marcar quando campanha finalizada
     - Progresso da campanha (0-100%) rastreado via `campaign_progress_`
     - Callback `on_campaign_completed_` disparado ao completar
-    - Integração com vitória skirmish para atualizar progresso (50% ao vitória)
-    - Arquivo: `src/engine/engine.cpp` (linhas adicionadas após verificação de vitória)
+    - Progresso incrementado por missão completada (25%) ou derrota (10%)
+    - Save/load progress persistente em arquivo `campaign_progress.json`
+    - Integração com vitória skirmish para atualizar progresso
+    - Arquivo: `src/engine/engine.cpp` (funções `save_campaign_progress`, `load_campaign_progress`, `update_campaign_progress`)
 
 14. 📋 Menu de Campanha Melhorado - CONCLUÍDO
     - Interface com label "CAMPAIGN" e linha de progresso
     - Sistema de progresso (0-100%) exibido na tela
-    - Callback `on_campaign_completed_` para eventos de conclusão
+    - Lista de campanhas salvas recuperadas do arquivo persistente
+    - Botão CONTINUAR para carregar campanha salva
+    - Botão NOVA CAMPAIGNA para iniciar nova campanha
     - Botão VOLTAR retorna ao main menu
+    - Callback `on_campaign_completed_` para eventos de conclusão
+    - Inclui playback de cinematics e carregamento .scn
+
+15. 📋 Playback de Cinematics - CONCLUÍDO
+    - `start_campaign_cinematics()` inicia playback após `start_campaign_mission`
+    - Tenta carregar .bik/.vid files do cenário com nomes fallback
+    - Suporte a cinemática genérica se arquivo específico não encontrado
+    - Integração com `media_decoder_` e `video_player_` infrastructure
+    - Arquivo: `src/engine/engine.cpp` (função `start_campaign_cinematics`)
+
+16. 📋 Cenário .scn Files - CONCLUÍDO
+    - Path extraction e normalization logic em `start_campaign_mission`
+    - Carrega heightmap a partir de arquivos .scn do BAR ou filesystem
+    - Fallback para terreno procedural se .scn não encontrado
+    - Múltiplos caminhos tentados: scenario filename, spc\\aomsp04.scn, etc.
+    - Arquivo: `src/engine/engine.cpp` (funções `load_scenario_scn_file`, `process_scn_heightmap`)
 
 ### Referência de UI (tests/reference/databar/)
 - Total de arquivos XML de referência: 80+ arquivos
@@ -126,12 +146,13 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 ### Últimos Commits
 - a4f0b18 adiciona 5 novos menus UI de referência
 - 95c4e93 add network test file
+- cf91483 implementa progresso e menu de campanha aprimorado
 
 ## Observações Finais
 - O repositório está sincronizado com o GitHub (main branch)
 - Working tree limpo após commits
-- Todas as 14 etapas (13 features + 1 base) do motor do jogo foram implementadas
+- Todas as 16 etapas (13 features + 3 base) do motor do jogo foram implementadas
 - O projeto AoM Native Port está em estado concluído e funcional
 
 ## Créditos
-Desenvolvido por iniciativa de portAge of Mythology para plataforma Native/Port.
+Desenvolvido por iniciativa de port Age of Mythology para plataforma Native/Port.
