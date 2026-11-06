@@ -41,7 +41,23 @@ struct EngineConfig {
     float render_scale = 1.0f;
     int max_fps = 60;
     std::string language = "portuguese";
+    
+    // --- Novas opções para Android ---
+    bool enable_virtual_joystick = true;
+    float touch_sensitivity = 1.0f;
+    int graphics_quality = 2; // 0=Baixa, 1=Média, 2=Alta
+    int target_fps = 60;
+    bool high_contrast_mode = false;
+    bool large_text_size = false;
+    bool reduce_battery_mode = false;
+    bool enable_screen_orientation_lock = true;
+    int screen_orientation = 0; // 0=Auto, 1=Retrato, 2=Paisagem
 };
+
+// Forward declaration for network
+class NetworkManager;
+
+// Membros da classe Engine
 
 class GameplayWorld;
 enum class ResourceType;
@@ -114,6 +130,10 @@ enum class EngineState {
     UI_MP_LAUNCH_SCREEN,
     UI_MP_LOGIN,
     UI_MP_OTHER_SETTINGS,
+    UI_MP_PASSPORT,
+    UI_MP_PASSPORT_TAKEN,
+    UI_MP_SETUP_FINAL,
+    UI_MP_LOGIN,
     UI_MP_PASSPORT,
     UI_MP_PASSPORT_TAKEN,
     UI_MP_SETUP_FINAL,

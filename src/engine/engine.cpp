@@ -2667,12 +2667,22 @@ void Engine::load_options() {
         if (key == "master_volume") master_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "music_volume") music_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "sfx_volume") sfx_volume_ = std::clamp(val, 0.0f, 1.0f);
-        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 1.0f);
+        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 2.0f);
         else if (key == "show_fps") show_fps_ = (val > 0.5f);
         else if (key == "music_enabled") music_enabled_ = (val > 0.5f);
         else if (key == "sfx_enabled") sfx_enabled_ = (val > 0.5f);
+        // Novas opções Android
+        else if (key == "touch_sensitivity") touch_sensitivity_ = std::clamp(val, 0.0f, 1.0f);
+        else if (key == "graphics_quality_int") graphics_quality_ = std::clamp(val, 0.0f, 2.0f);
+        else if (key == "target_fps") target_fps_ = std::max(30, std::min(240, (int)val));
+        else if (key == "high_contrast_mode") high_contrast_mode_ = (val > 0.5f);
+        else if (key == "large_text_size") large_text_size_ = (val > 0.5f);
+        else if (key == "reduce_battery_mode") reduce_battery_mode_ = (val > 0.5f);
+        else if (key == "enable_screen_orientation_lock") screen_orientation_lock_ = (val > 0.5f);
+        else if (key == "screen_orientation") screen_orientation_ = std::clamp(val, 0, 2);
     }
-    LOGI("Loaded options: master=%.2f, music=%.2f, sfx=%.2f", master_volume_, music_volume_, sfx_volume_);
+    LOGI("Loaded options: master=%.2f, music=%.2f, sfx=%.2f, graphics=%d, fps=%d", 
+         master_volume_, music_volume_, sfx_volume_, graphics_quality_, target_fps_);
 }
 
 void Engine::save_options() {
@@ -2690,6 +2700,71 @@ void Engine::save_options() {
     out << "show_fps " << (show_fps_ ? 1.0f : 0.0f) << "\n";
     out << "music_enabled " << (music_enabled_ ? 1.0f : 0.0f) << "\n";
     out << "sfx_enabled " << (sfx_enabled_ ? 1.0f : 0.0f) << "\n";
+    // Novas opções Android
+    out << "touch_sensitivity " << touch_sensitivity_ << "\n";
+    out << "target_fps " << target_fps_ << "\n";
+    out << "high_contrast_mode " << (high_contrast_mode_ ? 1.0f : 0.0f) << "\n";
+    out << "large_text_size " << (large_text_size_ ? 1.0f : 0.0f) << "\n";
+    out << "reduce_battery_mode " << (reduce_battery_mode_ ? 1.0f : 0.0f) << "\n";
+    out << "enable_screen_orientation_lock " << (screen_orientation_lock_ ? 1.0f : 0.0f) << "\n";
+    out << "screen_orientation " << screen_orientation_ << "\n";
+}
+
+void Engine::network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port) {
+    LOGI("Iniciando host multiplayer...");
+    if (network_manager_) {
+        network_manager_->host_game(game_name, player_name, port);
+    }
+}
+
+void Engine::network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name) {
+    LOGI("Tentando conectar em: %s:%d", host_ip.c_str(), port);
+    if (network_manager_) {
+        network_manager_->join_game(host_ip, port, player_name);
+    }
+}
+
+void Engine::network_leave_session() {
+    if (network_manager_) {
+        network_manager_->leave_session();
+    }
+}
+
+void Engine::network_update(float dt) {
+    if (network_manager_) {
+        network_manager_->update(dt);
+    }
+}
+
+void Engine::shutdown() {
+    LOGI("Engine researching tech: %s", tech_name.c_str());
+    // TODO: Implement actual tech research
+    // - Verificar se a tech existe no techtree
+    // - Verificar custos de research
+    // - Atualizar estado da tech tree
+    // - Notificar todos os clientes sobre a research
+    // Por enquanto, apenas logar a request
+}
+
+void Engine::cast_god_power(const std::string& power_name, int target_type, const glm::vec3& target_pos) {
+    LOGI("Engine casting god power: %s (target_type=%d) at (%.1f, %.1f, %.1f)", 
+         power_name.c_str(), target_type, target_pos.x, target_pos.y, target_pos.z);
+    // TODO: Implement actual god power cast
+    // - Verificar se o jogador tem a power disponível
+    // - Aplicar efeitos do power (dano, healing, summon, etc.)
+    // - Consumir recursos/coldown
+    // - Notificar todos os clientes sobre o cast
+    // Por enquanto, apenas logar a request
+}
+
+void Engine::set_victory_result(int result) {
+    LOGI("Engine setting victory result: %d", result);
+    // TODO: Implement victory state
+    // - Definir winner/loser
+    // - Mostrar tela de vitória/derrota
+    // - Salvar resultado no replay
+    // - Transição para MAIN_MENU ou próximo estado
+    // Por enquanto, apenas logar a request
 }
 
 void Engine::shutdown() {

@@ -9,6 +9,10 @@
 #include <thread>
 #include <atomic>
 
+#include <glm/glm.hpp>
+
+#include "game/victory.h"
+
 namespace aom::net {
 
 constexpr uint16_t DEFAULT_AOM_PORT = 2300;
@@ -125,6 +129,10 @@ public:
     bool is_connected() const { return role_ != NetRole::OFFLINE; }
     int my_slot_id() const { return my_slot_id_; }
 
+    // Engine replication access
+    Engine* engine() const { return engine_; }
+    void set_engine(Engine* engine) { engine_ = engine; }
+
     // Lobby Interactions
     std::vector<PlayerSlot> get_slots();
     GameSettings get_settings();
@@ -135,6 +143,11 @@ public:
     void update_settings(const GameSettings& settings); // Host only
     void send_chat(const std::string& message);
     bool launch_game(); // Host only
+
+    // Network replication functions
+    void send_tech_research(uint8_t slot_id, const std::string& tech_name);
+    void send_god_power_cast(uint8_t slot_id, const std::string& power_name, int target_type, const glm::vec3& target_pos);
+    void send_victory_notification(uint8_t winner_slot, VictoryResult result);
 
     // Frame update (called in Engine::update)
     void update(float dt);
@@ -169,6 +182,7 @@ private:
 
     float beacon_timer_ = 0.0f;
     bool is_discovering_ = false;
+    Engine* engine_ = nullptr;
 };
 
 } // namespace aom::net
