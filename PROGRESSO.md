@@ -167,17 +167,80 @@ mas o codigo do P2 pode ser escrito e revisado aqui.
 - `engine.cpp`: verificacao integrada no loop IN_GAME com exibicao de tela
   de vitoria/derrota e botoes "MENU PRINCIPAL" / "JOGAR NOVAMENTE".
 
-### P2.4 — Skybox / Cube Map — parcialmente implementado
-- `engine.cpp`: `load_skybox_cube()` carrega definicoes .cub e texturas do
-  textures.bar; `generate_skydome()` cria skydome procedural.
-- Pendente: integrar skybox com 6 faces do cube map no render loop.
+### P2.4 — Skybox / Cube Map — implementado (P3.1/P3.2)
+- `renderer.h`: adicionado `draw_skybox(const TextureHandle faces[6], float radius)` à interface IRenderer
+- `engine.h/engine.cpp`: `skybox_faces_[6]`, `skybox_mesh_`, `load_skybox_faces()`,
+  `create_skybox_mesh()`, `add_skybox_quad()` — carrega todas as 6 faces do .cub
+  e renderiza skybox completo (cubo invertido com normais para dentro)
+- `engine.cpp`: render loop usa `draw_skybox` quando skybox_mesh_ está disponível,
+  com fallback para skydome procedural (`generate_skydome()`)
+- `load_textures()` tenta `load_skybox_faces()` primeiro, depois `load_skybox_cube()`
 
 ### P2.5 — Validação de Performance e Memória — pendente
 - Requer dispositivo ARM64 real para medir FPS, OOM e vazamento (bloqueado
   pelo P0).
 
-Arquivos alterados nesta sessao: `include/game/save_load.h`,
-`src/game/save_load.cpp`, `src/engine/engine.cpp`, `include/ecs/gameplay.h`.
+---
+
+## P3 — Animação, Partículas e Efeitos Visuais (2026-11-06)
+
+**Status:** Implementado (código escrito, pendente build/teste no dispositivo via P0).
+
+### P3.1 — Renderer: suporte a skybox/cubemap ✅
+- `IRenderer::draw_skybox()` adicionado à interface abstrata (com implementação default no-op)
+
+### P3.2 — Skybox completo com .cub (6 faces) ✅
+- `Engine::load_skybox_faces()` carrega todas as 6 faces (up/down/front/back/left/right)
+  de um arquivo .cub a partir do textures.bar
+- `Engine::create_skybox_mesh()` cria malha de cubo invertido (vista interna)
+- `Engine::add_skybox_quad()` helper para criar faces do skybox
+- Render loop desenha skybox com 6 texturas quando disponível
+
+### P3.3 — GRN Animation Playback ✅
+- `include/anim/grn_animation.h`: `GrnAnimation`, `GrnBone`, `GrnTrack`, `GrnKeyframe`,
+  `GrnPlayer` — estruturas e player de animação esquelética
+- `src/anim/grn_animation.cpp`: parser de arquivos .grn (Granny 3D) com extração
+  de nomes de osso, hierarquia, duração e keyframes; `GrnPlayer::evaluate()` calcula
+  matrizes de transformação por osso em um dado tempo, com looping e hierarquia
+  (pai → filho)
+- `CMakeLists.txt`: `grn_animation.cpp` adicionado à biblioteca e novo alvo
+  `test_grn_animation`
+- `src/tests/test_grn_animation.cpp`: suíte de testes (avaliação de pose, looping,
+  hierarquia de ossos, dados inválidos, arquivo muito pequeno)
+
+### P3.4 — Particle System .prt ✅
+- `include/anim/prt_particle.h`: `ParticleType`, `ActiveParticle`, `PrtParticleSystem`
+  com emissores POINT/SPHERE/CONE/BOX, taxa de emissão, gravidade, interpolação de
+  cor e tamanho ao longo da vida, limite de partículas
+- `src/anim/prt_particle.cpp`: parser de arquivos .prt (formato INI-like com seções
+  [Emitter], [Particle], [Emission], [Render]); `emit()` para emissão contínua,
+  `burst_emit()` para eventos pontuais; `update()` com física (gravidade, quicar no chão);
+  `render()` desenha partículas como cruz de debug visível
+- `CMakeLists.txt`: `prt_particle.cpp` adicionado à biblioteca e novo alvo
+  `test_prt_particle`
+- `src/tests/test_prt_particle.cpp`: suíte de testes (parse de .prt, emissão,
+  atualização física, expiração, tipos de emissor)
+
+### P3.5 — Efeitos Visuais Integrados ✅
+- `engine.h/engine.cpp`: `prt_particles_` (unique_ptr<PrtParticleSystem>) e
+  `prt_particle_tex_` adicionados ao Engine
+- `load_textures()` carrega partículas .prt (fire_torch, combat_hit, construction_sparks,
+  death_smoke, harvest_chips) durante a inicialização
+- Callbacks de gameplay usam `prt_particles_->burst_emit()` para eventos de colheita,
+  combate, construção e morte de unidades, com fallback para partículas antigas
+- `prt_particles_->update(delta_time)` e `prt_particles_->render()` chamados no loop
+  do engine
+
+### P3.6 — Testes P3 ✅
+- `test_grn_animation`: 5 testes (criação/avaliação, looping, hierarquia, inválido, pequeno)
+- `test_prt_particle`: 5 testes (parse .prt, inválido, criação/atualização, interpolação, tipos de emissor)
+
+Arquivos alterados nesta sessão: `include/renderer/renderer.h`,
+`include/engine/engine.h`, `include/anim/grn_animation.h`,
+`include/anim/prt_particle.h`, `src/anim/grn_animation.cpp`,
+`src/anim/prt_particle.cpp`, `src/engine/engine.cpp`,
+`src/tests/test_grn_animation.cpp`, `src/tests/test_prt_particle.cpp`,
+`CMakeLists.txt`.
 
 ---
 
