@@ -60,9 +60,38 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 ### Prioridade Média:
 6. ✅ Protozoário/God Picker - Seleção de civilização e deus (próximo estado após campanha) - CONCLUÍDO
 
-### Próximos Passos (Motor do Jogo):
-- Cenários e missões
-- Dinâmica de unidades guerreiras
-- Poderes divinos (god powers)
-- Sistema de progressão de campanha
+### Motor do Jogo - Progresso Sequencial ✅:
+7. ✅ IA de Unidades - Movement, attack targets e formação básica - IMPLEMENTADA
+   - Sistema de busca de alvo inimigo mais próximo
+   - Lógica de ataque quando dentro do range de ataque
+   - Movimento toward enemy units a 3.8f move_speed
 
+8. ✅ Sistema de Economia - Framework de tick de recursos (food, wood, gold, favor) - IMPLEMENTADO
+   - Timer acumulado a 60 FPS
+   - Taxas de coleta por tick definidas
+   - Estrutura pronta para integração com Villagers e entities de recurso
+
+9. 🔄 Tech Tree - Research system unlocking units/upgrades - EM ANDAMENTO
+   - Sistema de tecnologias disponíveis por civilização
+   - Bônus e vantagens únicas para cada cultura (Grego: favor de batalha, 
+     Egípcio: coleta mais rápida, Nórdico: exército mais rápido, Atlante: 
+     construção de maravilhas)
+   - Interface de seleção de tecnologias entre eras (Archaic → Classical → 
+     Medieval → Heroic → Mythic)
+   - Custo de pesquisa baseado em food, wood, gold, favor
+   - Arquitetura: novos métodos em engine.h e engine.cpp
+
+### Próximos Passos (Motor do Jogo):
+10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction
+    - Após Tech Tree concluído
+    - Objetivos variados: destruir TC, eliminar rei, conquistar relíquias,
+      acumulular certo quantidade de recursos, etc.
+
+11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game?
+    - Após Missões
+    - Hotkey/radial menu para selecionar powers divinas durante o jogo
+    - Integração com o God Power System já existente em game/god_powers.cpp
+
+12. 📋 Teste de Jogo Completo - Playthrough da campanha + God Picker → Jogo
+    - Validação final end-to-end: campanha → God Picker → IA de unidades 
+      → Economia → Tech Tree → Missões

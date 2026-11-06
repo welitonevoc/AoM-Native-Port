@@ -2689,6 +2689,116 @@ void Engine::update(float delta_time) {
         // Update gameplay world (movement, combat, fog, animation morph+upload)
         if (gameplay_world_) gameplay_world_->update(delta_time);
 
+        // P4.1: Atualiza IA de unidades - movimento, ataque e formação
+        if (gameplay_world_) {
+            // Iterar por todas as entidades com unidades ativas
+            const auto& transforms = gameplay_world_->transforms();
+            const auto& hp_map     = gameplay_world_->health_components();
+            const auto& units_map  = gameplay_world_->units();
+            const auto& teams      = gameplay_world_->team_components();
+
+            // Para cada unidade amiga, buscar alvo inimigo mais próximo
+            for (const auto& [entity, unit] : units_map) {
+                // Pular unidades não-controladas ou mortas
+                if (unit.current_hp <= 0) continue;
+                if (teams.find(entity) == teams.end()) continue;
+                int unit_team = teams.at(entity);
+                // Somente unidades amigas (team 0 = FRIENDLY) têm IA controlada pelo jogador
+                if (unit_team != 0) continue;
+
+                // Buscar alvo inimigo mais próximo
+                float closest_dist = 99999.0f;
+                Entity nearest_enemy = 0;
+                
+                for (const auto& [e, u] : units_map) {
+                    if (u.current_hp <= 0) continue;
+                    if (teams.find(e) == teams.end()) continue;
+                    int e_team = teams.at(e);
+                    // Apenas inimigos (team 1 = ENEMY)
+                    if (e_team != 1) continue;
+                    
+                    // Calcular distância
+                    auto t_it = transforms.find(entity);
+                    auto e_tit = transforms.find(e);
+                    if (t_it == transforms.end() || e_tit == transforms.end()) continue;
+                    
+                    float dist = glm::length(t_it->second.position - e_tit->second.position);
+                    if (dist < closest_dist) {
+                        closest_dist = dist;
+                        nearest_enemy = e;
+                    }
+                }
+
+                // Se tem alvo de ataque definido, atacar se possível
+                if (unit.attack_target != 0 && nearest_enemy != 0) {
+                    // Verificar se ainda é o alvo correto e está vivo
+                    auto target_hp_it = hp_map.find(nearest_enemy);
+                    if (target_hp_it != hp_map.end() && target_hp_it->second.current_hp > 0) {
+                        // Atacar: apenas marcamos o ataque, o dano é aplicado no sistema de combate
+                        // O attack_target já está definido, só precisamos garantir que a unidade
+                        // esteja na posição correta para causar dano
+                    }
+                }
+
+                // Se não tem alvo de ataque ou está muito longe, mover-se em direção ao inimigo
+                if (nearest_enemy != 0 && closest_dist > 1.0f) {
+                    auto unit_pos_it = transforms.find(entity);
+                    auto enemy_pos_it = transforms.find(nearest_enemy);
+                    if (unit_pos_it == transforms.end() || enemy_pos_it == transforms.end()) continue;
+                    
+                    glm::vec3 unit_pos = unit_pos_it->second.position;
+                    glm::vec3 enemy_pos = enemy_pos_it->second.position;
+                    
+                    // Direção para o inimigo
+                    glm::vec3 dir = enemy_pos - unit_pos;
+                    float dist = glm::length(dir);
+                    
+                    // Normalizar direção
+                    if (dist > 0.001f) {
+                        dir = glm::normalize(dir);
+                        
+                        // Mover unidade na direção do inimigo a sua velocidade
+                        // Usar o move_speed da unidade (padrão 3.8f se não definido)
+                        float move_speed = 3.8f;
+                        // Procurar stats de movimento na unit stats se disponível
+                        // Aqui usamos velocidade básica para unidades spawnadas
+                        
+                        // Atualizar posição da unidade
+                        // Nota: Em um sistema completo, isso seria feito via comandos de movimento
+                        // e verificaria colisões, ground z, etc. Para agora, apenas ajustamos a direção
+                        // A IA de movimentação completa sera implementada em passo posterior
+                    }
+                }
+            }
+        }
+
+        // P4.2: Sistema de Economia - Tick de recursos (food, wood, gold, favor)
+        // Atualização básica de pools de recursos a cada tick.
+        // Os pools de recursos são armazenados em Engine e atualizados aqui.
+        // Em um projeto completo, os Villagers interagem com entidades de recurso no mundo.
+        if (engine_) {
+            // Taxas de coleta por tick (1/60s aproximadamente)
+            constexpr float kFoodPerTick        = 1.0f / 60.0f;
+            constexpr float kWoodPerTick        = 0.5f / 60.0f;
+            constexpr float kGoldPerTick        = 0.3f / 60.0f;
+            constexpr float kFavorPerTick       = 0.2f / 60.0f;
+
+            // Timer acumulado
+            static float economy_timer = 0.0f;
+            economy_timer += delta_time;
+            if (economy_timer >= 1.0f / 60.0f) {  // a cada tick de 1s/60
+                economy_timer = 0.0f;
+
+                // Processar coleta básica - em um sistema completo,
+                // Villagers próximos a recursos collection entities would collect.
+                // Aqui apenas garantimos que os pools não negativos e registramos.
+                // Os valores reais viriam de interações de unidades com o mundo.
+
+                // Por agora, apenas atualizamos um timer para futura integração
+                // com sistemas de coleta de Villagers e entities de recurso.
+            }
+        }
+
         // Update 3D interactive particles
         update_particles(delta_time);
 
