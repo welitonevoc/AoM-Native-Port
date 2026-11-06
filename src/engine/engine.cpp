@@ -833,11 +833,14 @@ void Engine::start_game() {
     if (terrain_mesh_ == INVALID_MESH) {
         bool heightmap_loaded = false;
         if (scenarios_bar_ && scenarios_bar_->file_count() > 0) {
+            // Limite de tentativas: cada .scn e varrido byte a byte na busca
+            // do height-map, e o archive do AoM tem dezenas de cenários.
+            int attempts = 0;
             for (const BarEntry& entry : scenarios_bar_->entries()) {
-                if (ends_with(to_lower(entry.filename), ".scn")) {
-                    heightmap_loaded = load_scenario_heightmap(entry.filename);
-                    if (heightmap_loaded) break;
-                }
+                if (!ends_with(to_lower(entry.filename), ".scn")) continue;
+                if (++attempts > 6) break;
+                heightmap_loaded = load_scenario_heightmap(entry.filename);
+                if (heightmap_loaded) break;
             }
         }
         if (!heightmap_loaded) {
@@ -2275,6 +2278,28 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
     std::string custom_scn = "assets/scenario/spc/aomsp04.scn";
     mission_mgr_->init_mission_omens(gameplay_world_.get(), scenarios_bar_.get(), custom_scn, &camera_);
 
+    // Terreno 3D da campanha: o height-map vem do proprio cenario da missao
+    // ('spc\aomsp04.scn' — mapa "Omens"). O fluxo de campanha nao criava
+    // `terrain_mesh_`/`skydome_mesh_`, de modo que a partida renderizava
+    // apenas o clear color, sem o mapa nem as unidades sobre ele.
+    if (terrain_mesh_ == INVALID_MESH) {
+        bool heightmap_loaded = false;
+        static const char* kMissionScn[] = {
+            "spc\\aomsp04.scn", "spc/aomsp04.scn", "aomsp04.scn"
+        };
+        for (const char* scn : kMissionScn) {
+            if (load_scenario_heightmap(scn)) {
+                heightmap_loaded = true;
+                break;
+            }
+        }
+        if (!heightmap_loaded) {
+            LOGI("Cenario da missao sem height-map — usando terreno procedural");
+            generate_terrain();
+        }
+    }
+    if (skydome_mesh_ == INVALID_MESH) generate_skydome();
+
     create_in_game_hud();
     const auto setup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                               std::chrono::steady_clock::now() - setup_start)
@@ -2860,11 +2885,28 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
     // Ler arquivo do scenarios.bar ou do filesystem
     std::vector<uint8_t> data;
     if (scenarios_bar_ && scenarios_bar_->file_count() > 0) {
-        // Extrair do arquivo BAR
-        for (const BarEntry& entry : scenarios_bar_->entries()) {
-            if (ends_with(to_lower(entry.filename), ".scn")) {
-                data = scenarios_bar_->extract(entry);
-                if (!data.empty()) break;
+        // Preferir o cenário pedido: a campanha usa 'spc\aomsp04.scn' e o
+        // height-map precisa ser o do mapa realmente carregado. Sem isso,
+        // o primeiro '.scn' do arquivo era usado e o terreno não batia com a
+        // partida (ou nem existia, pois o archive usa separadores '\').
+        const BarEntry* wanted = scenarios_bar_->find(scenario_path);
+        if (wanted) {
+            data = scenarios_bar_->extract(*wanted);
+            if (!data.empty()) {
+                LOGI("Height-map: usando o cenario pedido '%s'", wanted->filename.c_str());
+            }
+        }
+        if (data.empty()) {
+            // Fallback: primeiro '.scn' disponivel no archive
+            for (const BarEntry& entry : scenarios_bar_->entries()) {
+                if (ends_with(to_lower(entry.filename), ".scn")) {
+                    data = scenarios_bar_->extract(entry);
+                    if (!data.empty()) {
+                        LOGW("Height-map: cenario '%s' nao encontrado no BAR, usando '%s'",
+                             scenario_path.c_str(), entry.filename.c_str());
+                        break;
+                    }
+                }
             }
         }
     }
@@ -2907,15 +2949,70 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
 
     const int HM_WIDTH = 64;
     const int HM_HEIGHT = 64;
-    const size_t HM_DATA_SIZE = static_cast<size_t>(HM_WIDTH) * HM_HEIGHT * sizeof(float);
+    const size_t HM_COUNT = static_cast<size_t>(HM_WIDTH) * HM_HEIGHT;
+    const size_t HM_DATA_SIZE = HM_COUNT * sizeof(float);
 
-    // Procurar por dados de height-map após o cabeçalho (offsets comuns)
+    // Procurar por dados de height-map após o cabeçalho.
+    //
+    // A busca valida a GRADE INTEIRA, não apenas o primeiro valor: um único
+    // float "razoável" aparece por acaso em qualquer blob binário, e acceptá-lo
+    // gerava um terreno com elevações de ~1e38 (cena invisível e vértices
+    // degenerados). Só é aceito um offset em que todos os 4096 valores são
+    // finitos, cabem numa faixa de elevação plausível e apresentam variação
+    // real — um grid constante é padding/zeros e não um mapa.
+    constexpr float kMinElevation = -500.0f;
+    constexpr float kMaxElevation = 3000.0f;
+    constexpr float kMinVariation = 0.05f;
+
+    auto read_value = [&](size_t offset, size_t index, bool as_int16) -> float {
+        if (as_int16) {
+            int16_t raw;
+            std::memcpy(&raw, data.data() + offset + index * sizeof(int16_t), sizeof(int16_t));
+            return static_cast<float>(raw);
+        }
+        float raw;
+        std::memcpy(&raw, data.data() + offset + index * sizeof(float), sizeof(float));
+        return raw;
+    };
+
+    // Amostragem rápida: descarta o offset logo que um valor fora da faixa
+    // aparece, sem varrer a grade inteira (o .scn tem ~1 MB e a busca é feita
+    // sobre cada byte).
+    auto sample_is_sane = [&](size_t offset, bool as_int16) -> bool {
+        static const size_t kSamples[] = {0, 1, 1023, 1024, 2047, 2048, 4094, 4095};
+        for (size_t index : kSamples) {
+            const float v = read_value(offset, index, as_int16);
+            if (as_int16) {
+                if (v < -5000.0f || v > 30000.0f) return false;
+            } else if (!std::isfinite(v) || v < kMinElevation || v > kMaxElevation) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    auto grid_is_sane = [&](size_t offset, bool as_int16) -> bool {
+        float lo = 0.0f;
+        float hi = 0.0f;
+        for (size_t i = 0; i < HM_COUNT; ++i) {
+            const float v = read_value(offset, i, as_int16);
+            if (as_int16) {
+                if (v < -5000.0f || v > 30000.0f) return false;
+            } else if (!std::isfinite(v) || v < kMinElevation || v > kMaxElevation) {
+                return false;
+            }
+            if (i == 0) { lo = hi = v; }
+            else { lo = std::min(lo, v); hi = std::max(hi, v); }
+        }
+        // Uma região constante (padding/zeros) não é um mapa.
+        return (hi - lo) > kMinVariation;
+    };
+
     size_t hm_offset = std::string::npos;
+    bool hm_is_int16 = false;
     for (size_t offset = 128; offset + HM_DATA_SIZE <= data.size(); offset += 4) {
-        // Heurística: valores de elevação devem estar em um range razoável (-50 a +500)
-        float test_val;
-        std::memcpy(&test_val, data.data() + offset, sizeof(float));
-        if (test_val > -100.0f && test_val < 1000.0f && std::isfinite(test_val)) {
+        if (!sample_is_sane(offset, false)) continue;
+        if (grid_is_sane(offset, false)) {
             hm_offset = offset;
             break;
         }
@@ -2923,19 +3020,17 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
 
     if (hm_offset == std::string::npos) {
         // Tentar ler como int16 (formato alternativo)
-        const size_t HM_DATA_SIZE_16 = static_cast<size_t>(HM_WIDTH) * HM_HEIGHT * sizeof(int16_t);
+        const size_t HM_DATA_SIZE_16 = HM_COUNT * sizeof(int16_t);
         for (size_t offset = 128; offset + HM_DATA_SIZE_16 <= data.size(); offset += 2) {
-            int16_t test_val;
-            std::memcpy(&test_val, data.data() + offset, sizeof(int16_t));
-            if (test_val > -1000 && test_val < 10000) {
+            if (!sample_is_sane(offset, true)) continue;
+            if (grid_is_sane(offset, true)) {
                 hm_offset = offset;
-                // Marcar como formato int16
-                heightmap_scale_ = 0.1f; // Escala para int16
+                hm_is_int16 = true;
                 break;
             }
         }
         if (hm_offset == std::string::npos) {
-            LOGW("Could not locate height-map data in .scn file");
+            LOGW("Could not locate a sane height-map grid in .scn file (%zu bytes)", data.size());
             return false;
         }
     }
@@ -2943,26 +3038,26 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
     // Extrair dados de elevação
     heightmap_width_ = HM_WIDTH;
     heightmap_height_ = HM_HEIGHT;
-    heightmap_scale_ = (heightmap_scale_ == 0.1f) ? 0.1f : 1.0f;
-    heightmap_data_.resize(HM_WIDTH * HM_HEIGHT);
+    heightmap_scale_ = hm_is_int16 ? 0.1f : 1.0f;
+    heightmap_data_.resize(HM_COUNT);
 
-    if (heightmap_scale_ == 0.1f) {
+    if (hm_is_int16) {
         // Formato int16
-        for (int i = 0; i < HM_WIDTH * HM_HEIGHT; ++i) {
+        for (size_t i = 0; i < HM_COUNT; ++i) {
             int16_t val;
             std::memcpy(&val, data.data() + hm_offset + i * sizeof(int16_t), sizeof(int16_t));
             heightmap_data_[i] = static_cast<float>(val) * heightmap_scale_;
         }
     } else {
         // Formato float32
-        for (int i = 0; i < HM_WIDTH * HM_HEIGHT; ++i) {
+        for (size_t i = 0; i < HM_COUNT; ++i) {
             std::memcpy(&heightmap_data_[i], data.data() + hm_offset + i * sizeof(float), sizeof(float));
             if (!std::isfinite(heightmap_data_[i])) heightmap_data_[i] = 0.0f;
         }
     }
 
-    LOGI("Loaded height-map from .scn: %dx%d, scale=%.2f, range=[%.2f, %.2f]",
-         heightmap_width_, heightmap_height_, heightmap_scale_,
+    LOGI("Loaded height-map from .scn: %dx%d, offset=%zu, escala=%.2f, range=[%.2f, %.2f]",
+         heightmap_width_, heightmap_height_, hm_offset, heightmap_scale_,
          *std::min_element(heightmap_data_.begin(), heightmap_data_.end()),
          *std::max_element(heightmap_data_.begin(), heightmap_data_.end()));
 
@@ -2980,6 +3075,23 @@ void Engine::generate_terrain_from_heightmap(const std::vector<float>& heightmap
     const float HALF_W = (width * STEP) * 0.5f;
     const float HALF_H = (height * STEP) * 0.5f;
 
+    // Normaliza a amplitude vertical para a mesma escala do terreno
+    // procedural (~±3 unidades). As elevações do .scn vêm em unidades
+    // próprias do formato e podem chegar a centenas ou milhares; sem esta
+    // normalização a malha ficaria com picos verticais e a câmera ficaria
+    // dentro ou fora do terreno.
+    std::vector<float> heights = heightmap;
+    const float h_min = *std::min_element(heights.begin(), heights.end());
+    const float h_max = *std::max_element(heights.begin(), heights.end());
+    constexpr float kTargetAmplitude = 3.0f;
+    if (h_max > h_min) {
+        const float factor = kTargetAmplitude / (h_max - h_min);
+        const float mid = (h_max + h_min) * 0.5f;
+        for (float& h : heights) h = (h - mid) * factor;
+    } else {
+        std::fill(heights.begin(), heights.end(), 0.0f);
+    }
+
     std::vector<TerrainVertex> verts;
     verts.reserve(static_cast<size_t>(width) * height);
     std::vector<uint32_t> indices;
@@ -2987,7 +3099,7 @@ void Engine::generate_terrain_from_heightmap(const std::vector<float>& heightmap
 
     auto get_height = [&](int x, int z) -> float {
         if (x < 0 || x >= width || z < 0 || z >= height) return 0.0f;
-        return heightmap[static_cast<size_t>(z) * width + x];
+        return heights[static_cast<size_t>(z) * width + x];
     };
 
     for (int z = 0; z < height; ++z) {

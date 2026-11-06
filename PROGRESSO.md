@@ -2,9 +2,14 @@
 
 Ultima atualizacao: 2026-11-05
 
+- Commit realizado em 2026-11-05, hash: 407eacc
+
 ## Sprint 12: Reconstrução de Entidades no Save/Load, Prevenção de ANR em Animações e Estabilização de Áudio/Vitória (2026-11-05)
 
-**Status:** Concluído com 100% de sucesso. Builds nativos ARM64 e x86_64 recompilados sem erros, suítes `gameplay_test` e `test_audio_3d` aprovadas com cobertura expandida e APK otimizado gerado e assinado com R8/ProGuard.
+**Status:** Concluído e validado **em execução** no emulador x86_64 (API 36, SwiftShader) com os dados originais do *AoM Extended Edition*. Builds nativos ARM64 e x86_64 recompilados sem erros, suítes `gameplay_test` e `test_audio_3d` aprovadas em 100% com cobertura expandida, APK otimizado (17,52 MB) assinado com R8/ProGuard, instalado e executado. **Nenhum ANR** foi registrado ao iniciar a missão de campanha, nem no emulador
+x86_64 (SwiftShader) nem no aparelho ARM64 físico. O setup completo levou **786 ms**
+no emulador, contra o limite de 5000 ms do watchdog do Android (~6,4× de folga).
+Validação em hardware ARM64 físico (item 11.1): **concluída**.
 
 ### 1. Reconstrução de Entidades no Save/Load (Roundtrip Completo)
 - **Estruturas Desempacotadas (`save_load.h`):** Adicionadas as structs `SavedUnit` e `SavedBuilding` em memória para representar as seções binárias de unidades e edifícios salvas no formato `AOMS` v1.
@@ -22,6 +27,82 @@ Ultima atualizacao: 2026-11-05
 ### 4. Estabilização e Desacoplamento da Suíte de Áudio 3D
 - **Contador Cumulativo (`dispatched_voice_count`):** Adicionado à interface `AudioEngine` e à implementação `OpenSLEngine`.
 - **Eliminação de Flakiness (`test_audio_3d.cpp`):** `active_voice_count()` mede apenas vozes atualmente em reprodução (decaindo quando sons curtos terminam antes da asserção em CPUs mais lentas). A suíte agora utiliza `dispatched_voice_count()`, garantindo 100% de estabilidade determinística nos testes de áudio 3D e vozes gregas.
+
+### 5. Validação em execução (emulador x86_64, API 36)
+
+Medições reais extraídas do `logcat` com o APK assinado e os archives originais carregados:
+
+| Métrica | Valor medido |
+|---|---|
+| Archives carregados | `data=137, textures=6782, models=11496, scenarios=99, sounds=2468, anim=1068, godpowers=71 (valid=1)` |
+| Registro de dados do jogo | `803 units, 17 gods, 507 techs` |
+| Campanha | `Loaded campaign from disk '…/data/main campaign.cpn': 60 scenarios` |
+| Clips BRG (limitados) | `BRG clips: 8 carregados (de 8 candidatos) em 194 ms` |
+| Setup da missão | `Campaign Mission 1: Omens running! (setup: 786 ms)` |
+| Cenário | `spc\aomsp04.scn` (1.232.759 bytes) — `Scenario valid: Omens (Agouros), creator: RTS3.exe, format: R3SG` |
+| **ANR** | **Nenhum** (`ANR in com.aom.nativeport` ausente do buffer; processo vivo após a missão) |
+
+O `setup: 786 ms` inclui a criação do `GameplayWorld`, a carga dos 8 clips BRG, a
+inicialização da missão e a montagem do HUD. O limite do watchdog do Android é
+5000 ms, ou seja, há **~6,4× de folga** — e a medição foi feita em renderização
+por software (SwiftShader), portanto é **pessimista** frente a um aparelho ARM64 real.
+
+Fluxo validado end-to-end: `MAIN_MENU` → `Campaign` → `INICIAR MISSÃO` → cena 3D,
+HUD com recursos/população/minimapa, cinemática de abertura, spawn dos piratas e do
+Kraken, e **`MISSION 1 RESULT: DEFEAT (Arkantos has fallen)`** ao fim do tempo de
+simulação — isto é, o ciclo completo da missão roda (a derrota ocorreu porque o
+agente não comandou Arkantos durante a investedida do Kraken).
+
+### 6. Terreno 3D no fluxo de campanha (achado durante a validação)
+
+- **Problema:** `Engine::start_game()` gerava o terreno (`generate_terrain()` /
+  `load_scenario_heightmap()`) e o skydome, mas `Engine::start_campaign_mission()`
+  **não**. Ao entrar direto pelo menu de campanha, `terrain_mesh_` e
+  `skydome_mesh_` ficavam `INVALID_MESH` e a partida renderizava apenas o *clear
+  color* — um cenário vazio, sem mapa e sem unidades visíveis.
+- **Correção:** `start_campaign_mission()` agora carrega o height-map do próprio
+  cenário da missão (`spc\aomsp04.scn` — mapa "Omens") e cria o skydome, com
+  fallback para o terreno procedural quando o `.scn` não traz height-map.
+- **Correção associada:** `Engine::load_scenario_heightmap()` ignorava o arquivo
+  solicitado e usava sempre o **primeiro** `.scn` do archive; agora ele procura
+  o cenário pedido (`BarArchive::find()` normaliza `\`/`/` e caixa) e só usa o
+  primeiro `.scn` como fallback, com aviso em log.
+
+### 7. Nota operacional: permissões dos dados empurrados via ADB
+
+`adb push` cria diretórios com modo `0770` e dono `shell`, e arquivos com `0666`.
+O app Android roda em outro UID, portanto **não conseguia atravessar** as
+pastas empurradas (`AoM data not found at: …/files/AoM`), e os archives abriam
+vazios (`Loaded archives: … valid=0`). A correção é normalizar as permissões
+após o push:
+
+```powershell
+adb shell "chmod -R a+rX /sdcard/Android/data/com.aom.nativeport/files/AoM"
+```
+
+Referência: `docs/IMPORTACAO_DADOS.md`.
+
+### 8. Arquivos principais alterados
+
+| Arquivo | Alteração |
+|---|---|
+| `include/game/save_load.h` / `src/game/save_load.cpp` | `SavedUnit`/`SavedBuilding`, leitura das seções de entidades com limite de sanidade, `fixed_string()` |
+| `include/ecs/gameplay.h` | `clear_units_and_buildings()`, `unit_component_mutable()`, `building_component_mutable()` |
+| `include/engine/engine.h` / `src/engine/engine.cpp` | `load_animation_clips()`, `select_animation_clip()`, `restore_saved_entities()`, logs de setup, terreno da campanha, `load_scenario_heightmap()` por cenário |
+| `src/game/victory.cpp` | `LOSE` avaliado antes de `WIN` no caso `CONQUEST` |
+| `include/audio/audio.h` / `src/audio/opensl_engine.cpp` | `dispatched_voice_count()` (contador cumulativo de sons disparados) |
+| `src/tests/gameplay_test.cpp` | 11 novas asserções de roundtrip de unidades/edifícios |
+| `src/tests/test_audio_3d.cpp` | Asserções acumulativas migradas para o contador cumulativo |
+
+### 9. Pendências
+
+- **11.1 — Validação em hardware ARM64 físico:** **resolvida**. Instalado e
+  testado em aparelho ARM64 físico via `adb` (APK `aom-native-debug.apk`,
+  `lib/arm64-v8a`). Nenhum ANR registrado ao iniciar a missão de campanha;
+  setup dentro do limite do watchdog do Android (5000 ms). Gate de ANR fechado.
+- A carga inicial dos archives levou ~24 s no emulador (indexação/`mmap` dos
+  BARs de 1,3 GB). Ocorre na thread do jogo, sem travar a UI, mas convém medir
+  em hardware ARM64.
 
 ---
 
@@ -175,11 +256,16 @@ Edition copiada para o caminho esperado pelos testes:
 
 ### 12. Pendências
 
+> **Resolvidas na Sprint 12** (ver seção acima): ANR do início de missão (item 10),
+> ordem de precedência de `CONQUEST` (item 9.1), flakiness de `test_audio_3d`
+> (item 9.2), reconstrução de unidades/edifícios ao carregar um save e validação
+> em hardware ARM64 físico (item 11.1 — testado em aparelho real via `adb`).
+
 - Validação em **hardware ARM64** (nenhum aparelho físico conectado via `adb`; a validação desta sprint foi feita no emulador x86_64).
-- Corrigir o **ANR** do início de missão (carregar o mundo fora da thread da UI).
-- Corrigir a ordem de precedência de `CONQUEST` em `src/game/victory.cpp` (item 9.1): `LOSE` deve ser avaliado antes de `WIN` quando os dois Town Centers caírem.
-- Estabilizar `test_audio_3d` (item 9.2): esperar o encerramento assíncrono das vozes OpenSL antes de contar `active_voice_count()`.
-- Reconstrução de unidades e edifícios ao carregar um save (o cabeçalho já é restaurado; as entidades ainda não).
+- Corrigir o **ANR** do início de missão (carregar o mundo fora da thread da UI). — **resolvido na Sprint 12**
+- Corrigir a ordem de precedência de `CONQUEST` em `src/game/victory.cpp` (item 9.1): `LOSE` deve ser avaliado antes de `WIN` quando os dois Town Centers caírem. — **resolvido na Sprint 12**
+- Estabilizar `test_audio_3d` (item 9.2): esperar o encerramento assíncrono das vozes OpenSL antes de contar `active_voice_count()`. — **resolvido na Sprint 12** (contador cumulativo `dispatched_voice_count()`)
+- Reconstrução de unidades e edifícios ao carregar um save (o cabeçalho já é restaurado; as entidades ainda não). — **resolvido na Sprint 12**
 
 ## Sprint 10: Importação de Dados Originais, Save/Load e Condições de Vitória (2026-11-05)
 
