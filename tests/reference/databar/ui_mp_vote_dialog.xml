@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_vote_dialog>
+  <vote_type>Kick Player</vote_type>
+  <target_player>Jogador 3</target_player>
+  <votes>
+    <yes>3</yes>
+    <no>1</no>
+  </votes>
+  <buttons>
+    <button label="Yes" action="vote_yes"/>
+    <button label="No" action="vote_no"/>
+    <button label="Close" action="close_vote_dialog"/>
+  </buttons>
+</mp_vote_dialog>

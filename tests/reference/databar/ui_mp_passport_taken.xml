@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_passport_taken>
+  <message>Username already taken.</message>
+  <buttons>
+    <button label="Try Again" action="mp_login"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</mp_passport_taken>

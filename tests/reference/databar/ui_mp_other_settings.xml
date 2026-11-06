@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_other_settings>
+  <options>
+    <option name="Fog of War" value="true"/>
+    <option name="Starting Age" value="Dark Age"/>
+    <option name="Victory Condition" value="Conquest"/>
+  </options>
+</mp_other_settings>

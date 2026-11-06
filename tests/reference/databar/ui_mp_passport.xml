@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_passport>
+  <player_name>Jogador1</player_name>
+  <password>********</password>
+  <buttons>
+    <button label="Login" action="mp_login"/>
+    <button label="Register" action="mp_register"/>
+  </buttons>
+</mp_passport>
