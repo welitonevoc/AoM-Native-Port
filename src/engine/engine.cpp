@@ -406,6 +406,386 @@ void Engine::set_state(EngineState new_state) {
             LOGI("Entered state: IN_GAME");
             create_in_game_hud();
             break;
+        case EngineState::UI_AI_PROMPT:
+            LOGI("Entered state: UI_AI_PROMPT");
+            create_ai_prompt_menu();
+            break;
+        case EngineState::UI_ALTERNATES_DIALOG:
+            LOGI("Entered state: UI_ALTERNATES_DIALOG");
+            create_alternates_dialog_menu();
+            break;
+        case EngineState::UI_ANIMATION_DLG:
+            LOGI("Entered state: UI_ANIMATION_DLG");
+            create_animation_dlg_menu();
+            break;
+        case EngineState::UI_ARENA_SETUP:
+            LOGI("Entered state: UI_ARENA_SETUP");
+            create_arena_setup_menu();
+            break;
+        case EngineState::UI_ARMY_EDIT:
+            LOGI("Entered state: UI_ARMY_EDIT");
+            create_army_edit_menu();
+            break;
+        case EngineState::UI_AUTOPATCHER_DIALOG:
+            LOGI("Entered state: UI_AUTOPATCHER_DIALOG");
+            create_autopatcher_dialog_menu();
+            break;
+        case EngineState::UI_CAMERA_EDITOR:
+            LOGI("Entered state: UI_CAMERA_EDITOR");
+            create_camera_editor_menu();
+            break;
+        case EngineState::UI_CAMPAIGN:
+            LOGI("Entered state: UI_CAMPAIGN");
+            create_campaign_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_EDITOR:
+            LOGI("Entered state: UI_CAMPAIGN_EDITOR");
+            create_campaign_editor_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_NLOANDING:
+            LOGI("Entered state: UI_CAMPAIGN_NLOANDING");
+            create_campaign_nloanding_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_SETUP:
+            LOGI("Entered state: UI_CAMPAIGN_SETUP");
+            create_campaign_setup_menu();
+            break;
+        case EngineState::UI_CHAT_DIALOG:
+            LOGI("Entered state: UI_CHAT_DIALOG");
+            create_chat_dialog_menu();
+            break;
+        case EngineState::UI_LIFF_DIALOG:
+            LOGI("Entered state: UI_LIFF_DIALOG");
+            create_liff_dialog_menu();
+            break;
+        case EngineState::UI_COMBAT_COMPARISON:
+            LOGI("Entered state: UI_COMBAT_COMPARISON");
+            create_combat_comparison_menu();
+            break;
+        case EngineState::UI_CUSTOMIZE_OPP:
+            LOGI("Entered state: UI_CUSTOMIZE_OPP");
+            create_customize_opp_menu();
+            break;
+        case EngineState::UI_DEFAULT_LOADING:
+            LOGI("Entered state: UI_DEFAULT_LOADING");
+            create_default_loading_menu();
+            break;
+        case EngineState::UI_EDITOR_MENU:
+            LOGI("Entered state: UI_EDITOR_MENU");
+            create_editor_menu();
+            break;
+        case EngineState::UI_EDITOR_PALETTES:
+            LOGI("Entered state: UI_EDITOR_PALETTES");
+            create_editor_palettes_menu();
+            break;
+        case EngineState::UI_EDIT_UNIT_DLG:
+            LOGI("Entered state: UI_EDIT_UNIT_DLG");
+            create_edit_unit_dlg_menu();
+            break;
+        case EngineState::UI_EULA:
+            LOGI("Entered state: UI_EULA");
+            create_eula_menu();
+            break;
+        case EngineState::UI_FAKE_TECHTREE:
+            LOGI("Entered state: UI_FAKE_TECHTREE");
+            create_fake_techtree_menu();
+            break;
+        case EngineState::UI_FILE_MANAGER:
+            LOGI("Entered state: UI_FILE_MANAGER");
+            create_file_manager_menu();
+            break;
+        case EngineState::UI_FRIENDS_DIALOGS:
+            LOGI("Entered state: UI_FRIENDS_DIALOGS");
+            create_friends_dialogs_menu();
+            break;
+        case EngineState::UI_GAME_LIST:
+            LOGI("Entered state: UI_GAME_LIST");
+            create_game_list_menu();
+            break;
+        case EngineState::UI_GAME_PALETTES:
+            LOGI("Entered state: UI_GAME_PALETTES");
+            create_game_palettes_menu();
+            break;
+        case EngineState::UI_GAME_SETTINGS_DIALOG:
+            LOGI("Entered state: UI_GAME_SETTINGS_DIALOG");
+            create_game_settings_dialog_menu();
+            break;
+        case EngineState::UI_GENERIC_ENTRY_DIALOG:
+            LOGI("Entered state: UI_GENERIC_ENTRY_DIALOG");
+            create_generic_entry_dialog_menu();
+            break;
+        case EngineState::UI_GOD_BUFFET_DIALOG:
+            LOGI("Entered state: UI_GOD_BUFFET_DIALOG");
+            create_god_buffet_dialog_menu();
+            break;
+        case EngineState::UI_GOD_PICKER:
+            LOGI("Entered state: UI_GOD_PICKER");
+            create_god_picker_menu();
+            break;
+        case EngineState::UI_HELP_DIALOG:
+            LOGI("Entered state: UI_HELP_DIALOG");
+            create_help_dialog_menu();
+            break;
+        case EngineState::UI_HOST_GAME_DIALOG:
+            LOGI("Entered state: UI_HOST_GAME_DIALOG");
+            create_host_game_dialog_menu();
+            break;
+        case EngineState::UI_HOTKEYS:
+            LOGI("Entered state: UI_HOTKEYS");
+            create_hotkeys_menu();
+            break;
+        case EngineState::UI_HOTKEY_SETUP:
+            LOGI("Entered state: UI_HOTKEY_SETUP");
+            create_hotkey_setup_menu();
+            break;
+        case EngineState::UI_IMAGE_DIALOG:
+            LOGI("Entered state: UI_IMAGE_DIALOG");
+            create_image_dialog_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_1:
+            LOGI("Entered state: UI_INGAME_MSG_1");
+            create_ingame_msg_1_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_2:
+            LOGI("Entered state: UI_INGAME_MSG_2");
+            create_ingame_msg_2_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_3:
+            LOGI("Entered state: UI_INGAME_MSG_3");
+            create_ingame_msg_3_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_DIALOG:
+            LOGI("Entered state: UI_INGAME_MSG_DIALOG");
+            create_ingame_msg_dialog_menu();
+            break;
+        case EngineState::UI_LAUNCH_SCREEN:
+            LOGI("Entered state: UI_LAUNCH_SCREEN");
+            create_launch_screen_menu();
+            break;
+        case EngineState::UI_LAYOUT:
+            LOGI("Entered state: UI_LAYOUT");
+            create_layout_menu();
+            break;
+        case EngineState::UI_LOW_DETAIL_BACKGROUND:
+            LOGI("Entered state: UI_LOW_DETAIL_BACKGROUND");
+            create_low_detail_background_menu();
+            break;
+        case EngineState::UI_MAIN:
+            LOGI("Entered state: UI_MAIN");
+            create_main_alt_menu();
+            break;
+        case EngineState::UI_MAP_PICKER:
+            LOGI("Entered state: UI_MAP_PICKER");
+            create_map_picker_menu();
+            break;
+        case EngineState::UI_MESSAGE_DIALOGS:
+            LOGI("Entered state: UI_MESSAGE_DIALOGS");
+            create_message_dialogs_menu();
+            break;
+        case EngineState::UI_MOTD:
+            LOGI("Entered state: UI_MOTD");
+            create_motd_menu();
+            break;
+        case EngineState::UI_MP_CUSTOM:
+            LOGI("Entered state: UI_MP_CUSTOM");
+            create_mp_custom_menu();
+            break;
+        case EngineState::UI_MP_ESO:
+            LOGI("Entered state: UI_MP_ESO");
+            create_mp_eso_menu();
+            break;
+        case EngineState::UI_MP_FRIENDS_LIST:
+            LOGI("Entered state: UI_MP_FRIENDS_LIST");
+            create_mp_friends_list_menu();
+            break;
+        case EngineState::UI_MP_HELP:
+            LOGI("Entered state: UI_MP_HELP");
+            create_mp_help_menu();
+            break;
+        case EngineState::UI_MP_PLANIP:
+            LOGI("Entered state: UI_MP_PLANIP");
+            create_mp_planip_menu();
+            break;
+        case EngineState::UI_MP_LAUNCH_SCREEN:
+            LOGI("Entered state: UI_MP_LAUNCH_SCREEN");
+            create_mp_launch_screen_menu();
+            break;
+        case EngineState::UI_MP_LOGIN:
+            LOGI("Entered state: UI_MP_LOGIN");
+            create_mp_login_menu();
+            break;
+        case EngineState::UI_MP_OTHER_SETTINGS:
+            LOGI("Entered state: UI_MP_OTHER_SETTINGS");
+            create_mp_other_settings_menu();
+            break;
+        case EngineState::UI_MP_PASSPORT:
+            LOGI("Entered state: UI_MP_PASSPORT");
+            create_mp_passport_menu();
+            break;
+        case EngineState::UI_MP_PASSPORT_TAKEN:
+            LOGI("Entered state: UI_MP_PASSPORT_TAKEN");
+            create_mp_passport_taken_menu();
+            break;
+        case EngineState::UI_MP_SETUP_FINAL:
+            LOGI("Entered state: UI_MP_SETUP_FINAL");
+            create_mp_setup_final_menu();
+            break;
+        case EngineState::UI_MP_VOTE_DIALOG:
+            LOGI("Entered state: UI_MP_VOTE_DIALOG");
+            create_mp_vote_dialog_menu();
+            break;
+        case EngineState::UI_NEW_DIALOGS:
+            LOGI("Entered state: UI_NEW_DIALOGS");
+            create_new_dialogs_menu();
+            break;
+        case EngineState::UI_OBJECTIVES:
+            LOGI("Entered state: UI_OBJECTIVES");
+            create_objectives_menu();
+            break;
+        case EngineState::UI_OBJECTIVES_DIALOG:
+            LOGI("Entered state: UI_OBJECTIVES_DIALOG");
+            create_objectives_dialog_menu();
+            break;
+        case EngineState::UI_OPTIONS_MENU:
+            LOGI("Entered state: UI_OPTIONS_MENU");
+            create_options_menu();
+            break;
+        case EngineState::UI_OTHER_SETTINGS:
+            LOGI("Entered state: UI_OTHER_SETTINGS");
+            create_others_settings_menu();
+            break;
+        case EngineState::UI_PLAYER_LOGIN:
+            LOGI("Entered state: UI_PLAYER_LOGIN");
+            create_player_login_menu();
+            break;
+        case EngineState::UI_PLAYER_STATUS_DIALOG:
+            LOGI("Entered state: UI_PLAYER_STATUS_DIALOG");
+            create_player_status_dialog_menu();
+            break;
+        case EngineState::UI_PLAYER_STATUS_DIALOG_2:
+            LOGI("Entered state: UI_PLAYER_STATUS_DIALOG_2");
+            create_player_status_dialog_2_menu();
+            break;
+        case EngineState::UI_POST_GAME_SCREEN:
+            LOGI("Entered state: UI_POST_GAME_SCREEN");
+            create_post_game_screen_menu();
+            break;
+        case EngineState::UI_PREGAME:
+            LOGI("Entered state: UI_PREGAME");
+            create_pregame_menu();
+            break;
+        case EngineState::UI_PREGAME_MP_TEST:
+            LOGI("Entered state: UI_PREGAME_MP_TEST");
+            create_pregame_mp_test_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_1:
+            LOGI("Entered state: UI_PREGAME_MSG_1");
+            create_pregame_msg_1_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_2:
+            LOGI("Entered state: UI_PREGAME_MSG_2");
+            create_pregame_msg_2_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_DIALOG:
+            LOGI("Entered state: UI_PREGAME_MSG_DIALOG");
+            create_pregame_msg_dialog_menu();
+            break;
+        case EngineState::UI_PREGAME_NEW:
+            LOGI("Entered state: UI_PREGAME_NEW");
+            create_pregame_new_menu();
+            break;
+        case EngineState::UI_PREGAME_STRESS:
+            LOGI("Entered state: UI_PREGAME_STRESS");
+            create_pregame_stress_menu();
+            break;
+        case EngineState::UI_PROFILE_SELECT:
+            LOGI("Entered state: UI_PROFILE_SELECT");
+            create_profile_select_menu();
+            break;
+        case EngineState::UI_RECEIVE:
+            LOGI("Entered state: UI_RECEIVE");
+            create_receive_menu();
+            break;
+        case EngineState::UI_RECEIVE_CONNECT:
+            LOGI("Entered state: UI_RECEIVE_CONNECT");
+            create_receive_connect_menu();
+            break;
+        case EngineState::UI_RM_GENERATION:
+            LOGI("Entered state: UI_RM_GENERATION");
+            create_rm_generation_menu();
+            break;
+        case EngineState::UI_ROOM_DIALOGS:
+            LOGI("Entered state: UI_ROOM_DIALOGS");
+            create_room_dialogs_menu();
+            break;
+        case EngineState::UI_SAMPLE:
+            LOGI("Entered state: UI_SAMPLE");
+            create_sample_menu();
+            break;
+        case EngineState::UI_SCENARIO_SET_DLG:
+            LOGI("Entered state: UI_SCENARIO_SET_DLG");
+            create_scenario_set_dlg_menu();
+            break;
+        case EngineState::UI_SESSION_CONNECT:
+            LOGI("Entered state: UI_SESSION_CONNECT");
+            create_session_connect_menu();
+            break;
+        case EngineState::UI_SINGLE_PLAYER_SETUP:
+            LOGI("Entered state: UI_SINGLE_PLAYER_SETUP");
+            create_single_player_setup_menu();
+            break;
+        case EngineState::UI_SOUND_DLG:
+            LOGI("Entered state: UI_SOUND_DLG");
+            create_sound_dlg_menu();
+            break;
+        case EngineState::UI_SOUND_EDIT_DLG:
+            LOGI("Entered state: UI_SOUND_EDIT_DLG");
+            create_sound_edit_dlg_menu();
+            break;
+        case EngineState::UI_SOUND_SET_DLG:
+            LOGI("Entered state: UI_SOUND_SET_DLG");
+            create_sound_set_dlg_menu();
+            break;
+        case EngineState::UI_SPRM_SETUP:
+            LOGI("Entered state: UI_SPRM_SETUP");
+            create_sprm_setup_menu();
+            break;
+        case EngineState::UI_STATS_UPLOAD:
+            LOGI("Entered state: UI_STATS_UPLOAD");
+            create_stats_upload_menu();
+            break;
+        case EngineState::UI_STATUS_MSG:
+            LOGI("Entered state: UI_STATUS_MSG");
+            create_status_msg_menu();
+            break;
+        case EngineState::UI_STRATEGIC_MAP:
+            LOGI("Entered state: UI_STRATEGIC_MAP");
+            create_strategic_map_menu();
+            break;
+        case EngineState::UI_TECHTREE:
+            LOGI("Entered state: UI_TECHTREE");
+            create_techtree_menu();
+            break;
+        case EngineState::UI_TRIBUTE_DLG:
+            LOGI("Entered state: UI_TRIBUTE_DLG");
+            create_tribute_dlg_menu();
+            break;
+        case EngineState::UI_TRIGGER_EDITOR:
+            LOGI("Entered state: UI_TRIGGER_EDITOR");
+            create_trigger_editor_menu();
+            break;
+        case EngineState::UI_TRIG_GROUP_EDITOR:
+            LOGI("Entered state: UI_TRIG_GROUP_EDITOR");
+            create_trig_group_editor_menu();
+            break;
+        case EngineState::UI_WATER_DIALOG:
+            LOGI("Entered state: UI_WATER_DIALOG");
+            create_water_dialog_menu();
+            break;
+        case EngineState::UI_XS_DEBUGGER:
+            LOGI("Entered state: UI_XS_DEBUGGER");
+            create_xs_debugger_menu();
+            break;
         default:
             break;
     }
@@ -482,15 +862,15 @@ void Engine::create_main_menu() {
 // ── uigamelist — lista de jogos salvos, campanhas e cenarios ─────────────────
 void Engine::create_game_list_menu() {
     clear_ui();
-
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
-
     const float sx = vw / 1024.0f;
     const float sy = vh / 768.0f;
-
     ui_->add_label("LISTA DE JOGOS", {vw * 0.5f - 130.0f, vh * 0.08f}, 32.0f,
                    0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
 // ── uialternates_dialog ──
 void Engine::create_alternates_dialog_menu() {
@@ -562,11 +942,145 @@ void Engine::create_campaign_menu() {
                     [this]() { return_to_main_menu(); });
 }
 
+// ── ucampaign_editor ──
+void Engine::create_campaign_editor_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("CAMPAIGN EDITOR", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
+// ── ucampaign_nloanding ──
+void Engine::create_campaign_nloanding_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("CAMPAIGN NLOANDING", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
+// ── ucampaign_setup ──
+void Engine::create_campaign_setup_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("CAMPAIGN SETUP", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
+// ── uichat_dialog ──
+void Engine::create_chat_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("CHAT DIALOG", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
+// ── uiliff_dialog ──
+void Engine::create_liff_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("LIFF DIALOG", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
 
+// ── uicombat_comparison ──
+void Engine::create_combat_comparison_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("COMBAT COMPARISON", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uicustomize_opp ──
+void Engine::create_customize_opp_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("CUSTOMIZE OPPONENT", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uidefault_loading ──
+void Engine::create_default_loading_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("DEFAULT LOADING", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uieditor_menu ──
+void Engine::create_editor_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("EDITOR MENU", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uieditor_palettes ──
+void Engine::create_editor_palettes_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("EDITOR PALETTES", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiedit_unit_dlg ──
+void Engine::create_edit_unit_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("EDIT UNIT DLG", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uieula ──
+void Engine::create_eula_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("EULA", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uifaketechtree ──
+void Engine::create_fake_techtree_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("FAKE TECHTREE", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f,
+                   0xFFFFD000);
     ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }
@@ -680,6 +1194,735 @@ void Engine::create_options_menu() {
         ui_->add_button({(vw - back_w) * 0.5f, vh * 0.84f}, {back_w, back_h}, "VOLTAR",
                        [this]() { return_to_main_menu(); });
     }
+
+// ── uifile_manager ──
+void Engine::create_file_manager_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("FILE MANAGER", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uifriends_dialogs ──
+void Engine::create_friends_dialogs_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("FRIENDS DIALOGS", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigame_palettes ──
+void Engine::create_game_palettes_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GAME PALETTES", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigamesettingsdialog ──
+void Engine::create_game_settings_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GAME SETTINGS DIALOG", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigenericentrydialog ──
+void Engine::create_generic_entry_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GENERIC ENTRY DIALOG", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigodbuffetdialog ──
+void Engine::create_god_buffet_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GOD BUFFET DIALOG", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uigodpicker ──
+void Engine::create_god_picker_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("GOD PICKER", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihelpdialog ──
+void Engine::create_help_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HELP DIALOG", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihostgamedialog ──
+void Engine::create_host_game_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOST GAME DIALOG", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihotkeys ──
+void Engine::create_hotkeys_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOTKEYS", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uihotkysetup ──
+void Engine::create_hotkey_setup_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("HOTKEY SETUP", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiimagedialog ──
+void Engine::create_image_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("IMAGE DIALOG", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiingamemsg1 ──
+void Engine::create_ingame_msg_1_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("INGAME MSG 1", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiingamemsg2 ──
+void Engine::create_ingame_msg_2_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("INGAME MSG 2", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiingamemsg3 ──
+void Engine::create_ingame_msg_3_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("INGAME MSG 3", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiingamemsgdialog ──
+void Engine::create_ingame_msg_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("INGAME MSG DIALOG", {vw * 0.5f - 170.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uilaunchscreen ──
+void Engine::create_launch_screen_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("LAUNCH SCREEN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uilayout ──
+void Engine::create_layout_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("LAYOUT", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uilowdetailbackground ──
+void Engine::create_low_detail_background_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("LOW DETAIL BACKGROUND", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimain ──
+void Engine::create_main_alt_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MAIN", {vw * 0.5f - 80.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimappicker ──
+void Engine::create_map_picker_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MAP PICKER", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimessagedialogs ──
+void Engine::create_message_dialogs_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MESSAGE DIALOGS", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimotd ──
+void Engine::create_motd_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MOTD", {vw * 0.5f - 80.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpcustom ──
+void Engine::create_mp_custom_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP CUSTOM", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpeso ──
+void Engine::create_mp_eso_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP ESO", {vw * 0.5f - 80.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpfriendslist ──
+void Engine::create_mp_friends_list_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP FRIENDS LIST", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimphelp ──
+void Engine::create_mp_help_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP HELP", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimplanip ──
+void Engine::create_mp_planip_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP PLANIP", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimplaunchscreen ──
+void Engine::create_mp_launch_screen_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP LAUNCH SCREEN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimplogin ──
+void Engine::create_mp_login_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP LOGIN", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpothersettings ──
+void Engine::create_mp_other_settings_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP OTHER SETTINGS", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimppassport ──
+void Engine::create_mp_passport_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP PASSPORT", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimppassporttaken ──
+void Engine::create_mp_passport_taken_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP PASSPORT TAKEN", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpsetupfinal ──
+void Engine::create_mp_setup_final_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP SETUP FINAL", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimpvotedialog ──
+void Engine::create_mp_vote_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP VOTE DIALOG", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uinewdialogs ──
+void Engine::create_new_dialogs_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("NEW DIALOGS", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiobjectives ──
+void Engine::create_objectives_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("OBJECTIVES", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiobjectivesdialog ──
+void Engine::create_objectives_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("OBJECTIVES DIALOG", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiothersettings ──
+void Engine::create_others_settings_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("OTHER SETTINGS", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiplayerlogin ──
+void Engine::create_player_login_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PLAYER LOGIN", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiplayerstatusdialog ──
+void Engine::create_player_status_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PLAYER STATUS DIALOG", {vw * 0.5f - 170.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiplayerstatusdialog2 ──
+void Engine::create_player_status_dialog_2_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PLAYER STATUS DIALOG 2", {vw * 0.5f - 180.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipostgamescreen ──
+void Engine::create_post_game_screen_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("POST GAME SCREEN", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregame ──
+void Engine::create_pregame_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregamemptest ──
+void Engine::create_pregame_mp_test_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME MP TEST", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregamemsg1 ──
+void Engine::create_pregame_msg_1_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME MSG 1", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregamemsg2 ──
+void Engine::create_pregame_msg_2_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME MSG 2", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregamemsgdialog ──
+void Engine::create_pregame_msg_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME MSG DIALOG", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipreamenew ──
+void Engine::create_pregame_new_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME NEW", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uipregamestress ──
+void Engine::create_pregame_stress_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PREGAME STRESS", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiprofileselect ──
+void Engine::create_profile_select_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("PROFILE SELECT", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uireceive ──
+void Engine::create_receive_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("RECEIVE", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uireceiveconnect ──
+void Engine::create_receive_connect_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("RECEIVE CONNECT", {vw * 0.5f - 130.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uirmgeneration ──
+void Engine::create_rm_generation_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("RM GENERATION", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiroomdialogs ──
+void Engine::create_room_dialogs_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("ROOM DIALOGS", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisample ──
+void Engine::create_sample_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SAMPLE", {vw * 0.5f - 70.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiscensetdlg ──
+void Engine::create_scenario_set_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SCENARIO SET DLG", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisessionconnect ──
+void Engine::create_session_connect_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SESSION CONNECT", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisingleplayersetup ──
+void Engine::create_single_player_setup_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SINGLE PLAYER SETUP", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisounddlg ──
+void Engine::create_sound_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SOUND DLG", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisoundeditdlg ──
+void Engine::create_sound_edit_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SOUND EDIT DLG", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisoundsetdlg ──
+void Engine::create_sound_set_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SOUND SET DLG", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uisprmsetup ──
+void Engine::create_sprm_setup_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("SPRM SETUP", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uistatsupload ──
+void Engine::create_stats_upload_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("STATS UPLOAD", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uistatusmsg ──
+void Engine::create_status_msg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("STATUS MSG", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uistrategicmap ──
+void Engine::create_strategic_map_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("STRATEGIC MAP", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uitechtree ──
+void Engine::create_techtree_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("TECHTREE", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uitributedlg ──
+void Engine::create_tribute_dlg_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("TRIBUTE DLG", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uitriggereditor ──
+void Engine::create_trigger_editor_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("TRIGGER EDITOR", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uitriggroupeditor ──
+void Engine::create_trig_group_editor_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("TRIG GROUP EDITOR", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiwaterdialog ──
+void Engine::create_water_dialog_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("WATER DIALOG", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uixsdebugger ──
+void Engine::create_xs_debugger_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("XS DEBUGGER", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiaiprompt ──
+void Engine::create_ai_prompt_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("AI PROMPT", {vw * 0.5f - 100.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
 }
 
 void Engine::create_credits_menu() {
