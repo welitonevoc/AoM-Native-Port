@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<camera_editor>
+  <position x="0" y="10" z="-10"/>
+  <rotation x="45" y="0" z="0"/>
+  <fov>45</fov>
+  <zoom_speed>2.0</zoom_speed>
+  <pan_speed>5.0</pan_speed>
+</camera_editor>

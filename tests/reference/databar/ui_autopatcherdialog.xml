@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<autopatcher_dialog>
+  <version>1.0.0</version>
+  <update_available>false</update_available>
+  <download_url>https://example.com/update</download_url>
+  <buttons>
+    <button label="Atualizar" action="download_update"/>
+    <button label="Ignorar" action="dismiss"/>
+  </buttons>
+</autopatcherdialog>
