@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mp_setup_final>
+<ui_mp_setup_final>
   <settings>
     <map_name>Random Map</map_name>
     <max_players>8</max_players>
@@ -7,7 +7,7 @@
     <game_mode>Conquest</game_mode>
   </settings>
   <buttons>
-    <button label="Start Game" action="start_mp_game"/>
-    <button label="Back" action="return_to_mp_menu"/>
+    <button label="Iniciar Partida" action="start_mp_game"/>
+    <button label="Voltar" action="return_to_mp_menu"/>
   </buttons>
-</mp_setup_final>
+</ui_mp_setup_final>
