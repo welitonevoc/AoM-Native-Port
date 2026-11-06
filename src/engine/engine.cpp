@@ -394,7 +394,241 @@ void Engine::set_state(EngineState new_state) {
             LOGI("Entered state: GOD_PICKER (uigodpicker)");
             create_god_picker_menu();
             break;
-        case EngineState::OPTIONS:
+
+        // ── Novos menus (90+) ──
+        case EngineState::UI_AI_PROMPT:
+            LOGI("Entered state: UI_AI_PROMPT");
+            create_ai_prompt_menu();
+            break;
+        case EngineState::UI_ALTERNATES_DIALOG:
+            LOGI("Entered state: UI_ALTERNATES_DIALOG");
+            create_alternates_dialog_menu();
+            break;
+        case EngineState::UI_ANIMATION_DLG:
+            LOGI("Entered state: UI_ANIMATION_DLG");
+            create_animation_dlg_menu();
+            break;
+        case EngineState::UI_ARENA_SETUP:
+            LOGI("Entered state: UI_ARENA_SETUP");
+            create_arena_setup_menu();
+            break;
+        case EngineState::UI_ARMY_EDIT:
+            LOGI("Entered state: UI_ARMY_EDIT");
+            create_army_edit_menu();
+            break;
+        case EngineState::UI_AUTOPATCHER_DIALOG:
+            LOGI("Entered state: UI_AUTOPATCHER_DIALOG");
+            create_autopatcher_dialog_menu();
+            break;
+        case EngineState::UI_CAMERA_EDITOR:
+            LOGI("Entered state: UI_CAMERA_EDITOR");
+            create_camera_editor_menu();
+            break;
+        case EngineState::UI_CAMPAIGN:
+            LOGI("Entered state: UI_CAMPAIGN");
+            create_campaign_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_EDITOR:
+            LOGI("Entered state: UI_CAMPAIGN_EDITOR");
+            create_campaign_editor_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_NLOANDING:
+            LOGI("Entered state: UI_CAMPAIGN_NLOANDING");
+            create_campaign_nloanding_menu();
+            break;
+        case EngineState::UI_CAMPAIGN_SETUP:
+            LOGI("Entered state: UI_CAMPAIGN_SETUP");
+            create_campaign_setup_menu();
+            break;
+        case EngineState::UI_CHAT_DIALOG:
+            LOGI("Entered state: UI_CHAT_DIALOG");
+            create_chat_dialog_menu();
+            break;
+        case EngineState::UI_LIFF_DIALOG:
+            LOGI("Entered state: UI_LIFF_DIALOG");
+            create_liff_dialog_menu();
+            break;
+        case EngineState::UI_COMBAT_COMPARISON:
+            LOGI("Entered state: UI_COMBAT_COMPARISON");
+            create_combat_comparison_menu();
+            break;
+        case EngineState::UI_CUSTOMIZE_OPP:
+            LOGI("Entered state: UI_CUSTOMIZE_OPP");
+            create_customize_opp_menu();
+            break;
+        case EngineState::UI_DEFAULT_LOADING:
+            LOGI("Entered state: UI_DEFAULT_LOADING");
+            create_default_loading_menu();
+            break;
+        case EngineState::UI_EDITOR_MENU:
+            LOGI("Entered state: UI_EDITOR_MENU");
+            create_editor_menu();
+            break;
+        case EngineState::UI_EDITOR_PALETTES:
+            LOGI("Entered state: UI_EDITOR_PALETTES");
+            create_editor_palettes_menu();
+            break;
+        case EngineState::UI_EDIT_UNIT_DLG:
+            LOGI("Entered state: UI_EDIT_UNIT_DLG");
+            create_edit_unit_dlg_menu();
+            break;
+        case EngineState::UI_EULA:
+            LOGI("Entered state: UI_EULA");
+            create_eula_menu();
+            break;
+        case EngineState::UI_FAKE_TECHTREE:
+            LOGI("Entered state: UI_FAKE_TECHTREE");
+            create_fake_techtree_menu();
+            break;
+        case EngineState::UI_FILE_MANAGER:
+            LOGI("Entered state: UI_FILE_MANAGER");
+            create_file_manager_menu();
+            break;
+        case EngineState::UI_FRIENDS_DIALOGS:
+            LOGI("Entered state: UI_FRIENDS_DIALOGS");
+            create_friends_dialogs_menu();
+            break;
+        case EngineState::UI_GAME_PALETTES:
+            LOGI("Entered state: UI_GAME_PALETTES");
+            create_game_palettes_menu();
+            break;
+        case EngineState::UI_GAME_SETTINGS_DIALOG:
+            LOGI("Entered state: UI_GAME_SETTINGS_DIALOG");
+            create_game_settings_dialog_menu();
+            break;
+        case EngineState::UI_GENERIC_ENTRY_DIALOG:
+            LOGI("Entered state: UI_GENERIC_ENTRY_DIALOG");
+            create_generic_entry_dialog_menu();
+            break;
+        case EngineState::UI_GOD_BUFFET_DIALOG:
+            LOGI("Entered state: UI_GOD_BUFFET_DIALOG");
+            create_god_buffet_dialog_menu();
+            break;
+        case EngineState::UI_HELP_DIALOG:
+            LOGI("Entered state: UI_HELP_DIALOG");
+            create_help_dialog_menu();
+            break;
+        case EngineState::UI_HOST_GAME_DIALOG:
+            LOGI("Entered state: UI_HOST_GAME_DIALOG");
+            create_host_game_dialog_menu();
+            break;
+        case EngineState::UI_HOTKEYS:
+            LOGI("Entered state: UI_HOTKEYS");
+            create_hotkeys_menu();
+            break;
+        case EngineState::UI_HOTKEY_SETUP:
+            LOGI("Entered state: UI_HOTKEY_SETUP");
+            create_hotkey_setup_menu();
+            break;
+        case EngineState::UI_IMAGE_DIALOG:
+            LOGI("Entered state: UI_IMAGE_DIALOG");
+            create_image_dialog_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_1:
+            LOGI("Entered state: UI_INGAME_MSG_1");
+            create_ingame_msg_1_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_2:
+            LOGI("Entered state: UI_INGAME_MSG_2");
+            create_ingame_msg_2_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_3:
+            LOGI("Entered state: UI_INGAME_MSG_3");
+            create_ingame_msg_3_menu();
+            break;
+        case EngineState::UI_INGAME_MSG_DIALOG:
+            LOGI("Entered state: UI_INGAME_MSG_DIALOG");
+            create_ingame_msg_dialog_menu();
+            break;
+        case EngineState::UI_LAUNCH_SCREEN:
+            LOGI("Entered state: UI_LAUNCH_SCREEN");
+            create_launch_screen_menu();
+            break;
+        case EngineState::UI_LAYOUT:
+            LOGI("Entered state: UI_LAYOUT");
+            create_layout_menu();
+            break;
+        case EngineState::UI_LOW_DETAIL_BACKGROUND:
+            LOGI("Entered state: UI_LOW_DETAIL_BACKGROUND");
+            create_low_detail_background_menu();
+            break;
+        case EngineState::UI_MAIN:
+            LOGI("Entered state: UI_MAIN");
+            create_main_alt_menu();
+            break;
+        case EngineState::UI_MAP_PICKER:
+            LOGI("Entered state: UI_MAP_PICKER");
+            create_map_picker_menu();
+            break;
+        case EngineState::UI_MESSAGE_DIALOGS:
+            LOGI("Entered state: UI_MESSAGE_DIALOGS");
+            create_message_dialogs_menu();
+            break;
+        case EngineState::UI_MOTD:
+            LOGI("Entered state: UI_MOTD");
+            create_motd_menu();
+            break;
+        case EngineState::UI_MP_CUSTOM:
+            LOGI("Entered state: UI_MP_CUSTOM");
+            create_mp_custom_menu();
+            break;
+        case EngineState::UI_MP_ESO:
+            LOGI("Entered state: UI_MP_ESO");
+            create_mp_eso_menu();
+            break;
+        case EngineState::UI_MP_FRIENDS_LIST:
+            LOGI("Entered state: UI_MP_FRIENDS_LIST");
+            create_mp_friends_list_menu();
+            break;
+        case EngineState::UI_MP_HELP:
+            LOGI("Entered state: UI_MP_HELP");
+            create_mp_help_menu();
+            break;
+        case EngineState::UI_MP_PLANIP:
+            LOGI("Entered state: UI_MP_PLANIP");
+            create_mp_planip_menu();
+            break;
+        case EngineState::UI_MP_LAUNCH_SCREEN:
+            LOGI("Entered state: UI_MP_LAUNCH_SCREEN");
+            create_mp_launch_screen_menu();
+            break;
+        case EngineState::UI_MP_LOGIN:
+            LOGI("Entered state: UI_MP_LOGIN");
+            create_mp_login_menu();
+            break;
+        case EngineState::UI_MP_OTHER_SETTINGS:
+            LOGI("Entered state: UI_MP_OTHER_SETTINGS");
+            create_mp_other_settings_menu();
+            break;
+        case EngineState::UI_MP_PASSPORT:
+            LOGI("Entered state: UI_MP_PASSPORT");
+            create_mp_passport_menu();
+            break;
+        case EngineState::UI_MP_PASSPORT_TAKEN:
+            LOGI("Entered state: UI_MP_PASSPORT_TAKEN");
+            create_mp_passport_taken_menu();
+            break;
+        case EngineState::UI_MP_SETUP_FINAL:
+            LOGI("Entered state: UI_MP_SETUP_FINAL");
+            create_mp_setup_final_menu();
+            break;
+        case EngineState::UI_MP_VOTE_DIALOG:
+            LOGI("Entered state: UI_MP_VOTE_DIALOG");
+            create_mp_vote_dialog_menu();
+            break;
+        case EngineState::UI_NEW_DIALOGS:
+            LOGI("Entered state: UI_NEW_DIALOGS");
+            create_new_dialogs_menu();
+            break;
+        case EngineState::UI_OBJECTIVES:
+            LOGI("Entered state: UI_OBJECTIVES");
+            create_objectives_menu();
+            break;
+        case EngineState::UI_OBJECTIVES_DIALOG:
+            LOGI("Entered state: UI_OBJECTIVES_DIALOG");
+            create_objectives_dialog_menu();
+            break;
+        case EngineState::UI_OPTIONS:
             LOGI("Entered state: OPTIONS");
             create_options_menu();
             break;
@@ -610,6 +844,26 @@ void Engine::create_god_picker_menu() {
     }
 
     // Lista de civilizacoes / deuses menores do Age of Mythology
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    const float sx = vw / 1024.0f;
+    const float sy = vh / 768.0f;
+
+    ui_->add_label("ESCOLHA DE DEUS / CIVILIZACAO",
+                   {vw * 0.5f - 230.0f, vh * 0.08f}, 30.0f, 0xFFFFD000);
+
+    // Mostra selecao atual (se ja houver)
+    if (god_picker_selection_made_) {
+        std::string sel = "Selecionado: " + god_picker_civilization_ +
+                          " / " + god_picker_minor_god_;
+        ui_->add_label(sel, {vw * 0.5f - 200.0f, vh * 0.13f}, 16.0f,
+                       0xFF88FF88);
+    }
+
+    // Lista de civilizacoes / deuses menores do Age of Mythology
     struct GodEntry {
         const char* civilization;
         const char* major_god;
@@ -687,6 +941,74 @@ void Engine::create_god_picker_menu() {
     // Voltar
     float back_w = 200.0f * sx;
     float back_h = 44.0f * sy;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h},
+                    "VOLTAR", [this]() { return_to_main_menu(); });
+}
+
+// ── uigamelist — lista de jogos salvos, campanhas e cenarios ──
+void Engine::create_game_list_menu() {
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    ui_->add_label("LISTA DE JOGOS", {vw * 0.5f - 130.0f, vh * 0.08f}, 32.0f,
+                   0xFFFFD000);
+
+    const std::string sp = save_game_path();
+    const bool found = has_valid_save(sp);
+
+    float y = vh * 0.26f;
+    const float btn_w = 340.0f;
+    const float btn_h = 44.0f;
+    const float btn_x = (vw - btn_w) * 0.5f;
+    const float gap = 12.0f;
+
+    if (found) {
+        ui_->add_button({btn_x, y}, {btn_w, btn_h}, "CONTINUAR PARTIDA SALVA",
+                        [this]() { load_game(); });
+        y += btn_h + gap;
+    } else {
+        ui_->add_label("Nenhum jogo salvo encontrado.",
+                       {vw * 0.5f - 150.0f, y}, 16.0f, 0xFFCCCCCC);
+        y += 30.0f;
+    }
+
+    y += 8.0f;
+    ui_->add_label("CAMPANHAS", {vw * 0.5f - 200.0f, y}, 22.0f, 0xFFCCCCCC);
+    y += 32.0f;
+
+    if (campaign_mgr_ && campaign_mgr_->scenario_count() > 0) {
+        const size_t scenario_count = campaign_mgr_->scenario_count();
+        const size_t show_count = std::min<size_t>(scenario_count, 6);
+        std::string camp_name = campaign_mgr_->current_campaign() ? campaign_mgr_->current_campaign()->name : "Campanha";
+        ui_->add_label("Campanha: " + camp_name + " (" + std::to_string(scenario_count) + " cenarios)",
+                       {vw * 0.5f - 240.0f, y - 8.0f}, 16.0f, 0xFFCCCCCC);
+        for (size_t i = 0; i < show_count; ++i) {
+            ui_->add_button({btn_x, y}, {btn_w, btn_h}, "Cenario " + std::to_string(i + 1),
+                            [this, i]() { start_campaign_mission(i); });
+            y += btn_h + gap;
+        }
+    } else {
+        ui_->add_label("Nenhuma campanha carregada.",
+                       {vw * 0.5f - 150.0f, y}, 16.0f, 0xFFCCCCCC);
+        y += 30.0f;
+    }
+
+    y += 8.0f;
+    ui_->add_label("MAPA ALEATORIO / SKIRMISH", {vw * 0.5f - 220.0f, y}, 22.0f,
+                   0xFFCCCCCC);
+    y += 32.0f;
+
+    ui_->add_button({btn_x, y}, {btn_w, btn_h}, "NOVO JOGO SKIRMISH",
+                    [this]() { set_state(EngineState::IN_GAME); start_game(); });
+    y += btn_h + gap;
+
+    ui_->add_button({btn_x, y}, {btn_w, btn_h}, "CAMPANHA (selecionar)",
+                    [this]() { create_campaign_menu(); });
+
+    float back_w = 220.0f;
+    float back_h = 44.0f;
     ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h},
                     "VOLTAR", [this]() { return_to_main_menu(); });
 }
