@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<trig_group_editor>
+  <groups>
+    <group name="Combat Triggers">
+      <trigger ref="attack_enemy"/>
+      <trigger ref="unit_death"/>
+    </group>
+    <group name="Economy Triggers">
+      <trigger name="resource_gathered"/>
+      <trigger name="building_constructed"/>
+    </group>
+  </groups>
+</trig_group_editor>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tribute_dialog>
+  <resources>
+    <resource name="Food" amount="100"/>
+    <resource name="Wood" amount="50"/>
+    <resource name="Gold" amount="200"/>
+    <resource name="Favor" amount="0"/>
+  </resources>
+  <actions>
+    <action name="Send Tribute" enabled="true"/>
+    <action name="Receive Tribute" enabled="false"/>
+  </actions>
+</tribute_dialog>

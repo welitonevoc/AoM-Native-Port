@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<strategic_map>
+  <regions>
+    <region name="Greece" owner="Player" controlled="true"/>
+    <region name="Egypt" owner="Enemy" controlled="false"/>
+    <region name="Norse Lands" owner="Neutral" controlled="false"/>
+  </regions>
+  <actions>
+    <action name="Attack" available="true"/>
+    <action name="Trade" available="true"/>
+    <action name="Diplomacy" available="false"/>
+  </actions>
+</strategic_map>
