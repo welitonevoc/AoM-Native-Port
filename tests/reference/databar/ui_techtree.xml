@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<techtree>
+  <technology name="Hoplite" level="1" cost="100" required_building="Barracks"/>
+  <technology name="Toxotes" level="2" cost="150" required_building="Archery Range"/>
+</techtree>

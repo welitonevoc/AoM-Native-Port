@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <trigger_editor>
   <triggers>
-    <trigger>
-      <name>Player Wins</name>
-      <condition>All Enemy Units Dead</condition>
-      <action>Victory</action>
-    </trigger>
-    <trigger>
-      <name>Time Limit</name>
-      <condition>Time Reaches Limit</condition>
-      <action>Score Comparison</action>
-    </trigger>
+    <trigger name="OnUnitDeath" action="RemoveUnit"/>
+    <trigger name="OnResourceGather" action="AddResources"/>
   </triggers>
+  <buttons>
+    <button label="Adicionar" action="add_trigger"/>
+    <button label="Remover" action="remove_trigger"/>
+  </buttons>
 </trigger_editor>
