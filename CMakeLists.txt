@@ -31,6 +31,9 @@ set(AOM_SOURCES
     src/data/game_data.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
+    src/data/proto_unit.cpp
+    src/data/major_god.cpp
+    src/data/sound_def.cpp
     src/fonts/font_system.cpp
     src/graphics/gfx_config.cpp
     src/game/god_powers.cpp
@@ -389,6 +392,27 @@ target_include_directories(test_ui_layout PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_ui_layout PRIVATE
+    log
+)
+
+add_executable(test_data_integration
+    src/tests/test_data_integration.cpp
+    src/data/game_data.cpp
+    src/data/water_bodies.cpp
+    src/data/unit_transform.cpp
+    src/data/proto_unit.cpp
+    src/data/major_god.cpp
+    src/data/sound_def.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_data_integration PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_data_integration PRIVATE
+    ${SYSTEM_Z_LIB}
     log
 )
 

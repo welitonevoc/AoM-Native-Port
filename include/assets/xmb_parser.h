@@ -71,6 +71,9 @@ struct XmbElement {
     /// Get attribute as bool with a default value
     [[nodiscard]] bool get_attribute_as_bool(const std::string& name, bool default_val = false) const;
 
+    /// Get attribute as int with a default value
+    [[nodiscard]] int get_attribute_as_int(const std::string& name, int default_val = 0) const;
+
     /// Get text content as various types
     [[nodiscard]] int text_as_int(int default_val = 0) const;
     [[nodiscard]] float text_as_float(float default_val = 0.0f) const;

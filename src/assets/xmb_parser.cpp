@@ -126,6 +126,16 @@ bool XmbElement::get_attribute_as_bool(const std::string& name, bool default_val
     return default_val;
 }
 
+int XmbElement::get_attribute_as_int(const std::string& name, int default_val) const {
+    std::string s = get_attribute(name);
+    if (s.empty()) return default_val;
+    try {
+        return std::stoi(s);
+    } catch (...) {
+        return default_val;
+    }
+}
+
 int XmbElement::text_as_int(int default_val) const {
     std::string s = trim(text);
     if (s.empty()) return default_val;
