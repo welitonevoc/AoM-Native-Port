@@ -336,6 +336,11 @@ private:
     Camera camera_;
     DirectionalLight dir_light_;
 
+    /// —— P3.5: Sistema de partículas baseado em .prt ——
+    std::unique_ptr<aom::PrtParticleSystem> prt_particles_;
+    TextureHandle prt_particle_tex_ = INVALID_TEXTURE;
+    bool load_prt_particles(const std::string& prt_name);
+
     // Camera orbit controls
     bool dragging_ = false;
     glm::vec2 last_touch_ = {0.0f, 0.0f};

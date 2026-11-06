@@ -818,27 +818,48 @@ void Engine::start_game() {
     }
 
     // Wire gameplay world callbacks to interactive particle spawners & 3D audio triggers
+    // P3.5: usa PrtParticleSystem (.prt) quando disponível, fallback para partículas antigas
     gameplay_world_->on_resource_harvested = [this](ResourceType type, const glm::vec3& pos) {
-        spawn_harvest_chips(type, pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(6, pos);  // emite partículas de colheita
+        } else {
+            spawn_harvest_chips(type, pos);
+        }
         if (audio_) {
             std::string res_name = (type == ResourceType::WOOD) ? "wood" : ((type == ResourceType::GOLD) ? "gold" : "food");
             audio_->play_harvest_sound(pos, res_name);
         }
     };
     gameplay_world_->on_combat_hit = [this](Entity, Entity, const glm::vec3& hit_pos) {
-        spawn_combat_hit(hit_pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(10, hit_pos);  // emite partículas de impacto
+        } else {
+            spawn_combat_hit(hit_pos);
+        }
         if (audio_) audio_->play_combat_hit(hit_pos, true);
     };
     gameplay_world_->on_building_sparks = [this](const glm::vec3& pos) {
-        spawn_construction_sparks(pos, 3);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(4, pos);  // emite faíscas de construção
+        } else {
+            spawn_construction_sparks(pos, 3);
+        }
         if (audio_) audio_->play_building_work(pos);
     };
     gameplay_world_->on_building_completed = [this](Entity, const glm::vec3& pos) {
-        spawn_construction_sparks(pos, 16);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(16, pos);  // emite partículas de conclusão
+        } else {
+            spawn_construction_sparks(pos, 16);
+        }
         if (audio_) audio_->play_sfx_3d("assets/sound/new_objective.wav", pos, 1.0f);
     };
     gameplay_world_->on_unit_death = [this](const glm::vec3& pos) {
-        spawn_death_smoke(pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(12, pos);  // emite fumaça de morte
+        } else {
+            spawn_death_smoke(pos);
+        }
         if (audio_) audio_->play_unit_death(pos, false);
     };
 
@@ -1185,6 +1206,11 @@ void Engine::update(float delta_time) {
         // Update 3D interactive particles
         update_particles(delta_time);
 
+        // P3.5: atualizar partículas .prt
+        if (prt_particles_) {
+            prt_particles_->update(delta_time);
+        }
+
         // Update real-time in-game HUD (resources, population, selection)
         update_in_game_hud(delta_time);
 
@@ -1383,6 +1409,11 @@ void Engine::render() {
 
         // Render 3D particles (combat hits, sparks, harvesting chips, death smoke)
         render_particles();
+
+        // P3.5: renderizar partículas .prt (cruz de debug visível sem textura)
+        if (prt_particles_) {
+            prt_particles_->render(renderer_.get(), prt_particle_tex_);
+        }
 
         // 4. In-Game HUD: Top Banner background & Golden divider
         renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, 36.0f}, INVALID_TEXTURE, 0xEE120A04);
@@ -2026,6 +2057,15 @@ bool Engine::load_textures() {
         }
     }
 
+    // Carregar partículas .prt (P3.5)
+    if (textures_bar_) {
+        load_prt_particles("particles/fire_torch.prt");
+        load_prt_particles("particles/combat_hit.prt");
+        load_prt_particles("particles/construction_sparks.prt");
+        load_prt_particles("particles/death_smoke.prt");
+        load_prt_particles("particles/harvest_chips.prt");
+    }
+
     return true;
 }
 
@@ -2207,6 +2247,35 @@ void Engine::add_skybox_quad(std::vector<Vertex>& verts, std::vector<uint32_t>& 
     indices.push_back(base + 0);
     indices.push_back(base + 2);
     indices.push_back(base + 3);
+}
+
+bool Engine::load_prt_particles(const std::string& prt_name) {
+    if (!renderer_ || !textures_bar_) return false;
+
+    prt_particles_ = std::make_unique<aom::PrtParticleSystem>();
+    if (!prt_particles_->load_definition(prt_name, textures_bar_.get())) {
+        LOGW("load_prt_particles: falha ao carregar '%s'", prt_name.c_str());
+        prt_particles_.reset();
+        return false;
+    }
+
+    // Tentar carregar a textura de partícula definida no .prt
+    const auto& def = prt_particles_->definition();
+    if (!def.texture_name.empty()) {
+        for (const std::string& cand : {
+                 def.texture_name + ".ddt",
+                 def.texture_name + " diffuse.ddt",
+                 def.texture_name + "_diffuse.ddt",
+                 def.texture_name,
+             }) {
+            prt_particle_tex_ = load_ddt_texture(cand);
+            if (prt_particle_tex_ != INVALID_TEXTURE) break;
+        }
+    }
+
+    LOGI("load_prt_particles: '%s' carregado (textura=%u)",
+         prt_name.c_str(), prt_particle_tex_);
+    return true;
 }
 
 bool Engine::load_models() {
@@ -2495,27 +2564,48 @@ void Engine::start_campaign_mission(size_t scenario_idx) {
     }
 
     // Wire gameplay world callbacks to interactive particle spawners & 3D audio triggers
+    // P3.5: usa PrtParticleSystem (.prt) quando disponível, fallback para partículas antigas
     gameplay_world_->on_resource_harvested = [this](ResourceType type, const glm::vec3& pos) {
-        spawn_harvest_chips(type, pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(6, pos);  // emite partículas de colheita
+        } else {
+            spawn_harvest_chips(type, pos);
+        }
         if (audio_) {
             std::string res_name = (type == ResourceType::WOOD) ? "wood" : ((type == ResourceType::GOLD) ? "gold" : "food");
             audio_->play_harvest_sound(pos, res_name);
         }
     };
     gameplay_world_->on_combat_hit = [this](Entity, Entity, const glm::vec3& hit_pos) {
-        spawn_combat_hit(hit_pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(10, hit_pos);  // emite partículas de impacto
+        } else {
+            spawn_combat_hit(hit_pos);
+        }
         if (audio_) audio_->play_combat_hit(hit_pos, true);
     };
     gameplay_world_->on_building_sparks = [this](const glm::vec3& pos) {
-        spawn_construction_sparks(pos, 3);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(4, pos);  // emite faíscas de construção
+        } else {
+            spawn_construction_sparks(pos, 3);
+        }
         if (audio_) audio_->play_building_work(pos);
     };
     gameplay_world_->on_building_completed = [this](Entity, const glm::vec3& pos) {
-        spawn_construction_sparks(pos, 16);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(16, pos);  // emite partículas de conclusão
+        } else {
+            spawn_construction_sparks(pos, 16);
+        }
         if (audio_) audio_->play_sfx_3d("assets/sound/new_objective.wav", pos, 1.0f);
     };
     gameplay_world_->on_unit_death = [this](const glm::vec3& pos) {
-        spawn_death_smoke(pos);
+        if (prt_particles_) {
+            prt_particles_->burst_emit(12, pos);  // emite fumaça de morte
+        } else {
+            spawn_death_smoke(pos);
+        }
         if (audio_) audio_->play_unit_death(pos, false);
     };
 

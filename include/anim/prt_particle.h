@@ -63,8 +63,11 @@ public:
     /// Carrega definição de um arquivo .prt
     bool load_definition(const std::string& prt_name, class BarArchive* archive = nullptr);
 
-    /// Emite partículas com base no tempo decorrido (dt em segundos)
+    /// Emite partículas com base no tempo decorrido (dt em segundos) — emissão contínua
     void emit(float dt, const glm::vec3& emitter_pos);
+
+    /// Emite uma rajada (burst) de partículas imediatamente — para eventos pontuais
+    void burst_emit(int count, const glm::vec3& emitter_pos);
 
     /// Atualiza todas as partículas ativas (física, vida)
     void update(float dt);

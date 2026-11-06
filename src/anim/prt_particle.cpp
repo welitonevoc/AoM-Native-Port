@@ -263,6 +263,17 @@ void PrtParticleSystem::emit(float dt, const glm::vec3& emitter_pos) {
     }
 }
 
+void PrtParticleSystem::burst_emit(int count, const glm::vec3& emitter_pos) {
+    if (count <= 0) return;
+    int space = def_.max_particles - static_cast<int>(active_particles_.size());
+    if (space <= 0) return;
+    if (count > space) count = space;
+
+    for (int i = 0; i < count; ++i) {
+        active_particles_.push_back(spawn_particle(emitter_pos));
+    }
+}
+
 void PrtParticleSystem::update(float dt) {
     for (auto& p : active_particles_) {
         if (!p.active) continue;
@@ -299,15 +310,23 @@ void PrtParticleSystem::render(IRenderer* renderer, TextureHandle default_tex) {
     if (!renderer || active_particles_.empty()) return;
 
     TextureHandle tex = (texture_ != INVALID_TEXTURE) ? texture_ : default_tex;
-    if (tex == INVALID_TEXTURE) return;  // Sem textura, não há como renderizar partículas
 
     for (const auto& p : active_particles_) {
         if (!p.active) continue;
-        // Desenha cada partícula como um quad (billboard) simples.
-        // O renderer não tem draw_particle, então usamos draw_mesh com um quad unitário.
-        // Implementação simplificada: desenha como um ponto/quad via debug_line ou
-        // deixa para o engine fazer o batching.
-        (void)p; (void)tex;
+
+        // Desenha partícula como uma cruz simples (billboard aproximado)
+        // usando debug lines — visível mesmo sem textura de partícula
+        const float s = p.size * 0.5f;
+        glm::vec3 p0 = p.pos + glm::vec3(-s, 0.0f, 0.0f);
+        glm::vec3 p1 = p.pos + glm::vec3(s, 0.0f, 0.0f);
+        glm::vec3 p2 = p.pos + glm::vec3(0.0f, -s, 0.0f);
+        glm::vec3 p3 = p.pos + glm::vec3(0.0f, s, 0.0f);
+        renderer->draw_debug_line(p0, p1, p.color);
+        renderer->draw_debug_line(p2, p3, p.color);
+
+        // Se houver textura, também desenha como quad texturizado
+        // (futuro: implementar draw_billboard no renderer)
+        (void)tex;
     }
 }
 
