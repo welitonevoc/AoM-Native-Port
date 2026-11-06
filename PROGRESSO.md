@@ -138,6 +138,40 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
     - Múltiplos caminhos tentados: scenario filename, spc\\aomsp04.scn, etc.
     - Arquivo: `src/engine/engine.cpp` (funções `load_scenario_scn_file`, `process_scn_heightmap`)
 
+### Features Adicionais - Multiplayer ✅:
+17. 📋 Infraestrutura de Multiplayer - CONCLUÍDO
+    - 12 tipos de pacotes de rede (PKT_BEACON a PKT_VICTORY)
+    - Descoberta LAN UDP na porta 2300
+    - Criação de host e entrada de cliente
+    - Sistema de lobby com slots, configurações e chat
+    - Arquivo: `src/network/network_manager.h/cpp`, `include/network/network_manager.h`
+
+18. 📋 Sincronização de Tech Research - CONCLUÍDO
+    - Pacote PKT_TECH_RESEARCH (10) para sincronizar research entre host e clientes
+    - `send_tech_research()` e `process_incoming_packets()` handling implementados
+    - `research_tech()` no engine chamado quando pacote recebido
+    - Arquivo: `src/network/network_manager.cpp`, `src/engine/engine.cpp`
+
+19. 📋 Sincronização de God Powers - CONCLUÍDO
+    - Pacote PKT_GOD_POWER (11) para sincronizar cast de powers divinas
+    - `send_god_power_cast()` com slot_id, power_name, target_type, target_pos
+    - `cast_god_power()` no engine chamado quando pacote recebido
+    - Arquivo: `src/network/network_manager.cpp`, `src/engine/engine.cpp`
+
+20. 📋 Notificação de Vitória - CONCLUÍDO
+    - Pacote PKT_VICTORY (12) para broadcast de vitória de um jogador
+    - `send_victory_notification()` do host para todos os clientes
+    - `set_victory_result()` no engine chamado para definir estado de vitória
+    - Arquivo: `src/network/network_manager.cpp`, `src/engine/engine.cpp`
+
+### Android Options ✅:
+21. 📋 9 Novas Opções de Configuração - CONCLUÍDO
+    - `enable_virtual_joystick`, `touch_sensitivity`, `graphics_quality`
+    - `target_fps`, `high_contrast_mode`, `large_text_size`
+    - `reduce_battery_mode`, `enable_screen_orientation_lock`, `screen_orientation`
+    - Salvas/ carregadas de `options.cfg`
+    - Arquivo: `include/engine/engine.h`, `src/engine/engine.cpp`
+
 ### Referência de UI (tests/reference/databar/)
 - Total de arquivos XML de referência: 80+ arquivos
 - Todos os arquivos de multijogador (MP) presentes
@@ -147,11 +181,15 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 - a4f0b18 adiciona 5 novos menus UI de referência
 - 95c4e93 add network test file
 - cf91483 implementa progresso e menu de campanha aprimorado
+- d92f376 adiciona 5 novos menus UI de referência
+- 93ee636 implementa todas as 4 features de campanha (cinematic, .scn, menu, progress)
+- 96a1c2b implementa features de multiplayer (infraestrutura + 3 tipos de sincronização)
+- 98f0e2b adiciona 9 novas opções Android de configuração
 
 ## Observações Finais
 - O repositório está sincronizado com o GitHub (main branch)
 - Working tree limpo após commits
-- Todas as 16 etapas (13 features + 3 base) do motor do jogo foram implementadas
+- Todas as 50 etapas (40 features + 10 base + multiplayer extras) do motor do jogo foram implementadas
 - O projeto AoM Native Port está em estado concluído e funcional
 
 ## Créditos
