@@ -7,7 +7,7 @@
     <game_mode>Conquest</game_mode>
   </settings>
   <buttons>
-    <button label="Start Game" action="start_mp_game"/>
-    <button label="Back" action="return_to_mp_menu"/>
+    <button label="Iniciar Partida" action="start_mp_game"/>
+    <button label="Voltar" action="return_to_mp_menu"/>
   </buttons>
 </mp_setup_final>
