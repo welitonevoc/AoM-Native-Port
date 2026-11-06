@@ -228,6 +228,37 @@ int main() {
                     "Sudden Death: player loses when friendly Town Center is destroyed");
     }
 
+    // ── Sprint 1: Combate integrado via GameplayWorld ───────────────────────
+    {
+        aom::GameplayWorld combat_world(nullptr);
+        const aom::Entity attacker = combat_world.spawn_unit(aom::Team::FRIENDLY, {0.0f, 0.0f, 0.0f});
+        const aom::Entity target   = combat_world.spawn_unit(aom::Team::ENEMY,   {1.0f, 0.0f, 0.0f});
+
+        auto* atk = combat_world.unit_component_mutable(attacker);
+        auto* tgt = combat_world.unit_component_mutable(target);
+        if (atk && tgt) {
+            atk->attack_damage = 50.0f;
+            atk->attack_range = 2.0f;
+            atk->attack_cooldown = 0.1f;
+            atk->attack_target = target;
+            tgt->max_hp = 100;
+            tgt->current_hp = 100;
+        }
+
+        bool target_died = false;
+        for (int step = 0; step < 200; ++step) {
+            combat_world.update(0.016f);
+            auto* t = combat_world.get_health(target);
+            if (t && t->current_hp <= 0) {
+                target_died = true;
+                break;
+            }
+        }
+        ok &= check(target_died, "Combate integrado: inimigo morre após dano acumulado");
+        ok &= check(combat_world.units().size() == 1,
+                    "Combate integrado: entidade morta removida do mundo");
+    }
+
     // ── Sprint 9: Skybox / Cube Map (.cub) Parser ─────────────────────────
     {
         const std::string mock_cub =

@@ -753,32 +753,62 @@ void Engine::start_game() {
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
 
-    // --- Spawn a few units and attach animation clips ---
-    // Pick the first available clip for now; in a full game this would be
-    // resolved by unit type → visual name from anim.bar scripts.
+    // --- Spawn unidades com tipos distintos e mesh apropriada ---
+    // Cada unidade recebe UnitStats extraídos do proto.xmb (se disponível) e
+    // a mesh/textura correspondente do model_cache_ (por nome de arquivo .brg).
+    struct UnitSpawn {
+        glm::vec3 pos;
+        Team team;
+        const char* unit_name;
+        const char* brg_name;   // nome do .brg no models.bar, ou nullptr para fallback
+    };
+
+    const std::vector<UnitSpawn> spawns = {
+        // Friendly base (esquerda)
+        {{-3.0f, 0.0f, 0.0f},  Team::FRIENDLY, "Hoplite",      "infantry g hoplite_idlea.brg"},
+        {{-1.5f, 0.0f,  1.0f}, Team::FRIENDLY, "Toxotes",      "archer g toxotes_idlea.brg"},
+        {{-1.5f, 0.0f, -1.0f}, Team::FRIENDLY, "Villager Greek", nullptr},
+        // Enemy base (direita)
+        {{ 3.0f, 0.0f, 0.0f},  Team::ENEMY,    "Hoplite",      "infantry g hoplite_idlea.brg"},
+        {{ 1.5f, 0.0f,  1.0f},  Team::ENEMY,    "Toxotes",      "archer g toxotes_idlea.brg"},
+        {{ 1.5f, 0.0f, -1.0f},  Team::ENEMY,    "Hoplite",      "infantry g hoplite_idlea.brg"},
+    };
+
     const aom::anim::BrgAnimationClip* clip = nullptr;
     TextureHandle clip_tex = INVALID_TEXTURE;
     select_animation_clip(clip, clip_tex);
 
-    // Spawn friendly + enemy units and attach animation
-    const std::vector<glm::vec3> spawn_positions = {
-        {-3.0f, 0.0f, 0.0f}, {-1.5f, 0.0f,  1.0f}, {-1.5f, 0.0f, -1.0f},
-        { 3.0f, 0.0f, 0.0f}, { 1.5f, 0.0f,  1.0f}, { 1.5f, 0.0f, -1.0f},
-    };
-    const std::vector<Team> spawn_teams = {
-        Team::FRIENDLY, Team::FRIENDLY, Team::FRIENDLY,
-        Team::ENEMY,    Team::ENEMY,    Team::ENEMY,
-    };
-    UnitStats default_stats;
-    default_stats.name = "Hoplite";
-    default_stats.max_hp = 120.0f;
-    default_stats.move_speed = 3.8f;
-    default_stats.attack_damage = 12.0f;
-    default_stats.attack_range = 2.2f;
+    for (const auto& s : spawns) {
+        // Extrair stats do proto.xmb (se disponível), senão defaults por tipo
+        UnitStats stats = extract_unit_stats_from_xmb(game_config_root_.get(), s.unit_name);
+        if (stats.name == "Unit") {
+            // Fallback se proto.xmb não tiver esta unidade
+            stats.name = s.unit_name;
+            stats.max_hp = 120.0f;
+            stats.move_speed = 3.8f;
+            stats.attack_damage = 12.0f;
+            stats.attack_range = 2.2f;
+        }
 
-    for (size_t i = 0; i < spawn_positions.size(); ++i) {
-        Entity e = gameplay_world_->spawn_unit(spawn_teams[i], spawn_positions[i], default_stats);
-        if (clip && clip->is_valid()) {
+        Entity e = gameplay_world_->spawn_unit(s.team, s.pos, stats);
+
+        // Associar mesh/textura do cache, se disponível
+        if (s.brg_name) {
+            if (auto* me = get_model_entry(s.brg_name)) {
+                if (me->mesh != INVALID_MESH) {
+                    // Armazenar mesh/textura na AnimationComponent via attach_animation
+                    // ou usar diretamente no render. Aqui usamos o default_clip para
+                    // animação; a mesh específica será usada pelo render se houver.
+                    if (clip && clip->is_valid()) {
+                        gameplay_world_->attach_animation(e, clip, clip_tex, renderer_.get());
+                    }
+                    // TODO: associar mesh específica por entidade (pode exigir
+                    // render_animated por entidade com mesh individual).
+                    LOGI("Spawned %s (%s) with cached mesh %s",
+                         s.unit_name, s.team == Team::FRIENDLY ? "friendly" : "enemy", s.brg_name);
+                }
+            }
+        } else if (clip && clip->is_valid()) {
             gameplay_world_->attach_animation(e, clip, clip_tex, renderer_.get());
         }
     }
@@ -2021,16 +2051,57 @@ bool Engine::load_skybox_cube(const std::string& cub_name) {
 bool Engine::load_models() {
     if (!renderer_ || !models_bar_) return false;
 
+    int loaded = 0;
     for (const BarEntry& entry : models_bar_->entries()) {
         if (!ends_with(to_lower(entry.filename), ".brg")) continue;
-        MeshHandle mesh = load_brg_model(models_bar_.get(), entry.filename, renderer_.get());
-        if (mesh != INVALID_MESH) {
-            model_mesh_ = mesh;
-            LOGI("Loaded BRG model: %s", entry.filename.c_str());
-            return true;
+
+        // Carregar dados do modelo
+        auto model = load_brg_model_data(models_bar_.get(), entry.filename);
+        if (!model || model->meshes.empty()) continue;
+
+        // Upload da malha para o renderer
+        const auto& m = model->meshes[0];
+        MeshHandle mesh = renderer_->create_mesh(
+            m.vertices.data(), static_cast<uint32_t>(m.vertices.size()),
+            m.indices.data(), static_cast<uint32_t>(m.indices.size()));
+        if (mesh == INVALID_MESH) continue;
+
+        // Tentar carregar textura difusa com mesmo nome base (.ddt)
+        TextureHandle tex = INVALID_TEXTURE;
+        std::string base = entry.filename;
+        if (ends_with(to_lower(base), ".brg")) {
+            base = base.substr(0, base.size() - 4);
         }
+        // Tenta vários candidatos de textura
+        for (const std::string& cand : {
+                 base + ".ddt",
+                 base + " diffuse.ddt",
+                 base + "_diffuse.ddt",
+                 base + ".bti",
+             }) {
+            tex = load_ddt_texture(cand);
+            if (tex != INVALID_TEXTURE) break;
+        }
+
+        ModelEntry& entry_cache = model_cache_[entry.filename];
+        entry_cache.mesh = mesh;
+        entry_cache.texture = tex;
+        entry_cache.model = model.get();
+        // Guardar ponteiro estável (o unique_ptr do modelo é descartado, mas
+        // precisamos dos dados para referência; o BrgModel é copiado por valor)
+        model_cache_models_[entry.filename] = std::move(model);
+
+        if (loaded == 0) {
+            model_mesh_ = mesh;
+            model_texture_ = tex;
+        }
+        ++loaded;
+        LOGI("Cached BRG model: %s (mesh=%u, texture=%u)",
+             entry.filename.c_str(), mesh, tex);
     }
-    return false;
+
+    LOGI("load_models: %d modelos BRG em cache", loaded);
+    return loaded > 0;
 }
 
 void Engine::next_texture() {}

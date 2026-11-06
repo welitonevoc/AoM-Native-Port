@@ -161,6 +161,13 @@ public:
     [[nodiscard]] CampaignMissionManager* mission_manager() { return mission_mgr_.get(); }
     [[nodiscard]] MeshHandle model_mesh() const { return model_mesh_; }
     [[nodiscard]] TextureHandle model_texture() const { return model_texture_; }
+
+    /// Recupera um modelo BRG carregado no cache por nome (ex: "hoplite.brg").
+    /// Retorna nullptr se o modelo ainda não foi carregado.
+    [[nodiscard]] ModelEntry* get_model_entry(const std::string& name) {
+        auto it = model_cache_.find(name);
+        return (it != model_cache_.end()) ? &it->second : nullptr;
+    }
     [[nodiscard]] const XmbElement* game_config() const { return game_config_root_.get(); }
     [[nodiscard]] bool archives_loaded() const { return archives_loaded_; }
 
@@ -349,6 +356,7 @@ private:
         BrgModel* model = nullptr;
     };
     std::unordered_map<std::string, ModelEntry> model_cache_;
+    std::unordered_map<std::string, std::unique_ptr<BrgModel>> model_cache_models_;
 
     // Options state
     float master_volume_ = 0.8f;
