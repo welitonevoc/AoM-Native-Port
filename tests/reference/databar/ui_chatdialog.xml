@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chat_dialog>
+  <messages>
+    <message>
+      <player>Jogador 1</player>
+      <text>Bom jogo a todos!</text>
+      <timestamp>00:05:32</timestamp>
+    </message>
+    <message>
+      <player>Jogador 2</player>
+      <text>Boa sorte!</text>
+      <timestamp>00:05:35</timestamp>
+    </message>
+    <message>
+      <player>Jogador 1</player>
+      <text>Começando a partida...</text>
+      <timestamp>00:05:40</timestamp>
+    </message>
+  </messages>
+  <input_placeholder>Digite sua mensagem aqui...</input_placeholder>
+</chat_dialog>

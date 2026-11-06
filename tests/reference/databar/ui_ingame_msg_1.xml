@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ingame_message_1>
+  <message>
+    <title>Unidade selecionada</title>
+    <text>Hoplite - Unidade de infantaria grega</text>
+  </message>
+  <message>
+    <title>Recursos insuficientes</title>
+    <text>Não há recursos suficientes para construir esta unidade.</text>
+  </message>
+  <message>
+    <title>Construção completa</title>
+    <text>Town Center construído com sucesso.</text>
+  </message>
+</ingame_message_1>
