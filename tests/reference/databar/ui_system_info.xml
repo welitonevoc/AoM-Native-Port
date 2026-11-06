@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<system_info>
+  <system_info>
+    <os>Windows 11</os>
+    <cpu>Intel i7-9700K</cpu>
+    <gpu>NVIDIA GTX 1070</gpu>
+    <ram>16 GB</ram>
+    <vram>8 GB</vram>
+  </system_info>
+  <buttons>
+    <button label="Save System Report" action="save_system_report"/>
+    <button label="Close" action="close_system_info"/>
+  </buttons>
+</system_info>

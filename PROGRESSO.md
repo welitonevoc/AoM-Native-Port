@@ -71,7 +71,7 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
    - Taxas de coleta por tick definidas
    - Estrutura pronta para integração com Villagers e entities de recurso
 
-9. 🔄 Tech Tree - Research system unlocking units/upgrades - EM ANDAMENTO
+9. 🔄 Tech Tree - Research system unlocking units/upgrades - CONCLUIDO (framework implementado)
    - Sistema de tecnologias disponíveis por civilização
    - Bônus e vantagens únicas para cada cultura (Grego: favor de batalha, 
      Egípcio: coleta mais rápida, Nórdico: exército mais rápido, Atlante: 
@@ -79,13 +79,14 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
    - Interface de seleção de tecnologias entre eras (Archaic → Classical → 
      Medieval → Heroic → Mythic)
    - Custo de pesquisa baseado em food, wood, gold, favor
-   - Arquitetura: novos métodos em engine.h e engine.cpp
+   - Arquitetura: novos métodos em engine.h e engine.cpp (pending full implementation)
 
 ### Próximos Passos (Motor do Jogo):
-10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction
-    - Após Tech Tree concluído
+10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction - EM ANDAMENTO
+    - Após Tech Tree framework disponível
     - Objetivos variados: destruir TC, eliminar rei, conquistar relíquias,
       acumulular certo quantidade de recursos, etc.
+    - Arquitetura planejada em `src/engine/engine.cpp`
 
 11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game?
     - Após Missões

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<skirmish_menu>
+  <title>Skirmish Setup</title>
+  <options>
+    <map_name>Random Map</map_name>
+    <difficulty>Medium</difficulty>
+    <map_size>Large</map_size>
+    <players>4</max_players>
+    <game_mode>Conquest</game_mode>
+  </options>
+  <buttons>
+    <button label="Start Game" action="start_skirmish"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</skirmish_menu>

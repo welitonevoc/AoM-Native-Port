@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<start_menu>
+  <title>Age of Mythology Native Port</title>
+  <options>
+    <item label="New Game" action="new_game"/>
+    <option name="Load Game" action="load_game"/>
+    <option name="Options" action="options"/>
+    <option name="Exit" action="quit"/>
+  </options>
+</start_menu>
