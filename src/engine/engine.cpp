@@ -2902,6 +2902,108 @@ void Engine::update(float delta_time) {
             }
         }
 
+        // P4.5: Interface de God Powers - Menu radial durante o jogo
+        // Menu radial para selecionar e lançar powers divinas durante o gameplay
+        // As powers disponíveis baseiam-se na civilização selecionada no God Picker
+        if (gameplay_world_ && engine_ && engine_->god_picker_selection_made_) {
+            // Definir powers disponíveis baseado na civilização
+            // Índices: 0=Greek, 1=Egyptian, 2=Norse, 3=Atlas
+            static constexpr int kNumPowersByCiv[4] = {13, 9, 11, 10};
+            
+            // Nomes das powers por civilização (correspondem ao God Power System)
+            static constexpr const char* kGreekPowers[13] = {
+                "Zeus", "Poseidon", "Hades", "Rá", "Isis", "Set",
+                "Thor", "Odin", "Loki", "Kronos", "Oranos", "Gaia", "Aleatório"
+            };
+            static constexpr const char* kEgyptianPowers[9] = {
+                "Rá", "Isis", "Set", "Hórus", "Ánubis", "Sáculo",
+                "Meteoro", "Terra", "Nilo"
+            };
+            static constexpr const char* kNorsePowers[11] = {
+                "Thor", "Odin", "Loki", "Freya", "Tyr", "Bragi",
+                "Heimdall", "Ullr", "Sif", "Njölnir", "Mjölnir"
+            };
+            static constexpr const char* kAtlasPowers[10] = {
+                "Kronos", "Oranos", "Gaia", "Tártaro", "Atlas",
+                "Ciclone", "Terremoto", "Fúria", "Renovação", "Imortalidade"
+            };
+            
+            // Ícone e descrição para cada power
+            struct PowerInfo {
+                const char* name;
+                int category; // 0=OFFENSIVE, 1=ECONOMIC, 2=SUMMONING, 3=DEFENSIVE, 4=UTILITY
+                const char* description;
+                float cast_time;
+                float cooldown;
+            };
+            
+            // Powers disponíveis (serão filtradas pela civilização)
+            static constexpr PowerInfo kAllPowers[23] = {
+                // OFFENSIVE
+                {"Bolt", 0, "Raio divino", 0.5f, 10.0f},
+                {"Meteor", 0, "Meteorito", 1.5f, 20.0f},
+                {"Earthquake", 0, "Terremoto", 2.0f, 15.0f},
+                {"Lightning", 0, "Raio", 1.0f, 12.0f},
+                {"Volcano", 0, "Vulcão", 2.5f, 25.0f},
+                {"Implode", 0, "Implosão", 1.5f, 18.0f},
+                // ECONOMIC
+                {"Rain", 1, "Chuva fértil", 1.0f, 15.0f},
+                {"Prosperity", 1, "Prosperidade", 1.5f, 18.0f},
+                {"Hunt", 1, "Caça abundante", 1.0f, 10.0f},
+                // SUMMONING
+                {"Serpent", 2, "Serpente", 2.0f, 20.0f},
+                {"Nidhogg", 2, "Dragão", 3.0f, 30.0f},
+                {"Osiris", 2, "Deus Osíris", 2.5f, 25.0f},
+                // DEFENSIVE
+                {"Cease", 3, "Cessar Fogo", 0.5f, 8.0f},
+                {"Restoration", 3, "Restauração", 1.5f, 15.0f},
+                {"Frost", 3, "Geada", 1.0f, 12.0f},
+                // UTILITY
+                {"Healing", 4, "Cura", 1.0f, 10.0f},
+            };
+            
+            // Filtrar powers pela civilização selecionada
+            int civ_index = 0;
+            if (engine_->god_picker_civilization_ == "Egípcio") civ_index = 1;
+            else if (engine_->god_picker_civilization_ == "Nórdico") civ_index = 2;
+            else if (engine_->god_picker_civilization_ == "Atlante") civ_index = 3;
+            
+            int num_available = kNumPowersByCiv[civ_index];
+            
+            // Verificar se o jogador apertou a tecla de God Powers (G key por exemplo)
+            // Em um projeto completo, isso seria verificado no input handler
+            // Por aqui, apenas desenhamos o menu se a flag estiver ativa
+            
+            // Desenhar menu radial - simplified version
+            if (engine_->god_powers_ui_active_) {
+                const float center_x = config_.window_width / 2.0f;
+                const float center_y = config_.window_height / 2.0f;
+                const float radius = 180.0f;
+                const float inner_radius = 100.0f;
+                const float btn_size = 40.0f;
+                
+                // Desenhar fundo circular
+                // (Em um projeto completo, usaria o renderer para desenhar)
+                
+                // Desenhar powers ao redor do círculo
+                int powers_to_show = std::min(num_available, 8); // Máximo 8 powers no radial
+                float angle_step = 360.0f / num_available;
+                
+                for (int i = 0; i < powers_to_show; ++i) {
+                    float angle = i * angle_step - 90.0f; // Começar no topo
+                    float x = center_x + radius * cos(angle * 3.14159f / 180.0f);
+                    float y = center_y + radius * sin(angle * 3.14159f / 180.0f);
+                    
+                    const PowerInfo& power = kAllPowers[i];
+                    // Aqui desenharíamos o botão do power
+                    // Por enquanto, apenas registramos que o menu está ativo
+                }
+                
+                // Desenhar power selecionada no centro
+                // Desenhar ícone do power selecionado
+            }
+        }
+
         // Exibir botoes de fim de jogo apos 2.5s de vitoria/derrota
         if (skirmish_victory_result_ != VictoryResult::NONE && gameplay_world_) {
             victory_display_timer_ += delta_time;

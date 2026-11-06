@@ -92,13 +92,15 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 
 ### Próximos Passos (Motor do Jogo):
 11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game? - EM ANDAMENTO
-    - Hotkey/radial menu para selecionar powers divinas durante o jogo
+    - Menu radial para selecionar powers divinas durante o gameplay
     - Integração com o God Power System já existente em game/god_powers.cpp
     - Usar a seleção do God Picker (civilização/deus) para determinar powers disponíveis
-    - Atalhos rápidos e interface radial para lançamento de powers em tempo de jogo
+    - Menu radial com atalhos de teclas e interface visual
+    - Atalhos rápidos: teclas 1-5 para powers, Espaço para confirmar alvo
+    - Interface mostrando power selecionada, tempo de recarga e descrição
 
 12. 📋 Teste de Jogo Completo - Playthrough da campanha + God Picker → Jogo - PRÓXIMO
     - Validação final end-to-end: campanha → God Picker → IA de unidades 
-      → Economia → Tech Tree → Missões
+      → Economia → Tech Tree → Missões → God Powers
     - Testar fluxo completo do jogo do início ao fim
     - Verificar balanço de dificuldade e experiência do jogador
