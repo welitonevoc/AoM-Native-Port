@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ready_check>
+  <players>
+    <player name="Jogador1" status="Pronto"/>
+    <player name="Jogador2" status="Aguardando"/>
+  </players>
+  <buttons>
+    <button label="Pronto" action="set_ready"/>
+    <button label="Não Pronto" action="set_not_ready"/>
+  </buttons>
+</mp_ready_check>
