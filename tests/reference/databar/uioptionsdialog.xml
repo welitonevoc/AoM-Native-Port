@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<options_dialog>
+  <section name="Audio">
+    <slider name="Master Volume" min="0" max="100" default="80"/>
+    <slider name="Music Volume" min="0" max="100" default="70"/>
+    <slider name="SFX Volume" min="0" max="100" default="90"/>
+    <checkbox name="Music Enabled" default="true"/>
+    <checkbox name="SFX Enabled" default="true"/>
+  </section>
+  <section name="Video">
+    <slider name="Graphics Quality" min="0" max="100" default="100"/>
+    <checkbox name="Trilinear Mipmap" default="true"/>
+    <checkbox name="Directional Lighting" default="true"/>
+    <checkbox name="Show FPS" default="true"/>
+  </section>
+  <section name="Language">
+    <option value="portuguese">Português</option>
+    <option value="english">English</option>
+    <option value="spanish">Español</option>
+  </section>
+</options_dialog>

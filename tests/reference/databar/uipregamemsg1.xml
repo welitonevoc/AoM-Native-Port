@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pregame_msg_1>
+  <message>
+    <title>Welcome to Age of Mythology</title>
+    <text>Welcome to the world of mythology where gods walk among mortals.</text>
+  </message>
+  <message>
+    <title>Controls</title>
+    <text>Click to select units, right-click to move or attack.</text>
+  </message>
+</pregame_msg_1>

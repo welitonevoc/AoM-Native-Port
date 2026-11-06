@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pregame_menu>
+  <button label="Learn To Play" action="start_game"/>
+  <button label="Campaign" action="create_campaign_menu"/>
+  <button label="Single Player" action="create_single_player_menu"/>
+  <button label="Multiplayer" action="open_multiplayer"/>
+  <button label="Options" action="open_options"/>
+  <button label="Credits" action="open_credits"/>
+  <button label="Exit" action="quit_app"/>
+</pregame_menu>

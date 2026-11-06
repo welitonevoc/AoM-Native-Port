@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<campaign_menu>
+  <campaign>
+    <name>Fall of the Trident</name>
+    <description>Follow Arkantos on his quest to stop Kronos</description>
+    <scenarios>
+      <scenario name="Omens" />
+      <scenario name="Rivers of the Sun" />
+      <scenario name="Villains" />
+      <scenario name="Do Unto Others" />
+      <scenario name="Underworld" />
+    </scenarios>
+  </campaign>
+  <campaign>
+    <name>The New Atlantis</name>
+    <description>Kastor's adventure in the Titans expansion</description>
+    <scenarios>
+      <scenario name="New Atlantis" />
+      <scenario name="Last of the Amazons" />
+      <scenario name="Arkantos" />
+      <scenario name="Poseidon's Sons" />
+      <scenario name="The New Atlantis" />
+    </scenarios>
+  </campaign>
+</campaign_menu>
