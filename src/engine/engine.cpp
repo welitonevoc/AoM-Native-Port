@@ -396,10 +396,6 @@ void Engine::set_state(EngineState new_state) {
             break;
 
         // ── Novos menus (90+) ──
-        case EngineState::UI_AI_PROMPT:
-            LOGI("Entered state: UI_AI_PROMPT");
-            create_ai_prompt_menu();
-            break;
         case EngineState::UI_ALTERNATES_DIALOG:
             LOGI("Entered state: UI_ALTERNATES_DIALOG");
             create_alternates_dialog_menu();
@@ -627,6 +623,146 @@ void Engine::set_state(EngineState new_state) {
         case EngineState::UI_OBJECTIVES_DIALOG:
             LOGI("Entered state: UI_OBJECTIVES_DIALOG");
             create_objectives_dialog_menu();
+            break;
+        case EngineState::UI_OTHERS_SETTINGS:
+            LOGI("Entered state: UI_OTHERS_SETTINGS");
+            create_others_settings_menu();
+            break;
+        case EngineState::UI_PLAYER_LOGIN:
+            LOGI("Entered state: UI_PLAYER_LOGIN");
+            create_player_login_menu();
+            break;
+        case EngineState::UI_PLAYER_STATUS_DIALOG:
+            LOGI("Entered state: UI_PLAYER_STATUS_DIALOG");
+            create_player_status_dialog_menu();
+            break;
+        case EngineState::UI_PLAYER_STATUS_DIALOG_2:
+            LOGI("Entered state: UI_PLAYER_STATUS_DIALOG_2");
+            create_player_status_dialog_2_menu();
+            break;
+        case EngineState::UI_POST_GAME_SCREEN:
+            LOGI("Entered state: UI_POST_GAME_SCREEN");
+            create_post_game_screen_menu();
+            break;
+        case EngineState::UI_PREGAME:
+            LOGI("Entered state: UI_PREGAME");
+            create_pregame_menu();
+            break;
+        case EngineState::UI_PREGAME_MP_TEST:
+            LOGI("Entered state: UI_PREGAME_MP_TEST");
+            create_pregame_mp_test_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_1:
+            LOGI("Entered state: UI_PREGAME_MSG_1");
+            create_pregame_msg_1_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_2:
+            LOGI("Entered state: UI_PREGAME_MSG_2");
+            create_pregame_msg_2_menu();
+            break;
+        case EngineState::UI_PREGAME_MSG_DIALOG:
+            LOGI("Entered state: UI_PREGAME_MSG_DIALOG");
+            create_pregame_msg_dialog_menu();
+            break;
+        case EngineState::UI_PREGAME_NEW:
+            LOGI("Entered state: UI_PREGAME_NEW");
+            create_pregame_new_menu();
+            break;
+        case EngineState::UI_PREGAME_STRESS:
+            LOGI("Entered state: UI_PREGAME_STRESS");
+            create_pregame_stress_menu();
+            break;
+        case EngineState::UI_PROFILE_SELECT:
+            LOGI("Entered state: UI_PROFILE_SELECT");
+            create_profile_select_menu();
+            break;
+        case EngineState::UI_RECEIVE:
+            LOGI("Entered state: UI_RECEIVE");
+            create_receive_menu();
+            break;
+        case EngineState::UI_RECEIVE_CONNECT:
+            LOGI("Entered state: UI_RECEIVE_CONNECT");
+            create_receive_connect_menu();
+            break;
+        case EngineState::UI_RM_GENERATION:
+            LOGI("Entered state: UI_RM_GENERATION");
+            create_rm_generation_menu();
+            break;
+        case EngineState::UI_ROOM_DIALOGS:
+            LOGI("Entered state: UI_ROOM_DIALOGS");
+            create_room_dialogs_menu();
+            break;
+        case EngineState::UI_SAMPLE:
+            LOGI("Entered state: UI_SAMPLE");
+            create_sample_menu();
+            break;
+        case EngineState::UI_SCENARIO_SET_DLG:
+            LOGI("Entered state: UI_SCENARIO_SET_DLG");
+            create_scenario_set_dlg_menu();
+            break;
+        case EngineState::UI_SESSION_CONNECT:
+            LOGI("Entered state: UI_SESSION_CONNECT");
+            create_session_connect_menu();
+            break;
+        case EngineState::UI_SINGLE_PLAYER_SETUP:
+            LOGI("Entered state: UI_SINGLE_PLAYER_SETUP");
+            create_single_player_setup_menu();
+            break;
+        case EngineState::UI_SOUND_DLG:
+            LOGI("Entered state: UI_SOUND_DLG");
+            create_sound_dlg_menu();
+            break;
+        case EngineState::UI_SOUND_EDIT_DLG:
+            LOGI("Entered state: UI_SOUND_EDIT_DLG");
+            create_sound_edit_dlg_menu();
+            break;
+        case EngineState::UI_SOUND_SET_DLG:
+            LOGI("Entered state: UI_SOUND_SET_DLG");
+            create_sound_set_dlg_menu();
+            break;
+        case EngineState::UI_SPRM_SETUP:
+            LOGI("Entered state: UI_SPRM_SETUP");
+            create_sprm_setup_menu();
+            break;
+        case EngineState::UI_STATS_UPLOAD:
+            LOGI("Entered state: UI_STATS_UPLOAD");
+            create_stats_upload_menu();
+            break;
+        case EngineState::UI_STATUS_MSG:
+            LOGI("Entered state: UI_STATUS_MSG");
+            create_status_msg_menu();
+            break;
+        case EngineState::UI_STRATEGIC_MAP:
+            LOGI("Entered state: UI_STRATEGIC_MAP");
+            create_strategic_map_menu();
+            break;
+        case EngineState::UI_TECHTREE:
+            LOGI("Entered state: UI_TECHTREE");
+            create_techtree_menu();
+            break;
+        case EngineState::UI_TRIBUTE_DLG:
+            LOGI("Entered state: UI_TRIBUTE_DLG");
+            create_tribute_dlg_menu();
+            break;
+        case EngineState::UI_TRIGGER_EDITOR:
+            LOGI("Entered state: UI_TRIGGER_EDITOR");
+            create_trigger_editor_menu();
+            break;
+        case EngineState::UI_TRIG_GROUP_EDITOR:
+            LOGI("Entered state: UI_TRIG_GROUP_EDITOR");
+            create_trig_group_editor_menu();
+            break;
+        case EngineState::UI_WATER_DIALOG:
+            LOGI("Entered state: UI_WATER_DIALOG");
+            create_water_dialog_menu();
+            break;
+        case EngineState::UI_XS_DEBUGGER:
+            LOGI("Entered state: UI_XS_DEBUGGER");
+            create_xs_debugger_menu();
+            break;
+        case EngineState::UI_AI_PROMPT:
+            LOGI("Entered state: UI_AI_PROMPT");
+            create_ai_prompt_menu();
             break;
         case EngineState::UI_OPTIONS:
             LOGI("Entered state: OPTIONS");
@@ -1919,6 +2055,16 @@ void Engine::create_xs_debugger_menu() {
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
     ui_->add_label("XS DEBUGGER", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uiaiprompt ──
+void Engine::create_ai_prompt_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("AI PROMPT", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
     ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }

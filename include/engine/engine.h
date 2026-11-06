@@ -157,6 +157,7 @@ enum class EngineState {
     UI_TRIG_GROUP_EDITOR,
     UI_WATER_DIALOG,
     UI_XS_DEBUGGER,
+    UI_AI_PROMPT,
 };
 
 enum class PlacementMode {
