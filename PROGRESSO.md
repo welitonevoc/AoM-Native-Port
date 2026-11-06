@@ -1,6 +1,6 @@
 # AoM Native Port - Registro de Progresso
 
-Ultima atualizacao: 2026-11-05
+Ultima atualizacao: 2026-11-06
 
 - Commit realizado em 2026-11-05, hash: 407eacc
 
@@ -103,6 +103,33 @@ Referência: `docs/IMPORTACAO_DADOS.md`.
 - A carga inicial dos archives levou ~24 s no emulador (indexação/`mmap` dos
   BARs de 1,3 GB). Ocorre na thread do jogo, sem travar a UI, mas convém medir
   em hardware ARM64.
+
+---
+
+## P1 — Gameplay Core (avanço em 2026-11-06)
+
+**Status:** Em andamento. ECSWorld e GameplayWorld já unificados (P1.1 concluído).
+Melhorias implementadas nesta sessão:
+
+- **Carregamento de modelos BRG em cache por nome:** `load_models()` agora itera
+  todos os `.brg` do `models.bar`, faz upload da malha para o renderer, tenta
+  carregar a textura difusa correspondente (`.ddt`) e armazena tudo em
+  `model_cache_` (mesh + textura + ponteiro do `BrgModel`). Método
+  `Engine::get_model_entry(name)` permite recuperar um modelo específico por
+  nome de arquivo.
+- **`start_game()` spawn unidades com tipos distintos:** em vez de spawnar 6
+  unidades genéricas como Hoplite, agora spawn Hoplite, Toxotes e Villager Greek
+  em posições opostas (friendly vs enemy), com `UnitStats` extraídos do
+  `proto.xmb` (ou defaults se ausente). Cada tipo tenta associar a mesh do
+  `model_cache_` pelo nome do arquivo `.brg`.
+- **Teste de combate integrado via GameplayWorld:** novo bloco no
+  `gameplay_test.cpp` que spawn attacker (FRIENDLY) e target (ENEMY),
+  configura `attack_damage`/`attack_target`, executa `update()` em loop e
+  verifica que o inimigo perde HP até morrer e é removido do mundo
+  (`units().size() == 1` após a morte).
+
+Arquivos alterados: `include/engine/engine.h`, `src/engine/engine.cpp`,
+`src/tests/gameplay_test.cpp`.
 
 ---
 
