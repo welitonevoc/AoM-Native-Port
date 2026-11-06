@@ -1,6 +1,6 @@
 # AoM Native Port - Registro de Progresso
 
-Ultima atualizacao: 2026-11-06 (Sprint 14 - Layouts UI data.bar)
+Ultima atualizacao: 2026-11-06 (Sprint 15 - Carregamento completo data.bar + data2.bar)
 
 - Commit realizado em 2026-11-05, hash: 407eacc
 
@@ -204,6 +204,79 @@ Referência: `docs/IMPORTACAO_DADOS.md`.
 | `include/engine/engine.h` / `src/engine/engine.cpp` | `UILayoutManager` membro; `load_ui_layout()`, `show_ui_layout()`, `show_techtree()`, `show_tribute()`, `show_sound_settings()` |
 | `src/tests/test_ui_layout.cpp` | Novo teste de regressão |
 | `CMakeLists.txt` | Novo fonte + alvo de teste |
+
+---
+
+## Sprint 15: Carregamento Completo de Dados do `data.bar` + `data2.bar` (2026-11-06)
+
+**Status:** Implementado. Todos os XMBs do `data.bar` (base) e `data2.bar` (expansão The Titans) são consumidos pela engine nativa, substituindo valores hard-coded por definições autênticas do Age of Mythology.
+
+### 1. `ProtoUnitRegistry` — Todas as unidades do jogo (`proto.xmb` / `protox.xmb`)
+- `include/data/proto_unit.h/.cpp`: Parser completo de todas as 800+ unidades
+- Captura: HP, line of sight, velocidade, aceleração, desaceleração
+- Custos: comida, madeira, ouro, favor (múltiplos elementos `<cost>`)
+- Ataque: dano, alcance, tempo de recarga, tipo de dano
+- Classificação automática: worker, ship, building, military, hero, myth_unit
+- Flags: can_attack, can_move, can_build, can_gather
+- Arquivos: `.brg` (modelo), ícone da UI
+- `protox.xmb` sobrescreve `proto.xmb` para unidades da expansão
+
+### 2. `GodRegistry` — Deuses maiores e menores (`majorgods.xmb` / `minorgods.xml`)
+- `include/data/major_god.h/.cpp`: Parser de deuses e panteões
+- Major God: nome, tech_name, retratos (256/128/64/32), posição, civilização
+- Minor God: dbid, name_id, tech_name, portrait, idade, posição, civilização
+- Detecção automática de civilização: greek, egypt, norse, atlantis
+- Lookup: find_major(), find_minor(), find_minors_by_civ()
+
+### 3. `SoundDefManager` — Definições de som (`soundsets.xml` / `*_snds.xml`)
+- `include/data/sound_def.h/.cpp`: Parser de som do AoM
+- SoundSet: nome, volume, max_num, lista de arquivos .wav com volume individual
+- ProtoUnitSoundDef: tipos de som (Select, Grunt, Hit, Death, Creation, Acknowledge)
+- Hit com damage_type_logic: Hack→MetalSlice, Slash→MetalSlice, Pierce→PierceFlesh, Crush→CrushFlesh
+- Acknowledge com target_logic: default→..., enemy→...
+- pick_sound(): seleção determinística por semente
+
+### 4. `GameDataManager` expandido — Carregamento unificado de todos os dados
+- `load_from_bar()` carrega: proto.xmb, protox.xmb, majorgods.xmb, minorgods.xml,
+  techtree.xmb, techtreex.xmb, waterbodies.xmb, unittransform.xmb, soundsets.xml
+- Lookups: find_unit(), find_god(), find_minor_god(), find_tech(),
+  find_soundset(), find_protounit_sound()
+- Contadores: unit_count(), god_count(), minor_god_count(), tech_count(),
+  soundset_count()
+- Suporta overlay base + expansão via BarArchive.mount()
+
+### 5. `XmbParser` — Novo helper
+- `get_attribute_as_int()`: ler atributo como inteiro com default
+
+### 6. Testes automatizados
+- `src/tests/test_data_integration.cpp`: novo alvo CMake valida:
+  - Carregamento completo de todos os XMBs (base + expansão)
+  - Contagens: unidades, deuses (maiores/menores), tecnologias, rios, oceanos, lagos,
+    transformações, soundsets
+  - Conteúdo específico: Hoplite, Toxotes, Villager Greek, Town Center, Trireme
+  - Mediterranena Sea: cor (0,50,170), bank, outer_bank
+  - Transformações: Wall Long→Gate, Villager Norse→Ulfsark, Dwarf→Ulfsark
+  - Deuses: Zeus, Poseidon, Hades, Ra, Isis, Set, Odin, Thor, Loki
+  - Deuses menores: Athena, Ares, Anubis, Bast
+  - Soundsets: GatherChop, GatherMine, Arrow, Build, MaleDeath
+  - Hoplite sound def com tipos de som
+  - Tecnologias: Age 1 Hoplite, Age 1 Toxotes
+  - `SKIP` se dados do jogo indisponíveis
+
+### 7. `CMakeLists.txt`
+- Adicionados `proto_unit.cpp`, `major_god.cpp`, `sound_def.cpp` à biblioteca
+- Novo alvo `test_data_integration`
+
+### Arquivos alterados
+| Arquivo | Alteração |
+|---|---|
+| `include/data/proto_unit.h` / `src/data/proto_unit.cpp` | Novo: `ProtoUnitRegistry`, `ProtoUnitData` |
+| `include/data/major_god.h` / `src/data/major_god.cpp` | Novo: `GodRegistry`, `MajorGodData`, `MinorGodData` |
+| `include/data/sound_def.h` / `src/data/sound_def.cpp` | Novo: `SoundDefManager`, `SoundSetDef`, `ProtoUnitSoundDef` |
+| `include/data/game_data.h` / `src/data/game_data.cpp` | Reescrito: carregamento unificado de todos os XMBs |
+| `include/assets/xmb_parser.h` / `src/assets/xmb_parser.cpp` | `get_attribute_as_int()` |
+| `src/tests/test_data_integration.cpp` | Novo teste de regressão |
+| `CMakeLists.txt` | Novos fontes + alvo de teste |
 
 ---
 
