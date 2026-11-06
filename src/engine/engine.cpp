@@ -15,6 +15,7 @@
 #include "game/save_load.h"
 #include "game/victory.h"
 #include "assets/cube_map.h"
+#include "aom/campaign_select_system.h"
 
 extern "C" {
 #include "stb_image.h"
@@ -384,7 +385,40 @@ void Engine::set_state(EngineState new_state) {
             if (audio_) {
                 audio_->play_music("menu_music.mp3", true);
             }
-            create_main_menu();
+            
+            // ── Tentativa de carregar layout XMB original do data.bar ──────────────
+            // Ordem de preferência:
+            // 1. Se data_path foi fornecido → carrega uipregamenew.xmb do data.bar (layout authentic AoM)
+            // 2. Se não encontrar → usa menu fallback hardcoded (ainda funciona, mas sem arte original)
+            bool layout_loaded = false;
+            
+            if (data_bar_) {
+                // Tenta carregar o layout autêntico de The Titans (uipregamenew.xmb)
+                // Este XMB contém os 7 botões originais com posições e ações corretas
+                layout_loaded = load_ui_layout("uipregamenew.xmb");
+                
+                if (layout_loaded) {
+                    LOGI("Layout XMB authentic 'uipregamenew.xmb' carregado com sucesso do data.bar");
+                    show_ui_layout("uipregamenew.xmb");
+                } else {
+                    LOGW("Layout XMB 'uipregamenew.xmb' não encontrado no data.bar");
+                    LOGW("Verifique se o path está correto e se o arquivo existe no .bar");
+                    // Fallback: menu hardcoded ainda funciona
+                    create_main_menu();
+                }
+            } else {
+                LOGW("data_bar_ não disponível - usando menu fallback hardcoded");
+                create_main_menu();
+            }
+            
+            // Se somehow load_ui_layout retornou false mas show_ui_layout não foi chamado
+            if (!layout_loaded) {
+                // Já caiu no fallback acima, mas por segurança:
+                if (!ui_->buttons().empty() && ui_->buttons()[0].label.empty()) {
+                    // Botões foram criados pelo fallback hardcoded
+                    LOGI("Menu fallback hardcoded ativo (7 botões básicos)");
+                }
+            }
             break;
         case EngineState::UI_OPTIONS:
             LOGI("Entered state: OPTIONS");
@@ -823,7 +857,7 @@ void Engine::create_main_menu() {
 
     const TitansBtn btns[] = {
         { 325.0f, [this]() { start_game(); }    }, // Learn To Play
-        { 365.0f, [this]() { create_campaign_menu(); } }, // Campaign
+        { 365.0f, [this]() { create_campaign_selection_menu(); } }, // Campaign - tela de seleção de cenário
         { 405.0f, [this]() { create_campaign_menu(); } }, // Single Player - abre menu de seleção de cenário
         { 445.0f, [this]() { open_multiplayer(); } }, // Multiplayer
         { 485.0f, [this]() { open_options(); } }, // Options
@@ -856,6 +890,25 @@ void Engine::create_main_menu() {
     if (show_fps_) {
         fps_label_ = ui_->add_label("FPS: 60",
             {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
+    }
+}
+
+// ── Seleção de Campanha ─────────────────────────────────────────────
+void Engine::create_campaign_selection_menu() {
+    LOGI("Opening campaign selection menu...");
+    
+    // Criar o CampaignSelectSystem para mostrar lista de cenários
+    // Usar os mesmos parâmetros do menu principal
+    campaign_select_system_.reset(new aom::CampaignSelectSystem());
+    if (campaign_select_system_->initialize(this, ui_.get(), this, 
+                config_.window_width, config_.window_height)) {
+        LOGI("Campaign selection menu initialized successfully");
+        // O CampaignSelectSystem já criou seus botões e está gerenciando toques
+        // O usuário agora pode selecionar um cenário
+    } else {
+        LOGW("Failed to initialize campaign selection menu");
+        // Fallback: tentar o menu de campanha original
+        create_campaign_menu();
     }
 }
 
@@ -1260,8 +1313,94 @@ void Engine::create_god_picker_menu() {
     clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
-    ui_->add_label("GOD PICKER", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
-    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+
+    // Título
+    ui_->add_label("SELECIONAR CIVILIZAÇÃO E DEUS", {vw * 0.5f - 180.0f, vh * 0.10f}, 32.0f, 0xFFFFD000);
+
+    // Linha de informação
+    std::string info_text = "Civilização: " + god_picker_civilization_ + " | Deus Menor: " + god_picker_minor_god_;
+    ui_->add_label(info_text, {vw * 0.5f - 150.0f, vh * 0.16f}, 18.0f, 0xFFCCCCCC);
+
+    const float col_w = vw * 0.47f;
+    const float col1_x = vw * 0.04f;
+    const float col2_x = vw * 0.56f;
+    const float btn_h = 38.0f;
+    const float gap = 8.0f;
+
+    // --- Coluna Esquerda: Civilizações ---
+    float y = vh * 0.18f;
+    ui_->add_label("CIVILIZAÇÕES", {col1_x, y}, 20.0f, 0xFFFFD000);
+    y += 30.0f;
+
+    // Botões de civilização - baseadas no Age of Mythology The Titans
+    static const char* civilizations[] = {
+        "Grego", "Egípcio", "Nórdico", "Atlante", "Aleatório"
+    };
+
+    // Associated minor god indices for each civilization (index into minor_gods[] array)
+    // Format: start index, count
+    static const int civ_god_start[] = {0, 3, 6, 10, 0};
+    static const int civ_god_count[] = {6, 3, 4, 3, 13};
+
+    for (int i = 0; i < 5; ++i) {
+        std::string civ_name = civilizations[i];
+        // Highlight selected civilization
+        uint32_t color = (god_picker_civilization_ == civ_name) ? 0xAA184818 : 0xAA2A1808;
+        ui_->add_button({col1_x, y}, {col_w, btn_h}, civ_name, [this, i]() {
+            god_picker_civilization_ = civ_name;
+            // Set minor god to first associated god for this civilization
+            int start = civ_god_start[i];
+            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(start));
+            create_god_picker_menu(); // Recreate to show updated info and god list
+        }, color, 0xAA553311);
+        y += btn_h + gap;
+    }
+
+    // --- Coluna Direita: Deuses Menores ---
+    y = vh * 0.18f;
+    ui_->add_label("DEUSES MENORES", {col2_x, y}, 20.0f, 0xFFFFD000);
+    y += 30.0f;
+
+    // Mostrar todos os deuses, highlightar o selecionado e associar à civilização
+    static const char* minor_gods[] = {
+        "Zeus", "Poseidon", "Hades", "Rá", "Isis", "Set",
+        "Thor", "Odin", "Loki", "Kronos", "Oranos", "Gaia", "Aleatório"
+    };
+
+    y = vh * 0.18f;
+    for (int i = 0; i < 13; ++i) {
+        std::string god_name = minor_gods[i];
+        // Highlight the currently selected one
+        uint32_t color = (god_picker_minor_god_ == god_name) ? 0xAA184818 : 0xAA552211;
+        
+        // Check if this god is associated with the current civilization
+        int start = civ_god_start[0]; // default Grego
+        int count = civ_god_count[0];
+        if (god_picker_civilization_ == "Grego") { start = civ_god_start[0]; count = civ_god_count[0]; }
+        else if (god_picker_civilization_ == "Egípcio") { start = civ_god_start[1]; count = civ_god_count[1]; }
+        else if (god_picker_civilization_ == "Nórdico") { start = civ_god_start[2]; count = civ_god_count[2]; }
+        else if (god_picker_civilization_ == "Atlante") { start = civ_god_start[3]; count = civ_god_count[3]; }
+        else if (god_picker_civilization_ == "Aleatório") { start = civ_god_start[4]; count = civ_god_count[4]; }
+        
+        bool associated = (i >= start && i < start + count);
+
+        ui_->add_button({col2_x, y}, {col_w, btn_h}, god_name, [this, i]() {
+            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(i));
+            create_god_picker_menu(); // Recreate to show updated selection
+        }, color, 0xAA553311);
+        y += btn_h + gap;
+    }
+
+    // --- Botão Finalizar Seleção ---
+    float back_w = 220.0f;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.82f}, {back_w, 44.0f}, "FINALIZAR SELEÇÃO",
+                    [this]() {
+                        god_picker_selection_made_ = true;
+                        LOGI("God Picker selection finalized: civilization=%s, minor_god=%s",
+                             god_picker_civilization_.c_str(), god_picker_minor_god_.c_str());
+                        set_state(EngineState::MAIN_MENU); // Return to main menu, game start will use the selection
+                    }, 0xAA204060, 0xAA306090);
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, 44.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }
 

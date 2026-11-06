@@ -17,6 +17,7 @@
 #include "audio/audio.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
+#include "aom/campaign_select_system.h"
 #include "video/video_player.h"
 #include "video/media_decoder.h"
 #include "campaign/campaign.h"
@@ -496,6 +497,7 @@ private:
     std::unique_ptr<BarArchive> godpowers_bar_;
     std::unique_ptr<CampaignManager> campaign_mgr_;
     std::unique_ptr<CampaignManager> campaign_mgr_xpack_;
+    std::unique_ptr<CampaignSelectSystem> campaign_select_system_;
     std::unique_ptr<CampaignMissionManager> mission_mgr_;
     GodPowerSystem god_powers_;
 
@@ -655,6 +657,11 @@ private:
     std::string mp_target_ip_ = "192.168.1.100";
     int mp_ip_last_octet_ = 100;
     int mp_ip_subnet_ = 1;
+
+    // God Picker state (after campaign)
+    std::string god_picker_civilization_ = "Grego";
+    std::string god_picker_minor_god_ = "Zeus";
+    bool god_picker_selection_made_ = false;
 
     // In-game HUD references
     UILabel* hud_food_label_ = nullptr;
