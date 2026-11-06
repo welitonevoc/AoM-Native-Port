@@ -663,6 +663,41 @@ private:
     std::string god_picker_minor_god_ = "Zeus";
     bool god_picker_selection_made_ = false;
 
+    // Tech Tree state - technologies available per civilization
+    // Each civilization has access to different technologies with unique bonuses
+    struct TechDef {
+        std::string name;
+        std::string description;
+        int era; // 0=Archaic, 1=Classical, 2=Medieval, 3=Heroic, 4=Mythic
+        int cost_food;
+        int cost_wood;
+        int cost_gold;
+        int cost_favor;
+        bool available; // whether this tech is available for this civilization
+    };
+
+    // Technology definitions available in the game
+    static const std::vector<TechDef> tech_defs_;
+
+    // Technology progress per civilization
+    // Tracks which technologies have been researched
+    std::map<std::string, std::vector<bool>> tech_progress_;  // civilization -> {researched}
+
+    // Current era per civilization
+    int current_era_[4] = {0, 0, 0, 0};  // Greek, Egyptian, Norse, Atlas
+
+    // Tech availability by civilization
+    // Index: 0=Greek, 1=Egyptian, 2=Norse, 3=Atlas
+    bool tech_available_[4][100] = {};  // [civilization_index][tech_index]
+
+    // Resources spent on research this era
+    int research_cost_food_ = 0;
+    int research_cost_wood_ = 0;
+    int research_cost_gold_ = 0;
+    int research_cost_favor_ = 0;
+    float research_timer_ = 0.0f;
+    int research_progress_ = 0; // 0-100%
+
     // In-game HUD references
     UILabel* hud_food_label_ = nullptr;
     UILabel* hud_wood_label_ = nullptr;
