@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu>
+  <button>
+    <label>Learn To Play</label>
+    <action>start_game</action>
+  </button>
+  <button>
+    <label>Campaign</label>
+    <action>create_campaign_menu</action>
+  </button>
+  <button>
+    <label>Single Player</label>
+    <action>create_single_player_menu</action>
+  </button>
+  <button>
+    <label>Multiplayer</label>
+    <action>open_multiplayer</action>
+  </button>
+  <button>
+    <label>Options</label>
+    <action>open_options</action>
+  </button>
+  <button>
+    <label>Credits</label>
+    <action>open_credits</action>
+  </button>
+  <button>
+    <label>Exit</label>
+    <action>quit_app</action>
+  </button>
+</menu>

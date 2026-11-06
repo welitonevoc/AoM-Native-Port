@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<options>
+  <audio>
+    <master_volume>0.8</master_volume>
+    <music_volume>0.7</music_volume>
+    <sfx_volume>0.9</sfx_volume>
+    <music_enabled>true</music_enabled>
+    <sfx_enabled>true</sfx_enabled>
+  </audio>
+  <video>
+    <graphics_quality>1.0</graphics_quality>
+    <trilinear_mipmap>true</trilinear_mipmap>
+    <directional_lighting>true</directional_lighting>
+    <show_fps>true</show_fps>
+  </video>
+  <gameplay>
+    <language>portuguese</language>
+  </gameplay>
+</options>

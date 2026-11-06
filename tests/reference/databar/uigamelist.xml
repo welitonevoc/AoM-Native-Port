@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<game_list>
+  <saved_games>
+    <game>
+      <name>Partida Salva 1</name>
+      <date>2026-11-01</date>
+      <mission>Omens - Missão 1</mission>
+      <civilization>Gregos</civilization>
+      <era>Era Heroica</era>
+    </game>
+    <game>
+      <name>Partida Salva 2</name>
+      <date>2026-10-28</date>
+      <mission>Omens - Missão 2</mission>
+      <civilization>Egípcios</civilization>
+      <era>Era Clássica</era>
+    </game>
+  </saved_games>
+  <campaigns>
+    <campaign name="Fall of the Trident">
+      <scenario_count>13</scenario_count>
+      <completed>1</completed>
+    </campaign>
+    <campaign name="The New Atlantis">
+      <scenario_count>12</scenario_count>
+      <completed>0</completed>
+    </campaign>
+  </campaigns>
+  <skirmish>
+    <maps>
+      <map>Random Map</map>
+      <map>Random Map - Random</map>
+    </maps>
+    <difficulties>
+      <difficulty>Easy</difficulty>
+      <difficulty>Moderate</difficulty>
+      <difficulty>Hard</difficulty>
+    </difficulties>
+  </skirmish>
+</game_list>
