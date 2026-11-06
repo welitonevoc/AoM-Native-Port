@@ -1423,6 +1423,66 @@ void Engine::create_message_dialogs_menu() {
                     [this]() { return_to_main_menu(); });
 }
 
+// ── uimotd ──
+void Engine::create_motd_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MOTD", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimp_custom ──
+void Engine::create_mp_custom_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP CUSTOM", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimp_eso ──
+void Engine::create_mp_eso_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP ESO", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimp_friends_list ──
+void Engine::create_mp_friends_list_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP FRIENDS LIST", {vw * 0.5f - 160.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimp_help ──
+void Engine::create_mp_help_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP HELP", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
+// ── uimp_planip ──
+void Engine::create_mp_planip_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+    ui_->add_label("MP PLANIP", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                    [this]() { return_to_main_menu(); });
+}
+
 void Engine::create_options_menu() {
     clear_ui();
 
