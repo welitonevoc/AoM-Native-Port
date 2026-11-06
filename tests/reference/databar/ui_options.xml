@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <options>
-  <audio>
-    <master_volume>0.8</master_volume>
-    <music_volume>0.7</music_volume>
-    <sfx_volume>0.9</sfx_volume>
-  </audio>
-  <video>
-    <graphics_quality>High</graphics_quality>
-    <resolution>1920x1080</resolution>
-  </video>
-  <gameplay>
-    <language>pt-BR</language>
-  </gameplay>
+  <section name="Audio">
+    <setting name="Volume" value="80"/>
+    <setting name="Music" value="70"/>
+    <setting name="SFX" value="90"/>
+  </section>
+  <section name="Graphics">
+    <setting name="Resolution" value="1920x1080"/>
+    <setting name="Quality" value="High"/>
+  </section>
 </options>
