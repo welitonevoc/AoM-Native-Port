@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <trig_group_editor>
   <groups>
-    <group name="Combat Triggers">
-      <trigger ref="attack_enemy"/>
-      <trigger ref="unit_death"/>
-    </group>
-    <group name="Economy Triggers">
-      <trigger name="resource_gathered"/>
-      <trigger name="building_constructed"/>
-    </group>
+    <group name="Group 1" triggers="5"/>
+    <group name="Group 2" missions="3"/>
   </groups>
-</trig_group_editor>
+  <buttons>
+    <button label="Adicionar Grupo" action="add_group"/>
+    <button label="Voltar" action="return_to_triggers"/>
+  </buttons>
+</trigger_group_editor>

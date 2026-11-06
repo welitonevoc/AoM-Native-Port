@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <water_dialog>
-  <water_body name="River">
-    <type>River</type>
-    <size>Large</size>
+  <water_body name="Lake">
+    <type>Freshwater</type>
+    <size>Medium</size>
     <depth>Deep</depth>
   </water_body>
-  <options>
-    <option label="Water Color" default="blue"/>
-    <option label="Wave Height" default="medium"/>
-    <option label="Flow Speed" default="normal"/>
-  </options>
+  <buttons>
+    <button label="Confirmar" action="confirm_water"/>
+    <button label="Cancelar" action="cancel"/>
+  </buttons>
 </water_dialog>

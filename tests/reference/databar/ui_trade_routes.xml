@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<trade_routes>
+  <trade_routes>
+    <route name="Rota 1" source="Região A" destination="Região B" active="true"/>
+    <route name="Rota 2" source="Região B" destination="Região C" active="false"/>
+  </trade_routes>
+  <buttons>
+    <button label="Adicionar Rota" action="add_trade_route"/>
+    <button label="Voltar" action="return_to_trade_menu"/>
+  </buttons>
+</trade_routes>

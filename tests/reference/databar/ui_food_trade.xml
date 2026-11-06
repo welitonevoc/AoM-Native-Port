@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<food_trade>
+  <trade_partner>Jogador2</food_trade>
+  <resources>
+    <food>100</food>
+    <wood>0</wood>
+    <gold>0</gold>
+  </resources>
+  <buttons>
+    <button label="Enviar" action="send_trade"/>
+    <button label="Cancelar" action="cancel_trade"/>
+  </buttons>
+</mp_trade>
