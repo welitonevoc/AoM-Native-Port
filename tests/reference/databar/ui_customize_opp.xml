@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<customize_opp>
+  <opponent>
+    <name>Jogador 2</name>
+    <civilization>Gregos</civilization>
+    <difficulty>Moderate</difficulty>
+    <team>1</team>
+    <color>blue</color>
+  </opponent>
+  <settings>
+    <starting_resources>
+      <food>500</food>
+      <wood>500</wood>
+      <gold>500</gold>
+      <favor>0</favor>
+    </starting_resources>
+    <starting_age>Archaic</starting_age>
+    <victory_condition>Conquest</victory_condition>
+  </settings>
+</customize_opp>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<editor_menu>
+  <options>
+    <option label="New Map" action="new_map"/>
+    <option label="Open Map" action="open_map"/>
+    <option label="Save Map" action="save_map"/>
+    <option label="Test Map" action="test_map"/>
+    <option label="Exit" action="return_to_main_menu"/>
+  </options>
+  <tools>
+    <tool name="Terrain Tool"/>
+    <tool name="Unit Tool"/>
+    <tool name="Building Tool"/>
+    <tool name="Trigger Tool"/>
+  </tools>
+</editor_menu>

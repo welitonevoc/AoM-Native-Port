@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<combat_comparison>
+  <unit1 name="Hoplite">
+    <health>120</health>
+    <attack>12</attack>
+    <range>2.2</range>
+    <speed>3.8</speed>
+  </unit1>
+  <unit2 name="Toxotes">
+    <health>100</health>
+    <attack>10</attack>
+    <range>10.0</range>
+    <speed>3.8</speed>
+  </unit2>
+  <comparison>
+    <winner unit1_wins="true" reason="Higher health and balanced stats"/>
+  </comparison>
+</combat_comparison>

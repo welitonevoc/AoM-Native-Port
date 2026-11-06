@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<default_loading>
+  <screen>
+    <background>loading_screen.png</background>
+    <logo>ao m logo.png</logo>
+    <tips>
+      <tip>Use vilageres para coletar recursos</text>
+      <tip>Construa um Town Center para iniciar</text>
+      <tip>Treine unidades militares para atacar</text>
+    </tips>
+  </screen>
+</default_loading>
