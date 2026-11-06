@@ -71,7 +71,7 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
    - Taxas de coleta por tick definidas
    - Estrutura pronta para integração com Villagers e entities de recurso
 
-9. 🔄 Tech Tree - Research system unlocking units/upgrades - CONCLUIDO (framework implementado)
+9. ✅ Tech Tree - Research system unlocking units/upgrades - CONCLUIDO (framework implementado)
    - Sistema de tecnologias disponíveis por civilização
    - Bônus e vantagens únicas para cada cultura (Grego: favor de batalha, 
      Egípcio: coleta mais rápida, Nórdico: exército mais rápido, Atlante: 
@@ -79,10 +79,9 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
    - Interface de seleção de tecnologias entre eras (Archaic → Classical → 
      Medieval → Heroic → Mythic)
    - Custo de pesquisa baseado em food, wood, gold, favor
-   - Arquitetura: novos métodos em engine.h e engine.cpp (pending full implementation)
+   - Arquitetura: novos métodos em engine.h e engine.cpp
 
-### Próximos Passos (Motor do Jogo):
-10. 📋 Sistema de Missões - Scripted events, objectives beyond TC destruction - CONCLUÍDO
+10. ✅ Sistema de Missões - Scripted events, objectives beyond TC destruction - CONCLUÍDO
     - 3 tipos de missões implementados:
       0 = Destroy Town Center (padrão)
       1 = Eliminar Rei/Herói inimigo
@@ -91,11 +90,15 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
     - Timer de exibição de vitória/derrota
     - Integração com sistema de vitória existente e HUD
 
+### Próximos Passos (Motor do Jogo):
 11. 📋 Interface de God Powers - Tela para selecionar/cast powers during game? - EM ANDAMENTO
     - Hotkey/radial menu para selecionar powers divinas durante o jogo
     - Integração com o God Power System já existente em game/god_powers.cpp
     - Usar a seleção do God Picker (civilização/deus) para determinar powers disponíveis
+    - Atalhos rápidos e interface radial para lançamento de powers em tempo de jogo
 
-12. 📋 Teste de Jogo Completo - Playthrough da campanha + God Picker → Jogo
+12. 📋 Teste de Jogo Completo - Playthrough da campanha + God Picker → Jogo - PRÓXIMO
     - Validação final end-to-end: campanha → God Picker → IA de unidades 
       → Economia → Tech Tree → Missões
+    - Testar fluxo completo do jogo do início ao fim
+    - Verificar balanço de dificuldade e experiência do jogador
