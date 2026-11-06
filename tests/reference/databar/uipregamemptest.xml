@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pregame_mp_test>
+  <title>MP Pregame Test</title>
+  <options>
+    <option name="Test Connection"/>
+    <option name="Test Latency"/>
+    <button label="Back" action="return_to_mp_menu"/>
+  </options>
+</pregame_mp_test>

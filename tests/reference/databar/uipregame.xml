@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pregame>
+  <title>Pregame</title>
+  <buttons>
+    <button label="Iniciar Partida" action="start_game"/>
+    <button label="Opções" action="options"/>
+    <button label="Sair" action="quit_app"/>
+  </buttons>
+</pregame>
