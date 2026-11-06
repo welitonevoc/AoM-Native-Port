@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs_debugger>
+  <scripts>
+    <script name="Campaign.xs" status="Loaded"/>
+    <script name="GameLogic.xs" status="Loaded"/>
+    <script name="AI.xs" status="Loaded"/>
+  </scripts>
+  <breakpoints>
+    <breakpoint file="Campaign.xs" line="42" enabled="true"/>
+    <breakpoint file="GameLogic.xs" line="15" enabled="false"/>
+  </breakpoints>
+  <variables>
+    <variable name="playerGold" value="500"/>
+    <variable name="playerFood" value="300"/>
+  </variables>
+</xs_debugger>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<multiplayer_lan>
+  <sessions>
+    <session name="Sala 1" host="Jogador1" players="2/8" map="Random Map"/>
+    <session name="Sala 2" host="Jogador2" players="4/8" map="Random Map"/>
+  </sessions>
+  <options>
+    <name>Nova Sala</name>
+    <map>Random Map</map>
+    <max_players>8</max_players>
+    <difficulty>Moderate</difficulty>
+  </options>
+</multiplayer_lan>

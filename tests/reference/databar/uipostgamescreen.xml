@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<post_game_screen>
+  <result>Victory</result>
+  <stats>
+    <units_killed>45</units_killed>
+    <resources_gathered>5000</resources_gathered>
+    <buildings_built>12</buildings_built>
+  </stats>
+  <buttons>
+    <button label="Replay" action="replay_game"/>
+    <button label="Main Menu" action="return_to_main_menu"/>
+    <button label="Save Replay" action="save_replay"/>
+  </buttons>
+</post_game_screen>

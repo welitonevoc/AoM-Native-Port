@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<water_dialog>
+  <water_body name="River">
+    <type>River</type>
+    <size>Large</size>
+    <depth>Deep</depth>
+  </water_body>
+  <options>
+    <option label="Water Color" default="blue"/>
+    <option label="Wave Height" default="medium"/>
+    <option label="Flow Speed" default="normal"/>
+  </options>
+</water_dialog>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<multiplayer_lobby>
+  <players>
+    <player name="Jogador 1" civilization="Gregos" ready="true"/>
+    <player name="Jogador 2" civilization="Egípcios" ready="false"/>
+  </players>
+  <settings>
+    <map>Random Map</map>
+    <difficulty>Moderate</difficulty>
+    <game_type>Skirmish</game_type>
+  </settings>
+  <chat>
+    <message player="Jogador 1" text="Pronto para jogar!" />
+    <message player="Jogador 2" text="Vamos lá!" />
+  </chat>
+</multiplayer_lobby>
