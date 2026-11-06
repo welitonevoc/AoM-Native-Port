@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_help>
+  <help_text>
+    <line>Como jogar multiplayer:</line>
+    <line>1. Escolha um mapa</line>
+    <line>2. Escolha o número de jogadores</line>
+    <line>3. Clique em Iniciar</line>
+  </help_text>
+  <buttons>
+    <button label="Fechar" action="close"/>
+  </buttons>
+</mp_help>

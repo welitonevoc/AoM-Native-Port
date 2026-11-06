@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_eso>
+  <servers>
+    <server name="ESO North America" status="online"/>
+    <server name="ESO Europe" status="online"/>
+  </servers>
+  <buttons>
+    <button label="Conectar" action="connect_eso"/>
+    <button label="Cancelar" action="cancel"/>
+  </buttons>
+</mp_eso>

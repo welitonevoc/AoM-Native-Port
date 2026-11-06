@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_friends_list>
+  <friends>
+    <friend name="Jogador1" status="online"/>
+    <friend name="Jogador2" status="offline"/>
+  </friends>
+  <buttons>
+    <button label="Adicionar Amigo" action="add_friend"/>
+    <button label="Remover" action="remove_friend"/>
+    <button label="Fechar" action="close"/>
+  </buttons>
+</mp_friends_list>

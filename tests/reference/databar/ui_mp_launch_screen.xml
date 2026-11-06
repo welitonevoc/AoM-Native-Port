@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_launch_screen>
+  <title>Multijogador</title>
+  <options>
+    <option name="Criar Partida"/>
+    <option label="Entrar na Partida" action="join_game"/>
+    <option label="Lista de Amigos" action="friends_list"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </options>
+</mp_launch_screen>

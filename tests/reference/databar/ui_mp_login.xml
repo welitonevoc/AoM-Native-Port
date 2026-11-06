@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_login>
+  <login>
+    <username>Jogador1</username>
+    <password>********</password>
+  </login>
+  <buttons>
+    <button label="Entrar" action="login"/>
+    <button label="Registrar" action="register"/>
+    <button label="Esqueci a Senha" action="forgot_password"/>
+  </buttons>
+</mp_login>

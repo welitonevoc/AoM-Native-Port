@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mp_planip>
+  <planip>
+    <name>Plano A</name>
+    <description>Plano de ação A</description>
+  </planip>
+  <planip>
+    <name>Plano B</name>
+    <description>Plano de ação B</description>
+  </planip>
+</mp_planip>
