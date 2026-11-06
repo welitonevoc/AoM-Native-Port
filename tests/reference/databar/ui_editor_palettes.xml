@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <editor_palettes>
-  <palette name="Terrain">
-    <texture name="Grass"/>
-    <texture name="Water"/>
-    <texture name="Sand"/>
-    <texture name="Dirt"/>
+  <palette name="textures">
+    <texture name="grass"/>
+    <texture name="water"/>
+    <texture name="sand"/>
+    <texture name="dirt"/>
   </palette>
-  <palette name="Buildings">
-    <building name="Town Center"/>
-    <building name="Barracks"/>
-    <building name="Archery Range"/>
-    <building name="Stable"/>
+  <palette name="models">
+    <model name="house"/>
+    <model name="barracks"/>
+    <model name="temple"/>
   </palette>
 </editor_palettes>

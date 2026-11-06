@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file_manager>
+  <current_folder>/saves/</current_folder>
+  <files>
+    <file name="save1.sav" size="1024" date="2026-11-01"/>
+    <file name="save2.sav" size="2048" date="2026-11-02"/>
+    <file name="save3.sav" size="1536" date="2026-11-03"/>
+  </files>
+  <buttons>
+    <button label="Load" action="load_save"/>
+    <button label="Delete" action="delete_save"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</file_manager>

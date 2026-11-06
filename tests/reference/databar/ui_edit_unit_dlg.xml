@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edit_unit_dialog>
+  <unit type="Hoplite">
+    <health>120</health>
+    <attack>12</attack>
+    <range>2.2</range>
+    <speed>3.8</speed>
+  </unit>
+  <buttons>
+    <button label="Save" action="save_unit"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</edit_unit_dialog>
