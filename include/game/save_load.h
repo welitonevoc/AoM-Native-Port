@@ -7,7 +7,7 @@
 namespace aom {
 
 /// Versao do formato de save (bump ao mudar o layout binario)
-static constexpr uint32_t kSaveFormatVersion = 1;
+static constexpr uint32_t kSaveFormatVersion = 2;
 /// Magic bytes para validacao do arquivo ('AOMS')
 static constexpr uint32_t kSaveMagic = 0x414F4D53;
 
@@ -21,6 +21,16 @@ struct SavedUnit {
     bool     worker     = false;
     int32_t  pop_cost   = 1;
     std::string unit_type;
+
+    /// Estado de ordem de movimento / ataque / construcao
+    bool     has_move_order   = false;
+    float    move_target_x = 0.0f, move_target_z = 0.0f;
+    uint32_t attack_target    = 0;   ///< entity id ou 0 = INVALID_ENTITY
+    uint32_t build_target     = 0;   ///< entity id ou 0 = INVALID_ENTITY
+    int32_t  gather_node      = -1;  ///< indice no resources_nodes_ ou -1
+    bool     returning_cargo  = false;
+    int32_t  carried_resource_amount = 0;
+    uint8_t  carried_resource_type   = 0;  ///< ResourceType (0=FOOD,1=WOOD,2=GOLD,3=FAVOR)
 };
 
 /// Edificio serializado (versao em memoria, sem o packing do arquivo).
@@ -34,6 +44,11 @@ struct SavedBuilding {
     bool     complete   = false;
     float    progress   = 0.0f;
     std::string name;
+
+    /// Estado de treinamento de unidades
+    std::string training_unit;   ///< vazio se nao esta treinando
+    float     train_timer = 0.0f;
+    std::vector<std::string> train_queue;  ///< fila de unidades a treinar
 };
 
 struct SaveGameData {

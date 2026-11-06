@@ -24,6 +24,23 @@ std::string fixed_string(const char* data, size_t max_len) {
     return std::string(data, len);
 }
 
+/// Escreve uma string com comprimento prefixado (u32 + bytes).
+void write_string(std::ofstream& out, const std::string& s) {
+    uint32_t len = static_cast<uint32_t>(s.size());
+    out.write(reinterpret_cast<const char*>(&len), sizeof(len));
+    if (len > 0) out.write(s.data(), len);
+}
+
+/// Le uma string com comprimento prefixado.
+bool read_string(std::ifstream& in, std::string& out) {
+    uint32_t len = 0;
+    in.read(reinterpret_cast<char*>(&len), sizeof(len));
+    if (!in || len > 1024 * 1024) return false;  // sanidade
+    out.resize(len);
+    if (len > 0) in.read(out.data(), len);
+    return in.good();
+}
+
 } // anonymous namespace
 
 #pragma pack(push, 1)
@@ -36,6 +53,17 @@ struct SaveUnit {
     uint8_t  _pad[2];
     int32_t  pop_cost;
     char     unit_type[64];
+
+    /// —— Novos campos (versao 2) ——
+    int32_t  has_move_order;          // 0 ou 1
+    float    move_target_x, move_target_z;
+    uint32_t attack_target;           // entity id ou 0 = INVALID_ENTITY
+    uint32_t build_target;            // entity id ou 0 = INVALID_ENTITY
+    int32_t  gather_node;             // indice no resources_nodes_ ou -1
+    int32_t  returning_cargo;         // 0 ou 1
+    int32_t  carried_resource_amount;
+    uint8_t  carried_resource_type;   // ResourceType
+    uint8_t  _pad2[3];
 };
 
 struct SaveBuilding {
@@ -48,6 +76,11 @@ struct SaveBuilding {
     uint8_t  _pad;
     float    progress;
     char     name[64];
+
+    /// —— Novos campos (versao 2) ——
+    char     training_unit[64];   // vazio se nao esta treinando
+    float    train_timer;
+    uint32_t train_queue_count;   // numero de unidades na fila de treinamento
 };
 
 struct SaveHeader {
@@ -85,6 +118,10 @@ bool save_game_state(const std::string& path,
     save_units.reserve(units_map.size());
     save_bldgs.reserve(bldgs_map.size());
 
+    // Coletar nomes da fila de treinamento para gravacao em bloco variavel
+    std::vector<std::vector<std::string>> train_queues;
+    train_queues.reserve(bldgs_map.size());
+
     for (const auto& [entity, unit] : units_map) {
         SaveUnit su{};
         su.entity = static_cast<uint32_t>(entity);
@@ -103,6 +140,18 @@ bool save_game_state(const std::string& path,
         su.worker   = unit.worker ? 1 : 0;
         su.pop_cost = unit.pop_cost;
         std::strncpy(su.unit_type, unit.unit_type_name.c_str(), sizeof(su.unit_type) - 1);
+
+        // —— Campos v2 ——
+        su.has_move_order   = unit.has_move_order ? 1 : 0;
+        su.move_target_x    = unit.move_target.x;
+        su.move_target_z    = unit.move_target.z;
+        su.attack_target    = static_cast<uint32_t>(unit.attack_target);
+        su.build_target     = static_cast<uint32_t>(unit.build_target);
+        su.gather_node      = unit.gather_node;
+        su.returning_cargo  = unit.returning_cargo ? 1 : 0;
+        su.carried_resource_amount = unit.carried_resource_amount;
+        su.carried_resource_type   = static_cast<uint8_t>(unit.carried_resource_type);
+
         save_units.push_back(su);
     }
 
@@ -125,6 +174,21 @@ bool save_game_state(const std::string& path,
         sb.complete = bld.complete ? 1 : 0;
         sb.progress = bld.progress;
         std::strncpy(sb.name, bld.name.c_str(), sizeof(sb.name) - 1);
+
+        // —— Campos v2 ——
+        std::strncpy(sb.training_unit, bld.training_unit.c_str(), sizeof(sb.training_unit) - 1);
+        sb.train_timer = bld.train_timer;
+        sb.train_queue_count = static_cast<uint32_t>(bld.train_queue.size());
+
+        // Coletar fila de treinamento para gravacao variavel
+        std::vector<std::string> q;
+        std::queue<std::string> tmp = bld.train_queue;  // copia para iterar
+        while (!tmp.empty()) {
+            q.push_back(tmp.front());
+            tmp.pop();
+        }
+        train_queues.push_back(std::move(q));
+
         save_bldgs.push_back(sb);
     }
 
@@ -151,12 +215,21 @@ bool save_game_state(const std::string& path,
         out.write(reinterpret_cast<const char*>(save_bldgs.data()), save_bldgs.size() * sizeof(SaveBuilding));
     }
 
+    // —— Bloco variavel: filas de treinamento ——
+    for (const auto& q : train_queues) {
+        uint32_t count = static_cast<uint32_t>(q.size());
+        out.write(reinterpret_cast<const char*>(&count), sizeof(count));
+        for (const auto& s : q) {
+            write_string(out, s);
+        }
+    }
+
     if (!out) {
         LOGE("save_game_state: erro de gravacao em '%s'", path.c_str());
         return false;
     }
 
-    LOGI("save_game_state: salvo com sucesso em '%s' (%u unidades, %u edificios)",
+    LOGI("save_game_state: salvo com sucesso em '%s' (%u unidades, %u edificios, v2)",
          path.c_str(), hdr.unit_count, hdr.building_count);
     return true;
 }
@@ -189,9 +262,6 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
     out.favor[0] = hdr.favor[0];  out.favor[1] = hdr.favor[1];
 
     // ── Seções de entidades ────────────────────────────────────────────────
-    // As seções ja eram gravadas desde a versao 1 do formato; aqui elas sao
-    // lidas de volta para permitir reconstruir o mundo ao carregar a partida.
-    // Um limite de sanidade evita alocacoes enormes em arquivos corrompidos.
     constexpr uint32_t kMaxEntities = 100000;
     if (hdr.unit_count > kMaxEntities || hdr.building_count > kMaxEntities) {
         LOGE("load_game_state: contagem de entidades invalida (u=%u b=%u)", hdr.unit_count, hdr.building_count);
@@ -221,6 +291,18 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
             u.worker     = su.worker != 0;
             u.pop_cost   = su.pop_cost;
             u.unit_type = fixed_string(su.unit_type, sizeof(su.unit_type));
+
+            // —— Campos v2 ——
+            u.has_move_order    = su.has_move_order != 0;
+            u.move_target_x     = su.move_target_x;
+            u.move_target_z     = su.move_target_z;
+            u.attack_target     = su.attack_target;
+            u.build_target      = su.build_target;
+            u.gather_node       = su.gather_node;
+            u.returning_cargo   = su.returning_cargo != 0;
+            u.carried_resource_amount = su.carried_resource_amount;
+            u.carried_resource_type   = su.carried_resource_type;
+
             out.units.push_back(std::move(u));
         }
     }
@@ -246,11 +328,39 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
             b.complete     = sb.complete != 0;
             b.progress     = sb.progress;
             b.name = fixed_string(sb.name, sizeof(sb.name));
+
+            // —— Campos v2 ——
+            b.training_unit = fixed_string(sb.training_unit, sizeof(sb.training_unit));
+            b.train_timer   = sb.train_timer;
+
             out.buildings.push_back(std::move(b));
         }
     }
 
-    LOGI("load_game_state: '%s' carregado — tempo=%.1fs unidades=%zu edificios=%zu",
+    // —— Ler bloco variavel: filas de treinamento ——
+    size_t bld_idx = 0;
+    for (auto& b : out.buildings) {
+        if (bld_idx >= out.buildings.size()) break;
+        uint32_t count = 0;
+        in.read(reinterpret_cast<char*>(&count), sizeof(count));
+        if (!in || count > 1000) {
+            LOGE("load_game_state: falha ao ler fila de treinamento do edificio %zu", bld_idx);
+            return false;
+        }
+        b.train_queue.clear();
+        b.train_queue.reserve(count);
+        for (uint32_t i = 0; i < count; ++i) {
+            std::string s;
+            if (!read_string(in, s)) {
+                LOGE("load_game_state: falha ao ler item da fila de treinamento");
+                return false;
+            }
+            b.train_queue.push_back(std::move(s));
+        }
+        ++bld_idx;
+    }
+
+    LOGI("load_game_state: '%s' carregado — tempo=%.1fs unidades=%zu edificios=%zu (v2)",
          path.c_str(), hdr.game_time, out.units.size(), out.buildings.size());
     return true;
 }

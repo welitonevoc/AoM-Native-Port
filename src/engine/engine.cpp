@@ -2162,6 +2162,27 @@ void Engine::restore_saved_entities(const SaveGameData& data) {
         if (clip && clip->is_valid() && renderer_) {
             world.attach_animation(e, clip, clip_tex, renderer_.get());
         }
+
+        // —— Restaurar estado de ordem da unidade (v2) ——
+        if (auto* u = world.unit_component_mutable(e)) {
+            u->has_move_order   = su.has_move_order;
+            u->move_target      = glm::vec3(su.move_target_x, 0.0f, su.move_target_z);
+            u->attack_target    = (su.attack_target != 0) ? static_cast<Entity>(su.attack_target) : INVALID_ENTITY;
+            u->build_target     = (su.build_target != 0) ? static_cast<Entity>(su.build_target) : INVALID_ENTITY;
+            u->gather_node      = su.gather_node;
+            u->returning_cargo  = su.returning_cargo;
+            u->carried_resource_amount = su.carried_resource_amount;
+            u->carried_resource_type = static_cast<ResourceType>(su.carried_resource_type);
+            // Reconstruir waypoints se houver ordem de movimento ativa
+            if (u->has_move_order) {
+                auto t_it = world.get_transform(e);
+                auto move_t = glm::vec3(su.move_target_x, 0.0f, su.move_target_z);
+                if (t_it) {
+                    u->waypoints = world.navigation_find_path(t_it->position, move_t);
+                    u->waypoint_index = 0;
+                }
+            }
+        }
         ++restored_units;
     }
 
@@ -2174,12 +2195,18 @@ void Engine::restore_saved_entities(const SaveGameData& data) {
         if (BuildingComponent* bc = world.building_component_mutable(e)) {
             bc->complete = sb.complete;
             bc->progress = sb.progress;
+            bc->training_unit = sb.training_unit;
+            bc->train_timer = sb.train_timer;
+            // Restaurar fila de treinamento (v2)
+            for (const auto& unit_type : sb.train_queue) {
+                bc->train_queue.push(unit_type);
+            }
         }
         if (sb.current_hp > 0) world.set_entity_hp(e, sb.current_hp);
         ++restored_buildings;
     }
 
-    LOGI("load_game: %zu unidades e %zu edificios restaurados", restored_units, restored_buildings);
+    LOGI("load_game: %zu unidades e %zu edificios restaurados (v2)", restored_units, restored_buildings);
 }
 
 void Engine::save_game(const std::string& path) {

@@ -1203,6 +1203,13 @@ public:
         return (it != building_components_.end()) ? &it->second : nullptr;
     }
     const FogOfWar& fog_of_war() const { return fog_of_war_; }
+
+    /// Acesso publico ao pathfinder da NavigationGrid (usado pelo save/load
+    /// para reconstruir waypoints de unidades ao carregar uma partida).
+    std::vector<glm::vec3> navigation_find_path(const glm::vec3& from, const glm::vec3& to) const {
+        return navigation_.find_path(from, to);
+    }
+
     std::vector<Entity> select_box(const glm::vec3& min_point, const glm::vec3& max_point) {
         std::vector<Entity> result;
         for (auto& [entity, transform] : ecs_world_.transforms_mut()) {
