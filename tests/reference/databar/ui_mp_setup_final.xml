@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui_mp_setup_final>
+<mp_setup_final>
   <settings>
     <map_name>Random Map</map_name>
     <max_players>8</max_players>
@@ -10,4 +10,4 @@
     <button label="Iniciar Partida" action="start_mp_game"/>
     <button label="Voltar" action="return_to_mp_menu"/>
   </buttons>
-</ui_mp_setup_final>
+</mp_setup_final>

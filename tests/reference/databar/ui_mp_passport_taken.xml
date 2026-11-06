@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui_mp_passport_taken>
-  <message>Este nome de usuário já está em uso.</message>
+<mp_passport_taken>
+  <message>This username is already taken.</message>
   <buttons>
     <button label="Tentar Novamente" action="mp_login"/>
     <button label="Voltar" action="return_to_main_menu"/>
   </buttons>
-</ui_mp_passport_taken>
+</mp_passport_taken>

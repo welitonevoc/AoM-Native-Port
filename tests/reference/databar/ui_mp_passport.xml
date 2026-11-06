@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui_mp_passport>
+<mp_passport>
   <username>Jogador1</username>
   <password>********</password>
   <buttons>
     <button label="Login" action="mp_login"/>
     <button label="Register" action="mp_register"/>
   </buttons>
-</ui_mp_passport>
+</mp_passport>
