@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<minimap>
+  <map_name>Random Map</map_name>
+  <size>Medium</size>
+  <players>8</max_players>
+  <fog_of_war>true</fog_of_war>
+</minimap>

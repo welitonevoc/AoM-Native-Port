@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unit_selection>
+  <selected_units>
+    <unit type="Hoplite" count="3"/>
+    <unit type="Toxotes" count="2"/>
+  </selected_units>
+  <actions>
+    <button label="Attack" action="attack_target"/>
+    <button label="Move" action="move_to"/>
+    <button label="Stop" action="stop_unit"/>
+  </buttons>
+</unit_selection>

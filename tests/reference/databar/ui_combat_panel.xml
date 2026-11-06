@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<combat_dialog>
+  <target>
+    <name>Arqueiro Inimigo</name>
+    <health>80</health>
+    <armor>5</armor>
+  </target>
+  <actions>
+    <button action="attack" label="Atacar"/>
+    <button label="Retirar" action="retreat"/>
+  </buttons>
+</combat_dialog>

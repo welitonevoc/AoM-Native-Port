@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resource_panel>
+  <resources>
+    <resource name="Food" value="500"/>
+    <resource name="Wood" value="400</wood>
+    <resource name="Gold" value="300"/></gold>
+    <resource name="Favor" value="100</favor>
+  </resources>
+</resource_panel>
