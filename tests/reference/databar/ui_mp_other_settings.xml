@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mp_other_settings>
-  <options>
-    <option name="Fog of War" value="true"/>
-    <option name="Starting Age" value="Archaic"/>
-    <option name="Victory Condition" value="Conquest"/>
-  </options>
+  <settings>
+    <fog_of_war>true</fog_of_war>
+    <starting_age>Dark Age</starting_age>
+    <victory_condition>Conquest</victory_condition>
+    <population_cap>100</max_population>
+  </settings>
+  <buttons>
+    <button label="Aplicar" action="apply_settings"/>
+    <button label="Voltar" action="return_to_menu"/>
+  </buttons>
 </mp_other_settings>

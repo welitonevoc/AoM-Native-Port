@@ -4,6 +4,6 @@
   <password>********</password>
   <buttons>
     <button label="Login" action="mp_login"/>
-    <button label="Register" action="mp_register"/>
+    <button label="Registrar" action="mp_register"/>
   </buttons>
 </mp_passport>
