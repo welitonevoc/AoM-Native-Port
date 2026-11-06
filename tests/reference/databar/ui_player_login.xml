@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<player_login>
+  <username>Jogador1</username>
+  <password>********</password>
+  <buttons>
+    <button label="Login" action="login"/>
+    <button label="Register" action="register"/>
+    <button label="Forgot Password" action="forgot_password"/>
+  </buttons>
+</player_login>

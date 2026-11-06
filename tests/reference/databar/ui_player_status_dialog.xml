@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<player_status_dialog>
+  <player>
+    <name>Jogador1</name>
+    <level>10</level>
+    <wins>15</wins>
+    <losses>5</losses>
+  </player>
+  <buttons>
+    <button label="Close" action="close"/>
+  </buttons>
+</player_status_dialog>

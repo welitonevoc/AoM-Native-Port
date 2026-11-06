@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<options_dialog>
+  <tabs>
+    <tab name="Audio"/>
+    <tab name="Video"/>
+    <tab name="Gameplay"/>
+  </tabs>
+  <buttons>
+    <button label="Salvar" action="save_options"/>
+    <button label="Cancelar" action="cancel"/>
+  </buttons>
+</options_dialog>
