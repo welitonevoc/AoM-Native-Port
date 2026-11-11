@@ -146,6 +146,12 @@ public:
                        float size = 18.0f,
                        uint32_t color = 0xFFFFD000);
 
+    /** Add a solid-color background quad (no text, no interaction) */
+    UIButton* add_background_quad(const glm::vec2& pos,
+                                  const glm::vec2& size,
+                                  TextureHandle tex = INVALID_TEXTURE,
+                                  uint32_t color = 0xFFFFFFFF);
+
     [[nodiscard]] const std::vector<UIButton>& buttons() const { return buttons_; }
     [[nodiscard]] const std::vector<UILabel>& labels() const { return labels_; }
     [[nodiscard]] const std::vector<UIAnimation>& animations() const { return animations_; }

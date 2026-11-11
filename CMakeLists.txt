@@ -14,6 +14,7 @@ set(AOM_SOURCES
     src/assets/xmb_parser.cpp
     src/audio/opensl_engine.cpp
     src/aom/campaign_select_system.cpp
+    src/aom/protox_parser.cpp
     src/engine/engine.cpp
     src/engine/ui_from_xmb.cpp
     src/renderer/gles_renderer.cpp

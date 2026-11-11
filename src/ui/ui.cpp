@@ -414,6 +414,22 @@ UILabel* UIManager::add_label(const std::string& txt,
     return &labels_.back();
 }
 
+UIButton* UIManager::add_background_quad(const glm::vec2& pos,
+                                         const glm::vec2& size,
+                                         TextureHandle tex,
+                                         uint32_t color) {
+    // A background quad is a button with no text, no callback, solid color
+    UIButton* btn = add_button(pos, size, std::function<void()>(), color, color);
+    if (btn) {
+        btn->label = "";
+        btn->normal_tex = tex;
+        btn->pressed_tex = tex;
+        btn->current_color = color;
+        btn->interactive = false;  // background quads don't receive touches
+    }
+    return btn;
+}
+
 bool UIManager::hit_test(const UIButton& btn, float x, float y) {
     return x >= btn.pos.x && x <= (btn.pos.x + btn.size.x) &&
            y >= btn.pos.y && y <= (btn.pos.y + btn.size.y);

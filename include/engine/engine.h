@@ -132,6 +132,12 @@ enum class EngineState {
     UI_OBJECTIVES,
     UI_OBJECTIVES_DIALOG,
     UI_OPTIONS_MENU,
+    /// Abas do menu de opções (aom-recover)
+    UI_OPTIONS_AUDIO,
+    UI_OPTIONS_VIDEO,
+    UI_OPTIONS_GAMEPLAY,
+    UI_OPTIONS_NETWORK,
+    UI_OPTIONS_CONTROLS,
     UI_OTHER_SETTINGS,
     UI_PLAYER_LOGIN,
     UI_PLAYER_STATUS_DIALOG,
@@ -263,6 +269,12 @@ public:
     void open_multiplayer();
     void return_to_main_menu();
     void quit_app();
+
+    // --- Multiplayer network operations (aom-recover) ---
+    void network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port);
+    void network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name);
+    void network_leave_session();
+    void network_update(float dt);
 
     bool recreate_renderer(void* native_window);
     void release_renderer();
@@ -720,6 +732,10 @@ private:
     bool sfx_enabled_ = true;
     bool show_fps_ = true;
     float graphics_quality_ = 1.0f;
+
+    // Virtual joystick / touch options (aom-recover)
+    bool enable_virtual_joystick_ = true;
+    float touch_sensitivity_ = 1.0f;
 
     // RTS Construction & Training Placement
     PlacementMode placement_mode_ = PlacementMode::NONE;
