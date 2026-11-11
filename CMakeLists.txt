@@ -598,5 +598,24 @@ target_link_libraries(test_audio_mp3 PRIVATE
     log
 )
 
+# ── P5 End-to-End Match (spawn → economia → combate → vitória) ──
+add_executable(test_e2e_match
+    src/tests/test_e2e_match.cpp
+    src/game/victory.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_e2e_match PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_e2e_match PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
 endif(BUILD_TESTING)
 
