@@ -16,8 +16,12 @@ Assets gerados:
 import os
 import struct
 import sys
+import time
 import zlib
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from progress_monitor import ProgressMonitor
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT / "assets"
@@ -239,7 +243,18 @@ def main():
 
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Monitor de progresso por etapa da importação
+    stages = [
+        "Carregando BAR e catalogando entradas",
+        "Extraindo textura de mármore grego",
+        "Gerando botões de mármore grego (normal/clicked/rollover)",
+        "Convertendo BMPs originais (splash/loading/menu)",
+        "Salvando assets finais em assets/",
+    ]
+    pm = ProgressMonitor(total=len(stages), label="Importação de assets AoM")
+
     # 1. Carregar textura de mármore grego genuína (greek button background.ddt)
+    pm.update(0, force=True)
     stone_img = None
     if bar_path and bar_path.is_file():
         print(f"[*] Abrindo BAR: {bar_path}")
@@ -262,6 +277,8 @@ def main():
     if stone_img:
         stone_img.save(ASSETS_DIR / "greek_button_bg.png")
 
+    pm.increment()
+
     # 2. Gerar os botões de mármore grego chanfrados com ouro autênticos
     print("[*] Gerando botões de mármore grego com friso dourado AoM...")
     btn_norm = create_greek_stone_button(stone_img, 280, 44, "normal")
@@ -272,6 +289,8 @@ def main():
     btn_click.save(ASSETS_DIR / "button_clicked.png")
     btn_roll.save(ASSETS_DIR / "button_rollover.png")
     print(f"[OK] Botões autênticos gerados: button_main.png ({btn_norm.size})")
+
+    pm.increment()
 
     # 3. Converter BMPs originais em alta resolução (loading1024.bmp e splash.bmp)
     loading_bmp = None
@@ -288,6 +307,8 @@ def main():
                 splash_bmp = cand
                 break
 
+    pm.increment()
+
     # 4. Salvar splash.png
     splash_out = ASSETS_DIR / "splash.png"
     if splash_bmp and splash_bmp.is_file():
@@ -295,7 +316,7 @@ def main():
         img.save(splash_out)
         print(f"[OK] Splash original convertido: {splash_bmp} -> {splash_out} ({img.size})")
 
-    # 5. Salvar loading.png
+    # 5. Salvar loading.png e main_menu.png
     loading_out = ASSETS_DIR / "loading.png"
     menu_out = ASSETS_DIR / "main_menu.png"
     if loading_bmp and loading_bmp.is_file():
@@ -306,9 +327,14 @@ def main():
             img.save(menu_out)
             print(f"[OK] Menu principal salvo -> {menu_out}")
         else:
-            print(f"[OK] Menu principal The Titans preservado -> {menu_out}")
+            print(f"[OK] Menu principal preservado -> {menu_out}")
 
-    print("\n=== Todos os assets do Menu Original AoM foram extraídos e gerados com perfeição! ===")
+    pm.increment()
+
+    # Finalizar
+    pm.increment()
+    pm.close(message="\n=== Todos os assets do Menu Original AoM foram extraídos e gerados com perfeição! ===")
+
     for fname in ["main_menu.png", "loading.png", "splash.png", "button_main.png", "button_clicked.png", "font.ttf"]:
         p = ASSETS_DIR / fname
         if p.is_file():
