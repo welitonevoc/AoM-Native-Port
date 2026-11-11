@@ -56,3 +56,4 @@ __pycache__/
 
 # Proprietary game reference data (extracted from original AoM BARs) — not for distribution
 /tests/reference/
+.backup_raiz/
