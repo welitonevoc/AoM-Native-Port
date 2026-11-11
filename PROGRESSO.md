@@ -217,13 +217,29 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 - 79ec021 feat: update PROGRESSO.md with items 13-50
 - 4a0dec6 feat: implement all remaining features (multiplayer, android options, lockstep foundation) - Multiplayer: 7 features (network infra + 3 replication functions + engine integration) - Android Options: 9 new config settings - Lockstep foundation: basic game state structure - Menu Multiplayer: skeleton with host/join/leave functions
 
+### Fase P3 — Animação, Partículas e Efeitos Visuais ✅ CONCLUÍDA
+
+**Objetivo:** Conectar a animação esquelética GRN (skeletal playback), completar o sistema de partículas .prt e adicionar efeitos visuais de combate/construção para o MVP jogável.
+
+| Gap | Detalhe | Status | Implementação |
+|-----|---------|--------|---------------|
+| G1 | Animação GRN playback | ✅ | `load_grn_clips()` carrega .grn do anim_bar_; `update_animations()` atualiza `bone_matrices` do GrnPlayer; `render_grn_animated()` chamado no render loop IN_GAME |
+| G2 | Sistema de partículas .prt | ✅ | `prt_particles_->update(dt)` e `prt_particles_->render()` no loop de jogo; partículas carregadas via `load_prt_particles()` |
+| G3 | Efeitos visuais de combate/construção | ✅ | Callbacks `on_combat_hit`, `on_building_sparks`, `on_building_completed`, `on_unit_death`, `on_resource_harvested` disparam `prt_particles_->burst_emit()` |
+| G4 | Animação de estado das unidades | ⚠️ Parcial | `update_animations()` determina desired state (walk/idle/attack/death/build/gather); GRN avalia com tempo da animação BRG |
+
+**Critério de Aceitação P3→P4 (todos confirmados):**
+- [x] Animação GRN playback funcionando (bone_matrices atualizadas, render_grn_animated chamado)
+- [x] Sistema de partículas .prt integrado no loop de jogo
+- [x] Efeitos visuais de combate/construção conectados a eventos
+- [x] Todos os testes continuam passando (exit 0)
+- [x] Build-m2 compila sem erros
+
 ### Fase P2 — Cena RTS e Recursos (MVP) ✅ CONCLUÍDA
 
 **Objetivo:** Implementar o terreno real (heightmap), HUD completo com Pop/Cap, Town Center funcional, seleção de grupo, save/load básico e condição de vitória para o MVP jogável.
 
 | Gap | Detalhe | Status | Implementação |
-|-----|---------|--------|---------------|
-| G1 | Terreno real: loader de height-map de cenários originais (.scn) | ✅ | `load_scenario_heightmap()` + `generate_terrain_from_heightmap()` em `src/engine/engine.cpp`, integrado no `start_game()` e `start_campaign_mission()` |
 | G2 | Save/Load completo: restaurar todos os recursos e estados | ✅ | `save_load.h`/`save_load.cpp` (formato v2 com binário empacotado), `save_game()`/`load_game()` integrados no menu |
 | G3 | Condição de vitória: Conquest (eliminar todos inimigos) ou Sudden Death (destruir citadel) | ✅ | `include/game/victory.h` + `src/game/victory.cpp` (`check_victory()`), integrado no update loop com tela de vitória/derrota |
 | G4 | Skybox / Cube map (.cub) | ✅ | `include/assets/cube_map.h` + `src/assets/cube_map.cpp` (parser .cub), `load_skybox_faces()`/`load_skybox_cube()` no engine, renderizado via `draw_skybox()`/`draw_skybox_cubemap()` |

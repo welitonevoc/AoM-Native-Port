@@ -1360,6 +1360,30 @@ public:
                 ac.morph_normals.data(),
                 static_cast<uint32_t>(ac.morph_positions.size()));
         }
+
+        // ── Animação GRN esquelética — atualizar bone_matrices cada frame ──
+        for (auto& [entity, gac] : grn_animations_) {
+            if (!gac.is_ready()) continue;
+            if (!gac.player) continue;
+
+            // Avalia a animação no tempo atual do state machine da unidade
+            float t = 0.0f;
+            const auto u_it = units_.find(entity);
+            if (u_it != units_.end()) {
+                // Reutiliza o tempo da animação BRG se existir, senão avança livre
+                const auto ac_it = animations_.find(entity);
+                if (ac_it != animations_.end() && ac_it->second.is_ready()) {
+                    t = ac_it->second.anim_state.current_time();
+                } else {
+                    // Sem clip BRG: avança o tempo livre baseado em dt acumulado não temos,
+                    // usamos 0 para pose bind (estática). O playback real virá quando
+                    // houver um clock dedicado por entidade.
+                    t = 0.0f;
+                }
+            }
+
+            gac.player->evaluate(t, gac.bone_matrices);
+        }
     }
 
     const std::unordered_map<Entity, AnimationComponent>& animations() const { return animations_; }

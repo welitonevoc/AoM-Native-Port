@@ -2369,6 +2369,62 @@ bool Engine::load_animation_clips(size_t max_clips) {
     return loaded > 0;
 }
 
+bool Engine::load_grn_clips(size_t max_clips) {
+    if (!anim_bar_ || anim_bar_->file_count() == 0) return false;
+
+    const auto t0 = std::chrono::steady_clock::now();
+
+    // Prioriza os clips das unidades jogáveis.
+    static const char* kPreferred[] = {"hoplite", "villager", "toxotes", "minotaur",
+                                        "archer",   "cavalry",  "infantry", "soldier"};
+
+    std::vector<std::string> preferred;
+    std::vector<std::string> fallback;
+    for (const BarEntry& entry : anim_bar_->entries()) {
+        const std::string low = to_lower(entry.filename);
+        if (!ends_with(low, ".grn")) continue;
+        bool is_preferred = false;
+        for (const char* pref : kPreferred) {
+            if (low.find(pref) != std::string::npos) { is_preferred = true; break; }
+        }
+        if (is_preferred) {
+            if (preferred.size() < max_clips) preferred.push_back(entry.filename);
+        } else if (fallback.size() < max_clips) {
+            fallback.push_back(entry.filename);
+        }
+        if (preferred.size() >= max_clips && fallback.size() >= max_clips) break;
+    }
+
+    std::vector<std::string> candidates = preferred;
+    for (const std::string& name : fallback) {
+        if (candidates.size() >= max_clips) break;
+        candidates.push_back(name);
+    }
+
+    size_t loaded = 0;
+    grn_clips_.clear();
+    for (const std::string& name : candidates) {
+        const BarEntry* entry = anim_bar_->find(name);
+        if (!entry) continue;
+        const std::vector<uint8_t> data = anim_bar_->extract(*entry);
+        if (data.empty()) continue;
+        // Fazer parse manualmente do .grn do BAR
+        auto anim = aom::anim::parse_grn(data.data(), data.size(), name);
+        if (anim && anim->is_valid()) {
+            grn_clips_.emplace(name, std::move(anim));
+            ++loaded;
+        }
+    }
+
+    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now() - t0)
+                                .count();
+    LOGI("GRN clips: %zu carregados (de %zu candidatos) em %lld ms",
+         loaded, candidates.size(), static_cast<long long>(elapsed_ms));
+
+    return loaded > 0;
+}
+
 bool Engine::select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
                                    TextureHandle& texture) const {
     clip = nullptr;
@@ -2436,6 +2492,9 @@ void Engine::start_game() {
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
+
+    // --- Load GRN skeletal animation clips from anim.bar (carga limitada + cache) ---
+    load_grn_clips();
 
     // --- Spawn unidades com tipos distintos e mesh apropriada ---
     // Cada unidade recebe UnitStats extraídos do proto.xmb (se disponível) e
@@ -3105,6 +3164,7 @@ void Engine::render() {
         if (gameplay_world_) {
             gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_);
             gameplay_world_->render_animated(renderer_.get());
+            gameplay_world_->render_grn_animated(renderer_.get());
         }
 
         // 4. Partículas 3D
@@ -3159,6 +3219,7 @@ void Engine::render() {
         if (gameplay_world_) {
             gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_);
             gameplay_world_->render_animated(renderer_.get());
+            gameplay_world_->render_grn_animated(renderer_.get());
         }
 
         // Render 3D particles (combat hits, sparks, harvesting chips, death smoke)
@@ -4796,6 +4857,9 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
+
+    // --- Load GRN skeletal animation clips from anim.bar (carga limitada + cache) ---
+    load_grn_clips();
 
     const aom::anim::BrgAnimationClip* clip = nullptr;
     TextureHandle clip_tex = INVALID_TEXTURE;

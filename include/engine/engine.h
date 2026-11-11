@@ -241,6 +241,9 @@ public:
     /// milissegundos, e o resultado e reaproveitado nas partidas seguintes.
     bool load_animation_clips(size_t max_clips = 8);
 
+    /// Carrega (de forma limitada) as animacoes esqueletais .grn de `anim.bar`.
+    bool load_grn_clips(size_t max_clips = 8);
+
     /// Escolhe um clip ja carregado e resolve a textura correspondente.
     bool select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
                                TextureHandle& texture) const;
@@ -604,6 +607,14 @@ private:
     std::unique_ptr<aom::anim::AnimationSystem> anim_system_;
     std::vector<std::string> anim_clip_names_; ///< Nomes dos .brg já interpretados
     bool anim_clips_ready_ = false;            ///< Clips já carregados (reaproveitados)
+    std::unordered_map<std::string, std::unique_ptr<aom::anim::GrnAnimation>> grn_clips_; ///< Nomes dos .grn já interpretados
+
+    /// Retorna um clip .grn previamente carregado por nome (ou nullptr).
+    [[nodiscard]] const aom::anim::GrnAnimation* find_grn_clip(const std::string& name) const {
+        auto it = grn_clips_.find(name);
+        return (it != grn_clips_.end()) ? it->second.get() : nullptr;
+    }
+
     std::unique_ptr<aom::video::VideoPlayer> video_player_;
     std::unique_ptr<aom::video::MediaDecoder> media_decoder_;
 
