@@ -13,6 +13,7 @@ set(AOM_SOURCES
     src/assets/cube_map.cpp
     src/assets/xmb_parser.cpp
     src/audio/opensl_engine.cpp
+    src/aom/campaign_select_system.cpp
     src/engine/engine.cpp
     src/engine/ui_from_xmb.cpp
     src/renderer/gles_renderer.cpp
@@ -72,26 +73,34 @@ target_compile_options(aom_native PRIVATE
 
 set(CMAKE_SKIP_RPATH TRUE)
 
-find_library(SYSTEM_Z_LIB NAMES z PATHS /system/lib64 /system/lib NO_DEFAULT_PATH)
+# Force use of Android 64-bit system libraries (no versioned sonames like libEGL.so.1)
+# by prioritizing /system/lib64 over Termux sysroot
+link_directories(/system/lib64)
+
+find_library(SYSTEM_Z_LIB NAMES z PATHS /system/lib64 NO_DEFAULT_PATH)
 if(NOT SYSTEM_Z_LIB)
     set(SYSTEM_Z_LIB z)
 endif()
 
 # Media NDK (libmediandk.so) — sistema em API 24+; stub do Termux como fallback.
-find_library(SYSTEM_MEDIA_NDK_LIB NAMES mediandk PATHS /system/lib64 /system/lib NO_DEFAULT_PATH)
+find_library(SYSTEM_MEDIA_NDK_LIB NAMES mediandk PATHS /system/lib64 NO_DEFAULT_PATH)
 if(NOT SYSTEM_MEDIA_NDK_LIB)
     set(SYSTEM_MEDIA_NDK_LIB mediandk)
 endif()
 
-# Linkagem correta para Android NDK
+# Linkagem correta para Android NDK - link against full paths to avoid versioned sonames from Termux sysroot
+# Android system libraries in /system/lib64 have correct sonames (libEGL.so, not libEGL.so.1)
 target_link_libraries(aom_native PRIVATE
-    EGL
-    GLESv3
-    android
-    log
+    /system/lib64/libEGL.so
+    /system/lib64/libGLESv3.so
+    /system/lib64/libandroid.so
+    /system/lib64/liblog.so
     ${SYSTEM_MEDIA_NDK_LIB}
     ${SYSTEM_Z_LIB}
-    OpenSLES
+    /system/lib64/libOpenSLES.so
+    /system/lib64/libdl.so
+    /system/lib64/libm.so
+    /system/lib64/libc.so
 )
 
 set_target_properties(aom_native PROPERTIES
@@ -135,6 +144,10 @@ target_include_directories(ui_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(ui_test PRIVATE
+    z
+    log
 )
 
 add_executable(test_camera_track
@@ -200,6 +213,11 @@ add_executable(test_data_docs
     src/graphics/lighting.cpp
     src/campaign/campaign.cpp
     src/data/game_data.cpp
+    src/data/proto_unit.cpp
+    src/data/major_god.cpp
+    src/data/water_bodies.cpp
+    src/data/unit_transform.cpp
+    src/data/sound_def.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
 )
@@ -282,6 +300,7 @@ add_executable(test_particles_anim
     src/anim/animation_system.cpp
     src/anim/grn_animation.cpp
     src/anim/prt_particle.cpp
+    src/assets/bar_archive.cpp
 )
 target_include_directories(test_particles_anim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -297,6 +316,7 @@ add_executable(test_prt_particle
     src/tests/test_prt_particle.cpp
     src/anim/prt_particle.cpp
     src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
 )
 target_include_directories(test_prt_particle PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -351,6 +371,11 @@ add_executable(test_bar_overlay
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
     src/data/game_data.cpp
+    src/data/proto_unit.cpp
+    src/data/major_god.cpp
+    src/data/water_bodies.cpp
+    src/data/unit_transform.cpp
+    src/data/sound_def.cpp
     src/campaign/campaign.cpp
 )
 target_include_directories(test_bar_overlay PRIVATE
@@ -367,6 +392,10 @@ add_executable(test_water_bodies
     src/tests/test_water_bodies.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
+    src/data/proto_unit.cpp
+    src/data/major_god.cpp
+    src/data/sound_def.cpp
+    src/anim/animation_system.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
 )
@@ -383,8 +412,10 @@ target_link_libraries(test_water_bodies PRIVATE
 add_executable(test_ui_layout
     src/tests/test_ui_layout.cpp
     src/ui/ui_layout.cpp
+    src/ui/ui.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
+    third_party/stb_image.c
 )
 target_include_directories(test_ui_layout PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -392,6 +423,7 @@ target_include_directories(test_ui_layout PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_ui_layout PRIVATE
+    ${SYSTEM_Z_LIB}
     log
 )
 
@@ -427,6 +459,19 @@ target_include_directories(test_ddt_reference PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_ddt_reference PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_perf
+    src/tests/test_perf.cpp
+)
+target_include_directories(test_perf PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_perf PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )

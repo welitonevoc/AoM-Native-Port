@@ -39,10 +39,20 @@ public:
     void draw_terrain(aom::MeshHandle, aom::TextureHandle, aom::TextureHandle,
                       aom::TextureHandle, aom::TextureHandle) override {}
     void draw_water(const glm::vec4&, aom::TextureHandle, float,
-                    const glm::vec3& = glm::vec3(0, 50, 170)) override {}
+                       const glm::vec3& = glm::vec3(0, 50, 170),
+                       float = -0.4f, float = -0.4f, aom::TextureHandle = aom::INVALID_TEXTURE) override {}
+    void draw_mesh_skinned(aom::MeshHandle, const glm::mat4&,
+                           aom::TextureHandle,
+                           const std::vector<glm::mat4>&,
+                           aom::BlendMode = aom::BlendMode::OPAQUE) override {}
+    void draw_billboard(const glm::vec3&, const glm::vec2&,
+                         aom::TextureHandle, uint32_t) override {}
 
     void begin_ui() override {}
     void draw_ui_quad(const glm::vec2&, const glm::vec2&, aom::TextureHandle, uint32_t) override {}
+    void draw_ui_quad_nineslice(const glm::vec2&, const glm::vec2&, aom::TextureHandle,
+                                 uint32_t, uint32_t, float, float, float, float,
+                                 uint32_t) override {}
     void draw_ui_text(const std::string&, const glm::vec2&, float, uint32_t) override {}
     void end_ui() override {}
 
@@ -52,6 +62,8 @@ public:
 
     float get_fps() const override { return 60.0f; }
     const char* get_name() const override { return "MockTestRenderer"; }
+
+    bool frustum_test_sphere(const glm::vec3&, float) const override { return true; }
 
     aom::MeshHandle create_dynamic_mesh(const aom::Vertex*, uint32_t, const uint32_t*, uint32_t) override {
         return 10;

@@ -90,6 +90,82 @@ struct Camera {
     [[nodiscard]] glm::mat4 view_projection() const {
         return projection_matrix() * view_matrix();
     }
+
+    /// Frustum plane equations (ax + by + cz + d = 0, normalized)
+    struct FrustumPlanes {
+        glm::vec4 planes[6]; // left, right, bottom, top, near, far
+    };
+
+    /// Extract frustum planes from view-projection matrix
+    [[nodiscard]] FrustumPlanes get_frustum_planes() const {
+        FrustumPlanes result;
+        glm::mat4 vp = view_projection();
+        
+        // Left plane: clip.x + clip.w >= 0 -> (vp[0][3] + vp[0][0]) * x + ...
+        result.planes[0] = glm::vec4(
+            vp[0][3] + vp[0][0],
+            vp[1][3] + vp[1][0],
+            vp[2][3] + vp[2][0],
+            vp[3][3] + vp[3][0]
+        );
+        // Right plane: clip.x - clip.w <= 0 -> (vp[0][3] - vp[0][0]) * x + ...
+        result.planes[1] = glm::vec4(
+            vp[0][3] - vp[0][0],
+            vp[1][3] - vp[1][0],
+            vp[2][3] - vp[2][0],
+            vp[3][3] - vp[3][0]
+        );
+        // Bottom plane: clip.y + clip.w >= 0
+        result.planes[2] = glm::vec4(
+            vp[0][3] + vp[0][1],
+            vp[1][3] + vp[1][1],
+            vp[2][3] + vp[2][1],
+            vp[3][3] + vp[3][1]
+        );
+        // Top plane: clip.y - clip.w <= 0
+        result.planes[3] = glm::vec4(
+            vp[0][3] - vp[0][1],
+            vp[1][3] - vp[1][1],
+            vp[2][3] - vp[2][1],
+            vp[3][3] - vp[3][1]
+        );
+        // Near plane: clip.z + clip.w >= 0
+        result.planes[4] = glm::vec4(
+            vp[0][3] + vp[0][2],
+            vp[1][3] + vp[1][2],
+            vp[2][3] + vp[2][2],
+            vp[3][3] + vp[3][2]
+        );
+        // Far plane: clip.z - clip.w <= 0
+        result.planes[5] = glm::vec4(
+            vp[0][3] - vp[0][2],
+            vp[1][3] - vp[1][2],
+            vp[2][3] - vp[2][2],
+            vp[3][3] - vp[3][2]
+        );
+
+        // Normalize planes
+        for (int i = 0; i < 6; ++i) {
+            float len = sqrt(result.planes[i].x * result.planes[i].x + 
+                           result.planes[i].y * result.planes[i].y + 
+                           result.planes[i].z * result.planes[i].z);
+            if (len > 0.0f) result.planes[i] /= len;
+        }
+        return result;
+    }
+
+    /// Test if a sphere is inside the frustum
+    [[nodiscard]] bool frustum_test_sphere(const glm::vec3& center, float radius) const {
+        FrustumPlanes planes = get_frustum_planes();
+        for (int i = 0; i < 6; ++i) {
+            float dist = planes.planes[i].x * center.x + 
+                         planes.planes[i].y * center.y + 
+                         planes.planes[i].z * center.z + 
+                         planes.planes[i].w;
+            if (dist < -radius) return false;
+        }
+        return true;
+    }
 };
 
 /// Directional light (sun)
@@ -165,6 +241,12 @@ public:
     virtual void draw_mesh(MeshHandle mesh, const glm::mat4& transform,
                            TextureHandle texture, BlendMode blend = BlendMode::OPAQUE) = 0;
 
+    /// Draw a skinned mesh with bone matrices
+    virtual void draw_mesh_skinned(MeshHandle mesh, const glm::mat4& transform,
+                                   TextureHandle texture,
+                                   const std::vector<glm::mat4>& bone_matrices,
+                                   BlendMode blend = BlendMode::OPAQUE) = 0;
+
     /// Draw terrain
     /// @param base_texture     Textura base do terreno (grama/direto)
     /// @param blend_texture    Textura de mistura/encosta (cliff)
@@ -179,13 +261,31 @@ public:
     /// @param water_color  RGB 0-255 color of the water (from waterbodies.xmb)
     virtual void draw_water(const glm::vec4& water_plane,
                             TextureHandle normal_map, float time,
-                            const glm::vec3& water_color = glm::vec3(0, 50, 170)) = 0;
+                            const glm::vec3& water_color = glm::vec3(0, 50, 170),
+                            float water_level = -0.4f,
+                            float terrain_height = -0.4f,
+                            TextureHandle water_tex = INVALID_TEXTURE) = 0;
 
     /// Draw a skybox / cubemap using 6 face textures.
     /// @param faces  Array of 6 texture handles in order: [up, down, front, back, left, right]
     /// @param radius  Skybox radius in world units
     virtual void draw_skybox(const TextureHandle faces[6], float radius = 65.0f) {
         (void)faces; (void)radius;
+    }
+
+    /// Desenha skybox usando uma textura cubemap já criada (GL_TEXTURE_CUBE_MAP)
+    virtual void draw_skybox_cubemap(TextureHandle cubemap, float radius = 65.0f) {
+        (void)cubemap; (void)radius;
+    }
+
+    /// Cria uma textura cubemap a partir de 6 imagens RGBA (uma por face)
+    /// Ordem das faces: UP, DOWN, FRONT, BACK, LEFT, RIGHT
+    /// Retorna handle da textura cubemap ou INVALID_TEXTURE em falha.
+    virtual TextureHandle create_cubemap_from_rgba(
+        const std::array<std::vector<uint8_t>, 6>& faces_rgba,
+        uint32_t width, uint32_t height) {
+        (void)faces_rgba; (void)width; (void)height;
+        return INVALID_TEXTURE;
     }
 
     // --- UI Rendering ---
@@ -196,6 +296,14 @@ public:
     /// Draw a textured quad (UI element)
     virtual void draw_ui_quad(const glm::vec2& pos, const glm::vec2& size,
                                TextureHandle texture, uint32_t color = 0xFFFFFFFF) = 0;
+
+    /// Draw a 9-slice textured quad (UI element with borders)
+    virtual void draw_ui_quad_nineslice(const glm::vec2& pos, const glm::vec2& size,
+                                         TextureHandle texture,
+                                         uint32_t tex_w, uint32_t tex_h,
+                                         float border_left, float border_right,
+                                         float border_top, float border_bottom,
+                                         uint32_t color = 0xFFFFFFFF) = 0;
 
     /// Draw UI text (requires font texture atlas)
     virtual void draw_ui_text(const std::string& text, const glm::vec2& pos,
@@ -209,6 +317,20 @@ public:
     /// Draw a debug line
     virtual void draw_debug_line(const glm::vec3& from, const glm::vec3& to,
                                   uint32_t color) = 0;
+
+    /// Draw a billboard (camera-facing quad) for particles/sprites
+    /// @param position  World position of the billboard center
+    /// @param size      Width/height of the billboard in world units
+    /// @param texture   Texture handle (can be INVALID_TEXTURE for colored quad)
+    /// @param color     Tint color (RGBA, 0xRRGGBBAA)
+    virtual void draw_billboard(const glm::vec3& position, const glm::vec2& size,
+                                 TextureHandle texture, uint32_t color = 0xFFFFFFFF) = 0;
+
+    /// Frustum culling: test if a sphere is inside the view frustum
+    /// @param center World-space center of the sphere
+    /// @param radius Radius of the sphere in world units
+    /// @return true if sphere is inside or intersecting the frustum
+    virtual bool frustum_test_sphere(const glm::vec3& center, float radius) const = 0;
 
     /// Get current FPS
     [[nodiscard]] virtual float get_fps() const = 0;
