@@ -107,10 +107,9 @@ int main() {
 
         // Partículas devem ter subido e começado a cair
         bool any_moved = false;
-        for (const auto& p : /* não temos acesso direto, verificar via active_count */) {
-            (void)p;
+        // Não temos acesso direto às partículas, verificar via active_count
+        if (ps.active_count() > 0) {
             any_moved = true;
-            break;
         }
         // Após muitos updates, partículas com vida 0.5s devem expirar
         ps.update(10.0f);

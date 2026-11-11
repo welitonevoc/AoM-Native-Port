@@ -86,7 +86,18 @@ CompareResult compare_rgba_to_png(const std::vector<uint8_t>& rgba,
 
 int main(int argc, char** argv) {
     std::string data_path = data_root();
-    std::string textures_dir = std::string(argv[1]); // pasta tests/reference/textures
+
+    // argv[1] e a pasta de PNGs de referencia (tests/reference/textures) e
+    // argv[2] (opcional) o caminho do textures.bar. Sem argumentos o teste
+    // nao tem o que comparar — antes isso acessava argv[1] nulo e causava
+    // SIGSEGV.
+    if (argc < 2) {
+        std::printf("SKIP: uso: %s <pasta de PNGs de referencia> [textures.bar]\n",
+                    argv[0]);
+        return 0;
+    }
+
+    const std::string textures_dir = argv[1];
     std::string textures_bar = data_path + "/textures/textures.bar";
 
     if (argc > 2) {

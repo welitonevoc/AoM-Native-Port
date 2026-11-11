@@ -2,6 +2,7 @@
 #include "game/save_load.h"
 #include "game/victory.h"
 #include "assets/cube_map.h"
+#include <filesystem>
 #include <iostream>
 
 static bool check(bool condition, const char* message) {
@@ -144,7 +145,11 @@ int main() {
         world.resources_mutable().gold  = 444;
         world.resources_mutable().favor = 222;
 
-        const std::string save_path = "build-win/test_roundtrip.dat";
+        // Caminho relativo ao diretorio de trabalho do teste: funciona no
+        // build Termux (build-m2), no build Windows e no runner do CI. O
+        // diretorio NAO e criado aqui de proposito — save_game_state() deve
+        // cria-lo por conta propria.
+        const std::string save_path = "aom_test_artifacts/test_roundtrip.dat";
         bool save_ok = aom::save_game_state(save_path, world, 123.5f, 9999);
         ok &= check(save_ok, "save_game_state successfully exported world snapshot");
 
@@ -199,6 +204,11 @@ int main() {
             break;
         }
         ok &= check(building_found, "At least one building was serialized with its entity id");
+
+        // Limpeza dos artefatos: o teste nao deve deixar lixo na arvore.
+        std::error_code cleanup_ec;
+        std::filesystem::remove(save_path, cleanup_ec);
+        std::filesystem::remove(std::filesystem::path(save_path).parent_path(), cleanup_ec);
     }
 
     // ── Sprint 9: Victory Conditions (Conquest & Sudden Death) ─────────────
@@ -235,28 +245,46 @@ int main() {
         const aom::Entity target   = combat_world.spawn_unit(aom::Team::ENEMY,   {1.0f, 0.0f, 0.0f});
 
         auto* atk = combat_world.unit_component_mutable(attacker);
-        auto* tgt = combat_world.unit_component_mutable(target);
-        if (atk && tgt) {
+        auto* tgt_health = combat_world.health_component_mutable(target);
+        ok &= check(atk != nullptr && tgt_health != nullptr,
+                    "Combate integrado: componentes de atacante e alvo disponiveis");
+        if (atk && tgt_health) {
             atk->attack_damage = 50.0f;
             atk->attack_range = 2.0f;
             atk->attack_cooldown = 0.1f;
             atk->attack_target = target;
-            tgt->max_hp = 100;
-            tgt->current_hp = 100;
+            // 200 HP = 4 golpes de 50: permite observar o dano acumulado em
+            // varios frames antes da morte.
+            tgt_health->max_hp = 200;
+            tgt_health->current_hp = 200;
         }
 
+        // GameplayWorld::update() remove a entidade morta no mesmo frame em que
+        // o HP chega a zero (gameplay.h: remove_entity no laco de dead_entities).
+        // Logo, HP <= 0 so e observavel ANTES da remocao. Usamos 200 HP para
+        // enxergar o estado intermediario e confirmamos a morte pela ausencia
+        // do componente de health (a entidade foi removida do mundo).
+        bool damage_observed = false;
         bool target_died = false;
+        int hp_seen = 200;
         for (int step = 0; step < 200; ++step) {
             combat_world.update(0.016f);
-            auto* t = combat_world.get_health(target);
-            if (t && t->current_hp <= 0) {
-                target_died = true;
+            const auto* t = combat_world.get_health(target);
+            if (t) {
+                hp_seen = t->current_hp;
+                if (hp_seen < 200) damage_observed = true;
+            } else {
+                target_died = true;  // removida do mundo = morta
                 break;
             }
         }
+        ok &= check(damage_observed, "Combate integrado: primeiro golpe aplicado no alvo");
+        ok &= check(hp_seen <= 100, "Combate integrado: dano acumulado em multiplos golpes");
         ok &= check(target_died, "Combate integrado: inimigo morre após dano acumulado");
         ok &= check(combat_world.units().size() == 1,
                     "Combate integrado: entidade morta removida do mundo");
+        ok &= check(combat_world.get_health(target) == nullptr,
+                    "Combate integrado: componente de health removido junto com a entidade");
     }
 
     // ── Sprint 9: Skybox / Cube Map (.cub) Parser ─────────────────────────
