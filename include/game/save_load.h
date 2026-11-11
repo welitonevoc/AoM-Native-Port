@@ -69,6 +69,7 @@ struct SaveGameData {
 };
 
 /// Serializa o estado do jogo para um arquivo binario.
+/// Cria o diretorio de destino se ele ainda nao existir.
 /// Retorna true em caso de sucesso.
 bool save_game_state(const std::string& path,
                      const GameplayWorld& world,

@@ -1,4 +1,5 @@
 #include "game/save_load.h"
+#include <filesystem>
 #include <fstream>
 #include <cstring>
 #include <utility>
@@ -102,6 +103,22 @@ bool save_game_state(const std::string& path,
                      float game_time_seconds,
                      int map_seed)
 {
+    // Garante que o diretorio de destino exista. Sem isso, um caminho como
+    // "saves/slot1.dat" falha silenciosamente no ofstream quando a pasta
+    // "saves" ainda nao foi criada (comum em saves de usuario no Android).
+    {
+        const std::filesystem::path parent = std::filesystem::path(path).parent_path();
+        if (!parent.empty()) {
+            std::error_code ec;
+            std::filesystem::create_directories(parent, ec);
+            if (ec) {
+                LOGE("save_game_state: falha ao criar o diretorio '%s': %s",
+                     parent.string().c_str(), ec.message().c_str());
+                return false;
+            }
+        }
+    }
+
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
     if (!out) {
         LOGE("save_game_state: falha ao abrir '%s' para gravacao", path.c_str());
