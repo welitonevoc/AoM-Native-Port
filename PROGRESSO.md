@@ -261,14 +261,14 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 | Gap | Detalhe | Status | Implementação |
 |-----|---------|--------|---------------|
 | G1 | Otimização de lookups de ECS no update loop | ✅ | `update_orders()` faz 1 busca de transform por entidade por frame (era 3-4); `gather_resources()` usa referência mutável única; `update_animations()` busca transform uma única vez |
-| G2 | Culling de frustum / distância | ⏳ | Pendente |
+| G2 | Culling de frustum / distância | ✅ | `render()`, `render_animated()` e `render_grn_animated()` recebem `const Camera*` opcional e descartam entidades fora do frustum (6 planos) ou além de 60 unidades de distância; planos calculados 1 vez/frame. Engine passa `&camera_`. |
 | G3 | Pool de partículas | ✅ | `particles_` pré-alocado com 2000 slots em `initialize()`; `spawn_particle()` reutiliza slot inativo; `update_particles()` marca como inativo sem `erase`/`remove_if`; sem realocações durante o jogo |
 | G4 | Validação 60 FPS + OOM | ⏳ | Pendente validação em dispositivo Android real |
 | G5 | Polish de transição jogo → menu | ✅ | `return_to_main_menu()` reseta `skirmish_victory_result_` e `victory_display_timer_` |
 
 **Critério de Aceitação P4→P5 (todos confirmados no código):**
 - [x] Lookups de ECS otimizados (1 busca de transform por entidade por frame no update_orders)
-- [ ] Culling por distância/frustum (pendente)
+- [x] Culling por distância/frustum implementado (render/render_animated/render_grn_animated)
 - [x] Pool de partículas sem realocações durante o jogo
 - [ ] 60 FPS estáveis no dispositivo alvo (pendente validação em dispositivo)
 - [ ] Sem OOM em 30 min de jogo (pendente validação em dispositivo)

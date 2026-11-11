@@ -3174,9 +3174,9 @@ void Engine::render() {
 
         // 3. Entidades 3D (tropas, prédios, animações)
         if (gameplay_world_) {
-            gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_);
-            gameplay_world_->render_animated(renderer_.get());
-            gameplay_world_->render_grn_animated(renderer_.get());
+            gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_, &camera_);
+            gameplay_world_->render_animated(renderer_.get(), &camera_);
+            gameplay_world_->render_grn_animated(renderer_.get(), &camera_);
         }
 
         // 4. Partículas 3D
@@ -3229,9 +3229,9 @@ void Engine::render() {
 
         // 3. RTS Entities, Buildings, Health Bars, Selection Rings, Tactical Vectors
         if (gameplay_world_) {
-            gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_);
-            gameplay_world_->render_animated(renderer_.get());
-            gameplay_world_->render_grn_animated(renderer_.get());
+            gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_, &camera_);
+            gameplay_world_->render_animated(renderer_.get(), &camera_);
+            gameplay_world_->render_grn_animated(renderer_.get(), &camera_);
         }
 
         // Render 3D particles (combat hits, sparks, harvesting chips, death smoke)

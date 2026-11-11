@@ -1388,13 +1388,33 @@ public:
     std::unordered_map<Entity, AnimationComponent>& animations() { return animations_; }
 
     /// Render all animated entities with their morphed GPU mesh.
-    void render_animated(IRenderer* renderer) const {
+    void render_animated(IRenderer* renderer, const Camera* camera = nullptr) const {
         if (!renderer) return;
+        // ── Culling: frustum + distância ──────────────────────────────────────
+        const Camera* cam = camera;
+        Camera::FrustumPlanes planes;
+        bool use_culling = cam != nullptr;
+        if (use_culling) planes = cam->get_frustum_planes();
+        const glm::vec3 cam_pos = use_culling ? cam->position : glm::vec3(0.0f);
+        constexpr float kMaxDistSq = 3600.0f;
+        auto culled = [&](const glm::vec3& pos, float radius) -> bool {
+            if (!use_culling) return false;
+            for (int i = 0; i < 6; ++i) {
+                const float dist = planes.planes[i].x * pos.x +
+                                   planes.planes[i].y * pos.y +
+                                   planes.planes[i].z * pos.z +
+                                   planes.planes[i].w;
+                if (dist < -radius) return true;
+            }
+            return glm::dot(pos - cam_pos, pos - cam_pos) > kMaxDistSq;
+        };
         for (const auto& [entity, ac] : animations_) {
             if (!ac.is_ready()) continue;
             const auto t_it = ecs_world_.transforms().find(entity);
             if (t_it == ecs_world_.transforms().end()) continue;
             const TransformComponent& tr = t_it->second;
+            const float radius = std::max({std::abs(tr.scale.x), std::abs(tr.scale.y), std::abs(tr.scale.z)}) * 1.5f;
+            if (culled(tr.position, radius)) continue;
             glm::mat4 model = glm::translate(glm::mat4(1.f), tr.position);
             model = glm::rotate(model, glm::radians(tr.rotation.y), glm::vec3(0.f,1.f,0.f));
             model = glm::scale(model, tr.scale);
@@ -1408,13 +1428,33 @@ public:
     std::unordered_map<Entity, GrnAnimationComponent>& grn_animations() { return grn_animations_; }
 
     /// Render all GRN skeletal animated entities.
-    void render_grn_animated(IRenderer* renderer) const {
+    void render_grn_animated(IRenderer* renderer, const Camera* camera = nullptr) const {
         if (!renderer) return;
+        // ── Culling: frustum + distância ──────────────────────────────────────
+        const Camera* cam = camera;
+        Camera::FrustumPlanes planes;
+        bool use_culling = cam != nullptr;
+        if (use_culling) planes = cam->get_frustum_planes();
+        const glm::vec3 cam_pos = use_culling ? cam->position : glm::vec3(0.0f);
+        constexpr float kMaxDistSq = 3600.0f;
+        auto culled = [&](const glm::vec3& pos, float radius) -> bool {
+            if (!use_culling) return false;
+            for (int i = 0; i < 6; ++i) {
+                const float dist = planes.planes[i].x * pos.x +
+                                   planes.planes[i].y * pos.y +
+                                   planes.planes[i].z * pos.z +
+                                   planes.planes[i].w;
+                if (dist < -radius) return true;
+            }
+            return glm::dot(pos - cam_pos, pos - cam_pos) > kMaxDistSq;
+        };
         for (const auto& [entity, gac] : grn_animations_) {
             if (!gac.is_ready()) continue;
             const auto t_it = ecs_world_.transforms().find(entity);
             if (t_it == ecs_world_.transforms().end()) continue;
             const TransformComponent& tr = t_it->second;
+            const float radius = std::max({std::abs(tr.scale.x), std::abs(tr.scale.y), std::abs(tr.scale.z)}) * 1.5f;
+            if (culled(tr.position, radius)) continue;
             glm::mat4 model = glm::translate(glm::mat4(1.f), tr.position);
             model = glm::rotate(model, glm::radians(tr.rotation.y), glm::vec3(0.f,1.f,0.f));
             model = glm::scale(model, tr.scale);
@@ -1672,8 +1712,30 @@ public:
         return blips;
     }
     void render(IRenderer* renderer, MeshHandle mesh, TextureHandle texture,
-                MeshHandle hoplite_mesh, TextureHandle hoplite_texture) const {
+                MeshHandle hoplite_mesh, TextureHandle hoplite_texture,
+                const Camera* camera = nullptr) const {
         if (!renderer || (mesh == INVALID_MESH && hoplite_mesh == INVALID_MESH)) return;
+
+        // ── Culling: frustum + distância ──────────────────────────────────────
+        // Calcula os planos do frustum UMA única vez por frame (não por entidade).
+        const Camera* cam = camera;
+        Camera::FrustumPlanes planes;
+        bool use_culling = cam != nullptr;
+        if (use_culling) planes = cam->get_frustum_planes();
+        const glm::vec3 cam_pos = use_culling ? cam->position : glm::vec3(0.0f);
+        constexpr float kMaxDistSq = 3600.0f; // 60 unidades de mundo (rede de segurança)
+        auto culled = [&](const glm::vec3& pos, float radius) -> bool {
+            if (!use_culling) return false;
+            for (int i = 0; i < 6; ++i) {
+                const float dist = planes.planes[i].x * pos.x +
+                                   planes.planes[i].y * pos.y +
+                                   planes.planes[i].z * pos.z +
+                                   planes.planes[i].w;
+                if (dist < -radius) return true; // fora do frustum
+            }
+            return glm::dot(pos - cam_pos, pos - cam_pos) > kMaxDistSq; // muito distante
+        };
+
         for (const auto& node : resources_nodes_) {
             if (node.remaining <= 0) continue;
             if (!fog_of_war_.is_explored(node.position)) continue;
@@ -1691,6 +1753,10 @@ public:
             if (unit && static_cast<Team>(unit->team) == Team::ENEMY && !fog_of_war_.is_visible(transform.position)) {
                 continue; // Enemy unit hidden in fog of war!
             }
+            // Culling por frustum/distância: não renderiza o que não está na vista.
+            const float radius = std::max({std::abs(transform.scale.x), std::abs(transform.scale.y), std::abs(transform.scale.z)}) * 1.5f;
+            if (culled(transform.position, radius)) continue;
+
             glm::mat4 model = glm::translate(glm::mat4(1.0f), transform.position);
             model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
             glm::vec3 scale = transform.scale;

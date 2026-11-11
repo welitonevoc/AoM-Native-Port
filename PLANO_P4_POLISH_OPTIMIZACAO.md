@@ -30,7 +30,7 @@
 | Gap | Detalhe | Prioridade |
 |-----|---------|------------|
 | **G1** | **Otimização de lookups de ECS no update loop**: ✅ CONCLUÍDO — `update_orders()` faz 1 busca de transform por entidade por frame (era 3-4); `gather_resources()` usa referência mutável única; `update_animations()` busca transform uma única vez | Alta |
-| **G2** | **Culling de frustum / distância**: ⏳ Pendente | Média |
+| **G2** | **Culling de frustum / distância**: ✅ CONCLUÍDO — `render()`, `render_animated()` e `render_grn_animated()` recebem `const Camera*` opcional e descartam entidades fora do frustum (6 planos) ou além de 60 unidades de distância. Os planos do frustum são calculados 1 vez/frame (não por entidade). Chamadas no engine passam `&camera_`; com camera == nullptr não há culling (testes inalterados). | Média |
 | **G3** | **Pool de partículas**: ✅ CONCLUÍDO — `particles_` pré-alocado com 2000 slots; `spawn_particle()` reutiliza slot inativo; `update_particles()` marca como inativo sem `erase`/`remove_if`; sem realocações durante o jogo | Média |
 | **G4** | **Validação 60 FPS + OOM**: ⏳ Pendente validação em dispositivo Android real | Alta |
 | **G5** | **Polish de transição estado jogo → menu**: ✅ CONCLUÍDO — `return_to_main_menu()` reseta `skirmish_victory_result_` e `victory_display_timer_` | Média |
@@ -70,8 +70,9 @@
 3. Manter atualização completa para unidades amigáveis e edifícios do jogador
 
 **Critério de Aceitação:**
-- Entidades distantes não consomem ciclos de update desnecessários
-- Renderização culla entidades fora do frustum
+- [x] Renderização culla entidades fora do frustum (frustum + distância, 1 cálculo de planos/frame)
+- [x] Culling desativado quando camera == nullptr (testes e chamadas sem câmera continuam funcionando)
+- [x] Unidades amigas e edifícios continuam sendo atualizados integralmente (sem culling de update que afete gameplay)
 
 ---
 
@@ -134,7 +135,7 @@
 ## Critério de Aceitação P4→P5 (todos confirmados no código):
 
 - [x] Lookups de ECS otimizados (1 busca de transform por entidade por frame no update_orders)
-- [ ] Culling por distância/frustum implementado (pendente)
+- [x] Culling por distância/frustum implementado (render/render_animated/render_grn_animated)
 - [x] Pool de partículas sem realocações durante o jogo (2000 slots pré-alocados)
 - [ ] 60 FPS estáveis no dispositivo alvo (pendente validação em dispositivo Android)
 - [ ] Sem OOM em 30 min de jogo (pendente validação em dispositivo Android)
@@ -148,8 +149,8 @@
 
 | Arquivo | Modificação |
 |---------|-------------|
-| `include/ecs/gameplay.h` | Otimizar lookups de transform em `update_orders()`, `gather_resources()`, `update_animations()` |
-| `src/engine/engine.cpp` | Pool de partículas, culling por distância, polish de transição vitória→menu |
+| `include/ecs/gameplay.h` | Otimizar lookups de transform em `update_orders()`, `gather_resources()`, `update_animations()`; culling frustum/distância em `render()`, `render_animated()`, `render_grn_animated()` |
+| `src/engine/engine.cpp` | Pool de partículas, culling por distância/frustum (passa `&camera_`), polish de transição vitória→menu |
 | `include/engine/engine.h` | Declarar membros do pool de partículas se necessário |
 
 ---
