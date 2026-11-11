@@ -3457,6 +3457,14 @@ void Engine::handle_touch(const TouchEvent& touch) {
                                 gameplay_world_->place_building(Team::FRIENDLY, ground_hit, 8.0f, BuildingType::BARRACKS, "Quartel Militar");
                             }
                         }
+                    } else if (placement_mode_ == PlacementMode::TOWN_CENTER) {
+                        if (sel != INVALID_ENTITY) {
+                            gameplay_world_->order_worker_build(sel, BuildingType::TOWN_CENTER, ground_hit);
+                        } else {
+                            if (gameplay_world_->deduct_resources(0, 400, 200, 0)) {
+                                gameplay_world_->place_building(Team::FRIENDLY, ground_hit, 10.0f, BuildingType::TOWN_CENTER, "Centro da Cidade");
+                            }
+                        }
                     }
                     placement_mode_ = PlacementMode::NONE;
                 } else {
@@ -6429,6 +6437,7 @@ void Engine::update_in_game_hud(float dt) {
 
     // 2. Selection & Action Panel
     Entity sel = gameplay_world_->selected_entity();
+    size_t sel_count = gameplay_world_->selected_count();
 
     auto hide_action_buttons = [this]() {
         if (hud_action_btn1_) { hud_action_btn1_->label = ""; hud_action_btn1_->onClick = nullptr; hud_action_btn1_->normal_color = 0x00000000; }
@@ -6446,6 +6455,13 @@ void Engine::update_in_game_hud(float dt) {
         return;
     }
 
+    // Quando múltiplas estao selecionadas, mostra contagem no titulo
+    std::string sel_prefix;
+    if (sel_count > 1) {
+        std::snprintf(buf, sizeof(buf), "%zu selecionadas", sel_count);
+        sel_prefix = buf;
+    }
+
     const auto* unit = gameplay_world_->get_unit(sel);
     const auto* bld  = gameplay_world_->get_building(sel);
     const auto* hp   = gameplay_world_->get_health(sel);
@@ -6453,8 +6469,13 @@ void Engine::update_in_game_hud(float dt) {
     if (unit) {
         if (hud_sel_title_) {
             std::string team_str = (unit->team == Team::FRIENDLY) ? " (Aliado)" : " (Inimigo)";
-            hud_sel_title_->text = unit->unit_type_name + team_str;
-            hud_sel_title_->color = (unit->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            if (!sel_prefix.empty()) {
+                hud_sel_title_->text = sel_prefix + "  [" + unit->unit_type_name + team_str + "]";
+                hud_sel_title_->color = (unit->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            } else {
+                hud_sel_title_->text = unit->unit_type_name + team_str;
+                hud_sel_title_->color = (unit->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            }
         }
         if (hud_sel_hp_ && hp) {
             std::snprintf(buf, sizeof(buf), "HP: %d / %d", hp->current_hp, hp->max_hp);
@@ -6514,9 +6535,12 @@ void Engine::update_in_game_hud(float dt) {
                     };
                 }
                 if (hud_action_btn4_) {
-                    hud_action_btn4_->label = "";
-                    hud_action_btn4_->onClick = nullptr;
-                    hud_action_btn4_->normal_color = 0x00000000;
+                    hud_action_btn4_->label = "Centro (400M 200O)";
+                    hud_action_btn4_->normal_color = 0xDD2A1C0E;
+                    hud_action_btn4_->onClick = [this]() {
+                        placement_mode_ = PlacementMode::TOWN_CENTER;
+                        LOGI("Placement mode: TOWN_CENTER");
+                    };
                 }
             } else {
                 // Military unit
@@ -6536,8 +6560,13 @@ void Engine::update_in_game_hud(float dt) {
         }
     } else if (bld) {
         if (hud_sel_title_) {
-            hud_sel_title_->text = bld->name + ((bld->team == Team::FRIENDLY) ? " (Aliado)" : " (Inimigo)");
-            hud_sel_title_->color = (bld->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            if (!sel_prefix.empty()) {
+                hud_sel_title_->text = sel_prefix + "  [" + bld->name + "]";
+                hud_sel_title_->color = (bld->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            } else {
+                hud_sel_title_->text = bld->name + ((bld->team == Team::FRIENDLY) ? " (Aliado)" : " (Inimigo)");
+                hud_sel_title_->color = (bld->team == Team::FRIENDLY) ? 0xFFFFD000 : 0xFFFF4444;
+            }
         }
         if (hud_sel_hp_ && hp) {
             std::snprintf(buf, sizeof(buf), "HP: %d / %d", hp->current_hp, hp->max_hp);

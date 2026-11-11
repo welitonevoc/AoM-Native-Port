@@ -170,7 +170,8 @@ enum class PlacementMode {
     NONE,
     HOUSE,
     BARRACKS,
-    TOWER
+    TOWER,
+    TOWN_CENTER
 };
 
 struct ActionBtn {

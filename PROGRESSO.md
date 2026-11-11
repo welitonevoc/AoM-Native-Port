@@ -283,16 +283,16 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 | Story | Detalhe | Status | Implementação |
 |-------|---------|--------|---------------|
 | P5.1 | HUD Completo (população, minimapa, painel de comandos, fila de produção) | ✅ | População/recursos já existiam; minimapa com blips já existia; painel de comandos com 4 botoes de acao ja existia; barra visual de progresso de producao desenhada com quads no render(); tooltip dinâmico (hud_tooltip_) com custo/descricao do comando. |
-| P5.2 | Town Center e Selecao de Grupo | ⏳ | Pendente |
+| P5.2 | Town Center e Selecao de Grupo | ✅ | `place_town_center()` ja existia (TCs iniciais em start_game); fornece +15 pop cada e ponto de retorno de recursos; `population_cap` (10 base + tc_count*15 + house_count*10) ja existia. Adicionado `TOWN_CENTER` ao `PlacementMode`, botao "Centro (400M 200O)" no HUD para trabalhadores, handling de placement de TC no touch UP, e contagem de selecionados no HUD ("N selecionadas" quando multi-selecao). |
 | P5.3 | Save/Load Completo e Condicao de Vitoria | ⏳ | Pendente |
 | P5.4 | IA Economica e Militar Basica | ⏳ | Pendente |
 | P5.5 | Audio Ampliado (MP3, Sound Banks, 3D, Pool SFX) | ⏳ | Pendente |
 | P5.6 | UI de XMB (uimain/commandpanel) e Localizacao | ⏳ | Pendente |
 
 **Critério de Aceitação P5→Release:**
-- [ ] HUD completo: população, minimapa, painel de comandos, fila de produção
-- [ ] Town Center implementado e funcional
-- [ ] Seleção de grupo (box select) funcionando
+- [x] HUD completo: população, minimapa, painel de comandos, fila de produção
+- [x] Town Center implementado e funcional
+- [x] Seleção de grupo (box select) funcionando
 - [ ] Save/load restaura partida completa (recursos + estados)
 - [ ] Vitória Conquest e Sudden Death implementadas
 - [ ] IA inimiga joga sozinha (economia + militares)

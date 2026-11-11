@@ -77,24 +77,29 @@
 
 ---
 
-### Story P5.2 — Town Center e Seleção de Grupo
+### Story P5.2 — Town Center e Seleção de Grupo ✅ CONCLUÍDA
 
 **Descrição:** Implementar o Town Center (edifício central da facção) e concluir a seleção de grupo (box select/drag).
 
 **Agente responsável:** Gameplay Programmer
 
 **Tarefas:**
-1. Implementar `place_town_center()` com modelo e textura reais do BRG
-2. Town Center como fonte de população e ponto de retorno de recursos
-3. Concluir `TouchInputManager` como sistema geral de entrada (box select por arrasto)
-4. Seleção múltipla de unidades (drag box) com anéis de seleção
-5. Deselect ao clicar no vazio
+1. ✅ `place_town_center()` já existia (TCs iniciais friendly/enemy em start_game) — fornece +15 pop cada e ponto de retorno de recursos
+2. ✅ TC como fonte de população (`population_cap`: 10 base + tc_count*15 + house_count*10) e ponto de retorno de recursos (`get_nearest_town_center`) — já existiam
+3. ✅ `TouchInputManager`/box select concluído (DOWN/MOVE/UP handling, `box_selecting_`, `box_start_`, `box_current_`)
+4. ✅ Seleção múltipla com arrasto (`select_box()`) com anéis de seleção visuais no chão — já existiam
+5. ✅ Deselect ao clicar no vazio — já existia
+6. ✅ Adicionado `TOWN_CENTER` ao `PlacementMode` enum
+7. ✅ Botão "Centro (400M 200O)" no HUD para trabalhadores (btn4)
+8. ✅ Handling de placement de TC no touch UP (deduz 400M 200O, constrói via `place_building` ou `order_worker_build`)
+9. ✅ Contagem de selecionados no HUD ("N selecionadas" quando multi-seleção)
 
 **Critério de Aceitação:**
-- Town Center é construível e funciona como depósito de recursos
-- Box select seleciona múltiplas unidades ao arrastar
-- Anéis de seleção aparecem em unidades selecionadas
-- Clique no vazio limpa seleção
+- ✅ Town Center é construível pelo jogador via HUD e funciona como depósito de recursos
+- ✅ Box select seleciona múltiplas unidades ao arrastar
+- ✅ Anéis de seleção aparecem em unidades selecionadas
+- ✅ Clique no vazio limpa seleção
+- ✅ Contagem de multi-seleção exibida no HUD
 
 ---
 
