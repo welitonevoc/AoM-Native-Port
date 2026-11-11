@@ -313,6 +313,12 @@ void on_native_window_created(ANativeActivity* activity, ANativeWindow* window) 
     LOGI("onNativeWindowCreated: %dx%d",
          ANativeWindow_getWidth(window), ANativeWindow_getHeight(window));
 
+    // Adquire o native window para que o framework Android não o destrua
+    // enquanto a engine estiver usando. Sem isso, o ANativeWindow pode ser
+    // liberado a qualquer momento, causando crash no eglCreateWindowSurface
+    // (pthread_mutex_lock on destroyed mutex no driver Mali).
+    ANativeWindow_acquire(window);
+
     auto* state = static_cast<AppState*>(activity->instance);
     {
         std::lock_guard<std::mutex> lock(state->mutex);
@@ -322,14 +328,18 @@ void on_native_window_created(ANativeActivity* activity, ANativeWindow* window) 
     state->cond.notify_all();
 }
 
-void on_native_window_destroyed(ANativeActivity* activity, ANativeWindow*) {
+void on_native_window_destroyed(ANativeActivity* activity, ANativeWindow* window) {
     LOGI("onNativeWindowDestroyed");
     auto* state = static_cast<AppState*>(activity->instance);
     {
         std::lock_guard<std::mutex> lock(state->mutex);
-        state->window = nullptr;
-        state->has_window = false;
+        if (state->window == window) {
+            state->window = nullptr;
+            state->has_window = false;
+        }
     }
+    // Libera a referência adquirida em on_native_window_created.
+    ANativeWindow_release(window);
 }
 
 void on_native_window_resized(ANativeActivity* activity, ANativeWindow* window) {

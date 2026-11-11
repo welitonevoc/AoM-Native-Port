@@ -36,10 +36,7 @@ enum PacketType : uint8_t {
     PKT_SETTINGS_UPDATE = 6,
     PKT_CHAT = 7,
     PKT_LAUNCH = 8,
-    PKT_LEAVE = 9,
-    PKT_TECH_RESEARCH = 10,     // Nova: sincronização de tecnologia
-    PKT_GOD_POWER = 11,         // Nova: sincronização de power divina
-    PKT_VICTORY = 12            // Nova: notificação de vitória
+    PKT_LEAVE = 9
 };
 
 void set_nonblocking(int fd) {
@@ -402,7 +399,6 @@ void NetworkManager::update_my_slot(MajorGod god, uint8_t team, uint8_t color_id
     if (role_ == NetRole::HOST) {
         broadcast_lobby_state();
     } else if (role_ == NetRole::CLIENT) {
-        // Sincronizar estado do jogador para o host
         std::vector<uint8_t> pkt;
         pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
         pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
@@ -419,83 +415,26 @@ void NetworkManager::update_my_slot(MajorGod god, uint8_t team, uint8_t color_id
     if (on_lobby_updated) on_lobby_updated();
 }
 
-void NetworkManager::send_tech_research(uint8_t slot_id, const std::string& tech_name) {
+void NetworkManager::set_slot_state(uint8_t slot_id, bool is_open, bool is_human, AIDifficulty diff) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (role_ != NetRole::CLIENT || udp_sock_ < 0 || host_ip_.empty()) return;
+    if (role_ != NetRole::HOST || slot_id >= slots_.size()) return;
 
-    std::vector<uint8_t> pkt;
-    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
-    pkt.push_back(PKT_TECH_RESEARCH);
+    slots_[slot_id].is_open = is_open;
+    slots_[slot_id].is_human = is_human;
+    slots_[slot_id].ai_diff = diff;
+    if (!is_open) {
+        slots_[slot_id].name = "Fechado";
+        slots_[slot_id].is_ready = false;
+    } else if (!is_human) {
+        slots_[slot_id].name = "Computador (" + std::string(ai_difficulty_to_string(diff)) + ")";
+        slots_[slot_id].is_ready = true;
+    } else {
+        slots_[slot_id].name = "Aberto";
+        slots_[slot_id].is_ready = false;
+    }
 
-    // Append tech name (max 31 chars)
-    uint8_t tlen = static_cast<uint8_t>(std::min(tech_name.size(), size_t(31)));
-    pkt.push_back(tlen);
-    pkt.insert(pkt.end(), tech_name.begin(), tech_name.begin() + tlen);
-
-    send_to_host(pkt);
-}
-
-void NetworkManager::send_god_power_cast(uint8_t slot_id, const std::string& power_name, int target_type, const glm::vec3& target_pos) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (role_ != NetRole::CLIENT || udp_sock_ < 0 || host_ip_.empty()) return;
-
-    std::vector<uint8_t> pkt;
-    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
-    pkt.push_back(PKT_GOD_POWER);
-
-    // Slot ID
-    pkt.push_back(slot_id);
-
-    // Power name (max 31 chars)
-    uint8_t plen = static_cast<uint8_t>(std::min(power_name.size(), size_t(31)));
-    pkt.push_back(plen);
-    pkt.insert(pkt.end(), power_name.begin(), power_name.begin() + plen);
-
-    // Target type
-    pkt.push_back(static_cast<uint8_t>(target_type));
-
-    // Target position (3 floats)
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.x));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.x + 1)); // simplificado
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.x + 2));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.y));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.y + 1));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.y + 2));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.z));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.z + 1));
-    pkt.push_back(*reinterpret_cast<const uint8_t*>(&target_pos.z + 2));
-
-    send_to_host(pkt);
-}
-
-void NetworkManager::send_victory_notification(uint8_t winner_slot, VictoryResult result) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (role_ != NetRole::HOST || udp_sock_ < 0) return;
-
-    std::vector<uint8_t> pkt;
-    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
-    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
-    pkt.push_back(PKT_VICTORY);
-
-    pkt.push_back(winner_slot);
-    pkt.push_back(static_cast<uint8_t>(result));
-
-    // Broadcast to all clients
-    struct sockaddr_in bcast_addr{};
-    bcast_addr.sin_family = AF_INET;
-    bcast_addr.sin_port = htons(port_);
-    bcast_addr.sin_addr.s_addr = INADDR_BROADCAST;
-
-    sendto(udp_sock_, pkt.data(), pkt.size(), 0,
-           reinterpret_cast<struct sockaddr*>(&bcast_addr), sizeof(bcast_addr));
+    broadcast_lobby_state();
+    if (on_lobby_updated) on_lobby_updated();
 }
 
 void NetworkManager::update_settings(const GameSettings& settings) {
@@ -863,78 +802,6 @@ void NetworkManager::process_incoming_packets() {
                     broadcast_lobby_state();
                     if (on_lobby_updated) on_lobby_updated();
                 }
-            }
-        } else if (type == PKT_TECH_RESEARCH && role_ == NetRole::HOST) {
-            // Cliente pesquisou uma tecnologia
-            if (rec >= 6) {
-                size_t p = 5;
-                uint8_t tlen = buf[p++];
-                std::string tech_name = (p + tlen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), tlen) : "";
-                p += tlen;
-                
-                LOGI("Host received tech research: %s", tech_name.c_str());
-                // Chamar engine para pesquisar tecnologia
-                if (engine_) {
-                    engine_->research_tech(tech_name);
-                }
-            }
-        } else if (type == PKT_GOD_POWER && role_ == NetRole::HOST) {
-            // Cliente castou uma power divina
-            if (rec >= 8) {
-                size_t p = 5;
-                uint8_t slot_id = buf[p++];
-                uint8_t plen = buf[p++];
-                std::string power_name = (p + plen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), plen) : "";
-                p += plen;
-                uint8_t target_type = buf[p++];
-                
-                // Read target position (3 floats = 12 bytes)
-                float target_x, target_y, target_z;
-                // Simplified - ler bytes como floats
-                if (p + 12 <= static_cast<size_t>(rec)) {
-                    memcpy(&target_x, buf.data() + p, 4);
-                    memcpy(&target_y, buf.data() + p + 4, 4);
-                    memcpy(&target_z, buf.data() + p + 8, 4);
-                    p += 12;
-                }
-                
-                LOGI("Host received god power cast: %s slot=%d target_type=%d pos=(%.1f, %.1f, %.1f)", 
-                     power_name.c_str(), slot_id, target_type, target_x, target_y, target_z);
-                // Chamar engine para castar power divina
-                if (engine_) {
-                    engine_->cast_god_power(power_name, target_type, glm::vec3(target_x, target_y, target_z));
-                }
-            }
-        } else if (type == PKT_VICTORY && role_ == NetRole::HOST) {
-            // Host received victory notification - broadcast to all clients
-            if (rec >= 3) {
-                uint8_t winner_slot = buf[5];
-                uint8_t result = buf[6];
-                
-                LOGI("Host received victory: slot=%d result=%d", winner_slot, result);
-                // Chamar engine para definir estado de vitória
-                if (engine_) {
-                    engine_->set_victory_result(result);
-                }
-            }
-            // Broadcast victory to all connected clients
-            if (udp_sock_ >= 0) {
-                struct sockaddr_in bcast_addr{};
-                bcast_addr.sin_family = AF_INET;
-                bcast_addr.sin_port = htons(port_);
-                bcast_addr.sin_addr.s_addr = INADDR_BROADCAST;
-                
-                std::vector<uint8_t> pkt;
-                pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
-                pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
-                pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
-                pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
-                pkt.push_back(PKT_VICTORY);
-                pkt.push_back(winner_slot);
-                pkt.push_back(result);
-                
-                sendto(udp_sock_, pkt.data(), pkt.size(), 0,
-                       reinterpret_cast<struct sockaddr*>(&bcast_addr), sizeof(bcast_addr));
             }
         }
     }
