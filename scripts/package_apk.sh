@@ -22,10 +22,24 @@ OUTPUT_APK="$PROJECT_DIR/aom-native-debug.apk"
 echo "=== Packaging AoM Native APK ==="
 
 # Função: verifica se uma ferramenta está disponível E executável
+# Detecta placeholders quebrados (ex: zipalign com "404: Not Found")
+# e binários ELF reais (ex: aapt, aapt2) que podem não aceitar --help.
 tool_usable() {
     local tool="$1"
-    command -v "$tool" >/dev/null 2>&1 || return 1
-    # Testa execução real (alguns placeholders quebrados existem no PATH)
+    local path
+    path="$(command -v "$tool" 2>/dev/null)" || return 1
+
+    # Se o arquivo não existe ou não é executável, não serve
+    [ -x "$path" ] || return 1
+
+    # Detecta binário ELF real (magia: \x7fELF) -> sempre usável
+    local magic
+    magic="$(head -c 4 "$path" 2>/dev/null)"
+    if [ "$magic" = $'\x7fELF' ]; then
+        return 0
+    fi
+
+    # Para scripts, testa execução real (--help ou sem argumentos)
     "$tool" --help >/dev/null 2>&1 || "$tool" >/dev/null 2>&1 || return 1
     return 0
 }
