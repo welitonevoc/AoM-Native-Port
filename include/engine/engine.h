@@ -336,9 +336,14 @@ public:
     void spawn_death_smoke(const glm::vec3& pos, int count = 12);
     void update_particles(float dt);
     void render_particles();
-    size_t particle_count() const { return particles_.size(); }
+    size_t particle_count() const {
+        size_t c = 0;
+        for (const auto& p : particles_) if (p.active) ++c;
+        return c;
+    }
 
     struct Particle {
+        bool active = false;
         glm::vec3 pos{0.0f};
         glm::vec3 vel{0.0f};
         float life = 0.0f;

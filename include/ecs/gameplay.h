@@ -1343,8 +1343,6 @@ public:
                 if (ac.anim_state.current_state() != desired)
                     ac.anim_state.play(desired, desired != "death");
             }
-
-            // Advance clock, fire tags
             ac.anim_state.update(dt, [&](const std::string& tag_name) {
                 if (on_anim_tag) on_anim_tag(entity, tag_name);
             });
@@ -1860,6 +1858,11 @@ private:
 
     void update_orders() {
         for (auto& [entity, unit] : units_) {
+            // Cache da transform da entidade (uma única busca por frame/entidade)
+            auto tr_it = ecs_world_.transforms_mut().find(entity);
+            if (tr_it == ecs_world_.transforms_mut().end()) continue;
+            TransformComponent& tr = tr_it->second;
+
             // Target tracking for attacks
             if (unit.attack_target != INVALID_ENTITY) {
                 auto enemy_t = ecs_world_.transforms().find(unit.attack_target);
@@ -1867,17 +1870,17 @@ private:
                 if (enemy_t == ecs_world_.transforms().end() || enemy_hp == ecs_world_.healths().end() || enemy_hp->second.current_hp <= 0) {
                     unit.attack_target = INVALID_ENTITY;
                     unit.has_move_order = false;
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    tr.velocity = glm::vec3(0.0f);
                     continue;
                 }
-                const float dist = glm::length(enemy_t->second.position - ecs_world_.transforms().at(entity).position);
+                const float dist = glm::length(enemy_t->second.position - tr.position);
                 if (dist <= unit.attack_range * 0.9f) {
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    tr.velocity = glm::vec3(0.0f);
                     continue;
                 } else {
                     unit.move_target = enemy_t->second.position;
-                    glm::vec3 dir = glm::normalize(enemy_t->second.position - ecs_world_.transforms().at(entity).position);
-                    ecs_world_.transforms_mut()[entity].velocity = dir * unit.move_speed;
+                    glm::vec3 dir = glm::normalize(enemy_t->second.position - tr.position);
+                    tr.velocity = dir * unit.move_speed;
                     continue;
                 }
             }
@@ -1889,17 +1892,17 @@ private:
                 if (b_t == ecs_world_.transforms().end() || b_comp == building_components_.end() || b_comp->second.complete) {
                     unit.build_target = INVALID_ENTITY;
                     unit.has_move_order = false;
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    tr.velocity = glm::vec3(0.0f);
                     continue;
                 }
-                const float dist = glm::length(b_t->second.position - ecs_world_.transforms().at(entity).position);
+                const float dist = glm::length(b_t->second.position - tr.position);
                 if (dist <= 2.2f) {
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    tr.velocity = glm::vec3(0.0f);
                     continue;
                 } else {
                     unit.move_target = b_t->second.position;
-                    glm::vec3 dir = glm::normalize(b_t->second.position - ecs_world_.transforms().at(entity).position);
-                    ecs_world_.transforms_mut()[entity].velocity = dir * unit.move_speed;
+                    glm::vec3 dir = glm::normalize(b_t->second.position - tr.position);
+                    tr.velocity = dir * unit.move_speed;
                     continue;
                 }
             }
@@ -1910,9 +1913,9 @@ private:
                 if (node.remaining <= 0) {
                     unit.gather_node = -1;
                 } else {
-                    const float dist = glm::length(node.position - ecs_world_.transforms().at(entity).position);
+                    const float dist = glm::length(node.position - tr.position);
                     if (dist <= 2.0f) {
-                        ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                        tr.velocity = glm::vec3(0.0f);
                         unit.has_move_order = false;
                         continue;
                     }
@@ -1920,22 +1923,21 @@ private:
             }
 
             if (!unit.has_move_order) continue;
-            auto& transform = ecs_world_.transforms_mut()[entity];
             if (unit.waypoint_index >= unit.waypoints.size()) {
                 unit.has_move_order = false;
-                transform.velocity = glm::vec3(0.0f);
+                tr.velocity = glm::vec3(0.0f);
                 continue;
             }
-            const glm::vec3 delta = unit.waypoints[unit.waypoint_index] - transform.position;
+            const glm::vec3 delta = unit.waypoints[unit.waypoint_index] - tr.position;
             const float distance = glm::length(delta);
             if (distance < 0.15f) {
                 ++unit.waypoint_index;
                 if (unit.waypoint_index >= unit.waypoints.size()) {
                     unit.has_move_order = false;
-                    transform.velocity = glm::vec3(0.0f);
+                    tr.velocity = glm::vec3(0.0f);
                 }
             } else {
-                transform.velocity = (delta / distance) * unit.move_speed;
+                tr.velocity = (delta / distance) * unit.move_speed;
             }
         }
     }
@@ -1943,8 +1945,8 @@ private:
     void gather_resources(float dt) {
         for (auto& [entity, unit] : units_) {
             if (!unit.worker) continue;
-            auto t_it = ecs_world_.transforms().find(entity);
-            if (t_it == ecs_world_.transforms().end()) continue;
+            auto t_it = ecs_world_.transforms_mut().find(entity);
+            if (t_it == ecs_world_.transforms_mut().end()) continue;
             auto& transform = t_it->second;
 
             // --- 1. Returning Cargo to Town Center ---
@@ -1961,7 +1963,7 @@ private:
                     unit.carried_resource_amount = 0;
                     unit.returning_cargo = false;
                     unit.has_move_order = false;
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    transform.velocity = glm::vec3(0.0f);
                     continue;
                 }
                 auto tc_t = ecs_world_.transforms().find(tc);
@@ -1984,7 +1986,7 @@ private:
                     unit.carried_resource_amount = 0;
                     unit.returning_cargo = false;
                     unit.has_move_order = false;
-                    ecs_world_.transforms_mut()[entity].velocity = glm::vec3(0.0f);
+                    transform.velocity = glm::vec3(0.0f);
 
                     // Autonomously return to gather node if still valid
                     if (unit.gather_node >= 0 && unit.gather_node < static_cast<int>(resources_nodes_.size())) {

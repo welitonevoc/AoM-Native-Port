@@ -111,6 +111,9 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
     // 4. Load Options FIRST (before loading archives, to get correct data_path)
     load_options();
 
+    // 4b. Pré-alocar pool de partículas (sem realocações durante o jogo)
+    particles_.resize(2000);
+
     // 5. Initialize VideoPlayer (fallback timer) + MediaDecoder (real frames)
     video_player_ = std::make_unique<aom::video::VideoPlayer>();
     video_player_->on_playlist_completed = [this]() {
@@ -2656,15 +2659,21 @@ void Engine::start_game() {
 }
 
 void Engine::spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size) {
-    if (particles_.size() >= 1000) return;
-    Particle p;
+    // Encontrar slot inativo no pool (sem realocação)
+    size_t slot = particles_.size();
+    for (size_t i = 0; i < particles_.size(); ++i) {
+        if (!particles_[i].active) { slot = i; break; }
+    }
+    if (slot == particles_.size()) return;  // pool cheio
+
+    Particle& p = particles_[slot];
+    p.active = true;
     p.pos = pos;
     p.vel = vel;
     p.life = 0.0f;
     p.max_life = (life > 0.05f) ? life : 0.6f;
     p.color = color;
     p.size = size;
-    particles_.push_back(p);
 }
 
 void Engine::spawn_construction_sparks(const glm::vec3& pos, int count) {
@@ -2737,6 +2746,7 @@ void Engine::spawn_death_smoke(const glm::vec3& pos, int count) {
 
 void Engine::update_particles(float dt) {
     for (auto& p : particles_) {
+        if (!p.active) continue;
         p.life += dt;
         p.pos += p.vel * dt;
         p.vel.y -= 9.8f * dt; // Gravity
@@ -2746,17 +2756,16 @@ void Engine::update_particles(float dt) {
             p.vel.x *= 0.75f;           // Surface friction
             p.vel.z *= 0.75f;
         }
+        if (p.life >= p.max_life) {
+            p.active = false;  // Libera slot no pool
+        }
     }
-
-    particles_.erase(
-        std::remove_if(particles_.begin(), particles_.end(),
-                       [](const Particle& p) { return p.life >= p.max_life; }),
-        particles_.end());
 }
 
 void Engine::render_particles() {
-    if (!renderer_ || particles_.empty()) return;
+    if (!renderer_) return;
     for (const auto& p : particles_) {
+        if (!p.active) continue;
         float progress = std::clamp(p.life / p.max_life, 0.0f, 1.0f);
         uint32_t alpha = static_cast<uint32_t>((1.0f - progress) * 255.0f);
         if (alpha == 0) continue;
@@ -2830,6 +2839,9 @@ void Engine::open_credits() {
 
 void Engine::return_to_main_menu() {
     save_options();
+    // Limpar estado residual de vitória/derrota antes de voltar ao menu
+    skirmish_victory_result_ = VictoryResult::NONE;
+    victory_display_timer_   = 0.0f;
     set_state(EngineState::MAIN_MENU);
 }
 
