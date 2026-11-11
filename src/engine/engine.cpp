@@ -4,16 +4,20 @@
 #include "assets/ddt_texture.h"
 #include "assets/xmb_parser.h"
 #include "ui/ui.h"
+#include "ui/ui_layout.h"
 #include "audio/audio.h"
 #include "ecs/gameplay.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
+#include "anim/prt_particle.h"
 #include "video/video_player.h"
 #include "video/media_decoder.h"
 #include "renderer/camera_track.h"
 #include "network/network_manager.h"
+#include "data/proto_unit.h"
 #include "game/save_load.h"
 #include "game/victory.h"
+#include "game/scenario_trigger.h"
 #include "assets/cube_map.h"
 #include "aom/campaign_select_system.h"
 
@@ -104,25 +108,16 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
         if (audio_) ui_->set_audio_engine(audio_.get());
     }
 
-    // 4. Load Core UI Textures (Splash, Loading, Stone Buttons)
-    load_core_ui_textures();
-    if (ui_ && button_main_tex_ != INVALID_TEXTURE) {
-        ui_->set_default_button_textures(button_main_tex_, button_clicked_tex_);
-    }
-
-    // 5. Load Options
+    // 4. Load Options FIRST (before loading archives, to get correct data_path)
     load_options();
 
-    // 6. Initialize VideoPlayer (fallback timer) + MediaDecoder (real frames)
+    // 5. Initialize VideoPlayer (fallback timer) + MediaDecoder (real frames)
     video_player_ = std::make_unique<aom::video::VideoPlayer>();
     video_player_->on_playlist_completed = [this]() {
         set_state(EngineState::MAIN_MENU);
     };
 
     media_decoder_ = std::make_unique<aom::video::MediaDecoder>();
-
-    // Load saved campaign progress from persistent storage
-    load_campaign_progress();
 
     // on_frame: chamado pelo update() — faz upload do frame YUV→RGBA para GPU.
     // Recria a textura quando as dimensões do vídeo mudam (playlist com vídeos
@@ -155,11 +150,19 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
         set_state(EngineState::MAIN_MENU);
     };
 
-    // 7. Load archives in background / step
+    // 6. Load archives AFTER load_options, so data_path is correct
     load_archives(config.data_path);
     load_textures();
     load_models();
     load_game_config();
+
+    // 7. Load Core UI Textures (Splash, Loading, Stone Buttons) — DEPOIS de load_archives
+    // para que textures_bar_ esteja disponível e as texturas DDT do textures.bar
+    // possam ser encontradas.
+    load_core_ui_textures();
+    if (ui_ && button_main_tex_ != INVALID_TEXTURE) {
+        ui_->set_default_button_textures(button_main_tex_, button_clicked_tex_);
+    }
 
     // 8. Playlist de abertura fiel ao original (playlist.aom: AOM LOGO → introcg).
     //    Os MP4s convertidos são empacotados no APK em assets/avi/.
@@ -319,8 +322,7 @@ bool Engine::load_core_ui_textures() {
     main_menu_tex_ = load_png_asset("main_menu.png");
     if (main_menu_tex_ == INVALID_TEXTURE)
         main_menu_tex_ = load_png_asset("mainmenu.png");
-    if (main_menu_tex_ == INVALID_TEXTURE)
-        main_menu_tex_ = loading_tex_;
+    // NÃO fazer fallback para loading_tex_ — MAIN_MENU usa cenário 3D, não imagem estática
 
     // --- 4. Authentic AoM Stone Buttons ---
     button_main_tex_ = load_png_asset("button_main.png");
@@ -343,6 +345,7 @@ bool Engine::load_core_ui_textures() {
 
     // --- 5. Font ---
     auto font_bytes = read_asset("font.ttf");
+    LOGI("Font bytes read: %zu (from read_asset)", font_bytes.size());
     if (!font_bytes.empty()) {
         if (renderer_->set_font_data(font_bytes.data(), font_bytes.size())) {
             LOGI("Font loaded (%zu bytes)", font_bytes.size());
@@ -358,10 +361,20 @@ bool Engine::load_core_ui_textures() {
     return true;
 }
 
+// ── Aviso: load_portal_textures() foi removida.
+//        Os nomes usados ("ui\portal_main.ddt", etc.) continham sequências de escape inválidas
+//        (\p → descarta a barra) e eram chutados, não vindo do XMB.
+//        As texturas reais do menu principal são resolvidas via texture_resolver em
+//        show_ui_layout(), lendo os nomes direto do uipregamenew.xmb.
+
 void Engine::set_state(EngineState new_state) {
     state_ = new_state;
     state_timer_ = 0.0f;
     cinematic_skip_requested_ = false;
+
+    // Limpeza total de UI em TODA transição de estado
+    // Evita elementos residuais de menus anteriores ("camadas fantasmas")
+    clear_ui();
 
     switch (new_state) {
         case EngineState::CINEMATIC:
@@ -383,12 +396,45 @@ void Engine::set_state(EngineState new_state) {
             clear_ui();
             loading_progress_ = 0.0f;
             break;
-        case EngineState::MAIN_MENU:
-            LOGI("Entered state: MAIN_MENU (uipregamenew)");
+        case EngineState::MAIN_MENU: {
+            LOGI("Entered state: MAIN_MENU (uipregamenew + fundo 3D animado)");
             if (audio_) {
                 audio_->play_music("menu_music.mp3", true);
             }
             
+            // Desabilitar barras de HP no menu principal
+            if (gameplay_world_) {
+                gameplay_world_->set_render_hp_bars(false);
+            }
+            
+            // ── Carregar cenário de fundo 3D do menu (modo menu background) ──
+            if (!gameplay_world_ || !gameplay_world_->has_background_scenario()) {
+                start_generic_mission("ui background xpack.scn", true);
+            }
+
+            // ── Verificar se recursos de jogo já foram carregados (evita recarregar a cada volta ao MAIN_MENU) ──
+            if (!resources_loaded_) {
+                LOGI("Carregando recursos de jogo para MAIN_MENU...");
+                if (!gameplay_world_ || model_mesh_ == INVALID_MESH || !prt_particles_) {
+                    load_archives(config_.data_path);
+                    load_textures();
+                    load_models();
+                    load_game_config();
+                }
+                resources_loaded_ = true;
+            }
+
+            // ── Configurar câmera isométrica estilo The Titans ──────────────────
+            radius_ = 32.0f;
+            yaw_ = -0.35f;
+            pitch_ = 0.65f;
+            camera_.target = glm::vec3(-4.0f, 0.5f, -2.0f);
+            
+            // ── Povoar cena 3D de fundo com elementos do The Titans ─────────────
+            if (gameplay_world_ && !gameplay_world_->has_background_scenario()) {
+                populate_menu_background_scene();
+            }
+
             // ── Tentativa de carregar layout XMB original do data.bar ──────────────
             // Ordem de preferência:
             // 1. Se data_path foi fornecido → carrega uipregamenew.xmb do data.bar (layout authentic AoM)
@@ -396,21 +442,37 @@ void Engine::set_state(EngineState new_state) {
             bool layout_loaded = false;
             
             if (data_bar_) {
+                LOGI("[DIAG] data_bar_ disponível, %zu arquivos no BAR", data_bar_->file_count());
                 // Tenta carregar o layout autêntico de The Titans (uipregamenew.xmb)
                 // Este XMB contém os 7 botões originais com posições e ações corretas
                 layout_loaded = load_ui_layout("uipregamenew.xmb");
                 
                 if (layout_loaded) {
-                    LOGI("Layout XMB authentic 'uipregamenew.xmb' carregado com sucesso do data.bar");
-                    show_ui_layout("uipregamenew.xmb");
+                    LOGI("[DIAG] Layout XMB authentic 'uipregamenew.xmb' carregado com sucesso");
+                    size_t created = show_ui_layout("uipregamenew.xmb");
+                    LOGI("[DIAG] show_ui_layout criou %zu elementos", created);
                 } else {
-                    LOGW("Layout XMB 'uipregamenew.xmb' não encontrado no data.bar");
-                    LOGW("Verifique se o path está correto e se o arquivo existe no .bar");
+                    LOGW("[DIAG] Layout XMB 'uipregamenew.xmb' NÃO encontrado no data.bar");
+                    LOGW("[DIAG] Verifique se o arquivo existe no data.bar/data2.bar");
+                    // Diagnóstico: lista entradas do data.bar que contenham "pregame" ou ".xmb"
+                    LOGI("[DIAG] Entradas do data.bar contendo 'pregame' ou '.xmb':");
+                    size_t diag_shown = 0;
+                    data_bar_->for_each([&](const BarEntry& e) {
+                        const std::string& fn = e.filename;
+                        if (fn.find("pregame") != std::string::npos ||
+                            fn.find(".xmb") != std::string::npos) {
+                            LOGI("[DIAG]   '%s'", fn.c_str());
+                            ++diag_shown;
+                        }
+                    });
+                    if (diag_shown == 0) {
+                        LOGW("[DIAG]   (nenhuma entrada encontrada)");
+                    }
                     // Fallback: menu hardcoded ainda funciona
                     create_main_menu();
                 }
             } else {
-                LOGW("data_bar_ não disponível - usando menu fallback hardcoded");
+                LOGW("[DIAG] data_bar_ não disponível - usando menu fallback hardcoded");
                 create_main_menu();
             }
             
@@ -423,7 +485,8 @@ void Engine::set_state(EngineState new_state) {
                 }
             }
             break;
-        case EngineState::UI_OPTIONS:
+        }
+        case EngineState::OPTIONS:
             LOGI("Entered state: OPTIONS");
             create_options_menu();
             break;
@@ -835,9 +898,22 @@ void Engine::create_main_menu() {
     const float vh = static_cast<float>(config_.window_height);
 
     // ── Layout Autêntico Age of Mythology: The Titans (uipregamenew.xmb) ──────
-    // A arte do menu The Titans é desenhada na resolução padrão 1024x768.
-    // Os 7 botões de jade verde estão perfeitamente posicionados dentro do portal:
-    // Left: 417, Right: 591 -> Largura de 174px (margem de toque ampliada)
+    // Carrega o layout XMB autêntico do data.bar (menu pregame The Titans)
+    // com 7 botões de jade verde: Learn To Play, Campaign, Single Player,
+    // Multiplayer, Options, More, Exit
+    if (load_ui_layout("uipregamenew.xmb")) {
+        size_t created = show_ui_layout("uipregamenew.xmb");
+        if (created > 0) {
+            LOGI("create_main_menu: uipregamenew.xmb aplicado com %zu elementos", created);
+            // ── Teste isolado de fonte (depois do show_ui_layout, que chama clear_ui) ──
+            ui_->add_label("TESTE DE FONTE", {100.0f, 100.0f}, 32.0f, 0xFFFF0000);
+            return;
+        }
+    }
+
+    LOGW("[DIAG] create_main_menu: falha ao carregar uipregamenew.xmb, usando fallback procedural");
+
+    // ── Fallback Procedural (layout hardcoded original) ───────────────────────
     const float sx = vw / 1024.0f;
     const float sy = vh / 768.0f;
 
@@ -855,31 +931,39 @@ void Engine::create_main_menu() {
     // 7. Exit          (Y=573)
     struct TitansBtn {
         float y;
+        const char* label;
         std::function<void()> action;
     };
 
     const TitansBtn btns[] = {
-        { 325.0f, [this]() { start_game(); }    }, // Learn To Play
-        { 365.0f, [this]() { create_campaign_selection_menu(); } }, // Campaign - tela de seleção de cenário
-        { 405.0f, [this]() { create_campaign_menu(); } }, // Single Player - abre menu de seleção de cenário
-        { 445.0f, [this]() { open_multiplayer(); } }, // Multiplayer
-        { 485.0f, [this]() { open_options(); } }, // Options
-        { 525.0f, [this]() { open_credits(); } }, // More
-        { 573.0f, [this]() { quit_app(); }     }, // Exit
+        { 325.0f, "LEARN TO PLAY", [this]() { start_game(); }    },
+        { 365.0f, "CAMPAIGN", [this]() { create_campaign_selection_menu(); } },
+        { 405.0f, "SINGLE PLAYER", [this]() { create_campaign_menu(); } },
+        { 445.0f, "MULTIPLAYER", [this]() { open_multiplayer(); } },
+        { 485.0f, "OPTIONS", [this]() { open_options(); } },
+        { 525.0f, "MORE", [this]() { open_credits(); } },
+        { 573.0f, "EXIT", [this]() { quit_app(); }     },
     };
 
+    size_t btns_created = 0;
     for (const auto& b : btns) {
         auto* btn = ui_->add_button(
             {btn_x, (b.y - 2.0f) * sy},
             {btn_w, btn_h},
-            "",
+            b.label,               // texto do botão visível
             b.action,
-            0x00000000,   // Transparente em repouso: exibe o botão original de jade perfeitamente
-            0x55FFD700    // Brilho dourado ao toque (feedback tátil)
+            0x88203010,            // cor visível (marrom-escuro dourado) em vez de transparente
+            0x55FFD700             // brilho dourado ao toque (feedback tátil)
         );
-        btn->normal_tex = INVALID_TEXTURE;
-        btn->pressed_tex = INVALID_TEXTURE;
+        if (btn) {
+            btn->normal_tex = button_main_tex_;
+            btn->pressed_tex = button_clicked_tex_;
+            btn->text_color = 0xFFFFFFFF;
+            btn->text_size = 20.0f * sy;
+            btns_created++;
+        }
     }
+    LOGI("[DIAG] create_main_menu fallback: %zu/%zu botões criados", btns_created, sizeof(btns)/sizeof(btns[0]));
 
     // ── Aviso de dados originais ausentes ────────────────────────────────────
     if (!archives_loaded_) {
@@ -893,6 +977,16 @@ void Engine::create_main_menu() {
     if (show_fps_) {
         fps_label_ = ui_->add_label("FPS: 60",
             {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
+    }
+
+    // ── DIAGNÓSTICO: mostrar qual textura de fundo está ativa ─────────────────
+    LOGI("[DEBUG menu] data_path='%s'", config_.data_path.empty() ? "(vazio)" : config_.data_path.c_str());
+    LOGI("[DEBUG menu] main_menu_tex_=%u (arquivo principal)", main_menu_tex_);
+    LOGI("[DEBUG menu] splash_tex_=%u loading_tex_=%u", splash_tex_, loading_tex_);
+    if (main_menu_tex_ == INVALID_TEXTURE) {
+        LOGW("[DEBUG menu] AVISO: main_menu_tex_ está INVALID — fundo usará fallback/cor sólida!");
+    } else {
+        LOGI("[DEBUG menu] OK: main_menu_tex_ válido — fundo do menu carregado");
     }
 }
 
@@ -917,6 +1011,19 @@ void Engine::create_campaign_selection_menu() {
 
 // ── uigamelist — lista de jogos salvos, campanhas e cenarios ─────────────────
 void Engine::create_game_list_menu() {
+    clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uigamelist.xmb) ─────────
+    if (load_ui_layout("uigamelist.xmb")) {
+        size_t created = show_ui_layout("uigamelist.xmb");
+        if (created > 0) {
+            LOGI("create_game_list_menu: uigamelist.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_game_list_menu: falha ao carregar uigamelist.xmb, usando fallback procedural");
+
     clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
@@ -991,79 +1098,25 @@ void Engine::create_camera_editor_menu() {
 // ── ucampaign ──
 void Engine::create_campaign_menu() {
     clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uicampaign.xmb) ────────
+    if (load_ui_layout("uicampaign.xmb")) {
+        size_t created = show_ui_layout("uicampaign.xmb");
+        if (created > 0) {
+            LOGI("create_campaign_menu: uicampaign.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_campaign_menu: falha ao carregar uicampaign.xmb, usando fallback procedural");
+
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
-    // Título
     ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
-
-    // Linha de estado de progresso
-    std::string state_text = "Progress: " + std::to_string(campaign_progress_) + "%";
-    ui_->add_label(state_text, {vw * 0.5f - 120.0f, vh * 0.25f}, 18.0f, 0xFFCCCCCC);
-
-    // Se campanha completada, mostrar mensagem
-    if (campaign_completed_) {
-        ui_->add_label("Campaign Completed!", {vw * 0.5f - 100.0f, vh * 0.35f}, 20.0f, 0xFF76FF03);
-    }
-
-    // Lista de campanhas salvas
-    int y_offset = vh * 0.45f;
-    ui_->add_label("Saved Campaigns:", {vw * 0.3f, y_offset}, 16.0f, 0xFFFFD700);
-    y_offset += 25;
-
-    // Exibir campanhas disponíveis
-    if (!campaign_saved_list_.empty()) {
-        for (const auto& campaign : campaign_saved_list_) {
-            bool is_completed = (campaign.progress >= 100);
-            std::string camp_text = campaign.name + " - " + std::to_string(campaign.progress) + "%";
-            uint32_t color = is_completed ? 0xFF76FF03 : 0xFFFFFFFF;
-            ui_->add_label(camp_text, {vw * 0.3f, y_offset}, 16.0f, color);
-            y_offset += 20;
-        }
-    } else {
-        ui_->add_label("No saved campaigns found", {vw * 0.3f, y_offset}, 16.0f, 0xFFFFFFFF);
-    }
-
-    y_offset += 15;
-
-    // Botões
-    // Botão Continuar (se houver progresso)
-    if (campaign_progress_ > 0 && !campaign_completed_) {
-        ui_->add_button({vw * 0.25f, vh * 0.85f}, {150.0f, 40.0f}, "CONTINUAR",
-                        [this]() { /* Load saved campaign progress */ });
-    }
-
-    // Botão Nova Campanha
-    ui_->add_button({vw * 0.5f, vh * 0.85f}, {150.0f, 40.0f}, "NOVA CAMPAIGNA",
-                    [this]() { create_campaign_selection_menu(); });
-
-    // Botão Voltar
-    ui_->add_button({vw * 0.75f, vh * 0.85f}, {150.0f, 40.0f}, "VOLTAR",
+    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
                     [this]() { return_to_main_menu(); });
 }
-
-// Função para atualizar progresso da campanha
-void Engine::update_campaign_progress(int progress) {
-    campaign_progress_ = progress;
-    // Em um projeto completo, isso salvaria o progresso e dispararia eventos
-    // como "missão completada", "nova era desbloqueada", etc.
-    if (campaign_progress_ >= 100) {
-        campaign_progress_ = 100;
-        // Marcar campanha como completada
-        campaign_completed_ = true;
-        // Disparar evento de conclusão
-        if (on_campaign_completed_) on_campaign_completed_();
-    }
-}
-
-// Flag para tracking de campanha completada
-bool campaign_completed_ = false;
-
-// Progresso da campanha (0-100%)
-int campaign_progress_ = 0;
-
-// Callback para quando campanha é completada
-std::function<void()> on_campaign_completed_;
 
 // ── ucampaign_editor ──
 void Engine::create_campaign_editor_menu() {
@@ -1211,6 +1264,18 @@ void Engine::create_fake_techtree_menu() {
 void Engine::create_options_menu() {
     clear_ui();
 
+    // ── Layout Autêntico Age of Mythology: The Titans (uioptionsmenu.xmb) ──────
+    // Tenta carregar o layout XMB autêntico do data.bar
+    if (load_ui_layout("uioptionsmenu.xmb")) {
+        size_t created = show_ui_layout("uioptionsmenu.xmb");
+        if (created > 0) {
+            LOGI("create_options_menu: uioptionsmenu.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_options_menu: falha ao carregar uioptionsmenu.xmb, usando fallback procedural");
+
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
@@ -1318,6 +1383,8 @@ void Engine::create_options_menu() {
                        [this]() { return_to_main_menu(); });
     }
 
+}
+
 // ── uifile_manager ──
 void Engine::create_file_manager_menu() {
     clear_ui();
@@ -1416,11 +1483,11 @@ void Engine::create_god_picker_menu() {
         std::string civ_name = civilizations[i];
         // Highlight selected civilization
         uint32_t color = (god_picker_civilization_ == civ_name) ? 0xAA184818 : 0xAA2A1808;
-        ui_->add_button({col1_x, y}, {col_w, btn_h}, civ_name, [this, i]() {
+        ui_->add_button({col1_x, y}, {col_w, btn_h}, civ_name, [this, i, civ_name]() {
             god_picker_civilization_ = civ_name;
             // Set minor god to first associated god for this civilization
             int start = civ_god_start[i];
-            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(start));
+            god_picker_minor_god_ = aom::net::major_god_to_string(static_cast<aom::net::MajorGod>(start));
             create_god_picker_menu(); // Recreate to show updated info and god list
         }, color, 0xAA553311);
         y += btn_h + gap;
@@ -1455,7 +1522,7 @@ void Engine::create_god_picker_menu() {
         bool associated = (i >= start && i < start + count);
 
         ui_->add_button({col2_x, y}, {col_w, btn_h}, god_name, [this, i]() {
-            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(i));
+            god_picker_minor_god_ = aom::net::major_god_to_string(static_cast<aom::net::MajorGod>(i));
             create_god_picker_menu(); // Recreate to show updated selection
         }, color, 0xAA553311);
         y += btn_h + gap;
@@ -1987,6 +2054,19 @@ void Engine::create_session_connect_menu() {
 // ── uisingleplayersetup ──
 void Engine::create_single_player_setup_menu() {
     clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uisingleplayersetup.xmb) ──
+    if (load_ui_layout("uisingleplayersetup.xmb")) {
+        size_t created = show_ui_layout("uisingleplayersetup.xmb");
+        if (created > 0) {
+            LOGI("create_single_player_setup_menu: uisingleplayersetup.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_single_player_setup_menu: falha ao carregar uisingleplayersetup.xmb, usando fallback procedural");
+
+    clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
     ui_->add_label("SINGLE PLAYER SETUP", {vw * 0.5f - 150.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
@@ -2016,6 +2096,19 @@ void Engine::create_sound_edit_dlg_menu() {
 
 // ── uisoundsetdlg ──
 void Engine::create_sound_set_dlg_menu() {
+    clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uisoundsetdlg.xmb) ──────
+    if (load_ui_layout("uisoundsetdlg.xmb")) {
+        size_t created = show_ui_layout("uisoundsetdlg.xmb");
+        if (created > 0) {
+            LOGI("create_sound_set_dlg_menu: uisoundsetdlg.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_sound_set_dlg_menu: falha ao carregar uisoundsetdlg.xmb, usando fallback procedural");
+
     clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
@@ -2067,6 +2160,19 @@ void Engine::create_strategic_map_menu() {
 // ── uitechtree ──
 void Engine::create_techtree_menu() {
     clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uitechtree.xmb) ────────
+    if (load_ui_layout("uitechtree.xmb")) {
+        size_t created = show_ui_layout("uitechtree.xmb");
+        if (created > 0) {
+            LOGI("create_techtree_menu: uitechtree.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_techtree_menu: falha ao carregar uitechtree.xmb, usando fallback procedural");
+
+    clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
     ui_->add_label("TECHTREE", {vw * 0.5f - 90.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
@@ -2076,6 +2182,19 @@ void Engine::create_techtree_menu() {
 
 // ── uitributedlg ──
 void Engine::create_tribute_dlg_menu() {
+    clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uitributedlg.xmb) ───────
+    if (load_ui_layout("uitributedlg.xmb")) {
+        size_t created = show_ui_layout("uitributedlg.xmb");
+        if (created > 0) {
+            LOGI("create_tribute_dlg_menu: uitributedlg.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_tribute_dlg_menu: falha ao carregar uitributedlg.xmb, usando fallback procedural");
+
     clear_ui();
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
@@ -2136,6 +2255,17 @@ void Engine::create_ai_prompt_menu() {
 
 void Engine::create_credits_menu() {
     clear_ui();
+
+    // ── Layout Autêntico Age of Mythology: The Titans (uicredits.xmb) ─────────
+    if (load_ui_layout("uicredits.xmb")) {
+        size_t created = show_ui_layout("uicredits.xmb");
+        if (created > 0) {
+            LOGI("create_credits_menu: uicredits.xmb aplicado com %zu elementos", created);
+            return;
+        }
+    }
+
+    LOGW("create_credits_menu: falha ao carregar uicredits.xmb, usando fallback procedural");
 
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
@@ -2358,8 +2488,10 @@ void Engine::start_game() {
                     }
                     // TODO: associar mesh específica por entidade (pode exigir
                     // render_animated por entidade com mesh individual).
-                    LOGI("Spawned %s (%s) with cached mesh %s",
-                         s.unit_name, s.team == Team::FRIENDLY ? "friendly" : "enemy", s.brg_name);
+                    LOGI("Spawned %s (%s) brg=%s clip=%s mesh=%u tex=%u",
+                         s.unit_name, s.team == Team::FRIENDLY ? "friendly" : "enemy",
+                         s.brg_name, clip ? clip->name.c_str() : "none",
+                         me->mesh, me->texture);
                 }
             }
         } else if (clip && clip->is_valid()) {
@@ -2461,7 +2593,7 @@ void Engine::start_game() {
                               std::chrono::steady_clock::now() - setup_start)
                               .count();
     LOGI("start_game: %zu units spawned, Town Centers established, anim clips=%zu (setup: %lld ms)",
-         spawn_positions.size(), anim_system_->clip_count(), static_cast<long long>(setup_ms));
+         spawns.size(), anim_system_->clip_count(), static_cast<long long>(setup_ms));
 }
 
 void Engine::spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size) {
@@ -2667,22 +2799,12 @@ void Engine::load_options() {
         if (key == "master_volume") master_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "music_volume") music_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "sfx_volume") sfx_volume_ = std::clamp(val, 0.0f, 1.0f);
-        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 2.0f);
+        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "show_fps") show_fps_ = (val > 0.5f);
         else if (key == "music_enabled") music_enabled_ = (val > 0.5f);
         else if (key == "sfx_enabled") sfx_enabled_ = (val > 0.5f);
-        // Novas opções Android
-        else if (key == "touch_sensitivity") touch_sensitivity_ = std::clamp(val, 0.0f, 1.0f);
-        else if (key == "graphics_quality_int") graphics_quality_ = std::clamp(val, 0.0f, 2.0f);
-        else if (key == "target_fps") target_fps_ = std::max(30, std::min(240, (int)val));
-        else if (key == "high_contrast_mode") high_contrast_mode_ = (val > 0.5f);
-        else if (key == "large_text_size") large_text_size_ = (val > 0.5f);
-        else if (key == "reduce_battery_mode") reduce_battery_mode_ = (val > 0.5f);
-        else if (key == "enable_screen_orientation_lock") screen_orientation_lock_ = (val > 0.5f);
-        else if (key == "screen_orientation") screen_orientation_ = std::clamp(val, 0, 2);
     }
-    LOGI("Loaded options: master=%.2f, music=%.2f, sfx=%.2f, graphics=%d, fps=%d", 
-         master_volume_, music_volume_, sfx_volume_, graphics_quality_, target_fps_);
+    LOGI("Loaded options: master=%.2f, music=%.2f, sfx=%.2f", master_volume_, music_volume_, sfx_volume_);
 }
 
 void Engine::save_options() {
@@ -2700,71 +2822,6 @@ void Engine::save_options() {
     out << "show_fps " << (show_fps_ ? 1.0f : 0.0f) << "\n";
     out << "music_enabled " << (music_enabled_ ? 1.0f : 0.0f) << "\n";
     out << "sfx_enabled " << (sfx_enabled_ ? 1.0f : 0.0f) << "\n";
-    // Novas opções Android
-    out << "touch_sensitivity " << touch_sensitivity_ << "\n";
-    out << "target_fps " << target_fps_ << "\n";
-    out << "high_contrast_mode " << (high_contrast_mode_ ? 1.0f : 0.0f) << "\n";
-    out << "large_text_size " << (large_text_size_ ? 1.0f : 0.0f) << "\n";
-    out << "reduce_battery_mode " << (reduce_battery_mode_ ? 1.0f : 0.0f) << "\n";
-    out << "enable_screen_orientation_lock " << (screen_orientation_lock_ ? 1.0f : 0.0f) << "\n";
-    out << "screen_orientation " << screen_orientation_ << "\n";
-}
-
-void Engine::network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port) {
-    LOGI("Iniciando host multiplayer...");
-    if (network_manager_) {
-        network_manager_->host_game(game_name, player_name, port);
-    }
-}
-
-void Engine::network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name) {
-    LOGI("Tentando conectar em: %s:%d", host_ip.c_str(), port);
-    if (network_manager_) {
-        network_manager_->join_game(host_ip, port, player_name);
-    }
-}
-
-void Engine::network_leave_session() {
-    if (network_manager_) {
-        network_manager_->leave_session();
-    }
-}
-
-void Engine::network_update(float dt) {
-    if (network_manager_) {
-        network_manager_->update(dt);
-    }
-}
-
-void Engine::shutdown() {
-    LOGI("Engine researching tech: %s", tech_name.c_str());
-    // TODO: Implement actual tech research
-    // - Verificar se a tech existe no techtree
-    // - Verificar custos de research
-    // - Atualizar estado da tech tree
-    // - Notificar todos os clientes sobre a research
-    // Por enquanto, apenas logar a request
-}
-
-void Engine::cast_god_power(const std::string& power_name, int target_type, const glm::vec3& target_pos) {
-    LOGI("Engine casting god power: %s (target_type=%d) at (%.1f, %.1f, %.1f)", 
-         power_name.c_str(), target_type, target_pos.x, target_pos.y, target_pos.z);
-    // TODO: Implement actual god power cast
-    // - Verificar se o jogador tem a power disponível
-    // - Aplicar efeitos do power (dano, healing, summon, etc.)
-    // - Consumir recursos/coldown
-    // - Notificar todos os clientes sobre o cast
-    // Por enquanto, apenas logar a request
-}
-
-void Engine::set_victory_result(int result) {
-    LOGI("Engine setting victory result: %d", result);
-    // TODO: Implement victory state
-    // - Definir winner/loser
-    // - Mostrar tela de vitória/derrota
-    // - Salvar resultado no replay
-    // - Transição para MAIN_MENU ou próximo estado
-    // Por enquanto, apenas logar a request
 }
 
 void Engine::shutdown() {
@@ -2813,6 +2870,40 @@ void Engine::update(float delta_time) {
         if (loading_progress_ >= 1.0f && state_timer_ >= 1.8f) {
             set_state(EngineState::MAIN_MENU);
         }
+    } else if (state_ == EngineState::MAIN_MENU) {
+        // ── MAIN_MENU: fundo 3D animado (ondas, tropas, câmera panorâmica) ──
+        // Câmera orbital panorâmica lenta
+        yaw_ += delta_time * 0.02f;  // rotação bem lenta
+        const float cx = camera_.target.x + std::sin(yaw_) * std::cos(pitch_) * radius_;
+        const float cy = camera_.target.y + std::sin(pitch_) * radius_ + 2.0f;
+        const float cz = camera_.target.z + std::cos(yaw_) * std::cos(pitch_) * radius_;
+        camera_.position = glm::vec3(cx, cy, cz);
+
+        // Update gameplay world (tropas andando, coletando, ondas)
+        if (gameplay_world_) gameplay_world_->update(delta_time);
+
+        // Partículas 3D
+        update_particles(delta_time);
+        if (prt_particles_) {
+            prt_particles_->update(delta_time);
+        }
+
+        // Atualiza vídeo de fundo do menu (se houver)
+        if (menu_bg_) {
+            menu_bg_->update(delta_time);
+            if (menu_bg_restart_) {
+                menu_bg_restart_ = false;
+                start_menu_background();
+            }
+        }
+
+        // Áudio posicional do listener
+        if (audio_) {
+            glm::vec3 diff = camera_.target - camera_.position;
+            glm::vec3 forward = (glm::length(diff) > 0.001f) ? glm::normalize(diff) : glm::vec3(0.0f, 0.0f, 1.0f);
+            glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+            audio_->set_listener(camera_.target, forward, right);
+        }
     } else if (state_ == EngineState::IN_GAME) {
         if (mission_mgr_) {
             mission_mgr_->update(delta_time, gameplay_world_.get(), &camera_);
@@ -2833,116 +2924,6 @@ void Engine::update(float delta_time) {
 
         // Update gameplay world (movement, combat, fog, animation morph+upload)
         if (gameplay_world_) gameplay_world_->update(delta_time);
-
-        // P4.1: Atualiza IA de unidades - movimento, ataque e formação
-        if (gameplay_world_) {
-            // Iterar por todas as entidades com unidades ativas
-            const auto& transforms = gameplay_world_->transforms();
-            const auto& hp_map     = gameplay_world_->health_components();
-            const auto& units_map  = gameplay_world_->units();
-            const auto& teams      = gameplay_world_->team_components();
-
-            // Para cada unidade amiga, buscar alvo inimigo mais próximo
-            for (const auto& [entity, unit] : units_map) {
-                // Pular unidades não-controladas ou mortas
-                if (unit.current_hp <= 0) continue;
-                if (teams.find(entity) == teams.end()) continue;
-                int unit_team = teams.at(entity);
-                // Somente unidades amigas (team 0 = FRIENDLY) têm IA controlada pelo jogador
-                if (unit_team != 0) continue;
-
-                // Buscar alvo inimigo mais próximo
-                float closest_dist = 99999.0f;
-                Entity nearest_enemy = 0;
-                
-                for (const auto& [e, u] : units_map) {
-                    if (u.current_hp <= 0) continue;
-                    if (teams.find(e) == teams.end()) continue;
-                    int e_team = teams.at(e);
-                    // Apenas inimigos (team 1 = ENEMY)
-                    if (e_team != 1) continue;
-                    
-                    // Calcular distância
-                    auto t_it = transforms.find(entity);
-                    auto e_tit = transforms.find(e);
-                    if (t_it == transforms.end() || e_tit == transforms.end()) continue;
-                    
-                    float dist = glm::length(t_it->second.position - e_tit->second.position);
-                    if (dist < closest_dist) {
-                        closest_dist = dist;
-                        nearest_enemy = e;
-                    }
-                }
-
-                // Se tem alvo de ataque definido, atacar se possível
-                if (unit.attack_target != 0 && nearest_enemy != 0) {
-                    // Verificar se ainda é o alvo correto e está vivo
-                    auto target_hp_it = hp_map.find(nearest_enemy);
-                    if (target_hp_it != hp_map.end() && target_hp_it->second.current_hp > 0) {
-                        // Atacar: apenas marcamos o ataque, o dano é aplicado no sistema de combate
-                        // O attack_target já está definido, só precisamos garantir que a unidade
-                        // esteja na posição correta para causar dano
-                    }
-                }
-
-                // Se não tem alvo de ataque ou está muito longe, mover-se em direção ao inimigo
-                if (nearest_enemy != 0 && closest_dist > 1.0f) {
-                    auto unit_pos_it = transforms.find(entity);
-                    auto enemy_pos_it = transforms.find(nearest_enemy);
-                    if (unit_pos_it == transforms.end() || enemy_pos_it == transforms.end()) continue;
-                    
-                    glm::vec3 unit_pos = unit_pos_it->second.position;
-                    glm::vec3 enemy_pos = enemy_pos_it->second.position;
-                    
-                    // Direção para o inimigo
-                    glm::vec3 dir = enemy_pos - unit_pos;
-                    float dist = glm::length(dir);
-                    
-                    // Normalizar direção
-                    if (dist > 0.001f) {
-                        dir = glm::normalize(dir);
-                        
-                        // Mover unidade na direção do inimigo a sua velocidade
-                        // Usar o move_speed da unidade (padrão 3.8f se não definido)
-                        float move_speed = 3.8f;
-                        // Procurar stats de movimento na unit stats se disponível
-                        // Aqui usamos velocidade básica para unidades spawnadas
-                        
-                        // Atualizar posição da unidade
-                        // Nota: Em um sistema completo, isso seria feito via comandos de movimento
-                        // e verificaria colisões, ground z, etc. Para agora, apenas ajustamos a direção
-                        // A IA de movimentação completa sera implementada em passo posterior
-                    }
-                }
-            }
-        }
-
-        // P4.2: Sistema de Economia - Tick de recursos (food, wood, gold, favor)
-        // Atualização básica de pools de recursos a cada tick.
-        // Os pools de recursos são armazenados em Engine e atualizados aqui.
-        // Em um projeto completo, os Villagers interagem com entidades de recurso no mundo.
-        if (engine_) {
-            // Taxas de coleta por tick (1/60s aproximadamente)
-            constexpr float kFoodPerTick        = 1.0f / 60.0f;
-            constexpr float kWoodPerTick        = 0.5f / 60.0f;
-            constexpr float kGoldPerTick        = 0.3f / 60.0f;
-            constexpr float kFavorPerTick       = 0.2f / 60.0f;
-
-            // Timer acumulado
-            static float economy_timer = 0.0f;
-            economy_timer += delta_time;
-            if (economy_timer >= 1.0f / 60.0f) {  // a cada tick de 1s/60
-                economy_timer = 0.0f;
-
-                // Processar coleta básica - em um sistema completo,
-                // Villagers próximos a recursos collection entities would collect.
-                // Aqui apenas garantimos que os pools não negativos e registramos.
-                // Os valores reais viriam de interações de unidades com o mundo.
-
-                // Por agora, apenas atualizamos um timer para futura integração
-                // com sistemas de coleta de Villagers e entities de recurso.
-            }
-        }
 
         // Update 3D interactive particles
         update_particles(delta_time);
@@ -2977,184 +2958,6 @@ void Engine::update(float delta_time) {
                         hud_sel_title_->color = 0xFFFF3333;
                     }
                 }
-            }
-            // P4.5: Tracking de conclusão de campanha
-            // Se campanha estiver ativa e houver vitória, atualizar progresso
-            if (campaign_completed_ == false && skirmish_victory_result_ == VictoryResult::WIN) {
-                // Em um projeto completo, aqui verificaríamos se esta campanha
-                // já estava em progresso e atualizaríamos o progresso accordingly
-                // Para agora, apenas marcamos que uma vitória ocorreu
-                update_campaign_progress(50); // 50% de progresso como exemplo
-            }
-        }
-        }
-
-        // P4.4: Sistema de Missões - Objetivos além da destruição do Town Center
-        // Suporte a vários tipos de missões com condições de vitória variadas
-        if (gameplay_world_ && skirmish_victory_result_ == VictoryResult::NONE) {
-            // Mission objectives tracking
-            static int mission_objectives_[3] = {0, 0, 0}; // 0=pending, 1=completed, 2=failed
-            static int mission_type_ = 0; // 0=Destroy TC, 1=Eliminate King, 2=Collect Resources
-            static int mission_progress_[3] = {0, 0, 0}; // progress per objective
-
-            // Verificar objetivos da missão baseada no tipo selecionado
-            if (mission_type_ == 0) {
-                // Mission Type 0: Destroy Town Center (padrão)
-                // Já verificado pelo check_victory(), mas podemos adicionar
-                // feedback adicional aqui
-                if (skirmish_victory_result_ == VictoryResult::WIN) {
-                    mission_objectives_[0] = 1; // completed
-                    mission_display_timer_ = 2.5f; // Show victory message
-                }
-            } else if (mission_type_ == 1) {
-                // Mission Type 1: Eliminate King/Hero unit
-                // Procurar pela unidade do rei/herói inimiga
-                const auto& units_map = gameplay_world_->units();
-                const auto& hp_map = gameplay_world_->health_components();
-                const auto& transforms = gameplay_world_->transforms();
-                const auto& teams = gameplay_world_->team_components();
-
-                int king_entity = 0;
-                for (const auto& [entity, unit] : units_map) {
-                    if (teams.find(entity) == teams.end()) continue;
-                    if (teams.at(entity) != 1) continue; // Apenas inimigos
-                    if (unit.current_hp <= 0) continue;
-                    
-                    // Verificar se é o "rei" ou herói (unit_type_name contém "King" ou "Hero")
-                    std::string utype = unit.unit_type_name;
-                    if (utype.find("King") != std::string::npos || 
-                        utype.find("Hero") != std::string::npos ||
-                        utype.find("Basileus") != std::string::npos) {
-                        king_entity = entity;
-                        break;
-                    }
-                }
-
-                // Se encontrou o rei/herói e está morto, missão completada
-                if (king_entity != 0) {
-                    auto king_hp_it = hp_map.find(king_entity);
-                    if (king_hp_it == hp_map.end() || king_hp_it->second.current_hp <= 0) {
-                        mission_objectives_[1] = 1; // completed
-                        mission_display_timer_ = 2.5f;
-                    }
-                }
-            } else if (mission_type_ == 2) {
-                // Mission Type 2: Acumular certa quantidade de recursos
-                // Verificar pools de recursos
-                const auto& resource_pools = gameplay_world_->friendly_resource_pool();
-                int total_resources = resource_pools.food + resource_pools.wood + 
-                                     resource_pools.gold + resource_pools.favor;
-                
-                int target_amount = 1000; // Meta de recursos
-                if (total_resources >= target_amount) {
-                    mission_objectives_[2] = 1; // completed
-                    mission_display_timer_ = 2.5f;
-                } else {
-                    // Atualizar progresso
-                    mission_progress_[2] = total_resources;
-                }
-            }
-        }
-
-        // P4.5: Interface de God Powers - Menu radial durante o jogo
-        // Menu radial para selecionar e lançar powers divinas durante o gameplay
-        // As powers disponíveis baseiam-se na civilização selecionada no God Picker
-        if (gameplay_world_ && engine_ && engine_->god_picker_selection_made_) {
-            // Definir powers disponíveis baseado na civilização
-            // Índices: 0=Greek, 1=Egyptian, 2=Norse, 3=Atlas
-            static constexpr int kNumPowersByCiv[4] = {13, 9, 11, 10};
-            
-            // Nomes das powers por civilização (correspondem ao God Power System)
-            static constexpr const char* kGreekPowers[13] = {
-                "Zeus", "Poseidon", "Hades", "Rá", "Isis", "Set",
-                "Thor", "Odin", "Loki", "Kronos", "Oranos", "Gaia", "Aleatório"
-            };
-            static constexpr const char* kEgyptianPowers[9] = {
-                "Rá", "Isis", "Set", "Hórus", "Ánubis", "Sáculo",
-                "Meteoro", "Terra", "Nilo"
-            };
-            static constexpr const char* kNorsePowers[11] = {
-                "Thor", "Odin", "Loki", "Freya", "Tyr", "Bragi",
-                "Heimdall", "Ullr", "Sif", "Njölnir", "Mjölnir"
-            };
-            static constexpr const char* kAtlasPowers[10] = {
-                "Kronos", "Oranos", "Gaia", "Tártaro", "Atlas",
-                "Ciclone", "Terremoto", "Fúria", "Renovação", "Imortalidade"
-            };
-            
-            // Ícone e descrição para cada power
-            struct PowerInfo {
-                const char* name;
-                int category; // 0=OFFENSIVE, 1=ECONOMIC, 2=SUMMONING, 3=DEFENSIVE, 4=UTILITY
-                const char* description;
-                float cast_time;
-                float cooldown;
-            };
-            
-            // Powers disponíveis (serão filtradas pela civilização)
-            static constexpr PowerInfo kAllPowers[23] = {
-                // OFFENSIVE
-                {"Bolt", 0, "Raio divino", 0.5f, 10.0f},
-                {"Meteor", 0, "Meteorito", 1.5f, 20.0f},
-                {"Earthquake", 0, "Terremoto", 2.0f, 15.0f},
-                {"Lightning", 0, "Raio", 1.0f, 12.0f},
-                {"Volcano", 0, "Vulcão", 2.5f, 25.0f},
-                {"Implode", 0, "Implosão", 1.5f, 18.0f},
-                // ECONOMIC
-                {"Rain", 1, "Chuva fértil", 1.0f, 15.0f},
-                {"Prosperity", 1, "Prosperidade", 1.5f, 18.0f},
-                {"Hunt", 1, "Caça abundante", 1.0f, 10.0f},
-                // SUMMONING
-                {"Serpent", 2, "Serpente", 2.0f, 20.0f},
-                {"Nidhogg", 2, "Dragão", 3.0f, 30.0f},
-                {"Osiris", 2, "Deus Osíris", 2.5f, 25.0f},
-                // DEFENSIVE
-                {"Cease", 3, "Cessar Fogo", 0.5f, 8.0f},
-                {"Restoration", 3, "Restauração", 1.5f, 15.0f},
-                {"Frost", 3, "Geada", 1.0f, 12.0f},
-                // UTILITY
-                {"Healing", 4, "Cura", 1.0f, 10.0f},
-            };
-            
-            // Filtrar powers pela civilização selecionada
-            int civ_index = 0;
-            if (engine_->god_picker_civilization_ == "Egípcio") civ_index = 1;
-            else if (engine_->god_picker_civilization_ == "Nórdico") civ_index = 2;
-            else if (engine_->god_picker_civilization_ == "Atlante") civ_index = 3;
-            
-            int num_available = kNumPowersByCiv[civ_index];
-            
-            // Verificar se o jogador apertou a tecla de God Powers (G key por exemplo)
-            // Em um projeto completo, isso seria verificado no input handler
-            // Por aqui, apenas desenhamos o menu se a flag estiver ativa
-            
-            // Desenhar menu radial - simplified version
-            if (engine_->god_powers_ui_active_) {
-                const float center_x = config_.window_width / 2.0f;
-                const float center_y = config_.window_height / 2.0f;
-                const float radius = 180.0f;
-                const float inner_radius = 100.0f;
-                const float btn_size = 40.0f;
-                
-                // Desenhar fundo circular
-                // (Em um projeto completo, usaria o renderer para desenhar)
-                
-                // Desenhar powers ao redor do círculo
-                int powers_to_show = std::min(num_available, 8); // Máximo 8 powers no radial
-                float angle_step = 360.0f / num_available;
-                
-                for (int i = 0; i < powers_to_show; ++i) {
-                    float angle = i * angle_step - 90.0f; // Começar no topo
-                    float x = center_x + radius * cos(angle * 3.14159f / 180.0f);
-                    float y = center_y + radius * sin(angle * 3.14159f / 180.0f);
-                    
-                    const PowerInfo& power = kAllPowers[i];
-                    // Aqui desenharíamos o botão do power
-                    // Por enquanto, apenas registramos que o menu está ativo
-                }
-                
-                // Desenhar power selecionada no centro
-                // Desenhar ícone do power selecionado
             }
         }
 
@@ -3269,18 +3072,48 @@ void Engine::render() {
         std::snprintf(prog_buf, sizeof(prog_buf), "Carregando a Era dos Deuses... %.0f%%", loading_progress_ * 100.0f);
         renderer_->draw_ui_text(prog_buf, {bar_x, bar_y - 28.0f}, 18.0f, 0xFFFFD000);
     } else if (state_ == EngineState::MAIN_MENU) {
-        // ── Background fullscreen (arte autêntica Age of Mythology: The Titans) ──
-        if (main_menu_tex_ != INVALID_TEXTURE) {
-            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, main_menu_tex_, 0xFFFFFFFF);
-        } else if (loading_tex_ != INVALID_TEXTURE) {
-            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, loading_tex_, 0xFFFFFFFF);
-        } else if (splash_tex_ != INVALID_TEXTURE) {
-            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, splash_tex_, 0xFFFFFFFF);
+        // ── MAIN_MENU com fundo 3D animado (cenário costeiro The Titans) ──────
+        // 1. Vídeo de fundo do menu (se disponível) — desenha primeiro para ficar atrás de tudo
+        if (menu_bg_tex_ != INVALID_TEXTURE) {
+            const float aspect_vid = static_cast<float>(menu_bg_w_) / menu_bg_h_;
+            const float aspect_dst = vw / vh;
+            float fw = vw, fh = vh;
+            if (aspect_dst > aspect_vid) { fw = vh * aspect_vid; }
+            else                         { fh = vw / aspect_vid; }
+            renderer_->draw_ui_quad({(vw - fw) * 0.5f, (vh - fh) * 0.5f},
+                                    {fw, fh}, menu_bg_tex_, 0xFFFFFFFF);
         } else {
-            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, INVALID_TEXTURE, 0xFF0A0806);
+            // 1b. Skybox procedural atmosférico (cubemap ou faces)
+            if (skybox_cubemap_ != INVALID_TEXTURE) {
+                renderer_->draw_skybox_cubemap(skybox_cubemap_, 65.0f);
+            } else {
+                renderer_->draw_skybox(skybox_faces_, 65.0f);
+            }
         }
 
-        // ── Botões e labels (feedback de toque e elementos interativos) ───────
+        // 2. Terreno 3D & Water Plane
+        if (terrain_mesh_ != INVALID_MESH) {
+            renderer_->draw_terrain(terrain_mesh_, terrain_texture_, terrain_blend_tex_,
+                                 terrain_bank_tex_, terrain_outer_bank_tex_);
+        }
+        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
+                         -water_plane_.w,  // water_level (Y world)
+                         terrain_height_,  // terrain_height
+                         water_tex_);      // water texture from textures.bar
+
+        // 3. Entidades 3D (tropas, prédios, animações)
+        if (gameplay_world_) {
+            gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_);
+            gameplay_world_->render_animated(renderer_.get());
+        }
+
+        // 4. Partículas 3D
+        render_particles();
+        if (prt_particles_) {
+            prt_particles_->render(renderer_.get(), prt_particle_tex_);
+        }
+
+        // 5. UI por cima (pórtico central + 7 botões)
         if (ui_) ui_->render();
     } else if (state_ == EngineState::OPTIONS || state_ == EngineState::CREDITS ||
                state_ == EngineState::MULTIPLAYER_LAN || state_ == EngineState::MULTIPLAYER_LOBBY) {
@@ -3298,13 +3131,11 @@ void Engine::render() {
         renderer_->set_camera(camera_);
         renderer_->set_light(dir_light_);
 
-        // 1. Celestial Skybox (P3.2: 6 faces do cube map) ou Skydome procedural (fallback)
-        if (skybox_mesh_ != INVALID_MESH) {
-            glm::mat4 sky_transform = glm::translate(glm::mat4(1.0f), camera_.target);
+        // 1. Skybox (cubemap se disponível, senão procedural via faces)
+        if (skybox_cubemap_ != INVALID_TEXTURE) {
+            renderer_->draw_skybox_cubemap(skybox_cubemap_, 65.0f);
+        } else {
             renderer_->draw_skybox(skybox_faces_, 65.0f);
-        } else if (skydome_mesh_ != INVALID_MESH) {
-            glm::mat4 sky_transform = glm::translate(glm::mat4(1.0f), camera_.target);
-            renderer_->draw_mesh(skydome_mesh_, sky_transform, skydome_texture_, BlendMode::OPAQUE);
         }
 
         // 2. Authentic AoM 3D Terrain & Water Plane
@@ -3312,7 +3143,10 @@ void Engine::render() {
             renderer_->draw_terrain(terrain_mesh_, terrain_texture_, terrain_blend_tex_,
                                  terrain_bank_tex_, terrain_outer_bank_tex_);
         }
-        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_);
+        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
+                         -water_plane_.w,  // water_level (Y world)
+                         terrain_height_,  // terrain_height
+                         water_tex_);      // water texture from textures.bar
 
         if (model_mesh_ != INVALID_MESH) {
             glm::mat4 model_transform = glm::mat4(1.0f);
@@ -3661,6 +3495,12 @@ bool Engine::recreate_renderer(void* native_window) {
         return false;
     }
     load_core_ui_textures();
+    // Após recriar o renderer, todos os handles de OpenGL são invalidados.
+    // Limpa o cache para que as texturas sejam recarregadas sob demanda
+    // (evita usar handles antigos inválidos em texturas de portal, água, etc.).
+    texture_cache_.clear();
+    texture_dimensions_.clear();
+    resources_loaded_ = false; // forçar revalidação de recursos no próximo MAIN_MENU
     return true;
 }
 
@@ -3963,6 +3803,33 @@ bool Engine::load_textures() {
         LOGI("Created procedural water normal texture (handle %u)", water_normal_tex_);
     }
 
+    // Carregar textura de água (water_*.ddt do textures.bar) para o shader clássico
+    if (water_tex_ == INVALID_TEXTURE && textures_bar_) {
+        for (const char* candidate : {
+                 "water/water1.ddt",
+                 "water/water2.ddt",
+                 "water/water3.ddt",
+                 "water/water.ddt",
+                 "terrain/water1.ddt",
+                 "terrain/water2.ddt",
+                 "terrain/water.ddt",
+                 "water.ddt",
+             }) {
+            std::vector<uint8_t> data = textures_bar_->extract(candidate);
+            if (!data.empty()) {
+                auto ddt = DdtLoader::load(data);
+                if (ddt) {
+                    water_tex_ = renderer_->create_texture(*ddt);
+                    LOGI("Loaded water texture from BAR: '%s' (handle %u)", candidate, water_tex_);
+                    break;
+                }
+            }
+        }
+        if (water_tex_ == INVALID_TEXTURE) {
+            LOGW("No water texture found in textures.bar, shader will use procedural surface");
+        }
+    }
+
     // Carregar Skybox / Cube Map (.cub) — P3.2: 6 faces completas
     if (skybox_mesh_ == INVALID_MESH && textures_bar_) {
         for (const char* cub_name : {"sfx a shiny water.cub", "sfx shinygold map.cub", "sfx shinyice map.cub"}) {
@@ -4085,6 +3952,53 @@ bool Engine::load_skybox_faces(const std::string& cub_name) {
     if (loaded_count == 0) {
         LOGE("load_skybox_faces: nenhuma face de skybox carregada para '%s'", cub_name.c_str());
         return false;
+    }
+
+    // Criar cubemap texture via renderer a partir dos dados RGBA das faces
+    if (renderer_) {
+        std::array<std::vector<uint8_t>, 6> faces_rgba;
+        uint32_t w = 0, h = 0;
+        bool all_faces_ok = true;
+
+        for (int i = 0; i < 6; ++i) {
+            const auto& fe = faces[i];
+            if (fe.face_name.empty()) { all_faces_ok = false; break; }
+
+            std::vector<uint8_t> data;
+            for (const std::string& cand : {
+                     fe.face_name + ".ddt",
+                     fe.face_name + " diffuse.ddt",
+                     fe.face_name + "_diffuse.ddt",
+                     fe.face_name,
+                 }) {
+                data = textures_bar_->extract(cand);
+                if (!data.empty()) break;
+            }
+            if (data.empty()) { all_faces_ok = false; break; }
+
+            auto ddt = DdtLoader::load(data);
+            if (!ddt) { all_faces_ok = false; break; }
+
+            auto rgba = ddt->decode_rgba(0);
+            if (rgba.empty()) { all_faces_ok = false; break; }
+
+            if (w == 0) { w = ddt->width; h = ddt->height; }
+            else if (w != ddt->width || h != ddt->height) { all_faces_ok = false; break; }
+
+            faces_rgba[i] = std::move(rgba);
+        }
+
+        if (all_faces_ok) {
+            TextureHandle cubemap = renderer_->create_cubemap_from_rgba(faces_rgba, w, h);
+            if (cubemap != INVALID_TEXTURE) {
+                skybox_cubemap_ = cubemap;
+                LOGI("load_skybox_faces: cubemap texture criada via renderer (handle %u)", skybox_cubemap_);
+            } else {
+                LOGW("load_skybox_faces: renderer falhou ao criar cubemap");
+            }
+        } else {
+            LOGW("load_skybox_faces: falha ao preparar faces para cubemap, faces 2D ainda disponiveis");
+        }
     }
 
     // Criar malha do skybox (cubo invertido com normais apontando para dentro)
@@ -4393,11 +4307,12 @@ bool Engine::load_models() {
         ModelEntry& entry_cache = model_cache_[entry.filename];
         entry_cache.mesh = mesh;
         entry_cache.texture = tex;
-        entry_cache.model = model.get();
         entry_cache.unit_stats = unit_stats;
-        // Guardar ponteiro estável (o unique_ptr do modelo é descartado, mas
-        // precisamos dos dados para referência; o BrgModel é copiado por valor)
+        // Move o modelo para o cache PRIMEIRO, depois obtém o ponteiro do unique_ptr armazenado
+        // Isso evita ponteiro pendurado (dangling pointer) pois o unique_ptr original
+        // seria invalidado pelo std::move se pegássemos o .get() antes do move.
         model_cache_models_[entry.filename] = std::move(model);
+        entry_cache.model = model_cache_models_[entry.filename].get();
 
         if (loaded == 0) {
             model_mesh_ = mesh;
@@ -4562,82 +4477,157 @@ void Engine::create_load_game_menu() {
                    [this]() { return_to_main_menu(); });
 }
 
+// ── Saved Game Browser (multiple slots) ───────────────────────────────────────
+void Engine::open_saved_game_browser() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    ui_->add_label("CARREGAR JOGO", {vw * 0.5f - 110.0f, vh * 0.08f}, 32.0f, 0xFFFFD000);
+
+    // Listar saves
+    const auto saves = list_saved_games();
+    if (saves.empty()) {
+        ui_->add_label("Nenhum jogo salvo encontrado.", {vw * 0.5f - 150.0f, vh * 0.35f}, 20.0f, 0xFFCCCCCC);
+    } else {
+        // Cabeçalho da lista
+        ui_->add_label("Slots salvos:", {vw * 0.1f, vh * 0.18f}, 18.0f, 0xFFDDDDDD);
+
+        const float item_h = 40.0f;
+        const float start_y = vh * 0.23f;
+        for (size_t i = 0; i < saves.size(); ++i) {
+            const float y = start_y + i * item_h;
+            const uint32_t color = (static_cast<int>(i) == selected_save_index_) ? 0xFF00FF00 : 0xFFFFFFFF;
+            ui_->add_label(saves[i], {vw * 0.15f, y}, 16.0f, color);
+        }
+    }
+
+    // Botões de ação
+    float btn_w = 200.0f, btn_h = 48.0f;
+    float spacing = 10.0f;
+    float total_w = btn_w * 2 + spacing;
+    float start_x = (vw - total_w) * 0.5f;
+    float btn_y = vh * 0.75f;
+
+    ui_->add_button({start_x, btn_y}, {btn_w, btn_h}, "CARREGAR",
+                   [this]() { load_selected_save(); });
+    ui_->add_button({start_x + btn_w + spacing, btn_y}, {btn_w, btn_h}, "EXCLUIR",
+                   [this]() { delete_selected_save(); });
+
+    // Voltar
+    float back_w = 200.0f, back_h = 44.0f;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h}, "VOLTAR",
+                   [this]() { return_to_main_menu(); });
+}
+
+std::vector<std::string> Engine::list_saved_games() const {
+    std::vector<std::string> saves;
+    std::error_code ec;
+
+    // Diretório de saves do app
+    std::filesystem::path save_dir = config_.data_path;
+    if (!std::filesystem::exists(save_dir, ec)) return saves;
+
+    for (const auto& entry : std::filesystem::directory_iterator(save_dir, ec)) {
+        if (!entry.is_regular_file()) continue;
+        std::string name = entry.path().filename().string();
+        if (name.rfind("save_", 0) == 0 && name.size() > 5 && name.substr(name.size() - 4) == ".dat") {
+            saves.push_back(name);
+        }
+    }
+
+    // Ordenar por data de modificação (mais recente primeiro)
+    std::sort(saves.begin(), saves.end(), [&](const std::string& a, const std::string& b) {
+        auto ta = std::filesystem::last_write_time(save_dir / a, ec);
+        auto tb = std::filesystem::last_write_time(save_dir / b, ec);
+        return ta > tb;
+    });
+
+    return saves;
+}
+
+void Engine::refresh_saved_game_list() {
+    // Re-abre o browser para atualizar a lista
+    open_saved_game_browser();
+}
+
+void Engine::load_selected_save() {
+    const auto saves = list_saved_games();
+    if (selected_save_index_ >= 0 && static_cast<size_t>(selected_save_index_) < saves.size()) {
+        std::string path = config_.data_path + "/" + saves[selected_save_index_];
+        load_game(path);
+    }
+}
+
+void Engine::delete_selected_save() {
+    const auto saves = list_saved_games();
+    if (selected_save_index_ >= 0 && static_cast<size_t>(selected_save_index_) < saves.size()) {
+        std::string path = config_.data_path + "/" + saves[selected_save_index_];
+        std::error_code ec;
+        std::filesystem::remove(path, ec);
+        selected_save_index_ = -1;
+        refresh_saved_game_list();
+    }
+}
+
+void Engine::open_save_game_menu() {
+    clear_ui();
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    ui_->add_label("SALVAR JOGO", {vw * 0.5f - 110.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+
+    // Mostrar slots existentes
+    const auto saves = list_saved_games();
+    if (saves.empty()) {
+        ui_->add_label("Nenhum slot salvo. Novo save será criado.", {vw * 0.5f - 180.0f, vh * 0.35f}, 18.0f, 0xFFCCCCCC);
+    } else {
+        ui_->add_label("Slots existentes (sobrescrever ou novo):", {vw * 0.1f, vh * 0.2f}, 18.0f, 0xFFDDDDDD);
+        const float item_h = 36.0f;
+        const float start_y = vh * 0.26f;
+        for (size_t i = 0; i < saves.size() && i < 5; ++i) {
+            const float y = start_y + i * item_h;
+            const uint32_t color = (static_cast<int>(i) == selected_save_index_) ? 0xFF00FF00 : 0xFFFFFFFF;
+            ui_->add_label(saves[i], {vw * 0.15f, y}, 14.0f, color);
+        }
+    }
+
+    // Campo de nome do slot (simplificado: usa timestamp)
+    ui_->add_label("Nome do save:", {vw * 0.15f, vh * 0.55f}, 16.0f, 0xFFFFFFFF);
+    // No momento, gera nome automático com timestamp
+    char auto_name[64];
+    time_t now = time(nullptr);
+    strftime(auto_name, sizeof(auto_name), "save_%Y%m%d_%H%M%S.dat", localtime(&now));
+
+    float btn_w = 200.0f, btn_h = 48.0f;
+    float spacing = 10.0f;
+
+    ui_->add_button({(vw - btn_w) * 0.5f, vh * 0.65f}, {btn_w, btn_h}, "SALVAR COMO " + std::string(auto_name),
+                   [this, auto_name]() { save_game_slot(auto_name); });
+
+    float back_w = 200.0f, back_h = 44.0f;
+    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.82f}, {back_w, back_h}, "VOLTAR",
+                   [this]() { return_to_main_menu(); });
+}
+
+void Engine::save_game_slot(const std::string& slot_name) {
+    std::string path = config_.data_path + "/" + slot_name;
+    std::error_code ec;
+    std::filesystem::create_directories(config_.data_path, ec);
+    if (save_game_state(path, *gameplay_world_, accumulated_time_)) {
+        LOGI("Jogo salvo em '%s'", path.c_str());
+        return_to_main_menu();
+    } else {
+        LOGE("Falha ao salvar jogo em '%s'", path.c_str());
+    }
+}
+
 void Engine::create_single_player_menu() {
     start_game();
 }
 
 void Engine::create_random_map_menu() {
     start_game();
-}
-
-void Engine::create_campaign_menu() {
-    clear_ui();
-    const float vw = static_cast<float>(config_.window_width);
-    const float vh = static_cast<float>(config_.window_height);
-
-    // Header
-    const Campaign* camp = campaign_mgr_ ? campaign_mgr_->current_campaign() : nullptr;
-    std::string camp_name = camp ? camp->name : "Campanha";
-    ui_->add_label("CAMPANHA: " + camp_name, {vw * 0.5f - 240.0f, vh * 0.05f}, 26.0f, 0xFFFFD700);
-    ui_->add_label("Total de " + std::to_string(campaign_mgr_ ? campaign_mgr_->scenario_count() : 0) +
-                   " cenarios",
-                   {vw * 0.5f - 160.0f, vh * 0.09f}, 14.0f, 0xFFCCCCCC);
-
-    // Lista dinamica de cenarios jogáveis (pula cutscenes/unlisted)
-    const float box_w = vw * 0.90f;
-    const float box_x = (vw - box_w) * 0.5f;
-    const float box_y = vh * 0.13f;
-    const float row_h = 42.0f;
-    const float max_rows = 10.0f;  // numero de linhas visíveis antes de rolagem (simplificado)
-
-    float y = box_y;
-    int shown = 0;
-    std::vector<const CampaignScenario*> playable;
-    if (camp) {
-        for (size_t i = 0; i < camp->scenarios.size(); ++i) {
-            const auto* sc = &camp->scenarios[i];
-            if (sc->unlisted) continue;
-            // Considera jogável se tem filename .scn ou .scx (não cinemática pura)
-            if (sc->filename.empty()) continue;
-            playable.push_back(sc);
-        }
-    }
-
-    for (size_t i = 0; i < playable.size() && shown < static_cast<size_t>(max_rows); ++i, ++shown) {
-        const auto* sc = playable[i];
-        std::string label = sc->display_name.empty() ? ("Cenario " + std::to_string(i + 1))
-                                                      : sc->display_name;
-        std::string file_info = sc->filename;
-        // Trunca nome do arquivo para caber na linha
-        if (file_info.size() > 38) file_info = file_info.substr(0, 35) + "...";
-
-        ui_->add_label(label + "  |  " + file_info,
-                       {box_x + 20.0f, y}, 15.0f, 0xFFFFFFFF);
-
-        // Botão "JOGAR" para cada cenário
-        float btn_w = 120.0f, btn_h = 30.0f;
-        float btn_x = box_x + box_w - btn_w - 20.0f;
-        ui_->add_button({btn_x, y - 6.0f}, {btn_w, btn_h}, "JOGAR",
-                        [this, sc]() { start_campaign_mission(sc); },
-                        0xDD2A5A1A, 0xEE408525);
-
-        y += row_h;
-    }
-
-    if (playable.size() > max_rows) {
-        ui_->add_label("... e mais " + std::to_string(playable.size() - max_rows) +
-                       " cenario(ns)",
-                       {box_x + 20.0f, y}, 12.0f, 0xFF888888);
-        y += row_h;
-    }
-
-    // Buttons fixos no rodapé
-    const float btn_w = 200.0f;
-    const float btn_h = 44.0f;
-    const float btn_y = vh * 0.88f;
-
-    ui_->add_button({(vw - btn_w) * 0.5f, btn_y}, {btn_w, btn_h}, "VOLTAR",
-                    [this]() { return_to_main_menu(); }, 0xAA221105, 0xAA44220A);
 }
 
 // ── Layouts de UI do data.bar (Passo 4) ──────────────────────────────────
@@ -4672,8 +4662,77 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
+    // Mapa de ações do AoM para callbacks do Engine
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"start_game", [this]() { start_game(); }},
+        {"open_campaign", [this]() { create_campaign_selection_menu(); }},
+        {"open_campaign_selection", [this]() { create_campaign_selection_menu(); }},
+        {"open_single_player", [this]() { create_campaign_menu(); }},
+        {"open_multiplayer", [this]() { open_multiplayer(); }},
+        {"open_options", [this]() { open_options(); }},
+        {"open_credits", [this]() { open_credits(); }},
+        {"open_more", [this]() { open_credits(); }},
+        {"quit_app", [this]() { quit_app(); }},
+        {"exit", [this]() { quit_app(); }},
+        {"return_to_main_menu", [this]() { return_to_main_menu(); }},
+        {"back", [this]() { return_to_main_menu(); }},
+        {"uiOpenSavedGameBrowser", [this]() { open_saved_game_browser(); }},
+        {"load_selected_save", [this]() { load_selected_save(); }},
+        {"delete_selected_save", [this]() { delete_selected_save(); }},
+        {"save_game", [this]() { open_save_game_menu(); }},
+    };
+
+    // Resolver de texturas: carrega bg_texture do textures.bar e retorna handle + dimensões
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        // 1) Cache primeiro
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+
+        // 2) Normalizar: NÃO converter \ → / aqui. O BarArchive::normalize()
+        //    já trata barras invertidas e barras normais de forma bidirecional.
+        //    Apenas garantir extensão .ddt.
+        std::string normalized = name;
+        if (normalized.size() < 4 ||
+            normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+
+        // 3) Carregar de textures_bar_ (UI textures ficam em textures.bar, não data.bar)
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            // Também indexar pelo nome original para cache futuro
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            LOGI("UI texture resolved: '%s' -> '%s' (handle=%u, %ux%u)",
+                 name.c_str(), normalized.c_str(), h, rt.width, rt.height);
+        } else {
+            LOGE("UI texture NOT FOUND: '%s' (tried '%s')", name.c_str(), normalized.c_str());
+        }
+        return rt;
+    };
+
     size_t created = apply_layout_to_ui(*layout, ui_.get(),
-                                         static_cast<int>(vw), static_cast<int>(vh));
+                                         static_cast<int>(vw), static_cast<int>(vh),
+                                         action_callbacks, texture_resolver);
+    LOGI("[DIAG] show_ui_layout('uipregamenew.xmb'): %zu elementos criados", created);
+
+    // Resolver textos $$ID$$ usando as strings do Engine
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
 
     LOGI("show_ui_layout: '%s' exibido (%zu elementos)", layout_name.c_str(), created);
     return created;
@@ -4719,11 +4778,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     const auto setup_start = std::chrono::steady_clock::now();
     LOGI("Starting Campaign Mission: '%s' (%s)", scenario->display_name.c_str(),
          scenario->filename.c_str());
-    set_state(EngineState::CINEMATIC);
-
-    // --- Passo 1: iniciar playback de cinematics da campanha ---
-    // Transição suave para estado cinematográfico antes da gameplay
-    start_campaign_cinematics(scenario);
+    set_state(EngineState::IN_GAME);
 
     radius_ = 14.0f;
     yaw_ = 0.0f;
@@ -4803,17 +4858,11 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
             audio_->play_sfx(cue);
         }
     };
-    mission_mgr_->on_mission_completed = [this](MissionResult res) {
+    mission_mgr_->on_mission_completed = [this, scenario](MissionResult res) {
         if (res == MissionResult::VICTORY) {
             LOGI("Campaign Mission '%s' COMPLETED with VICTORY!", scenario->display_name.c_str());
-            // Update campaign progress and save
-            update_campaign_progress(campaign_progress_ + 25); // 25% por missão completada
-            save_campaign_progress(); // Save to persistent storage
         } else if (res == MissionResult::DEFEAT) {
             LOGI("Campaign Mission '%s' FAILED with DEFEAT!", scenario->display_name.c_str());
-            // On defeat, still update progress (maybe partial)
-            update_campaign_progress(campaign_progress_ + 10); // 10% por tentativa
-            save_campaign_progress();
         }
         // Fase 2: aqui vai a transição para o próximo cenário
     };
@@ -4905,272 +4954,149 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
          static_cast<long long>(setup_ms));
 }
 
-// ── Persistent Campaign Progress ──────────────────────────────────────
-// Structure for saving campaign progress to file
-struct SavedCampaignProgress {
-    std::string name;
-    int progress;     // 0-100%
-    bool completed;
-    std::string last_scenario; // Last scenario played
-    float timestamp;  // When it was saved
-};
+// ── Popula cena 3D de fundo do MAIN_MENU com elementos do The Titans ──────────
+void Engine::populate_menu_background_scene() {
+    if (!gameplay_world_ || !renderer_) return;
 
-// Saved campaign list (persistent across sessions)
-static std::vector<SavedCampaignProgress> campaign_saved_list;
+    LOGI("Populating MAIN_MENU background scene with The Titans elements...");
 
-// Save file name
-static const char* kCampaignSaveFile = "campaign_progress.json";
-
-// Save campaign progress to persistent storage
-void Engine::save_campaign_progress() {
-    // Update existing entry or add new
-    bool found = false;
-    for (auto& campaign : campaign_saved_list) {
-        if (campaign.name == "Current Campaign") {
-            campaign.progress = campaign_progress_;
-            campaign.completed = campaign_completed_;
-            campaign.last_scenario = ""; // Would be current scenario
-            campaign.timestamp = static_cast<float>(
-                std::chrono::duration<double>(
-                    std::chrono::steady_clock::now().time_since_epoch()).count());
-            found = true;
-            break;
-        }
+    // Carregar clips de animação para as unidades
+    load_animation_clips(8);
+    const aom::anim::BrgAnimationClip* clip = nullptr;
+    TextureHandle clip_tex = INVALID_TEXTURE;
+    select_animation_clip(clip, clip_tex);
+    if (clip && clip->is_valid()) {
+        gameplay_world_->set_default_animation(clip, clip_tex);
     }
 
-    if (!found) {
-        SavedCampaignProgress new_campaign;
-        new_campaign.name = "Current Campaign";
-        new_campaign.progress = campaign_progress_;
-        new_campaign.completed = campaign_completed_;
-        new_campaign.last_scenario = "";
-        new_campaign.timestamp = static_cast<float>(
-            std::chrono::duration<double>(
-                std::chrono::steady_clock::now().time_since_epoch()).count());
-        campaign_saved_list.push_back(new_campaign);
-    }
+    // ── 1. Edifícios na costa ────────────────────────────────────────────────
+    gameplay_world_->place_town_center(Team::FRIENDLY, glm::vec3(-8.0f, 0.0f, -5.0f), true);
+    gameplay_world_->place_town_center(Team::ENEMY, glm::vec3(10.0f, 0.0f, 6.0f), true);
+    gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-6.0f, 0.0f, -2.0f), 8.0f,
+                                    BuildingType::BARRACKS, "Quartel Militar");
+    gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-9.0f, 0.0f, -3.0f), 5.0f,
+                                    BuildingType::HOUSE, "Casa");
+    gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-7.0f, 0.0f, -6.0f), 5.0f,
+                                    BuildingType::HOUSE, "Casa");
+    gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-5.0f, 0.0f, 2.0f), 10.0f,
+                                    BuildingType::TOWER, "Torre de Guarda");
 
-    // Write to user directory save file
-    std::string save_path = get_user_directory() + "/" + kCampaignSaveFile;
-    std::ofstream outfile(save_path);
-    if (outfile.is_open()) {
-        outfile << "{\n";
-        outfile << "  \"campaigns\": [\n";
-        for (size_t i = 0; i < campaign_saved_list.size(); i++) {
-            const auto& c = campaign_saved_list[i];
-            outfile << "    {\n";
-            outfile << "      \"name\": \"" << c.name << "\",\n";
-            outfile << "      \"progress\": " << c.progress << ",\n";
-            outfile << "      \"completed\": " << (c.completed ? "true" : "false") << ",\n";
-            outfile << "      \"last_scenario\": \"" << c.last_scenario << "\",\n";
-            outfile << "      \"timestamp\": " << c.timestamp << "\n";
-            outfile << "    }";
-            if (i < campaign_saved_list.size() - 1) outfile << ",";
-            outfile << "\n";
-        }
-        outfile << "  ]\n";
-        outfile << "}\n";
-        outfile.close();
-        LOGI("Campaign progress saved to '%s'", save_path.c_str());
-    } else {
-        LOGW("Failed to save campaign progress to '%s'", save_path.c_str());
-    }
-}
-
-// Load campaign progress from persistent storage
-void Engine::load_campaign_progress() {
-    std::string save_path = get_user_directory() + "/" + kCampaignSaveFile;
-    std::ifstream infile(save_path);
-    if (!infile.is_open()) {
-        LOGI("No campaign save file found at '%s', starting fresh", save_path.c_str());
-        return;
-    }
-
-    // Read content
-    std::string content;
-    std::string line;
-    while (std::getline(infile, line)) {
-        content += line + "\n";
-    }
-    infile.close();
-
-    // Simple JSON parsing for campaign progress
-    size_t pos = content.find("\"campaigns\"");
-    if (pos != std::string::npos) {
-        size_t start = content.find("[", pos);
-        size_t end = content.find("]", start);
-        if (start != std::string::npos && end != std::string::npos) {
-            std::string campaigns_section = content.substr(start, end - start);
-            size_t p = campaigns_section.find("\"progress\"");
-            while (p != std::string::npos) {
-                size_t val_start = campaigns_section.find(":", p) + 1;
-                size_t val_end = campaigns_section.find(",", val_start);
-                if (val_end == std::string::npos)
-                    val_end = campaigns_section.find("}", val_start);
-                if (val_end > val_start) {
-                    std::string progress_str =
-                        campaigns_section.substr(val_start + 1, val_end - val_start - 1);
-                    try {
-                        int progress = std::stoi(progress_str);
-                        // Find the campaign name
-                        size_t n = campaigns_section.find("\"name\"", p);
-                        if (n != std::string::npos) {
-                            size_t name_val_start =
-                                campaigns_section.find("\"", n + 6) + 1;
-                            size_t name_val_end =
-                                campaigns_section.find("\"", name_val_start + 1);
-                            std::string name = campaigns_section.substr(
-                                name_val_start, name_val_end - name_val_start);
-
-                            if (name == "Current Campaign") {
-                                campaign_progress_ = progress;
-                                LOGI("Loaded campaign progress: %d%%", progress);
-                            }
-                        }
-                    } catch (...) {
-                        // Ignore parse errors
-                    }
-                }
-                p = campaigns_section.find("\"progress\"", p + 1);
-            }
-        }
-    }
-
-    LOGI("Campaign progress loaded from '%s'", save_path.c_str());
-}
-
-// Get user directory path (platform-dependent)
-std::string Engine::get_user_directory() {
-    // In a full project, this would return the actual user data directory
-    // (e.g., %APPDATA% on Windows, ~/.local/share on Linux)
-    // For now, return current directory as fallback
-    return ".";
-}
-
-void Engine::start_campaign_cinematics(const CampaignScenario* scenario) {
-    if (!scenario) {
-        LOGW("start_campaign_cinematics: scenario nulo");
-        return;
-    }
-
-    LOGI("Starting Campaign Cinematics: '%s'", scenario->display_name.c_str());
-
-    // Passo 1: Tentar carregar arquivo de cinemática .bik ou .vid do cenário
-    std::string cinematic_path = scenario->filename;
-    // Remove prefixos de campanha e adiciona extensão de mídia
-    if (ends_with(to_lower(cinematic_path), ".scn")) cinematic_path = cinematic_path.substr(0, cinematic_path.size() - 4);
-    if (ends_with(to_lower(cinematic_path), ".scx")) cinematic_path = cinematic_path.substr(0, cinematic_path.size() - 4);
-
-    // Normaliza separadores
-    for (char& c : cinematic_path) {
-        if (c == '\\') c = '/';
-    }
-
-    // Tenta varios nomes de arquivo de cinemática possíveis
-    std::vector<std::string> cinematic_names = {
-        cinematic_path + ".bik",
-        cinematic_path + ".vid",
-        "cinematic_" + cinematic_path + ".bik",
-        "cinematic_" + cinematic_path + ".vid",
-        "spc/campaign_intro.bik",
-        "spc/campaign_intro.vid",
+    // ── 2. Árvores, pinheiros e rochas na encosta e beira-mar ────────────────
+    const std::vector<std::pair<std::string, glm::vec3>> scenery_objects = {
+        {"Pine Tree Large", glm::vec3(-10.0f, 0.0f, -4.0f)},
+        {"Pine Tree Large", glm::vec3(-11.0f, 0.0f, -2.0f)},
+        {"Pine Tree Large", glm::vec3(-12.0f, 0.0f, -1.0f)},
+        {"Pine Tree Medium", glm::vec3(-9.0f, 0.0f, -6.0f)},
+        {"Pine Tree Medium", glm::vec3(-8.0f, 0.0f, -7.0f)},
+        {"Oak Tree", glm::vec3(-6.0f, 0.0f, -5.0f)},
+        {"Oak Tree", glm::vec3(-4.0f, 0.0f, -4.0f)},
+        {"Rock River Sandy", glm::vec3(-3.0f, 0.0f, 1.0f)},
+        {"Rock River Sandy", glm::vec3(-2.0f, 0.0f, 2.0f)},
+        {"Rock Large", glm::vec3(-1.0f, 0.0f, -1.0f)},
+        {"Rock Large", glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"Rock River Sandy", glm::vec3(2.0f, 0.0f, -1.0f)},
+        {"Rock River Sandy", glm::vec3(3.0f, 0.0f, 0.0f)},
+        {"Rock Large", glm::vec3(4.0f, 0.0f, 1.0f)},
     };
 
-    bool cinematic_loaded = false;
-    for (const auto& name : cinematic_names) {
-        if (media_decoder_->open(name)) {
-            LOGI("Campaign cinematic loaded: '%s'", name.c_str());
-            media_decoder_->play();
-            cinematic_loaded = true;
-            break;
+    for (const auto& [name, pos] : scenery_objects) {
+        TextureHandle tex = INVALID_TEXTURE;
+        if (textures_bar_) {
+            tex = load_ddt_texture(name + ".ddt");
         }
+        gameplay_world_->spawn_scenery_object(name, pos, 1.0f, tex);
     }
 
-    if (!cinematic_loaded) {
-        // Fallback: cinemática genérica de início de campanha
-        LOGW("Nenhum arquivo de cinemática encontrado para o cenário, usando intro genérica");
-        if (media_decoder_->open("cinematic_campaign_start.bik")) {
-            media_decoder_->play();
-            cinematic_loaded = true;
-        }
-    }
+    // ── 3. Tropas terrestres na praia ────────────────────────────────────────
+    UnitStats hoplite_stats;
+    hoplite_stats.name = "Hoplite";
+    hoplite_stats.max_hp = 120.0f;
+    hoplite_stats.move_speed = 3.8f;
+    hoplite_stats.attack_damage = 12.0f;
+    hoplite_stats.attack_range = 2.2f;
+    hoplite_stats.attack_cooldown = 1.5f;
+    hoplite_stats.los = 14.0f;
+    hoplite_stats.worker = false;
+    hoplite_stats.pop_cost = 2;
 
-    // Passo 2: Aguardar término da cinemática antes de continuar
-    // Em um projeto completo, isso seria tratado no loop de renderização
-    // com base no status do media_decoder_
-    if (cinematic_loaded) {
-        LOGI("Campaign cinematics playing - waiting for completion...");
-    }
+    UnitStats toxotes_stats;
+    toxotes_stats.name = "Toxotes";
+    toxotes_stats.max_hp = 80.0f;
+    toxotes_stats.move_speed = 4.2f;
+    toxotes_stats.attack_damage = 9.0f;
+    toxotes_stats.attack_range = 12.0f;
+    toxotes_stats.attack_cooldown = 2.0f;
+    toxotes_stats.los = 16.0f;
+    toxotes_stats.worker = false;
+    toxotes_stats.pop_cost = 2;
+
+    // Tropas amigas patrulhando
+    Entity h1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-4.0f, 0.0f, 1.5f), hoplite_stats);
+    Entity h2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 2.5f), hoplite_stats);
+    Entity h3 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.0f, 0.0f, 1.0f), hoplite_stats);
+    Entity t1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-5.0f, 0.0f, 2.0f), toxotes_stats);
+    Entity t2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-4.0f, 0.0f, 3.0f), toxotes_stats);
+
+    gameplay_world_->order_move(h1, glm::vec3(-2.0f, 0.0f, 2.0f));
+    gameplay_world_->order_move(h2, glm::vec3(-1.0f, 0.0f, 3.0f));
+    gameplay_world_->order_move(h3, glm::vec3(0.0f, 0.0f, 1.5f));
+    gameplay_world_->order_move(t1, glm::vec3(-1.0f, 0.0f, 2.5f));
+    gameplay_world_->order_move(t2, glm::vec3(0.0f, 0.0f, 2.0f));
+
+    // Tropas inimigas
+    Entity eh1 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(6.0f, 0.0f, 4.0f), hoplite_stats);
+    Entity eh2 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(7.0f, 0.0f, 5.0f), hoplite_stats);
+    Entity et1 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(8.0f, 0.0f, 3.0f), toxotes_stats);
+
+    gameplay_world_->order_move(eh1, glm::vec3(5.0f, 0.0f, 5.0f));
+    gameplay_world_->order_move(eh2, glm::vec3(6.0f, 0.0f, 6.0f));
+    gameplay_world_->order_move(et1, glm::vec3(7.0f, 0.0f, 4.0f));
+
+    // ── 4. Unidade Mítica Voadora (Pegasus) cruzando a tela ──────────────────
+    UnitStats pegasus_stats;
+    pegasus_stats.name = "Pegasus";
+    pegasus_stats.max_hp = 200.0f;
+    pegasus_stats.move_speed = 18.0f;
+    pegasus_stats.attack_damage = 25.0f;
+    pegasus_stats.attack_range = 3.0f;
+    pegasus_stats.attack_cooldown = 3.0f;
+    pegasus_stats.los = 24.0f;
+    pegasus_stats.worker = false;
+    pegasus_stats.pop_cost = 4;
+
+    Entity pegasus = gameplay_world_->spawn_unit(Team::FRIENDLY,
+        glm::vec3(-20.0f, 8.0f, -10.0f), pegasus_stats);
+    gameplay_world_->order_move(pegasus, glm::vec3(20.0f, 8.0f, 10.0f));
+
+    // ── 5. Villagers coletando recursos ──────────────────────────────────────
+    UnitStats villager_stats;
+    villager_stats.name = "Villager Greek";
+    villager_stats.max_hp = 50.0f;
+    villager_stats.move_speed = 3.5f;
+    villager_stats.attack_damage = 3.0f;
+    villager_stats.attack_range = 1.0f;
+    villager_stats.attack_cooldown = 1.5f;
+    villager_stats.los = 12.0f;
+    villager_stats.worker = true;
+    villager_stats.pop_cost = 1;
+
+    Entity v1 = gameplay_world_->spawn_worker(glm::vec3(-7.0f, 0.0f, 3.0f), villager_stats);
+    Entity v2 = gameplay_world_->spawn_worker(glm::vec3(-8.0f, 0.0f, 4.0f), villager_stats);
+    Entity v3 = gameplay_world_->spawn_worker(glm::vec3(-6.0f, 0.0f, 4.5f), villager_stats);
+
+    gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(-7.0f, 0.0f, 5.0f), 1200);
+    gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(-9.0f, 0.0f, 2.0f), 1500);
+    gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(-5.0f, 0.0f, 5.0f), 800);
+
+    gameplay_world_->order_gather(v1, glm::vec3(-7.0f, 0.0f, 5.0f));
+    gameplay_world_->order_gather(v2, glm::vec3(-9.0f, 0.0f, 2.0f));
+    gameplay_world_->order_gather(v3, glm::vec3(-5.0f, 0.0f, 5.0f));
+
+    LOGI("MAIN_MENU background scene populated: %zu units, %zu buildings",
+         gameplay_world_->units().size(), gameplay_world_->buildings().size());
 }
 
-void Engine::load_scenario_scn_file(const std::string& scn_path) {
-    LOGI("Loading scenario file: '%s'", scn_path.c_str());
-
-    // Tenta extrair do BAR se disponível
-    if (scenarios_bar_) {
-        for (const BarEntry& entry : scenarios_bar_->entries()) {
-            if (ends_with(to_lower(entry.filename), ".scn") &&
-                entry.filename.find(scn_path) != std::string::npos) {
-                LOGI("Found .scn in BAR: '%s'", entry.filename.c_str());
-                // Extrair e processar o heightmap/terrain do .scn
-                auto scn_data = scenarios_bar_->extract(entry);
-                if (!scn_data.empty()) {
-                    // Processar heightmap e dados de terreno
-                    process_scn_heightmap(scn_data, entry.filename);
-                    return;
-                }
-            }
-        }
-    }
-
-    // Fallback: tentar carregar do sistema de arquivos
-    // Em um projeto completo, o .scn seria um arquivo físico
-    LOGW("Scenario .scn not found in BAR, using procedural generation");
-    generate_terrain();
-}
-
-void Engine::process_scn_heightmap(const std::vector<uint8_t>& scn_data, const std::string& filename) {
-    // Processa o heightmap a partir dos dados do .scn
-    // AoM .scn files contêm: header, dimensions, height data, object placements
-    if (scn_data.size() < 12) {
-        LOGW("Scenario file too small to contain heightmap data");
-        generate_terrain();
-        return;
-    }
-
-    // Lê header do .scn (formato simplificado)
-    // Magic: "SCN\x00", Width, Height, NumObjects
-    uint32_t magic;
-    uint16_t width, height;
-    uint32_t num_objects;
-
-    // Copiar os primeiros bytes do header
-    memcpy(&magic, scn_data.data(), 4);
-    memcpy(&width, scn_data.data() + 4, 2);
-    memcpy(&height, scn_data.data() + 6, 2);
-    memcpy(&num_objects, scn_data.data() + 8, 4);
-
-    // Verificar magic number (formato AoM)
-    if (magic != 0x4E435353) { // "SCN\0" em little-endian
-        LOGW("Invalid .scn magic number, using procedural terrain");
-        generate_terrain();
-        return;
-    }
-
-    LOGI("Processing .scn heightmap: %dx%d, %u objects", width, height, num_objects);
-
-    // Criar heightmap a partir dos dados
-    // Os bytes de heightmap vêm após o header (offset 12)
-    // ... processar height data ...
-
-    // Spawnar objetos do cenário
-    // ... processar object placements ...
-
-    // Gerar terreno com os dados carregados
-    generate_terrain();
-}
-
-void Engine::start_generic_mission(const std::string& scenario_filename) {
+void Engine::start_generic_mission(const std::string& scenario_filename, bool menu_background_mode) {
     LOGI("Starting generic mission: '%s'", scenario_filename.c_str());
 
     // Carrega dados do cenário .scn (apenas header/terrain por enquanto)
@@ -5213,42 +5139,112 @@ void Engine::start_generic_mission(const std::string& scenario_filename) {
              scenario_filename.c_str());
     }
 
-    // Spawn entidades básicas para missão genérica (Town Center + unidades iniciais)
-    gameplay_world_->place_town_center(Team::FRIENDLY, glm::vec3(-6.0f, 0.0f, 0.0f), true);
-    gameplay_world_->place_town_center(Team::ENEMY, glm::vec3(6.0f, 0.0f, 0.0f), true);
+    // No modo menu_background, NÃO spawnar entidades — apenas carregar terrain/heightmap
+    if (!menu_background_mode) {
+        // Spawn entidades básicas para missão genérica (Town Center + unidades iniciais)
+        gameplay_world_->place_town_center(Team::FRIENDLY, glm::vec3(-6.0f, 0.0f, 0.0f), true);
+        gameplay_world_->place_town_center(Team::ENEMY, glm::vec3(6.0f, 0.0f, 0.0f), true);
 
-    // Unidades friendly iniciais
-    UnitStats hoplite_stats;
-    hoplite_stats.name = "Hoplite";
-    hoplite_stats.max_hp = 120.0f;
-    hoplite_stats.move_speed = 3.8f;
-    hoplite_stats.attack_damage = 12.0f;
-    hoplite_stats.attack_range = 2.2f;
+        // Unidades friendly iniciais
+        UnitStats hoplite_stats;
+        hoplite_stats.name = "Hoplite";
+        hoplite_stats.max_hp = 120.0f;
+        hoplite_stats.move_speed = 3.8f;
+        hoplite_stats.attack_damage = 12.0f;
+        hoplite_stats.attack_range = 2.2f;
 
-    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 0.0f), hoplite_stats);
-    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, 1.0f), hoplite_stats);
-    gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, -1.0f), hoplite_stats);
+        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 0.0f), hoplite_stats);
+        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, 1.0f), hoplite_stats);
+        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, -1.0f), hoplite_stats);
 
-    // Worker friendly
-    gameplay_world_->spawn_worker(glm::vec3(-4.0f, 0.0f, 1.5f));
+        // Worker friendly
+        gameplay_world_->spawn_worker(glm::vec3(-4.0f, 0.0f, 1.5f));
 
-    // Unidades enemy iniciais
-    UnitStats enemy_hoplite = hoplite_stats;
-    enemy_hoplite.name = "Enemy Hoplite";
-    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(3.0f, 0.0f, 0.0f), enemy_hoplite);
-    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, 1.0f), enemy_hoplite);
-    gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, -1.0f), enemy_hoplite);
+        // Unidades enemy iniciais
+        UnitStats enemy_hoplite = hoplite_stats;
+        enemy_hoplite.name = "Enemy Hoplite";
+        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(3.0f, 0.0f, 0.0f), enemy_hoplite);
+        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, 1.0f), enemy_hoplite);
+        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, -1.0f), enemy_hoplite);
 
-    // Nós de recursos
-    gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(-4.0f, 0.0f, 3.5f), 1200);
-    gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(-7.5f, 0.0f, 3.5f), 1500);
-    gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(-5.5f, 0.0f, -3.5f), 2000);
+        // Nós de recursos
+        gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(-4.0f, 0.0f, 3.5f), 1200);
+        gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(-7.5f, 0.0f, 3.5f), 1500);
+        gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(-5.5f, 0.0f, -3.5f), 2000);
 
-    gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(4.0f, 0.0f, 3.5f), 1200);
-    gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
-    gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
+        gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(4.0f, 0.0f, 3.5f), 1200);
+        gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
+        gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
 
-    LOGI("Generic mission: entidades básicas spawnadas");
+        gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(4.0f, 0.0f, 3.5f), 1200);
+        gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
+        gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
+
+        LOGI("Generic mission: entidades básicas spawnadas");
+    } else {
+        LOGI("Generic mission: modo menu background — apenas terrain/heightmap carregado (sem entidades)");
+    }
+}
+
+void Engine::start_menu_background() {
+    LOGI("start_menu_background: iniciando vídeo de fundo do menu");
+
+    menu_bg_ = std::make_unique<aom::video::MediaDecoder>();
+    menu_bg_->on_frame = [this](const aom::video::VideoFrame& frame) {
+        if (!renderer_ || frame.width == 0 || frame.height == 0) return;
+        if (menu_bg_tex_ == INVALID_TEXTURE ||
+            frame.width != menu_bg_w_ || frame.height != menu_bg_h_) {
+            if (menu_bg_tex_ != INVALID_TEXTURE) {
+                renderer_->destroy_texture(menu_bg_tex_);
+            }
+            menu_bg_tex_ = renderer_->create_texture(
+                frame.width, frame.height, frame.rgba.data());
+            menu_bg_w_ = frame.width;
+            menu_bg_h_ = frame.height;
+            LOGI("menu_bg: textura criada %ux%u", menu_bg_w_, menu_bg_h_);
+        } else {
+            renderer_->update_texture(menu_bg_tex_, frame.width, frame.height, frame.rgba.data());
+        }
+    };
+    menu_bg_->on_eos = [this]() {
+        menu_bg_restart_ = true;
+    };
+
+    // Tenta abrir o vídeo de fundo do menu (mesmo mecanismo de assets do cinematic queue)
+    std::string cache_dir;
+    if (native_activity_) {
+        auto* act = static_cast<ANativeActivity*>(native_activity_);
+        if (act && act->internalDataPath) cache_dir = act->internalDataPath;
+    }
+    if (cache_dir.empty() && !config_.data_path.empty()) {
+        cache_dir = config_.data_path + "/cinematic";
+    }
+    if (cache_dir.empty()) cache_dir = "/data/local/tmp";
+
+    // Tenta abrir assets comuns de vídeo de fundo do menu do AoM: The Titans
+    const char* candidates[] = {
+        "assets/avi/menu_bg.mp4",
+        "assets/avi/introcg.mp4",
+        "assets/avi/xintrocg.mp4",
+        "assets/avi/aom-logo.mp4",
+    };
+    bool opened = false;
+    for (const char* candidate : candidates) {
+        if (asset_manager_ && media_decoder_->open_asset(asset_manager_, candidate, cache_dir)) {
+            // Reutiliza o media_decoder_ já existente? Não: queremos um decodidor dedicado
+            // para o menu. O open_asset acima foi só para testar se o arquivo existe.
+            // Na verdade precisamos abrir no menu_bg_:
+            if (menu_bg_->open_asset(asset_manager_, candidate, cache_dir)) {
+                LOGI("menu_bg: vídeo aberto: %s", candidate);
+                opened = true;
+                break;
+            }
+        }
+    }
+    if (!opened) {
+        LOGW("menu_bg: nenhum vídeo de fundo encontrado; usará fundo estático");
+        menu_bg_.reset();
+    }
 }
 
 void Engine::open_multiplayer() {
@@ -5627,10 +5623,6 @@ void Engine::create_history_menu() {
     open_credits();
 }
 
-void Engine::create_editor_menu() {
-    start_game();
-}
-
 void Engine::create_menu_screen(
     const std::string& title,
     const std::string& subtitle,
@@ -5708,6 +5700,51 @@ void Engine::play_named_cinematic(const char* method_name) {
     }
 }
 
+namespace {
+/// Chave de comparação tolerante: nome-base (sem pasta e sem extensão), minúsculo, só [a-z0-9].
+/// "ui\\ui pregame button", "UI_Pregame_Button.ddt" e "ui pregame button" geram a mesma chave.
+std::string texture_key(std::string s) {
+    const size_t slash = s.find_last_of("\\/");
+    if (slash != std::string::npos) s.erase(0, slash + 1);
+    const size_t dot = s.rfind('.');
+    if (dot != std::string::npos && s.size() - dot <= 5) s.erase(dot);
+    std::string k;
+    for (unsigned char c : s) {
+        if (std::isalnum(c)) k.push_back(static_cast<char>(std::tolower(c)));
+    }
+    return k;
+}
+} // namespace
+
+void Engine::build_texture_key_index() {
+    texture_key_index_.clear();
+    texture_key_index_built_ = true;
+    if (!textures_bar_) return;
+    for (const BarEntry& e : textures_bar_->entries()) {
+        const std::string& n = e.filename;
+        if (n.size() < 4) continue;
+        std::string ext = n.substr(n.size() - 4);
+        for (char& c : ext) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        if (ext != ".ddt") continue;
+        texture_key_index_.emplace(texture_key(n), n);   // o primeiro vence
+    }
+    LOGI("[TEX] índice tolerante de texturas: %zu .ddt de %zu entradas",
+         texture_key_index_.size(), textures_bar_->file_count());
+}
+
+/// Diagnóstico: lista os nomes REAIS do textures.bar que contêm 'needle' (ignora separadores).
+void Engine::log_bar_names_containing(const std::string& needle, size_t max_lines) const {
+    if (!textures_bar_) return;
+    const std::string want = texture_key(needle);
+    size_t shown = 0;
+    for (const BarEntry& e : textures_bar_->entries()) {
+        if (texture_key(e.filename).find(want) == std::string::npos) continue;
+        LOGI("[TEX] entrada no BAR: '%s'", e.filename.c_str());
+        if (++shown >= max_lines) { LOGI("[TEX] ... (limite de %zu linhas)", max_lines); break; }
+    }
+    if (shown == 0) LOGW("[TEX] nenhuma entrada do textures.bar contém '%s'", needle.c_str());
+}
+
 TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
     if (!renderer_ || !textures_bar_) return INVALID_TEXTURE;
     auto it = texture_cache_.find(material_name);
@@ -5716,18 +5753,48 @@ TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
     std::string ddt_name = material_name;
     if (ddt_name.find('.') == std::string::npos) ddt_name += ".ddt";
 
-    const std::vector<uint8_t> data = textures_bar_->extract(ddt_name);
-    if (data.empty()) return INVALID_TEXTURE;
+    // 1) nome exato (o BarArchive já ignora caixa e troca '\\' por '/')
+    std::vector<uint8_t> data = textures_bar_->extract(ddt_name);
+    std::string resolved = ddt_name;
+
+    // 2) nome-base sem pasta, separadores/espacos/sublinhados equivalentes
+    if (data.empty()) {
+        if (!texture_key_index_built_) build_texture_key_index();
+        const auto k = texture_key_index_.find(texture_key(material_name));
+        if (k != texture_key_index_.end()) {
+            data = textures_bar_->extract(k->second);
+            resolved = k->second;
+            if (!data.empty()) {
+                LOGI("[TEX] '%s' resolvida por nome aproximado -> '%s'",
+                     material_name.c_str(), k->second.c_str());
+            }
+        }
+    }
+
+    if (data.empty()) {
+        if (texture_miss_logged_.insert(material_name).second) {
+            LOGW("[TEX] NAO ENCONTRADA: '%s' (tentado '%s', chave '%s')",
+                 material_name.c_str(), ddt_name.c_str(), texture_key(material_name).c_str());
+            // mostra o que existe de parecido (primeira palavra significativa)
+            std::string probe = material_name;
+            const size_t slash = probe.find_last_of("\\/");
+            if (slash != std::string::npos) probe.erase(0, slash + 1);
+            log_bar_names_containing(probe.substr(0, std::min<size_t>(probe.size(), 14)), 6);
+        }
+        return INVALID_TEXTURE;
+    }
 
     auto ddt = DdtLoader::load(data);
-    if (!ddt) return INVALID_TEXTURE;
+    if (!ddt) { LOGW("[TEX] '%s' (%s): DdtLoader::load falhou", material_name.c_str(), resolved.c_str()); return INVALID_TEXTURE; }
     auto rgba = ddt->decode_rgba(0);
-    if (rgba.empty()) return INVALID_TEXTURE;
+    if (rgba.empty()) { LOGW("[TEX] '%s' (%s): decode_rgba vazio (formato %d)", material_name.c_str(), resolved.c_str(), int(ddt->format)); return INVALID_TEXTURE; }
 
     TextureHandle handle = renderer_->create_texture(
         ddt->width, ddt->height, rgba.data());
     if (handle != INVALID_TEXTURE) {
         texture_cache_[material_name] = handle;
+        texture_dimensions_[material_name] = glm::ivec2(
+            static_cast<int>(ddt->width), static_cast<int>(ddt->height));
     }
     return handle;
 }
@@ -6021,6 +6088,12 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
 
     // Gerar malha de terreno a partir do height-map
     generate_terrain_from_heightmap(heightmap_data_, heightmap_width_, heightmap_height_, 1.0f);
+
+    // Atualizar NavigationGrid com base no height-map (encostas íngremes = intransponíveis)
+    if (gameplay_world_) {
+        gameplay_world_->rebuild_navigation_from_heightmap(
+            heightmap_data_, heightmap_width_, heightmap_height_, 1.0f);
+    }
 
     return true;
 }
@@ -6523,6 +6596,21 @@ void Engine::update_in_game_hud(float dt) {
             }
         }
     }
+}
+
+Entity Engine::transform_unit(Entity from_entity, const std::string& target_name) {
+    if (gameplay_world_) return gameplay_world_->transform_unit(from_entity, target_name);
+    return INVALID_ENTITY;
+}
+
+std::vector<UnitTransform> Engine::available_transforms(Entity entity) const {
+    if (gameplay_world_) return gameplay_world_->available_transforms(entity);
+    return {};
+}
+
+ModelEntry* Engine::get_model_entry(const std::string& name) {
+    auto it = model_cache_.find(name);
+    return (it != model_cache_.end()) ? &it->second : nullptr;
 }
 
 } // namespace aom

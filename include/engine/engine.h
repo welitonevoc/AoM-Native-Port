@@ -6,12 +6,19 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
+#include <optional>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderer/renderer.h"
 #include "assets/xmb_parser.h"
 #include "assets/brg_model.h"
 #include "data/game_data.h"
+#include "data/unit_transform.h"
+#include "data/proto_unit.h"
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
 #include "audio/audio.h"
@@ -30,6 +37,7 @@
 namespace aom {
 
 class BarArchive;
+class PrtParticleSystem;
 
 struct EngineConfig {
     std::string data_path;
@@ -41,23 +49,7 @@ struct EngineConfig {
     float render_scale = 1.0f;
     int max_fps = 60;
     std::string language = "portuguese";
-    
-    // --- Novas opções para Android ---
-    bool enable_virtual_joystick = true;
-    float touch_sensitivity = 1.0f;
-    int graphics_quality = 2; // 0=Baixa, 1=Média, 2=Alta
-    int target_fps = 60;
-    bool high_contrast_mode = false;
-    bool large_text_size = false;
-    bool reduce_battery_mode = false;
-    bool enable_screen_orientation_lock = true;
-    int screen_orientation = 0; // 0=Auto, 1=Retrato, 2=Paisagem
 };
-
-// Forward declaration for network
-class NetworkManager;
-
-// Membros da classe Engine
 
 class GameplayWorld;
 enum class ResourceType;
@@ -133,10 +125,6 @@ enum class EngineState {
     UI_MP_PASSPORT,
     UI_MP_PASSPORT_TAKEN,
     UI_MP_SETUP_FINAL,
-    UI_MP_LOGIN,
-    UI_MP_PASSPORT,
-    UI_MP_PASSPORT_TAKEN,
-    UI_MP_SETUP_FINAL,
     UI_MP_VOTE_DIALOG,
     UI_NEW_DIALOGS,
     UI_OBJECTIVES,
@@ -192,6 +180,13 @@ struct ActionBtn {
     std::function<void()> action;
 };
 
+struct ModelEntry {
+    MeshHandle mesh = INVALID_MESH;
+    TextureHandle texture = INVALID_TEXTURE;
+    BrgModel* model = nullptr;
+    const ProtoUnitData* unit_stats = nullptr;  ///< Estatísticas do proto.xmb (se houver match por nome)
+};
+
 struct EngineCallbacks {
     std::function<void()> on_initialized;
     std::function<void(float progress, const std::string& stage)> on_loading_progress;
@@ -236,7 +231,7 @@ public:
     /// Inicia uma missão genérica (sem script específico) usando apenas o
     /// terrain do .scn e entidades básicas. Fallback para cenários sem
     /// CampaignMissionManager dedicado.
-    void start_generic_mission(const std::string& scenario_filename);
+    void start_generic_mission(const std::string& scenario_filename, bool menu_background_mode = false);
 
     /// Carrega (de forma limitada) os clips de animacao BRG de `models.bar`.
     ///
@@ -250,6 +245,8 @@ public:
     bool select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
                                TextureHandle& texture) const;
     void create_campaign_menu();
+    /// Abre a tela de selecao de cenario da campanha (lista de missoes).
+    void create_campaign_selection_menu();
     void save_game(const std::string& path = "");
     void load_game(const std::string& path = "");
 
@@ -312,25 +309,16 @@ public:
 
     /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
     /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
-    [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name) {
-        if (gameplay_world_) return gameplay_world_->transform_unit(from_entity, target_name);
-        return INVALID_ENTITY;
-    }
+    [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name);
 
     /// Retorna as transformacoes disponiveis para uma entidade (do unittransform.xmb).
-    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const {
-        if (gameplay_world_) return gameplay_world_->available_transforms(entity);
-        return {};
-    }
+    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const;
     [[nodiscard]] MeshHandle model_mesh() const { return model_mesh_; }
     [[nodiscard]] TextureHandle model_texture() const { return model_texture_; }
 
     /// Recupera um modelo BRG carregado no cache por nome (ex: "hoplite.brg").
     /// Retorna nullptr se o modelo ainda não foi carregado.
-    [[nodiscard]] ModelEntry* get_model_entry(const std::string& name) {
-        auto it = model_cache_.find(name);
-        return (it != model_cache_.end()) ? &it->second : nullptr;
-    }
+    [[nodiscard]] ModelEntry* get_model_entry(const std::string& name);
     [[nodiscard]] const XmbElement* game_config() const { return game_config_root_.get(); }
     [[nodiscard]] bool archives_loaded() const { return archives_loaded_; }
 
@@ -370,6 +358,7 @@ private:
     std::string tr(const std::string& key) const;
 
     void create_main_menu();          ///< uipregamenew — menu pregame The Titans
+    void populate_menu_background_scene();  ///< Popula cena 3D do MAIN_MENU com elementos do The Titans
 
     void create_ai_prompt_menu();
     void create_alternates_dialog_menu();
@@ -378,7 +367,6 @@ private:
     void create_army_edit_menu();
     void create_autopatcher_dialog_menu();
     void create_camera_editor_menu();
-    void create_campaign_menu();
     void create_campaign_editor_menu();
     void create_campaign_nloanding_menu();
     void create_campaign_setup_menu();
@@ -411,6 +399,13 @@ private:
     void create_ingame_msg_dialog_menu();
     void create_launch_screen_menu();
     void create_layout_menu();
+
+    void create_skybox_mesh();
+    void add_skybox_quad(std::vector<Vertex>& verts, std::vector<uint32_t>& indices,
+                         const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2,
+                         const glm::vec3& p3, const glm::vec3& normal,
+                         const glm::vec2& t0, const glm::vec2& t1,
+                         const glm::vec2& t2, const glm::vec2& t3);
     void create_low_detail_background_menu();
     void create_main_alt_menu();
     void create_map_picker_menu();
@@ -475,7 +470,6 @@ private:
     void create_multiplayer_lobby_menu();
     void create_cinematics_menu();
     void create_history_menu();
-    void create_editor_menu();
     void create_menu_screen(
         const std::string& title,
         const std::string& subtitle,
@@ -487,7 +481,6 @@ private:
     void play_credits_cinematic();
     void play_titans_credits_cinematic();
     void play_named_cinematic(const char* method_name);
-    void create_options_menu();
     bool generate_ui_from_xmb();
     void create_credits_menu();
     void create_in_game_hud();
@@ -498,13 +491,24 @@ private:
     void save_options();
     std::string save_game_path() const;
 
+    // --- Saved Game Browser ---
+    void open_saved_game_browser();
+    void load_selected_save();
+    void delete_selected_save();
+    void refresh_saved_game_list();
+    std::vector<std::string> list_saved_games() const;
+    void open_save_game_menu();
+    void save_game_slot(const std::string& slot_name);
+
     EngineState state_ = EngineState::UNINITIALIZED;
+    int selected_save_index_ = -1;
     EngineConfig config_;
     EngineCallbacks callbacks_;
 
     void* asset_manager_ = nullptr;
     void* native_activity_ = nullptr;
     bool archives_loaded_ = false;
+    bool resources_loaded_ = false;   ///< Recursos de jogo (modelos, partículas, etc.) já carregados — evita recarregar a cada volta ao MAIN_MENU
 
     // Archives base do jogo; cada um pode ter a expansão The Titans
     // montada por cima (data2.bar, textures2.bar, models2.bar, ...).
@@ -529,6 +533,15 @@ private:
     UILayoutManager ui_layout_manager_;
 
     std::unordered_map<std::string, aom::TextureHandle> texture_cache_;
+    /// Dimensões (largura x altura) de cada textura carregada (para 9-slice)
+    std::unordered_map<std::string, glm::ivec2> texture_dimensions_;
+    // Índice tolerante de nomes de textura (chave = só [a-z0-9] do nome-base).
+    // Resolve "ui\\ui pregame button" <-> "ui_pregame_button.ddt" e variações de pasta/caixa.
+    std::unordered_map<std::string, std::string> texture_key_index_;
+    bool texture_key_index_built_ = false;
+    std::unordered_set<std::string> texture_miss_logged_;
+    void build_texture_key_index();
+    void log_bar_names_containing(const std::string& needle, size_t max_lines = 40) const;
     std::unordered_map<std::string, std::string> strings_;
 
     // Core Authentic AoM UI Textures
@@ -537,6 +550,7 @@ private:
     TextureHandle main_menu_tex_ = INVALID_TEXTURE;
     TextureHandle button_main_tex_ = INVALID_TEXTURE;
     TextureHandle button_clicked_tex_ = INVALID_TEXTURE;
+
     TextureHandle minimap_tex_ = INVALID_TEXTURE;
     glm::vec4 minimap_rect_{0.0f}; // x, y, width, height
 
@@ -553,6 +567,7 @@ private:
     /// —— Skybox completo (P3.2) ——
     TextureHandle skybox_faces_[6] = {INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE,
                                       INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE};
+    TextureHandle skybox_cubemap_ = INVALID_TEXTURE;  // GL_TEXTURE_CUBE_MAP
     MeshHandle skybox_mesh_ = INVALID_MESH;
     bool load_skybox_faces(const std::string& cub_name);
 
@@ -576,7 +591,9 @@ private:
     TextureHandle terrain_bank_tex_ = INVALID_TEXTURE;      ///< Textura da beira interna (waterbodies.xmb bank)
     TextureHandle terrain_outer_bank_tex_ = INVALID_TEXTURE;///< Textura da beira externa (waterbodies.xmb outer_bank)
     TextureHandle water_normal_tex_ = INVALID_TEXTURE;
+    TextureHandle water_tex_ = INVALID_TEXTURE;         ///< Textura de água (water_*.ddt do textures.bar)
     glm::vec4 water_plane_{0.0f, 1.0f, 0.0f, 0.4f}; ///< Plane equation Ax+By+Cz+D = 0, y = -0.4f
+    float terrain_height_ = -0.4f;                      ///< Altura do terreno sob a água (para depth/foam)
     glm::vec3 water_color_{0, 50, 170};             ///< Cor da água do waterbodies.xmb (RGB 0-255)
     int heightmap_width_ = 0;
     int heightmap_height_ = 0;
@@ -596,6 +613,15 @@ private:
     bool cinematic_new_frame_      = false; ///< flag: novo frame disponível para upload
     uint32_t cinematic_tex_w_ = 0;          ///< dimensões atuais da textura do frame
     uint32_t cinematic_tex_h_ = 0;
+
+    // Menu background video (menu background video playing behind the menu)
+    std::unique_ptr<aom::video::MediaDecoder> menu_bg_;
+    TextureHandle menu_bg_tex_ = INVALID_TEXTURE;
+    uint32_t menu_bg_w_ = 0;
+    uint32_t menu_bg_h_ = 0;
+    bool menu_bg_restart_ = false;
+
+    void start_menu_background(); ///< Abre e inicia a decodificação do vídeo de fundo do menu
 
     // Playlist de abertura fiel ao original (playlist.aom: AOM LOGO → introcg)
     std::vector<std::string> cinematic_queue_;
@@ -640,12 +666,6 @@ private:
     GameDataManager game_data_;
 
     // Cache de modelos BRG carregados
-    struct ModelEntry {
-        MeshHandle mesh = INVALID_MESH;
-        TextureHandle texture = INVALID_TEXTURE;
-        BrgModel* model = nullptr;
-        const ProtoUnitData* unit_stats = nullptr;  ///< Estatísticas do proto.xmb (se houver match por nome)
-    };
     std::unordered_map<std::string, ModelEntry> model_cache_;
     std::unordered_map<std::string, std::unique_ptr<BrgModel>> model_cache_models_;
 
@@ -682,41 +702,6 @@ private:
     std::string god_picker_civilization_ = "Grego";
     std::string god_picker_minor_god_ = "Zeus";
     bool god_picker_selection_made_ = false;
-
-    // Tech Tree state - technologies available per civilization
-    // Each civilization has access to different technologies with unique bonuses
-    struct TechDef {
-        std::string name;
-        std::string description;
-        int era; // 0=Archaic, 1=Classical, 2=Medieval, 3=Heroic, 4=Mythic
-        int cost_food;
-        int cost_wood;
-        int cost_gold;
-        int cost_favor;
-        bool available; // whether this tech is available for this civilization
-    };
-
-    // Technology definitions available in the game
-    static const std::vector<TechDef> tech_defs_;
-
-    // Technology progress per civilization
-    // Tracks which technologies have been researched
-    std::map<std::string, std::vector<bool>> tech_progress_;  // civilization -> {researched}
-
-    // Current era per civilization
-    int current_era_[4] = {0, 0, 0, 0};  // Greek, Egyptian, Norse, Atlas
-
-    // Tech availability by civilization
-    // Index: 0=Greek, 1=Egyptian, 2=Norse, 3=Atlas
-    bool tech_available_[4][100] = {};  // [civilization_index][tech_index]
-
-    // Resources spent on research this era
-    int research_cost_food_ = 0;
-    int research_cost_wood_ = 0;
-    int research_cost_gold_ = 0;
-    int research_cost_favor_ = 0;
-    float research_timer_ = 0.0f;
-    int research_progress_ = 0; // 0-100%
 
     // In-game HUD references
     UILabel* hud_food_label_ = nullptr;
