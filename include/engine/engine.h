@@ -374,6 +374,19 @@ private:
     bool load_strings(const std::string& path);
     std::string tr(const std::string& key) const;
 
+    /// P5.6: Carrega strings da UI para a tabela de localização (base PT-BR).
+    void load_ui_strings();
+
+    /// P5.6: Tenta carregar uimain.xmb para o menu principal (com fallback procedural).
+    void create_main_menu_from_xmb();
+
+    /// P5.6: Fallback procedural para o menu principal (hard-coded, se XMB falhar).
+    void create_main_menu_fallback();
+
+    /// P5.6: Tenta carregar commandpanel.xmb para o painel de comandos in-game.
+    /// Retorna true se o XMB foi carregado com sucesso; false -> usa fallback procedural.
+    bool create_command_panel_from_xmb();
+
     void create_main_menu();          ///< uipregamenew — menu pregame The Titans
     void populate_menu_background_scene();  ///< Popula cena 3D do MAIN_MENU com elementos do The Titans
 
@@ -748,6 +761,8 @@ private:
     UILabel* hud_tooltip_ = nullptr;
     glm::vec2 touch_down_pos_{0.0f, 0.0f};
     Entity last_selected_entity_ = 0;
+    /// P5.6: true se o painel de comandos foi carregado de commandpanel.xmb
+    bool command_panel_from_xmb_ = false;
 
     // Campaign & Mission HUD references
     UILabel* hud_obj_title_ = nullptr;

@@ -108,6 +108,9 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
         if (audio_) ui_->set_audio_engine(audio_.get());
     }
 
+    // P5.6: Carrega tabela de strings da UI para localização
+    load_ui_strings();
+
     // 4. Load Options FIRST (before loading archives, to get correct data_path)
     load_options();
 
@@ -895,102 +898,7 @@ void Engine::set_state(EngineState new_state) {
 }
 
 void Engine::create_main_menu() {
-    clear_ui();
-
-    const float vw = static_cast<float>(config_.window_width);
-    const float vh = static_cast<float>(config_.window_height);
-
-    // ── Layout Autêntico Age of Mythology: The Titans (uipregamenew.xmb) ──────
-    // Carrega o layout XMB autêntico do data.bar (menu pregame The Titans)
-    // com 7 botões de jade verde: Learn To Play, Campaign, Single Player,
-    // Multiplayer, Options, More, Exit
-    if (load_ui_layout("uipregamenew.xmb")) {
-        size_t created = show_ui_layout("uipregamenew.xmb");
-        if (created > 0) {
-            LOGI("create_main_menu: uipregamenew.xmb aplicado com %zu elementos", created);
-            // ── Teste isolado de fonte (depois do show_ui_layout, que chama clear_ui) ──
-            ui_->add_label("TESTE DE FONTE", {100.0f, 100.0f}, 32.0f, 0xFFFF0000);
-            return;
-        }
-    }
-
-    LOGW("[DIAG] create_main_menu: falha ao carregar uipregamenew.xmb, usando fallback procedural");
-
-    // ── Fallback Procedural (layout hardcoded original) ───────────────────────
-    const float sx = vw / 1024.0f;
-    const float sy = vh / 768.0f;
-
-    const float btn_w = 190.0f * sx;
-    const float btn_h = 36.0f * sy;
-    const float btn_x = (417.0f - 8.0f) * sx;
-
-    // Ordem exata dos 7 botões do menu The Titans:
-    // 1. Learn To Play (Y=325)
-    // 2. Campaign      (Y=365)
-    // 3. Single Player (Y=405)
-    // 4. Multiplayer   (Y=445)
-    // 5. Options       (Y=485)
-    // 6. More          (Y=525)
-    // 7. Exit          (Y=573)
-    struct TitansBtn {
-        float y;
-        const char* label;
-        std::function<void()> action;
-    };
-
-    const TitansBtn btns[] = {
-        { 325.0f, "LEARN TO PLAY", [this]() { start_game(); }    },
-        { 365.0f, "CAMPAIGN", [this]() { create_campaign_selection_menu(); } },
-        { 405.0f, "SINGLE PLAYER", [this]() { create_campaign_menu(); } },
-        { 445.0f, "MULTIPLAYER", [this]() { open_multiplayer(); } },
-        { 485.0f, "OPTIONS", [this]() { open_options(); } },
-        { 525.0f, "MORE", [this]() { open_credits(); } },
-        { 573.0f, "EXIT", [this]() { quit_app(); }     },
-    };
-
-    size_t btns_created = 0;
-    for (const auto& b : btns) {
-        auto* btn = ui_->add_button(
-            {btn_x, (b.y - 2.0f) * sy},
-            {btn_w, btn_h},
-            b.label,               // texto do botão visível
-            b.action,
-            0x88203010,            // cor visível (marrom-escuro dourado) em vez de transparente
-            0x55FFD700             // brilho dourado ao toque (feedback tátil)
-        );
-        if (btn) {
-            btn->normal_tex = button_main_tex_;
-            btn->pressed_tex = button_clicked_tex_;
-            btn->text_color = 0xFFFFFFFF;
-            btn->text_size = 20.0f * sy;
-            btns_created++;
-        }
-    }
-    LOGI("[DIAG] create_main_menu fallback: %zu/%zu botões criados", btns_created, sizeof(btns)/sizeof(btns[0]));
-
-    // ── Aviso de dados originais ausentes ────────────────────────────────────
-    if (!archives_loaded_) {
-        ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
-            {24.0f, vh - 64.0f}, 16.0f, 0xFFFF6666);
-        ui_->add_label("OPCOES > IMPORTAR DADOS DO JOGO",
-            {24.0f, vh - 42.0f}, 13.0f, 0xFFFFD000);
-    }
-
-    // ── FPS discreto no canto inferior direito ───────────────────────────────
-    if (show_fps_) {
-        fps_label_ = ui_->add_label("FPS: 60",
-            {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
-    }
-
-    // ── DIAGNÓSTICO: mostrar qual textura de fundo está ativa ─────────────────
-    LOGI("[DEBUG menu] data_path='%s'", config_.data_path.empty() ? "(vazio)" : config_.data_path.c_str());
-    LOGI("[DEBUG menu] main_menu_tex_=%u (arquivo principal)", main_menu_tex_);
-    LOGI("[DEBUG menu] splash_tex_=%u loading_tex_=%u", splash_tex_, loading_tex_);
-    if (main_menu_tex_ == INVALID_TEXTURE) {
-        LOGW("[DEBUG menu] AVISO: main_menu_tex_ está INVALID — fundo usará fallback/cor sólida!");
-    } else {
-        LOGI("[DEBUG menu] OK: main_menu_tex_ válido — fundo do menu carregado");
-    }
+    create_main_menu_from_xmb();
 }
 
 // ── Seleção de Campanha ─────────────────────────────────────────────
@@ -6061,6 +5969,235 @@ std::string Engine::tr(const std::string& key) const {
     return key;
 }
 
+void Engine::load_ui_strings() {
+    // ── Tabela de strings da UI (base PT-BR) ──
+    // Chave -> valor traduzido. Usada por tr() e por resolve_text() do UIManager
+    // (formato $$ID$$texto_fallback).
+    strings_ = {
+        // ── Menu Principal ──
+        {"MENU_LEARN_TO_PLAY", "Aprender a Jogar"},
+        {"MENU_CAMPAIGN", "Campanha"},
+        {"MENU_SINGLE_PLAYER", "Jogador Único"},
+        {"MENU_MULTIPLAYER", "Multijogador"},
+        {"MENU_OPTIONS", "Opções"},
+        {"MENU_MORE", "Mais"},
+        {"MENU_EXIT", "Sair"},
+
+        // ── HUD In-Game ──
+        {"HUD_FOOD", "Comida"},
+        {"HUD_WOOD", "Madeira"},
+        {"HUD_GOLD", "Ouro"},
+        {"HUD_FAVOR", "Favor"},
+        {"HUD_POP", "Pop"},
+        {"HUD_SELECT_UNIT", "Toque em uma unidade para selecionar"},
+        {"HUD_NONE_SELECTED", "Nenhuma unidade selecionada"},
+        {"HUD_SELECTED_COUNT", "selecionadas"},
+        {"HUD_BUILD_ON_TERRAIN", "Toque no terreno para construir!"},
+        {"HUD_MENU_BUTTON", "MENU"},
+
+        // ── Painel de Comandos ──
+        {"CMD_MOVER", "Mover"},
+        {"CMD_ATACAR", "Atacar"},
+        {"CMD_COLETAR", "Coletar"},
+        {"CMD_CONSTRUIR", "Construir"},
+        {"CMD_TREINAR", "Treinar"},
+        {"CMD_CENTRO", "Centro"},
+
+        // ── Telas de Vitória/Derrota ──
+        {"VICTORY_TITLE", "VITÓRIA"},
+        {"DEFEAT_TITLE", "DERROTA"},
+        {"BTN_MAIN_MENU", "MENU PRINCIPAL"},
+        {"BTN_PLAY_AGAIN", "JOGAR NOVAMENTE"},
+
+        // ── Save/Load ──
+        {"SAVE_LOAD_TITLE", "CARREGAR JOGO"},
+        {"SAVE_GAME", "Salvar Jogo"},
+        {"LOAD_GAME", "Carregar Jogo"},
+
+        // ── Configurações ──
+        {"SETTINGS_AUDIO", "Áudio"},
+        {"SETTINGS_MUSIC", "Música"},
+        {"SETTINGS_SFX", "SFX"},
+    };
+    LOGI("load_ui_strings: %zu strings carregadas para localização", strings_.size());
+}
+
+void Engine::create_main_menu_from_xmb() {
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    // ── Tenta uimain.xmb primeiro ──
+    if (load_ui_layout("uimain.xmb")) {
+        size_t created = show_ui_layout("uimain.xmb");
+        if (created > 0) {
+            LOGI("create_main_menu_from_xmb: uimain.xmb aplicado com %zu elementos", created);
+            if (!archives_loaded_) {
+                ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
+                    {24.0f, vh - 64.0f}, 16.0f, 0xFFFF6666);
+                ui_->add_label("OPCOES > IMPORTAR DADOS DO JOGO",
+                    {24.0f, vh - 42.0f}, 13.0f, 0xFFFFD000);
+            }
+            if (show_fps_) {
+                fps_label_ = ui_->add_label("FPS: 60",
+                    {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
+            }
+            return;
+        }
+    }
+
+    LOGW("create_main_menu_from_xmb: falha ao carregar uimain.xmb, tentando uipregamenew.xmb");
+
+    // ── Fallback: uipregamenew.xmb ──
+    if (load_ui_layout("uipregamenew.xmb")) {
+        size_t created = show_ui_layout("uipregamenew.xmb");
+        if (created > 0) {
+            LOGI("create_main_menu_from_xmb: uipregamenew.xmb aplicado com %zu elementos", created);
+            ui_->add_label("TESTE DE FONTE", {100.0f, 100.0f}, 32.0f, 0xFFFF0000);
+            if (!archives_loaded_) {
+                ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
+                    {24.0f, vh - 64.0f}, 16.0f, 0xFFFF6666);
+                ui_->add_label("OPCOES > IMPORTAR DADOS DO JOGO",
+                    {24.0f, vh - 42.0f}, 13.0f, 0xFFFFD000);
+            }
+            if (show_fps_) {
+                fps_label_ = ui_->add_label("FPS: 60",
+                    {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
+            }
+            return;
+        }
+    }
+
+    // ── Fallback procedural (hard-coded) ──
+    create_main_menu_fallback();
+}
+
+void Engine::create_main_menu_fallback() {
+    clear_ui();
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    const float sx = vw / 1024.0f;
+    const float sy = vh / 768.0f;
+
+    const float btn_w = 190.0f * sx;
+    const float btn_h = 36.0f * sy;
+    const float btn_x = (417.0f - 8.0f) * sx;
+
+    // Ordem exata dos 7 botões do menu The Titans
+    struct TitansBtn {
+        float y;
+        const char* label_key;
+        const char* fallback_label;
+        std::function<void()> action;
+    };
+
+    const TitansBtn btns[] = {
+        { 325.0f, "MENU_LEARN_TO_PLAY", "LEARN TO PLAY", [this]() { start_game(); }    },
+        { 365.0f, "MENU_CAMPAIGN", "CAMPAIGN", [this]() { create_campaign_selection_menu(); } },
+        { 405.0f, "MENU_SINGLE_PLAYER", "SINGLE PLAYER", [this]() { create_campaign_menu(); } },
+        { 445.0f, "MENU_MULTIPLAYER", "MULTIPLAYER", [this]() { open_multiplayer(); } },
+        { 485.0f, "MENU_OPTIONS", "OPTIONS", [this]() { open_options(); } },
+        { 525.0f, "MENU_MORE", "MORE", [this]() { open_credits(); } },
+        { 573.0f, "MENU_EXIT", "EXIT", [this]() { quit_app(); }     },
+    };
+
+    size_t btns_created = 0;
+    for (const auto& b : btns) {
+        std::string label = tr(b.label_key);
+        if (label == b.label_key && b.fallback_label) label = b.fallback_label;
+
+        auto* btn = ui_->add_button(
+            {btn_x, (b.y - 2.0f) * sy},
+            {btn_w, btn_h},
+            label,
+            b.action,
+            0x88203010,
+            0x55FFD700
+        );
+        if (btn) {
+            btn->normal_tex = button_main_tex_;
+            btn->pressed_tex = button_clicked_tex_;
+            btn->text_color = 0xFFFFFFFF;
+            btn->text_size = 20.0f * sy;
+            btns_created++;
+        }
+    }
+    LOGI("[DIAG] create_main_menu fallback: %zu/%zu botões criados", btns_created, sizeof(btns)/sizeof(btns[0]));
+
+    if (!archives_loaded_) {
+        ui_->add_label("DADOS DO JOGO NAO ENCONTRADOS",
+            {24.0f, vh - 64.0f}, 16.0f, 0xFFFF6666);
+        ui_->add_label("OPCOES > IMPORTAR DADOS DO JOGO",
+            {24.0f, vh - 42.0f}, 13.0f, 0xFFFFD000);
+    }
+
+    if (show_fps_) {
+        fps_label_ = ui_->add_label("FPS: 60",
+            {vw - 90.0f, vh - 24.0f}, 14.0f, 0x88FFFFFF);
+    }
+}
+
+bool Engine::create_command_panel_from_xmb() {
+    if (!gameplay_world_) return false;
+
+    // ── Tenta carregar commandpanel.xmb (sem clear_ui: aplica sobre o UI existente) ──
+    if (load_ui_layout("commandpanel.xmb")) {
+        const float vw = static_cast<float>(config_.window_width);
+        const float vh = static_cast<float>(config_.window_height);
+
+        const auto* layout = ui_layout_manager_.get_layout("commandpanel.xmb");
+        if (layout) {
+            // Callbacks de ação (preenchidos dinamicamente por update_in_game_hud)
+            std::unordered_map<std::string, std::function<void()>> action_callbacks;
+
+            auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+                ResolvedTexture rt;
+                auto it = texture_cache_.find(name);
+                if (it != texture_cache_.end()) {
+                    rt.handle = it->second;
+                    auto dit = texture_dimensions_.find(name);
+                    if (dit != texture_dimensions_.end()) {
+                        rt.width = static_cast<uint32_t>(dit->second.x);
+                        rt.height = static_cast<uint32_t>(dit->second.y);
+                    }
+                    return rt;
+                }
+                const BarEntry* entry = textures_bar_->find(name);
+                if (entry) {
+                    auto data = textures_bar_->extract(*entry);
+                    if (!data.empty()) {
+                        int w = 0, h = 0, comp = 0;
+                        unsigned char* png = stbi_load_from_memory(data.data(),
+                            static_cast<int>(data.size()), &w, &h, &comp, 4);
+                        if (png) {
+                            rt.handle = renderer_->create_texture(w, h, png);
+                            rt.width = w;
+                            rt.height = h;
+                            stbi_image_free(png);
+                            texture_cache_[name] = rt.handle;
+                            texture_dimensions_[name] = {w, h};
+                        }
+                    }
+                }
+                return rt;
+            };
+
+            size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                static_cast<int>(vw), static_cast<int>(vh),
+                action_callbacks, texture_resolver);
+            LOGI("create_command_panel_from_xmb: commandpanel.xmb aplicado (%zu elementos)", created);
+            command_panel_from_xmb_ = true;
+            return true;
+        }
+    }
+
+    command_panel_from_xmb_ = false;
+    return false;
+}
+
 void Engine::generate_terrain() {
     if (!renderer_) return;
     load_textures();
@@ -6486,6 +6623,9 @@ void Engine::create_in_game_hud() {
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
+    // ── P5.6: Tenta carregar commandpanel.xmb para o painel de comandos ──
+    create_command_panel_from_xmb();
+
     // ── 1. Top Resource Banner (y = 8..36) ──────────────────────────
     if (show_fps_) {
         fps_label_ = ui_->add_label("FPS: 60", {16.0f, 9.0f}, 16.0f, 0xFF88FF88);
@@ -6496,14 +6636,6 @@ void Engine::create_in_game_hud() {
     float res_x = 110.0f;
     const float res_y = 9.0f;
     const float res_step = std::min(150.0f, (vw - 320.0f) / 5.0f);
-
-    hud_food_label_ = ui_->add_label("Comida: 500", {res_x, res_y}, 16.0f, 0xFF55DD33);
-    res_x += res_step;
-    hud_wood_label_ = ui_->add_label("Madeira: 500", {res_x, res_y}, 16.0f, 0xFFD49B55);
-    res_x += res_step;
-    hud_gold_label_ = ui_->add_label("Ouro: 300", {res_x, res_y}, 16.0f, 0xFFFFD700);
-    res_x += res_step;
-    hud_favor_label_ = ui_->add_label("Favor: 100", {res_x, res_y}, 16.0f, 0xFFCC77FF);
     res_x += res_step;
     hud_pop_label_ = ui_->add_label("Pop: 0/25", {res_x, res_y}, 16.0f, 0xFFFFFFFF);
 
