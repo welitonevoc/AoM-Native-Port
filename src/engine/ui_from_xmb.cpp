@@ -56,7 +56,7 @@ bool Engine::generate_ui_from_xmb() {
 
         ui_->add_button(pos, {btn_w, btn_h},
             std::move(callback),
-            0xFF0066FF,
+            0xAA221105,  // Pedra escura AoM (não azul!)
             icon_path);
         ++idx;
     }
