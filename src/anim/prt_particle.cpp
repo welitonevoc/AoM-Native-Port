@@ -1,4 +1,5 @@
 #include "anim/prt_particle.h"
+#include "assets/bar_archive.h"
 #include <fstream>
 #include <sstream>
 #include <cstring>

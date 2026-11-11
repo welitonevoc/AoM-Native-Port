@@ -4,7 +4,7 @@
 /// para AoM Native Port
 ///
 /// Os arquivos .prt definem sistemas de partículas: emissores, taxas de
-• emissão, duração, velocidade inicial, cor, tamanho, textura e comportamento.
+/// emissão, duração, velocidade inicial, cor, tamanho, textura e comportamento.
 
 #include "renderer/renderer.h"
 #include <cstdint>

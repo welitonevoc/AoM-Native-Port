@@ -1,4 +1,5 @@
 #include "anim/grn_animation.h"
+#include "assets/bar_archive.h"
 #include <fstream>
 #include <cstring>
 #include <cmath>
@@ -237,10 +238,10 @@ std::unique_ptr<GrnAnimation> parse_grn(const uint8_t* data, size_t size,
     return anim->num_bones > 0 ? std::move(anim) : nullptr;
 }
 
-std::unique_ptr<GrnAnimation> load_grn_animation(class BarArchive* archive,
+std::unique_ptr<GrnAnimation> load_grn_animation(BarArchive* archive,
                                                  const std::string& name) {
     if (!archive) return nullptr;
-    const class BarEntry* entry = archive->find(name);
+    const aom::BarEntry* entry = archive->find(name);
     if (!entry) return nullptr;
     std::vector<uint8_t> raw = archive->extract(*entry);
     if (raw.empty()) return nullptr;

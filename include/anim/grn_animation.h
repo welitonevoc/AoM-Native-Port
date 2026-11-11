@@ -7,6 +7,7 @@
 /// e expõe os dados para o sistema de animação existente.
 
 #include "anim/animation_system.h"
+#include "assets/bar_archive.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -49,6 +50,11 @@ struct GrnAnimation {
     uint32_t num_bones = 0;
     std::vector<GrnBone> bones;
     std::vector<GrnTrack> tracks;   ///< Um track por osso animado
+
+    /// Verifica se a animação é válida (tem ossos e duração)
+    bool is_valid() const {
+        return num_bones > 0 && duration > 0.0f && !bones.empty();
+    }
 
     /// Busca o índice do osso pelo nome
     int32_t find_bone(const std::string& name) const {
@@ -97,7 +103,7 @@ std::unique_ptr<GrnAnimation> parse_grn(const uint8_t* data, size_t size,
                                         const std::string& name = "");
 
 /// Carrega uma animação .grn de um BarArchive
-std::unique_ptr<GrnAnimation> load_grn_animation(class BarArchive* archive,
+std::unique_ptr<GrnAnimation> load_grn_animation(BarArchive* archive,
                                                  const std::string& name);
 
 } // namespace anim
