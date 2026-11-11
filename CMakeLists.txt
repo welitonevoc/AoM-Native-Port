@@ -118,12 +118,18 @@ if(BUILD_TESTING)
 # Testes Automatizados
 add_executable(gameplay_test
     src/tests/gameplay_test.cpp
-    src/assets/xmb_parser.cpp
-    src/assets/bar_archive.cpp
-    src/anim/animation_system.cpp
-    src/game/save_load.cpp
-    src/game/victory.cpp
-    src/assets/cube_map.cpp
+)
+
+target_include_directories(gameplay_test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+
+target_link_libraries(gameplay_test PRIVATE
+    aom_native
+    z
+    log
 )
 target_include_directories(gameplay_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -131,6 +137,7 @@ target_include_directories(gameplay_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(gameplay_test PRIVATE
+    aom_native
     z
     log
 )
@@ -146,6 +153,20 @@ target_include_directories(ui_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(ui_test PRIVATE
+    z
+    log
+)
+
+add_executable(test_menu_system
+    src/tests/test_menu_system.cpp
+)
+target_include_directories(test_menu_system PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_menu_system PRIVATE
+    aom_native
     z
     log
 )

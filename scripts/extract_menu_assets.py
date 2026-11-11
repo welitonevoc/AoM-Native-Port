@@ -14,6 +14,7 @@ Assets gerados:
 """
 
 import os
+import shutil
 import struct
 import sys
 import time
@@ -237,6 +238,43 @@ def create_greek_stone_button(stone_img, w=280, h=44, state="normal"):
     return btn
 
 
+def copy_bar_files():
+    """Cópia todos os arquivos .bar dos diretórios de origem para a estrutura do APK"""
+    print("[*] Copiando todos os arquivos .bar para compilação...")
+    
+    # Define todos os diretórios de origem para busca
+    source_dirs = [
+        *CANDIDATE_DIRS,
+        ROOT / "assets_bar",
+    ]
+    
+    copied_count = 0
+    for source_base in source_dirs:
+        if not source_base.exists():
+            continue
+            
+        # Encontra todos os arquivos .bar recursivamente
+        for bar_file in source_base.rglob("*.bar"):
+            if bar_file.is_file():
+                # Calcula o caminho de destino correspondente na estrutura do APK
+                rel_path = bar_file.relative_to(source_base)
+                dest_path = ROOT / "build-apk" / "assets" / rel_path.parent / bar_file.name
+                
+                # Cria o diretório de destino
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Copia o arquivo .bar
+                import shutil
+                shutil.copy2(bar_file, dest_path)
+                copied_count += 1
+                print(f"[OK] Copiado: {bar_file} -> {dest_path}")
+    
+    if copied_count > 0:
+        print(f"[OK] Total de arquivos .bar copiados: {copied_count}")
+    else:
+        print("[!] Nenhum arquivo .bar encontrado para copiar")
+
+
 def main():
     try:
         from PIL import Image
@@ -252,6 +290,9 @@ def main():
         sys.exit(1)
 
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Primeiro, copia todos os arquivos .bar para compilação
+    copy_bar_files()
 
     # Monitor de progresso por etapa da importação
     stages = [

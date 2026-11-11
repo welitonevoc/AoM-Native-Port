@@ -107,6 +107,10 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
     } else {
         if (audio_) ui_->set_audio_engine(audio_.get());
     }
+    
+    // Initialize Menu System
+    menu_system_ = std::make_unique<aom::MenuSystem>();
+    menu_system_->initialize(renderer_.get());
 
     // P5.6: Carrega tabela de strings da UI para localização
     load_ui_strings();

@@ -37,6 +37,7 @@
 
 namespace aom {
 
+class MenuSystem;
 class BarArchive;
 class PrtParticleSystem;
 

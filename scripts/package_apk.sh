@@ -161,14 +161,22 @@ bash "$PROJECT_DIR/scripts/generate_app_icons.sh"
 
 # 3.7 Copiar .bar files originais para os ativos do APK (para que a extração funcione sem arquivos externos)
 echo "Copiando .bar files originais para os ativos do APK..."
+
+# 3.7.1 Copiar .bar files de assets_bar (método tradicional)
 BAR_SOURCE_DIR="$PROJECT_DIR/assets_bar"
 if [ -d "$BAR_SOURCE_DIR" ]; then
     mkdir -p "$APK_BUILD_DIR/assets"
     cp -r "$BAR_SOURCE_DIR"/. "$APK_BUILD_DIR/assets/"
-    echo "  .bar files copiados para $APK_BUILD_DIR/assets/"
+    echo "  .bar files copiados de $BAR_SOURCE_DIR para $APK_BUILD_DIR/assets/"
 else
     echo "AVISO: diretório assets_bar não encontrado: $BAR_SOURCE_DIR"
 fi
+
+# 3.7.2 Copiar .bar files de localizações de origem externas (usando extract_menu_assets.py)
+echo "Executando extract_menu_assets.py para localizar e copiar todos os .bar files..."
+python3 "$PROJECT_DIR/scripts/extract_menu_assets.py" 2>/dev/null || {
+    echo "AVISO: extract_menu_assets.py falhou (pode não haver jogos .bar disponíveis). Continuando..."
+}
 
 # 4. Compile manifest, resources and full assets
 # -0 "" ensures font.ttf and textures are stored uncompressed for instant zero-copy loading
