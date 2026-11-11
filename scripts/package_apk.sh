@@ -169,16 +169,38 @@ echo "Native library dependencies:"
 readelf -d lib/arm64-v8a/libaom_native.so | grep NEEDED || true
 aapt add app.unaligned.apk lib/arm64-v8a/libaom_native.so lib/arm64-v8a/libc++_shared.so
 
+# Localiza o uber-apk-signer.jar (alternativa Java para zipalign + apksigner)
+find_uber_signer() {
+    local candidates="
+        $PROJECT_DIR/uber-apk-signer.jar
+        $PROJECT_DIR/tools/uber-apk-signer.jar
+        $HOME/uber-apk-signer.jar
+        /data/data/com.termux/files/home/uber-apk-signer.jar
+    "
+    for c in $candidates; do
+        if [ -f "$c" ]; then
+            echo "$c"
+            return 0
+        fi
+    done
+    return 1
+}
+
+UBER_SIGNER="$(find_uber_signer || true)"
+
 # 6. Zipalign APK entries (page-aligned at 4 bytes) — opcional
 if tool_usable zipalign; then
     zipalign -f -p 4 app.unaligned.apk app.aligned.apk
     APK_TO_SIGN="app.aligned.apk"
+elif [ -n "$UBER_SIGNER" ]; then
+    echo "zipalign não disponível; uber-apk-signer fará zipalign + assinatura em um passo."
+    APK_TO_SIGN="app.unaligned.apk"
 else
     echo "AVISO: zipalign não encontrado ou inutilizável. O APK será gerado sem alinhamento (funciona normalmente)."
     APK_TO_SIGN="app.unaligned.apk"
 fi
 
-# 7. Apksigner (v2 & v3 signature scheme) — opcional
+# 7. Assinatura do APK — apksigner, uber-apk-signer ou sem assinatura
 if tool_usable apksigner && [ -f "$PROJECT_DIR/debug.keystore" ]; then
     apksigner sign \
       --ks "$PROJECT_DIR/debug.keystore" \
@@ -189,8 +211,18 @@ if tool_usable apksigner && [ -f "$PROJECT_DIR/debug.keystore" ]; then
       "$APK_TO_SIGN"
     echo "=== Verifying APK ==="
     apksigner verify -v "$OUTPUT_APK"
+elif [ -n "$UBER_SIGNER" ] && [ -f "$PROJECT_DIR/debug.keystore" ]; then
+    echo "Usando uber-apk-signer.jar para zipalign + assinatura..."
+    java -jar "$UBER_SIGNER" \
+      --apk "$APK_TO_SIGN" \
+      --ks "$PROJECT_DIR/debug.keystore" \
+      --ks-pass android \
+      --ks-key-alias androiddebugkey \
+      --key-pass android \
+      --out "$OUTPUT_APK"
+    echo "=== APK assinado com uber-apk-signer ==="
 elif [ -f "$APK_TO_SIGN" ]; then
-    echo "AVISO: apksigner não encontrado ou inutilizável. Copiando APK não assinado para $OUTPUT_APK"
+    echo "AVISO: apksigner/uber-apk-signer não disponível. Copiando APK não assinado para $OUTPUT_APK"
     cp "$APK_TO_SIGN" "$OUTPUT_APK"
 else
     echo "ERROR: não foi possível gerar o APK final" >&2
