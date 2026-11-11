@@ -159,6 +159,17 @@ fi
 echo "Generating launcher icons for all densities..."
 bash "$PROJECT_DIR/scripts/generate_app_icons.sh"
 
+# 3.7 Copiar .bar files originais para os ativos do APK (para que a extração funcione sem arquivos externos)
+echo "Copiando .bar files originais para os ativos do APK..."
+BAR_SOURCE_DIR="$PROJECT_DIR/assets_bar"
+if [ -d "$BAR_SOURCE_DIR" ]; then
+    mkdir -p "$APK_BUILD_DIR/assets"
+    cp -r "$BAR_SOURCE_DIR"/. "$APK_BUILD_DIR/assets/"
+    echo "  .bar files copiados para $APK_BUILD_DIR/assets/"
+else
+    echo "AVISO: diretório assets_bar não encontrado: $BAR_SOURCE_DIR"
+fi
+
 # 4. Compile manifest, resources and full assets
 # -0 "" ensures font.ttf and textures are stored uncompressed for instant zero-copy loading
 aapt package -F app.unaligned.apk \

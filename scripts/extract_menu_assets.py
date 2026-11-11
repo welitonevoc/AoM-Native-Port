@@ -34,8 +34,18 @@ CANDIDATE_DIRS = [
     ROOT / "build-m2",
 ]
 
+# Diretório alternativo dentro do próprio APK (build-apk/assets)
+APK_ASSETS_DIR = ROOT / "build-apk" / "assets"
+
 
 def find_aom_paths():
+    # Primeiro, tenta carregar de assets dentro do APK (build-apk/assets)
+    if APK_ASSETS_DIR.exists():
+        bar_candidate = APK_ASSETS_DIR / "textures" / "textures.bar"
+        if bar_candidate.is_file():
+            return bar_candidate, APK_ASSETS_DIR
+
+    # Se não estiver dentro do APK, tente os locais externos
     for base in CANDIDATE_DIRS:
         bar_candidates = [
             base / "textures" / "textures.bar",
