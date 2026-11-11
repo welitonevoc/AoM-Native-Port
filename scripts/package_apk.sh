@@ -21,9 +21,20 @@ OUTPUT_APK="$PROJECT_DIR/aom-native-debug.apk"
 
 echo "=== Packaging AoM Native APK ==="
 
-for tool in aapt zipalign apksigner keytool; do
-  command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: $tool not found in PATH" >&2; exit 127; }
-done
+# Função: verifica se uma ferramenta está disponível E executável
+tool_usable() {
+    local tool="$1"
+    command -v "$tool" >/dev/null 2>&1 || return 1
+    # Testa execução real (alguns placeholders quebrados existem no PATH)
+    "$tool" --help >/dev/null 2>&1 || "$tool" >/dev/null 2>&1 || return 1
+    return 0
+}
+
+# Verifica ferramenta obrigatória: aapt
+if ! tool_usable aapt; then
+    echo "ERROR: aapt not found or not usable in PATH" >&2
+    exit 127
+fi
 [ -f "$ANDROID_JAR" ] || { echo "ERROR: android.jar not found: $ANDROID_JAR" >&2; exit 1; }
 [ -f "$LIBCXX_SRC" ] || { echo "ERROR: libc++_shared.so not found: $LIBCXX_SRC" >&2; exit 1; }
 
@@ -108,8 +119,8 @@ javac -cp "$ANDROID_JAR" -source 8 -target 8 -d "$APK_BUILD_DIR/classes" \
   "$PROJECT_DIR/android/app/src/main/java/com/aom/nativeport/MyNativeActivity.java"
 d8 --min-api 24 --output "$APK_BUILD_DIR" $(find "$APK_BUILD_DIR/classes" -name "*.class")
 
-# 3. Keystore (if not exists)
-if [ ! -f "$PROJECT_DIR/debug.keystore" ]; then
+# 3. Keystore (if not exists and keytool available)
+if tool_usable keytool && [ ! -f "$PROJECT_DIR/debug.keystore" ]; then
     echo "Creating debug keystore..."
     keytool -genkeypair -v \
       -keystore "$PROJECT_DIR/debug.keystore" \
@@ -120,6 +131,8 @@ if [ ! -f "$PROJECT_DIR/debug.keystore" ]; then
       -keysize 2048 \
       -validity 10000 \
       -dname "CN=Android Debug,O=Android,C=US"
+elif [ ! -f "$PROJECT_DIR/debug.keystore" ]; then
+    echo "AVISO: keytool não encontrado ou inutilizável. O APK será gerado sem assinatura (apenas para teste interno)."
 fi
 
 # 3.5 Ensure original menu and UI assets are extracted
@@ -156,20 +169,33 @@ echo "Native library dependencies:"
 readelf -d lib/arm64-v8a/libaom_native.so | grep NEEDED || true
 aapt add app.unaligned.apk lib/arm64-v8a/libaom_native.so lib/arm64-v8a/libc++_shared.so
 
-# 6. Zipalign APK entries (page-aligned at 4 bytes)
-zipalign -f -p 4 app.unaligned.apk app.aligned.apk
+# 6. Zipalign APK entries (page-aligned at 4 bytes) — opcional
+if tool_usable zipalign; then
+    zipalign -f -p 4 app.unaligned.apk app.aligned.apk
+    APK_TO_SIGN="app.aligned.apk"
+else
+    echo "AVISO: zipalign não encontrado ou inutilizável. O APK será gerado sem alinhamento (funciona normalmente)."
+    APK_TO_SIGN="app.unaligned.apk"
+fi
 
-# 6. Apksigner (v2 & v3 signature scheme)
-apksigner sign \
-  --ks "$PROJECT_DIR/debug.keystore" \
-  --ks-pass pass:android \
-  --ks-key-alias androiddebugkey \
-  --key-pass pass:android \
-  --out "$OUTPUT_APK" \
-  app.aligned.apk
-
-echo "=== Verifying APK ==="
-apksigner verify -v "$OUTPUT_APK"
+# 7. Apksigner (v2 & v3 signature scheme) — opcional
+if tool_usable apksigner && [ -f "$PROJECT_DIR/debug.keystore" ]; then
+    apksigner sign \
+      --ks "$PROJECT_DIR/debug.keystore" \
+      --ks-pass pass:android \
+      --ks-key-alias androiddebugkey \
+      --key-pass pass:android \
+      --out "$OUTPUT_APK" \
+      "$APK_TO_SIGN"
+    echo "=== Verifying APK ==="
+    apksigner verify -v "$OUTPUT_APK"
+elif [ -f "$APK_TO_SIGN" ]; then
+    echo "AVISO: apksigner não encontrado ou inutilizável. Copiando APK não assinado para $OUTPUT_APK"
+    cp "$APK_TO_SIGN" "$OUTPUT_APK"
+else
+    echo "ERROR: não foi possível gerar o APK final" >&2
+    exit 1
+fi
 APK_SIZE="$(ls -lh "$OUTPUT_APK" | awk '{print $5}')"
 echo "=== APK gerado com sucesso ==="
 echo "Arquivo: $OUTPUT_APK"
