@@ -1589,6 +1589,11 @@ public:
         for (const auto& [entity, marker] : selections_) if (marker.selected) list.push_back(entity);
         return list;
     }
+    void select_entity(Entity entity, bool selected = true) {
+        if (entity == INVALID_ENTITY) return;
+        auto& sel = selections_[entity];
+        sel.selected = selected;
+    }
     Entity enemy_at(const glm::vec3& point, float radius = 1.5f) const {
         Entity result = INVALID_ENTITY; float best = radius;
         for (const auto& [entity, transform] : ecs_world_.transforms()) {

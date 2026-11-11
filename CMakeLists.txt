@@ -476,5 +476,127 @@ target_link_libraries(test_perf PRIVATE
     log
 )
 
+# ── P5 Testes Específicos (Gate Check P5→Release) ──
+add_executable(test_hud_complete
+    src/tests/test_hud_complete.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_hud_complete PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_hud_complete PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_town_center
+    src/tests/test_town_center.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_town_center PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_town_center PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_selection_group
+    src/tests/test_selection_group.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_selection_group PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_selection_group PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_save_load_complete
+    src/tests/test_save_load_complete.cpp
+    src/game/save_load.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+)
+target_include_directories(test_save_load_complete PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_save_load_complete PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_victory_conditions
+    src/tests/test_victory_conditions.cpp
+    src/game/victory.cpp
+)
+target_include_directories(test_victory_conditions PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_victory_conditions PRIVATE
+    log
+)
+
+add_executable(test_ai_basic
+    src/tests/test_ai_basic.cpp
+    src/ai/ai_system.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/assets/bar_archive.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_ai_basic PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_ai_basic PRIVATE
+    ${SYSTEM_Z_LIB}
+    z
+    log
+)
+
+add_executable(test_audio_mp3
+    src/tests/test_audio_mp3.cpp
+    src/audio/opensl_engine.cpp
+    src/assets/bar_archive.cpp
+    src/data/sound_def.cpp
+    src/assets/xmb_parser.cpp
+)
+target_include_directories(test_audio_mp3 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ndk-include
+)
+target_link_libraries(test_audio_mp3 PRIVATE
+    OpenSLES
+    android
+    ${SYSTEM_Z_LIB}
+    log
+)
+
 endif(BUILD_TESTING)
 
