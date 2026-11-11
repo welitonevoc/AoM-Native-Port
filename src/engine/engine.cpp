@@ -6659,6 +6659,7 @@ void Engine::create_in_game_hud() {
     const float btn_gap = 8.0f;
     float btn_start_x = std::max(520.0f, vw - (btn_w * 2.0f + btn_gap + 16.0f));
 
+    // Inicializa botões de ação com elementos ocultos padrão
     hud_action_btn1_ = ui_->add_button({btn_start_x, panel_y + 8.0f}, {btn_w, btn_h}, "", nullptr, 0x00000000, 0x00000000);
     hud_action_btn2_ = ui_->add_button({btn_start_x + btn_w + btn_gap, panel_y + 8.0f}, {btn_w, btn_h}, "", nullptr, 0x00000000, 0x00000000);
     hud_action_btn3_ = ui_->add_button({btn_start_x, panel_y + 8.0f + btn_h + 4.0f}, {btn_w, btn_h}, "", nullptr, 0x00000000, 0x00000000);
@@ -6672,7 +6673,10 @@ void Engine::create_in_game_hud() {
     hud_reinforce_label_  = ui_->add_label("", {vw - 230.0f, 38.0f}, 15.0f, 0xFF88DDFF);
     hud_subtitle_speaker_ = ui_->add_label("", {vw * 0.5f - 260.0f, vh - 138.0f}, 16.0f, 0xFFFFD700);
     hud_subtitle_text_    = ui_->add_label("", {vw * 0.5f - 260.0f, vh - 114.0f}, 14.0f, 0xFFFFFFFF);
-    hud_skip_btn_         = ui_->add_button({vw * 0.5f - 90.0f, vh - 52.0f}, {180.0f, 36.0f}, "", nullptr, 0x00000000, 0x00000000);
+    // Botão skip cinemático inicialmente oculto, será configurado via callback
+    hud_skip_btn_         = ui_->add_button({vw * 0.5f - 90.0f, vh - 5.0f}, {180.0f, 36.0f}, "PULAR CINEMÁTICA", nullptr, 0x00000000, 0x00000000);
+    // Oculta o botão inicialmente (visível apenas durante cinemáticas)
+    hud_skip_btn_->hidden = true;
 
     last_selected_entity_ = INVALID_ENTITY;
 }
@@ -6714,10 +6718,10 @@ void Engine::update_in_game_hud(float dt) {
     size_t sel_count = gameplay_world_->selected_count();
 
     auto hide_action_buttons = [this]() {
-        if (hud_action_btn1_) { hud_action_btn1_->label = ""; hud_action_btn1_->onClick = nullptr; hud_action_btn1_->normal_color = 0x00000000; }
-        if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->onClick = nullptr; hud_action_btn2_->normal_color = 0x00000000; }
-        if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->onClick = nullptr; hud_action_btn3_->normal_color = 0x00000000; }
-        if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->onClick = nullptr; hud_action_btn4_->normal_color = 0x00000000; }
+        if (hud_action_btn1_) { hud_action_btn1_->label = ""; hud_action_btn1_->normal_color = 0x00000000; }
+        if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->normal_color = 0x00000000; }
+        if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->normal_color = 0x00000000; }
+        if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->normal_color = 0x00000000; }
     };
 
     if (sel == INVALID_ENTITY) {
@@ -6825,9 +6829,9 @@ void Engine::update_in_game_hud(float dt) {
                         if (gameplay_world_) gameplay_world_->order_stop_selected();
                     };
                 }
-                if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->onClick = nullptr; hud_action_btn2_->normal_color = 0x00000000; }
-                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->onClick = nullptr; hud_action_btn3_->normal_color = 0x00000000; }
-                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->onClick = nullptr; hud_action_btn4_->normal_color = 0x00000000; }
+                if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->normal_color = 0x00000000; }
+                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->normal_color = 0x00000000; }
+                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->normal_color = 0x00000000; }
             }
         } else {
             hide_action_buttons();
@@ -6890,9 +6894,9 @@ void Engine::update_in_game_hud(float dt) {
                         }
                     };
                 }
-                if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->onClick = nullptr; hud_action_btn2_->normal_color = 0x00000000; }
-                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->onClick = nullptr; hud_action_btn3_->normal_color = 0x00000000; }
-                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->onClick = nullptr; hud_action_btn4_->normal_color = 0x00000000; }
+                if (hud_action_btn2_) { hud_action_btn2_->label = ""; hud_action_btn2_->normal_color = 0x00000000; }
+                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->normal_color = 0x00000000; }
+                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->normal_color = 0x00000000; }
             } else if (bld->type == BuildingType::BARRACKS) {
                 if (hud_action_btn1_) {
                     hud_action_btn1_->label = "Hoplite (60C 35O)";
@@ -6912,8 +6916,8 @@ void Engine::update_in_game_hud(float dt) {
                         }
                     };
                 }
-                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->onClick = nullptr; hud_action_btn3_->normal_color = 0x00000000; }
-                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->onClick = nullptr; hud_action_btn4_->normal_color = 0x00000000; }
+                if (hud_action_btn3_) { hud_action_btn3_->label = ""; hud_action_btn3_->normal_color = 0x00000000; }
+                if (hud_action_btn4_) { hud_action_btn4_->label = ""; hud_action_btn4_->normal_color = 0x00000000; }
             } else {
                 hide_action_buttons();
             }

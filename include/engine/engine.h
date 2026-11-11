@@ -21,6 +21,7 @@
 #include "data/proto_unit.h"
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
+#include "ui/menu_system.h"
 #include "audio/audio.h"
 #include "data/sound_def.h"
 #include "ai/ai_system.h"
@@ -37,7 +38,6 @@
 
 namespace aom {
 
-class MenuSystem;
 class BarArchive;
 class PrtParticleSystem;
 
@@ -561,6 +561,7 @@ private:
 
     std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<UIManager> ui_;
+    std::unique_ptr<MenuSystem> menu_system_;
     std::unique_ptr<AudioEngine> audio_;
 
     /// Gerenciador de layouts de UI do data.bar (XMB: uitechtree.xml, uitributedlg.xml, etc.)

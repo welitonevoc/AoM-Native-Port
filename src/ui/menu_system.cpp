@@ -1,4 +1,5 @@
 #include "ui/ui.h"
+#include "ui/menu_system.h"
 #include <algorithm>
 #include <iostream>
 
@@ -37,7 +38,7 @@ void MenuSystem::handle_input(const TouchEvent& touch) {
     if (!is_active_) return;
     
     for (size_t i = 0; i < buttons_.size(); ++i) {
-        UIButton& button = buttons_[i];
+        MenuButton& button = buttons_[i];
         
         if (!button.interactive) continue;
         
@@ -112,7 +113,7 @@ void MenuSystem::add_button(const std::string& id, const std::string& label,
                            const std::function<void()>& action,
                            const glm::vec2& position, const glm::vec2& size,
                            TextureHandle normal_tex, TextureHandle pressed_tex) {
-    UIButton button;
+    MenuButton button;
     button.menu_id = id;
     button.label = label;
     button.action = action;
@@ -133,7 +134,7 @@ void MenuSystem::add_button(const std::string& id, const std::string& label,
 
 void MenuSystem::remove_button(const std::string& id) {
     auto it = std::remove_if(buttons_.begin(), buttons_.end(),
-                            [&id](const UIButton& btn) { return btn.menu_id == id; });
+                            [&id](const MenuButton& btn) { return btn.menu_id == id; });
     buttons_.erase(it, buttons_.end());
 }
 
@@ -183,7 +184,7 @@ void MenuSystem::render_menu_background() {
 
 void MenuSystem::render_menu_buttons() {
     for (size_t i = 0; i < buttons_.size(); ++i) {
-        UIButton& button = buttons_[i];
+        MenuButton& button = buttons_[i];
         
         TextureHandle current_tex = button.is_selected ? 
                                    (button.pressed_tex != INVALID_TEXTURE ? 
@@ -212,7 +213,7 @@ void MenuSystem::render_selection_indicator() {
     if (selected_button_index_ >= 0 && 
         selected_button_index_ < (int)buttons_.size()) {
         
-        UIButton& button = buttons_[selected_button_index_];
+        MenuButton& button = buttons_[selected_button_index_];
         
         glm::vec2 cursor_pos = button.pos - glm::vec2(20, 0);
         renderer_->draw_rect({

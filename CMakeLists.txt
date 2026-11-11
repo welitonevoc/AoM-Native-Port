@@ -20,6 +20,7 @@ set(AOM_SOURCES
     src/renderer/camera_track.cpp
     src/ui/ui.cpp
     src/ui/ui_layout.cpp
+    src/ui/menu_system.cpp
     src/ai/ai_system.cpp
     src/video/video_player.cpp
     src/video/media_decoder.cpp

@@ -25,7 +25,7 @@ enum class MenuAction {
     RIGHT
 };
 
-struct UIButton {
+struct MenuButton {
     std::string id;
     std::string label;
     std::function<void()> action;
@@ -101,7 +101,7 @@ private:
     void update_current_menu_state(float dt);
     void process_menu_actions();
     
-    std::vector<UIButton> buttons_;
+    std::vector<MenuButton> buttons_;
     MenuState current_state_;
     int selected_button_index_;
     float animation_time_;
