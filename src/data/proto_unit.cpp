@@ -14,24 +14,56 @@ std::string to_lower(std::string_view s) {
     return out;
 }
 
-float parse_attr_float(const XmbElement& elem, const std::string& attr_name, float def = 0.0f) {
-    auto v = elem.get_attribute(attr_name);
-    if (v.empty()) return def;
-    try { return std::stof(v); } catch (...) { return def; }
-}
-
-int parse_attr_int(const XmbElement& elem, const std::string& attr_name, int def = 0) {
-    auto v = elem.get_attribute(attr_name);
-    if (v.empty()) return def;
-    try { return std::stoi(v); } catch (...) { return def;
+/// Le um stat do prototipo.
+///
+/// No proto.xmb/protox.xmb do AoM os stats sao ELEMENTOS FILHOS do <unit>
+/// (ex.: <maxhitpoints>115.0000</maxhitpoints>), e nao atributos. Lendo
+/// apenas get_attribute() todos os stats caiam no valor default e o registro
+/// ficava com HP/velocidade/populacao genericos. Procura primeiro no elemento
+/// filho e usa o atributo como fallback.
+float read_stat_float(const XmbElement& elem, const std::string& name, float def) {
+    if (const auto* child = elem.find_child(name)) {
+        if (!child->text.empty()) {
+            try { return std::stof(child->text); } catch (...) {}
+        }
+        const std::string attr = child->get_attribute("value");
+        if (!attr.empty()) {
+            try { return std::stof(attr); } catch (...) {}
+        }
     }
+    const std::string attr = elem.get_attribute(name);
+    if (!attr.empty()) {
+        try { return std::stof(attr); } catch (...) {}
+    }
+    return def;
 }
 
-bool parse_attr_bool(const XmbElement& elem, const std::string& attr_name, bool def = false) {
-    auto v = elem.get_attribute(attr_name);
-    if (v.empty()) return def;
-    auto lv = to_lower(v);
-    return lv == "true" || lv == "1" || lv == "yes";
+/// Versao inteira de read_stat_float().
+int read_stat_int(const XmbElement& elem, const std::string& name, int def = 0) {
+    if (const auto* child = elem.find_child(name)) {
+        if (!child->text.empty()) {
+            try { return std::stoi(child->text); } catch (...) {}
+        }
+        const std::string attr = child->get_attribute("value");
+        if (!attr.empty()) {
+            try { return std::stoi(attr); } catch (...) {}
+        }
+    }
+    const std::string attr = elem.get_attribute(name);
+    if (!attr.empty()) {
+        try { return std::stoi(attr); } catch (...) {}
+    }
+    return def;
+}
+
+/// Versao textual de read_stat_float() (ex.: <icon>...</icon>).
+std::string read_stat_string(const XmbElement& elem, const std::string& name) {
+    if (const auto* child = elem.find_child(name)) {
+        if (!child->text.empty()) return child->text;
+        const std::string attr = child->get_attribute("value");
+        if (!attr.empty()) return attr;
+    }
+    return elem.get_attribute(name);
 }
 
 } // anonymous namespace
@@ -81,16 +113,16 @@ bool ProtoUnitRegistry::load_from_xmb(const XmbElement& root) {
         u.name = child->get_attribute("name");
         if (u.name.empty()) continue;
 
-        u.dbid = parse_attr_int(*child, "dbid");
-        u.display_name_id = parse_attr_int(*child, "displaynameid");
-        u.population_count = parse_attr_int(*child, "populationcount", 1);
+        u.dbid = read_stat_int(*child, "dbid");
+        u.display_name_id = read_stat_int(*child, "displaynameid");
+        u.population_count = read_stat_int(*child, "populationcount", 1);
 
         // Estatísticas básicas
-        u.max_hitpoints = parse_attr_float(*child, "maxhitpoints", 100.0f);
-        u.los = parse_attr_float(*child, "los", 16.0f);
-        u.max_velocity = parse_attr_float(*child, "maxvelocity", 4.0f);
-        u.acceleration = parse_attr_float(*child, "acceleration", 0.0f);
-        u.deceleration = parse_attr_float(*child, "deceleration", 0.0f);
+        u.max_hitpoints = read_stat_float(*child, "maxhitpoints", 100.0f);
+        u.los = read_stat_float(*child, "los", 16.0f);
+        u.max_velocity = read_stat_float(*child, "maxvelocity", 4.0f);
+        u.acceleration = read_stat_float(*child, "acceleration", 0.0f);
+        u.deceleration = read_stat_float(*child, "deceleration", 0.0f);
 
         // Custos
         for (const auto& prop : child->children) {
@@ -158,13 +190,15 @@ bool ProtoUnitRegistry::load_from_xmb(const XmbElement& root) {
 
         u.can_move = u.max_velocity > 0.1f && !u.building;
 
-        // Tentativa de extrair nome do arquivo .brg e ícone (se existirem como atributos)
-        u.brg_filename = child->get_attribute("brg");
+        // Arquivo .brg: atributo <unit brg="..."> quando presente, senao a
+        // convencao <name>.brg
+        u.brg_filename = read_stat_string(*child, "brg");
         if (u.brg_filename.empty()) {
             // Convenção: <name>.brg
             u.brg_filename = u.name + ".brg";
         }
-        u.icon_filename = child->get_attribute("icon");
+        // Ícone da UI: no proto.xmb é o ELEMENTO <icon>...</icon>
+        u.icon_filename = read_stat_string(*child, "icon");
 
         // Inserir/atualizar no registro (protox.xmb sobrescreve proto.xmb)
         const std::string key = to_lower(u.name);
