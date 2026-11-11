@@ -1,0 +1,42 @@
+========================================
+ P5.5 — Áudio Ampliado Test Suite
+========================================
+
+--- Testing Audio Engine Creation ---
+PASS: create_audio_engine returned non-null
+PASS: Audio engine initialized (software fallback)
+Audio engine created and initialized
+
+--- Testing Music Volume Control ---
+PASS: Music volume set to 0.5
+PASS: Music volume clamped to 1.0
+PASS: Music volume clamped to 0.0
+
+--- Testing SFX Volume Control ---
+PASS: SFX volume set to 0.7
+PASS: SFX disabled
+PASS: SFX re-enabled
+
+--- Testing Music Enabled Control ---
+PASS: Music enabled by default
+PASS: Music disabled
+PASS: Music re-enabled
+
+--- Testing Simultaneous SFX Voices ---
+Active voices after 5 clicks: 5
+PASS: At least one voice active after multiple clicks
+PASS: At least 5 voices dispatched cumulatively
+
+--- Testing 3D Positional Audio ---
+PASS: Listener position set to origin
+PASS: 3D SFX spawned a voice near listener
+PASS: 3D SFX far away handled without crash
+
+--- Testing Sound Bank Definitions (SoundDefManager) ---
+PASS: SoundDefManager starts empty (loaded by engine from sounds.bar)
+PASS: pick_sound on empty set returns nullptr
+Sound bank definitions structure valid
+
+========================================
+ ALL AUDIO TESTS PASSED! (100%)
+========================================

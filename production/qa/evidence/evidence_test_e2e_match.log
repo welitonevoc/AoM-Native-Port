@@ -1,0 +1,27 @@
+========================================
+ P5 — End-to-End Match Test Suite
+ (Spawn → Economia → Combate → Vitória)
+========================================
+
+--- End-to-End Match: Spawn → Economia → Combate → Vitória ---
+PASS: Friendly Town Center spawned
+PASS: Enemy Town Center spawned
+PASS: Friendly villagers spawned
+PASS: Friendly hoplites spawned
+PASS: Enemy hoplites spawned
+PASS: Villagers ordered to gather resources
+  Recursos finais: Food=650 Wood=690 Gold=300
+PASS: Economia: recursos coletados > 0
+  População friendly final: 4
+PASS: População friendly > 0
+PASS: Vitória por Conquest após destruição do TC inimigo
+PASS: Victory condition persisted
+PASS: Victory result persisted
+PASS: Victory timer persisted
+  Partida completa simulada com sucesso!
+
+Tempo de execução: 0.111771s
+
+========================================
+ ALL END-TO-END TESTS PASSED! (100%)
+========================================

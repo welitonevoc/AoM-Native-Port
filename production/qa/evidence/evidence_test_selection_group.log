@@ -1,0 +1,24 @@
+========================================
+ P5.2 — Selection Group Test Suite
+========================================
+
+--- Testing Multi-Selection Count ---
+PASS: No entities selected initially
+PASS: Selected entity is INVALID initially
+PASS: Spawned 3 units
+PASS: Three units selected -> count is 3
+PASS: u1 is among selected entities
+
+--- Testing Selection Rings ---
+PASS: Spawned military unit
+PASS: One unit selected
+PASS: After deselect, count is 0
+
+--- Testing Box Select Concept ---
+PASS: Spawned 3 units in box area
+PASS: Box select selected 3 units
+PASS: Click on empty ground deselects all
+
+========================================
+ ALL SELECTION GROUP TESTS PASSED! (100%)
+========================================

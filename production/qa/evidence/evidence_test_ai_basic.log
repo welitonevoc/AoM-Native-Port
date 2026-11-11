@@ -1,0 +1,36 @@
+========================================
+ P5.4 — IA Econômica e Militar Test Suite
+========================================
+
+--- Testing AI Initialization ---
+PASS: AI team is ENEMY
+PASS: updatePlayerToAttack rule active
+PASS: updateFoodBreakdown rule active
+PASS: updateWoodBreakdown rule active
+PASS: updateGoldBreakdown rule active
+PASS: AI has rules loaded
+
+--- Testing AI Economic Rules ---
+PASS: Spawned enemy TC for AI economy
+PASS: Spawned enemy villager
+PASS: Spawned enemy villager
+PASS: Spawned enemy villager
+PASS: AI economic update ran without crash
+
+--- Testing AI Military Rules ---
+PASS: Spawned enemy buildings
+PASS: Spawned enemy Hoplite
+PASS: Spawned friendly target
+PASS: AI military update ran without crash
+
+--- Testing AI Building Construction ---
+PASS: Spawned enemy TC
+PASS: AI building construction update ran for 10 ticks
+
+--- Testing AI Attacks Player ---
+PASS: Spawned enemy and player units
+PASS: AI attack detection ran without crash
+
+========================================
+ ALL AI BASIC TESTS PASSED! (100%)
+========================================
