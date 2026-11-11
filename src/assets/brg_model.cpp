@@ -237,6 +237,11 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
 
     LOGI("BRG: Loaded model '%s' with %zu meshes, %u vertices, %u faces",
          name.c_str(), model->meshes.size(), model->total_vertices, model->total_faces);
+    for (size_t i = 0; i < model->meshes.size(); ++i) {
+        const auto& m = model->meshes[i];
+        LOGI("  Mesh[%zu]: '%s' verts=%u faces=%u texture='%s'",
+             i, m.name.c_str(), m.vertices.size(), m.indices.size() / 3, m.texture_name.c_str());
+    }
     return model;
 }
 

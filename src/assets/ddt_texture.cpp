@@ -1,7 +1,20 @@
 #include "assets/ddt_texture.h"
+#include "assets/ddt5_auto.h"
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "AoM-DDT", __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, "AoM-DDT", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "AoM-DDT", __VA_ARGS__)
+#else
+#define LOGI(...) ((void)0)
+#define LOGW(...) ((void)0)
+#define LOGE(...) ((void)0)
+#endif
 
 #include <algorithm>
+#include <cstdio>
 #include <cstring>
+#include <set>
 #include <stdexcept>
 
 namespace aom {
@@ -90,6 +103,116 @@ void decode_dxt1_block(const uint8_t* block, std::vector<uint8_t>& out,
     }
 }
 
+/// DXT3 block (16 bytes): bytes 0-7 = alpha (4 bits per pixel, 16 pixels),
+/// bytes 8-15 = DXT1 color block (2 colors + 4 bytes of 2-bit indices).
+void decode_dxt3_block(const uint8_t* block, std::vector<uint8_t>& out,
+                       uint32_t width, uint32_t height,
+                       uint32_t bx, uint32_t by) {
+    const uint16_t c0 = read_u16(block + 8);
+    const uint16_t c1 = read_u16(block + 10);
+    const uint32_t bits = read_u32(block + 12);
+
+    Rgba pal[4];
+    expand_565(c0, pal[0].r, pal[0].g, pal[0].b);
+    expand_565(c1, pal[1].r, pal[1].g, pal[1].b);
+    pal[0].a = pal[1].a = 255;
+
+    if (c0 > c1) {
+        pal[2] = lerp_color(pal[0], pal[1], 1, 3);
+        pal[3] = lerp_color(pal[0], pal[1], 2, 3);
+    } else {
+        pal[2] = lerp_color(pal[0], pal[1], 1, 2);
+        pal[2].a = 255;
+        pal[3] = Rgba{0, 0, 0, 0};
+    }
+
+    // Alpha: 4 bits per pixel, 16 pixels = 8 bytes, block[0..7]
+    for (uint32_t y = 0; y < 4; ++y) {
+        for (uint32_t x = 0; x < 4; ++x) {
+            const uint32_t pixel_index = 4 * y + x;
+            const uint8_t alpha_nibble =
+                (block[pixel_index / 2] >> (4 * (pixel_index & 1))) & 0x0F;
+            const uint8_t alpha = static_cast<uint8_t>(alpha_nibble * 17);
+
+            const uint32_t code = (bits >> (2 * pixel_index)) & 0x03;
+            Rgba c = pal[code];
+            c.a = alpha;
+            store_pixel(out, width, height, bx * 4 + x, by * 4 + y, c);
+        }
+    }
+}
+
+/// DXT5 block (16 bytes): bytes 0-1 = alpha0/alpha1, bytes 2-7 = alpha indices
+/// (3 bits each, 8 values + 7 interpolations), bytes 8-15 = DXT1 color block.
+void decode_dxt5_block(const uint8_t* block, std::vector<uint8_t>& out,
+                       uint32_t width, uint32_t height,
+                       uint32_t bx, uint32_t by) {
+    const uint16_t c0 = read_u16(block + 8);
+    const uint16_t c1 = read_u16(block + 10);
+    const uint32_t bits = read_u32(block + 12);
+
+    Rgba pal[4];
+    expand_565(c0, pal[0].r, pal[0].g, pal[0].b);
+    expand_565(c1, pal[1].r, pal[1].g, pal[1].b);
+    pal[0].a = pal[1].a = 255;
+
+    if (c0 > c1) {
+        pal[2] = lerp_color(pal[0], pal[1], 1, 3);
+        pal[3] = lerp_color(pal[0], pal[1], 2, 3);
+    } else {
+        pal[2] = lerp_color(pal[0], pal[1], 1, 2);
+        pal[2].a = 255;
+        pal[3] = Rgba{0, 0, 0, 0};
+    }
+
+    // Alpha: 8-alpha block (DXT5 alpha)
+    const uint8_t a0 = block[0];
+    const uint8_t a1 = block[1];
+    const uint32_t alpha_bits =
+        static_cast<uint32_t>(block[2]) |
+        (static_cast<uint32_t>(block[3]) << 8) |
+        (static_cast<uint32_t>(block[4]) << 16) |
+        (static_cast<uint32_t>(block[5]) << 24);
+
+    uint8_t alpha_palette[8];
+    alpha_palette[0] = a0;
+    alpha_palette[1] = a1;
+    if (a0 > a1) {
+        for (int i = 2; i < 8; ++i) {
+            alpha_palette[i] = static_cast<uint8_t>(
+                ((8 - i) * a0 + (i - 1) * a1) / 7);
+        }
+    } else {
+        alpha_palette[2] = static_cast<uint8_t>((6 * a0 + 1 * a1) / 7);
+        alpha_palette[3] = static_cast<uint8_t>((5 * a0 + 2 * a1) / 7);
+        alpha_palette[4] = static_cast<uint8_t>((4 * a0 + 3 * a1) / 7);
+        alpha_palette[5] = static_cast<uint8_t>((3 * a0 + 4 * a1) / 7);
+        alpha_palette[6] = static_cast<uint8_t>((2 * a0 + 5 * a1) / 7);
+        alpha_palette[7] = static_cast<uint8_t>(0);
+    }
+
+    for (uint32_t y = 0; y < 4; ++y) {
+        for (uint32_t x = 0; x < 4; ++x) {
+            const uint32_t pixel_index = 4 * y + x;
+            // 3 bits per pixel, packed into 6 bytes (48 bits)
+            const uint32_t bit_offset = 3 * pixel_index;
+            const uint32_t byte_offset = bit_offset / 8;
+            const uint32_t bit_shift = bit_offset % 8;
+            uint32_t alpha_code = (alpha_bits >> bit_shift) & 0x07;
+            if (bit_shift > 5) {
+                alpha_code |= (static_cast<uint32_t>(alpha_bits >> (bit_shift + 8)) & 0x07) << 3;
+                alpha_code &= 0x07;
+            }
+            const uint8_t alpha = alpha_palette[alpha_code];
+
+            const uint32_t code = (bits >> (2 * pixel_index)) & 0x03;
+            Rgba c = pal[code];
+            c.a = alpha;
+            store_pixel(out, width, height, bx * 4 + x, by * 4 + y, c);
+        }
+    }
+}
+
 /// AoM 5 bpp: RGB555 color0/color1, 16-bit 1-bit alpha mask, 4 index bytes.
 void decode_aom_5bpp_block(const uint8_t* block, std::vector<uint8_t>& out,
                            uint32_t width, uint32_t height,
@@ -146,8 +269,8 @@ void decode_aom_8bpp_block(const uint8_t* block, std::vector<uint8_t>& out,
 uint32_t block_size_for(DdtFormat format) {
     switch (format) {
         case DdtFormat::DXT1:     return 8;
-        case DdtFormat::AOM_5BPP: return 10;
-        case DdtFormat::AOM_8BPP: return 16;
+        case DdtFormat::AOM_5BPP: return 10;  // AoM 5bpp: 10-byte blocks (RGB555 c0/c1 + 16-bit alpha mask + 4 index bytes)
+        case DdtFormat::AOM_8BPP: return 16;  // 2B color0 + 2B color1 + 4*(2B alpha + 1B indices)
         default:                  return 0;
     }
 }
@@ -183,6 +306,11 @@ std::unique_ptr<DdtTexture> DdtLoader::load(const uint8_t* data, size_t size) {
         if (pal_offset == 0) {
             pal_offset = 48;
         }
+        tex->num_colors = num_colors;
+        tex->palette_offset_0 = pal_offset;
+        tex->palette_offset_1 = read_u32(data + 28);
+        tex->palette_offset_alpha1 = read_u32(data + 32);
+        tex->palette_offset_alpha4 = read_u32(data + 36);
         if (pal_offset + num_colors * 2 <= size) {
             tex->palette.assign(data + pal_offset, data + pal_offset + num_colors * 2);
         }
@@ -267,17 +395,66 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
         }
 
         case DdtFormat::PALETTE: {
-            if (palette.size() < 2 || mip.data.size() < pixel_count) {
-                return {};
-            }
-            const size_t num_colors = palette.size() / 2;
+            // 1. Expansão de cor BGR555 (Azul nos bits altos, Vermelho nos baixos)
+            auto expand_bgr555 = [](uint16_t v, uint8_t& r, uint8_t& g, uint8_t& b) {
+                b = ((v >> 10) & 0x1F); b = (b << 3) | (b >> 2);
+                g = ((v >>  5) & 0x1F); g = (g << 3) | (g >> 2);
+                r = ((v      ) & 0x1F); r = (r << 3) | (r >> 2);
+            };
+
+            // 2. Detectar se é 4BPP (2 pixels por byte) ou 8BPP (1 pixel por byte)
+            // O AoM salva 4BPP como (width * height) / 2 bytes.
+            bool is_4bpp = (mip.data.size() < pixel_count);
+
             for (size_t i = 0; i < pixel_count; ++i) {
-                size_t idx = mip.data[i];
+                uint8_t idx = 0;
+
+                if (is_4bpp) {
+                    // Lê 2 pixels por byte (Nibble alto = pixel par, Nibble baixo = pixel ímpar)
+                    uint8_t packed = mip.data[i >> 1];
+                    idx = (i & 1) ? (packed & 0x0F) : ((packed >> 4) & 0x0F);
+                } else {
+                    // Lê 1 pixel por byte
+                    idx = mip.data[i];
+                }
+
+                // Proteção contra índice fora da paleta
+                size_t num_colors = palette.size() / 2;
                 if (idx >= num_colors) idx = 0;
+
                 const uint16_t val = read_u16(palette.data() + idx * 2);
                 uint8_t* dst = output.data() + i * 4;
-                expand_555(val, dst[0], dst[1], dst[2]);
-                dst[3] = (alpha_bits > 0 && idx == 0 && val == 0) ? 0 : 255;
+
+                // 3. Aplica a cor (BGR555)
+                expand_bgr555(val, dst[0], dst[1], dst[2]);
+
+                // 4. Alpha
+                dst[3] = 255; // Fallback opaco
+                if (alpha_bits == 4 && palette_offset_alpha4 > 0) {
+                    // Lê da tabela de alpha 4-bit separada
+                    const uint8_t* a4 = mip.data.data() + palette_offset_alpha4;
+                    if ((i >> 1) < mip.data.size()) {
+                        uint8_t packed_a = a4[i >> 1];
+                        uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
+                        dst[3] = nib * 17; // Expande 0-15 para 0-255
+                    }
+                } else if (alpha_bits == 1) {
+                    // Alpha binário
+                    dst[3] = (idx == 0) ? 0 : 255;
+                }
+            }
+            return output;
+        }
+
+        case DdtFormat::RGB888: {
+            if (mip.data.size() < pixel_count * 3) return {};
+            for (size_t i = 0; i < pixel_count; ++i) {
+                const uint8_t* src = mip.data.data() + i * 3;
+                uint8_t* dst = output.data() + i * 4;
+                dst[0] = src[2];
+                dst[1] = src[1];
+                dst[2] = src[0];
+                dst[3] = 255;
             }
             return output;
         }
@@ -290,18 +467,48 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             const uint32_t blocks_y = (mip.height + 3) / 4;
             const uint8_t* in = mip.data.data();
 
+            // Formato 5: o layout interno do bloco de 10 bytes é escolhido automaticamente
+            // (ordem dos campos, bits dos índices, RGB555/565) pela imagem mais coerente.
+            ddt5::Layout l5{};
+            if (format == DdtFormat::AOM_5BPP) {
+                static thread_local ddt5::Layout s_prefer{0, 6, 4, false, false, false};
+                double sc = 0.0;
+                l5 = ddt5::choose_layout(mip.data.data(), mip.data.size(),
+                                         mip.width, mip.height, s_prefer, &sc);
+#ifdef __ANDROID__
+                if (l5.pc != s_prefer.pc || l5.pi != s_prefer.pi || l5.pa != s_prefer.pa ||
+                    l5.idx_msb != s_prefer.idx_msb || l5.alpha_msb != s_prefer.alpha_msb ||
+                    l5.c565 != s_prefer.c565) {
+                    __android_log_print(ANDROID_LOG_INFO, "AoM-DDT5",
+                        "layout escolhido: cores@%d indices@%d alpha@%d idxMSB=%d alphaMSB=%d rgb565=%d score=%.1f (%ux%u)",
+                        l5.pc, l5.pi, l5.pa, l5.idx_msb, l5.alpha_msb, l5.c565, sc, mip.width, mip.height);
+                }
+#endif
+                if (mip.width >= 32 && mip.height >= 32) s_prefer = l5;  // mips minúsculas não decidem
+            }
+
             for (uint32_t by = 0; by < blocks_y; ++by) {
                 for (uint32_t bx = 0; bx < blocks_x; ++bx) {
                     switch (format) {
                         case DdtFormat::DXT1:
                             decode_dxt1_block(in, output, mip.width, mip.height, bx, by);
                             break;
-                        case DdtFormat::AOM_5BPP:
-                            decode_aom_5bpp_block(in, output, mip.width, mip.height, bx, by);
+                        case DdtFormat::AOM_5BPP: {
+                            ddt5::Px px[16];
+                            ddt5::decode_block(in, l5, px);
+                            for (uint32_t y = 0; y < 4; ++y)
+                                for (uint32_t x = 0; x < 4; ++x) {
+                                    const ddt5::Px& p = px[4 * y + x];
+                                    store_pixel(output, mip.width, mip.height,
+                                                bx * 4 + x, by * 4 + y,
+                                                Rgba{p.r, p.g, p.b, p.a});
+                                }
                             break;
-                        case DdtFormat::AOM_8BPP:
+                        }
+                        case DdtFormat::AOM_8BPP: {
                             decode_aom_8bpp_block(in, output, mip.width, mip.height, bx, by);
                             break;
+                        }
                         default:
                             break;
                     }

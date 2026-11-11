@@ -171,6 +171,14 @@ const BarEntry* BarArchive::find(const std::string& filename) const {
     if (it != name_index_.end()) {
         return &entries_[it->second];
     }
+    // Fallback: busca tolerante caso o índice não encontre (ex.: variações
+    // de caso, separadores, ou nomes ligeiramente diferentes no BAR).
+    const std::string target = normalize(filename);
+    for (const BarEntry& e : entries_) {
+        if (normalize(e.filename) == target) return &e;
+        // também aceita correspondência parcial: o alvo está contido no nome da entrada
+        if (normalize(e.filename).find(target) != std::string::npos) return &e;
+    }
     return nullptr;
 }
 
@@ -266,8 +274,13 @@ size_t BarArchive::extract_all(const std::string& output_dir) const {
 }
 
 std::string BarArchive::normalize(const std::string& filename) {
-    std::string out = to_lower(filename);
-    std::replace(out.begin(), out.end(), '\\', '/');
+    std::string out;
+    out.reserve(filename.size());
+    for (char c : filename) {
+        if (c == '\\' || c == '/') out.push_back('\\');   // sempre \\ no índice
+        else out.push_back(static_cast<char>(std::tolower(
+            static_cast<unsigned char>(c))));
+    }
     return out;
 }
 
