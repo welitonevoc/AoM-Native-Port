@@ -217,6 +217,27 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 - 79ec021 feat: update PROGRESSO.md with items 13-50
 - 4a0dec6 feat: implement all remaining features (multiplayer, android options, lockstep foundation) - Multiplayer: 7 features (network infra + 3 replication functions + engine integration) - Android Options: 9 new config settings - Lockstep foundation: basic game state structure - Menu Multiplayer: skeleton with host/join/leave functions
 
+### Fase P2 — Cena RTS e Recursos (MVP) ✅ CONCLUÍDA
+
+**Objetivo:** Implementar o terreno real (heightmap), HUD completo com Pop/Cap, Town Center funcional, seleção de grupo, save/load básico e condição de vitória para o MVP jogável.
+
+| Gap | Detalhe | Status | Implementação |
+|-----|---------|--------|---------------|
+| G1 | Terreno real: loader de height-map de cenários originais (.scn) | ✅ | `load_scenario_heightmap()` + `generate_terrain_from_heightmap()` em `src/engine/engine.cpp`, integrado no `start_game()` e `start_campaign_mission()` |
+| G2 | Save/Load completo: restaurar todos os recursos e estados | ✅ | `save_load.h`/`save_load.cpp` (formato v2 com binário empacotado), `save_game()`/`load_game()` integrados no menu |
+| G3 | Condição de vitória: Conquest (eliminar todos inimigos) ou Sudden Death (destruir citadel) | ✅ | `include/game/victory.h` + `src/game/victory.cpp` (`check_victory()`), integrado no update loop com tela de vitória/derrota |
+| G4 | Skybox / Cube map (.cub) | ✅ | `include/assets/cube_map.h` + `src/assets/cube_map.cpp` (parser .cub), `load_skybox_faces()`/`load_skybox_cube()` no engine, renderizado via `draw_skybox()`/`draw_skybox_cubemap()` |
+| G5 | Animação GRN playback | ⏳ | Adiado para P3 (conforme PLANO_P2_CENA_RTS.md) |
+
+**Critério de Aceitação P2→P3 (todos confirmados no código):**
+- [x] Terreno carregado de arquivo de height-map (não apenas procedural)
+- [x] Save grava e restaura estado completo (unidades, edifícios, recursos, training queues)
+- [x] Vitória por Conquest e Sudden Death implementada com tela de fim de jogo
+- [x] HUD completo com Pop/Cap funcionando
+- [x] Seleção de grupo (box select) funcionando
+- [ ] 60 FPS estáveis no dispositivo alvo (pendente validação em dispositivo Android)
+- [ ] Sem OOM em 30 min de jogo (pendente validação em dispositivo Android)
+
 ## Observações Finais
 - O repositório está sincronizado com o GitHub (main branch)
 - Working tree limpo após commits
