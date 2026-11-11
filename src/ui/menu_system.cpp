@@ -2,6 +2,13 @@
 #include "ui/menu_system.h"
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstring>
+
+extern "C" {
+#include "stb_image.h"
+}
 
 namespace aom {
 
@@ -42,20 +49,20 @@ void MenuSystem::handle_input(const TouchEvent& touch) {
         
         if (!button.interactive) continue;
         
-        bool is_touching = touch.x >= button.pos.x &&
-                          touch.x <= button.pos.x + button.size.x &&
-                          touch.y >= button.pos.y &&
-                          touch.y <= button.pos.y + button.size.y;
+        bool is_touching = touch.x >= button.position.x &&
+                          touch.x <= button.position.x + button.size.x &&
+                          touch.y >= button.position.y &&
+                          touch.y <= button.position.y + button.size.y;
         
         if (is_touching && touch.state == TouchEvent::State::DOWN) {
             button.current_color = button.pressed_color;
-            button.is_selected = true;
+            button.selected = true;
             selected_button_index_ = static_cast<int>(i);
         } else if (is_touching && touch.state == TouchEvent::State::UP) {
-            if (button.is_selected) {
+            if (button.selected) {
                 button.action();
             }
-            button.is_selected = false;
+            button.selected = false;
         }
     }
 }
@@ -66,17 +73,17 @@ void MenuSystem::handle_input(const MenuAction& action) {
     switch (action) {
         case MenuAction::UP:
             if (selected_button_index_ > 0) {
-                buttons_[selected_button_index_].is_selected = false;
+                buttons_[selected_button_index_].selected = false;
                 selected_button_index_--;
-                buttons_[selected_button_index_].is_selected = true;
+                buttons_[selected_button_index_].selected = true;
             }
             break;
             
         case MenuAction::DOWN:
             if (selected_button_index_ < (int)buttons_.size() - 1) {
-                buttons_[selected_button_index_].is_selected = false;
+                buttons_[selected_button_index_].selected = false;
                 selected_button_index_++;
-                buttons_[selected_button_index_].is_selected = true;
+                buttons_[selected_button_index_].selected = true;
             }
             break;
             
@@ -104,7 +111,7 @@ void MenuSystem::set_state(MenuState state) {
     animation_time_ = 0.0f;
     
     for (auto& button : buttons_) {
-        button.is_selected = false;
+        button.selected = false;
         button.is_highlights = false;
     }
 }
@@ -114,14 +121,15 @@ void MenuSystem::add_button(const std::string& id, const std::string& label,
                            const glm::vec2& position, const glm::vec2& size,
                            TextureHandle normal_tex, TextureHandle pressed_tex) {
     MenuButton button;
+    button.id = id;
     button.menu_id = id;
     button.label = label;
     button.action = action;
-    button.pos = position;
+    button.position = position;
     button.size = size;
     button.normal_tex = normal_tex;
     button.pressed_tex = pressed_tex;
-    button.is_selected = false;
+    button.selected = false;
     button.is_highlights = false;
     
     if (normal_tex == INVALID_TEXTURE) {
@@ -143,13 +151,22 @@ void MenuSystem::clear_buttons() {
     selected_button_index_ = 0;
 }
 
+// Helper: load a PNG asset and create a texture
+static TextureHandle load_png_texture(IRenderer* renderer, const std::string& asset_name) {
+    if (!renderer) return INVALID_TEXTURE;
+    
+    // Read asset bytes - this needs access to asset manager
+    // For now, return INVALID_TEXTURE; the engine loads textures separately
+    // and passes them via add_button() parameters
+    (void)asset_name;
+    return INVALID_TEXTURE;
+}
+
 void MenuSystem::load_menu_assets() {
     if (!renderer_) return;
     
-    main_menu_bg_tex_ = renderer_->load_texture("assets/main_menu.png");
-    button_tex_ = renderer_->load_texture("assets/button_main.png");
-    button_pressed_tex_ = renderer_->load_texture("assets/button_clicked.png");
-    
+    // Textures are loaded by the engine and passed via add_button() parameters
+    // MenuSystem does not directly load assets from files
     assets_loaded_ = true;
 }
 
@@ -157,11 +174,11 @@ void MenuSystem::update_button_states(float dt) {
     animation_time_ += dt;
     
     for (auto& button : buttons_) {
-        if (button.is_selected) {
+        if (button.selected) {
             float pulse = 1.0f + 0.1f * std::sin(animation_time_ * 2.0f);
             button.size = glm::vec2(280 * pulse, 44 * pulse);
-            button.pos = glm::vec2(340 - button.size.x / 2, 
-                                   300 - button.size.y / 2);
+            button.position = glm::vec2(340.0f - button.size.x / 2.0f, 
+                                       300.0f - button.size.y / 2.0f);
         }
     }
 }
@@ -175,10 +192,10 @@ void MenuSystem::render_current_menu() {
 }
 
 void MenuSystem::render_menu_background() {
-    if (main_menu_bg_tex_) {
-        renderer_->draw_texture(main_menu_bg_tex_, {0, 0});
+    if (main_menu_bg_tex_ != INVALID_TEXTURE) {
+        renderer_->draw_ui_quad({0.0f, 0.0f}, {800.0f, 600.0f}, main_menu_bg_tex_, 0xFFFFFFFF);
     } else {
-        renderer_->draw_rect({0, 0, 800, 600}, 0xFF000000FF);
+        renderer_->draw_ui_quad({0.0f, 0.0f}, {800.0f, 600.0f}, INVALID_TEXTURE, 0xFF000000FF);
     }
 }
 
@@ -186,25 +203,20 @@ void MenuSystem::render_menu_buttons() {
     for (size_t i = 0; i < buttons_.size(); ++i) {
         MenuButton& button = buttons_[i];
         
-        TextureHandle current_tex = button.is_selected ? 
+        TextureHandle current_tex = button.selected ? 
                                    (button.pressed_tex != INVALID_TEXTURE ? 
                                     button.pressed_tex : button.normal_tex) : 
                                    button.normal_tex;
         
         if (current_tex != INVALID_TEXTURE) {
-            renderer_->draw_texture(current_tex, button.pos, button.size);
+            renderer_->draw_ui_quad(button.position, button.size, current_tex, button.current_color);
         } else {
-            renderer_->draw_rect({
-                button.pos.x, button.pos.y, 
-                button.size.x, button.size.y
-            }, button.current_color);
+            renderer_->draw_ui_quad(button.position, button.size, INVALID_TEXTURE, button.current_color);
         }
         
         if (!button.label.empty() && button.is_big_button) {
-            glm::vec2 text_pos = button.pos + glm::vec2(10, 10);
-            renderer_->draw_text("fonts/defcon.ttf", button.label, 
-                               text_pos, button.text_color, 
-                               button.text_size);
+            glm::vec2 text_pos = button.position + glm::vec2(10.0f, 10.0f);
+            renderer_->draw_ui_text(button.label, text_pos, button.text_size, button.text_color);
         }
     }
 }
@@ -215,10 +227,8 @@ void MenuSystem::render_selection_indicator() {
         
         MenuButton& button = buttons_[selected_button_index_];
         
-        glm::vec2 cursor_pos = button.pos - glm::vec2(20, 0);
-        renderer_->draw_rect({
-            cursor_pos.x, cursor_pos.y, 10, button.size.y
-        }, 0xFFFFFF00);
+        glm::vec2 cursor_pos = button.position - glm::vec2(20.0f, 0.0f);
+        renderer_->draw_ui_quad(cursor_pos, {10.0f, button.size.y}, INVALID_TEXTURE, 0xFFFFFF00);
     }
 }
 

@@ -6674,9 +6674,7 @@ void Engine::create_in_game_hud() {
     hud_subtitle_speaker_ = ui_->add_label("", {vw * 0.5f - 260.0f, vh - 138.0f}, 16.0f, 0xFFFFD700);
     hud_subtitle_text_    = ui_->add_label("", {vw * 0.5f - 260.0f, vh - 114.0f}, 14.0f, 0xFFFFFFFF);
     // Botão skip cinemático inicialmente oculto, será configurado via callback
-    hud_skip_btn_         = ui_->add_button({vw * 0.5f - 90.0f, vh - 5.0f}, {180.0f, 36.0f}, "PULAR CINEMÁTICA", nullptr, 0x00000000, 0x00000000);
-    // Oculta o botão inicialmente (visível apenas durante cinemáticas)
-    hud_skip_btn_->hidden = true;
+    hud_skip_btn_         = ui_->add_button({vw * 0.5f - 90.0f, vh - 5.0f}, {180.0f, 36.0f}, "", nullptr, 0x00000000, 0x00000000);
 
     last_selected_entity_ = INVALID_ENTITY;
 }

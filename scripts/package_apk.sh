@@ -77,8 +77,8 @@ rm -rf "$APK_BUILD_DIR"
 mkdir -p "$APK_BUILD_DIR"/lib/arm64-v8a
 cd "$APK_BUILD_DIR"
 
-VERSION_CODE="$(date +%s)"
-VERSION_NAME="1.0.$(date +%m%d%H%M)"
+VERSION_CODE="${VERSION_CODE:-$(date +%s)}"
+VERSION_NAME="${VERSION_NAME:-1.0.$(date +%m%d%H%M)}"
 echo "Building APK with versionCode: $VERSION_CODE, versionName: $VERSION_NAME"
 
 # 1. AndroidManifest with app icon and storage permissions
