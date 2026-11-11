@@ -3,6 +3,8 @@
 #include "ecs/ecs.h"
 #include "assets/xmb_parser.h"
 #include "anim/animation_system.h"
+#include "anim/grn_animation.h"
+#include "data/unit_transform.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -39,8 +41,28 @@ struct AnimationComponent : Component {
     std::vector<glm::vec3> morph_positions;
     std::vector<glm::vec3> morph_normals;
 
+    // GPU Morphing support (for future GPU-side morphing)
+    MeshHandle morph_positions_buffer = INVALID_MESH;  // VBO with all frame positions
+    MeshHandle morph_normals_buffer = INVALID_MESH;    // VBO with all frame normals
+    uint32_t morph_frame_count = 0;                    // Number of frames in the clip
+    uint32_t morph_vertex_count = 0;                   // Vertices per frame
+
     bool is_ready() const {
         return clip != nullptr && clip->is_valid() && dynamic_mesh != INVALID_MESH;
+    }
+};
+
+/// GrnAnimationComponent — for skeletal (GRN) animations.
+/// Uses GrnPlayer to evaluate bone matrices on CPU, uploads to GPU as uniform buffer.
+struct GrnAnimationComponent : Component {
+    std::unique_ptr<aom::anim::GrnPlayer> player;
+    const aom::anim::GrnAnimation* animation = nullptr;
+    MeshHandle static_mesh = INVALID_MESH;      // Base mesh (single frame, rigged)
+    TextureHandle texture = INVALID_TEXTURE;
+    std::vector<glm::mat4> bone_matrices;       // Uploaded as uniform buffer
+
+    bool is_ready() const {
+        return animation != nullptr && player && player->animation() != nullptr && static_mesh != INVALID_MESH;
     }
 };
 
@@ -67,16 +89,21 @@ inline UnitStats extract_unit_stats_from_xmb(const XmbElement* proto_root, const
     // Archetype classification must also work without proto data (tests or a
     // missing/corrupt proto.xmb), otherwise trained villagers never become
     // workers and cannot gather or build.
-    const auto apply_unit_class = [&unit_name, &stats]() {
+    //
+    // O custo populacional real vem do <populationcount> do proto.xmb. A
+    // heuristica por nome e apenas um FALLBACK: sobrescrever o dado real
+    // faria um Colosso/Hidra custar 1 pop em vez de 5.
+    bool pop_cost_from_data = false;
+    const auto apply_unit_class = [&unit_name, &stats, &pop_cost_from_data]() {
         if (unit_name.find("Villager") != std::string::npos || unit_name.find("worker") != std::string::npos) {
             stats.worker = true;
-            stats.pop_cost = 1;
+            if (!pop_cost_from_data) stats.pop_cost = 1;
         } else if (unit_name.find("Hoplite") != std::string::npos || unit_name.find("Toxotes") != std::string::npos) {
-            stats.pop_cost = 2;
+            if (!pop_cost_from_data) stats.pop_cost = 2;
         } else if (unit_name.find("Minotaur") != std::string::npos) {
-            stats.pop_cost = 4;
+            if (!pop_cost_from_data) stats.pop_cost = 4;
         } else {
-            stats.pop_cost = 1;
+            if (!pop_cost_from_data) stats.pop_cost = 1;
         }
     };
 
@@ -97,7 +124,8 @@ inline UnitStats extract_unit_stats_from_xmb(const XmbElement* proto_root, const
                 } else if (child->name == "los") {
                     stats.los = child->text_as_float(stats.los);
                 } else if (child->name == "populationcount") {
-                    stats.pop_cost = child->text_as_int(1);
+                    stats.pop_cost = child->text_as_int(stats.pop_cost);
+                    pop_cost_from_data = true;
                 } else if (child->name == "cost") {
                     const std::string res = child->get_attribute("resourcetype");
                     const int amt = child->text_as_int(0);
@@ -617,6 +645,12 @@ public:
     std::function<void(const glm::vec3& pos)> on_building_sparks;
     std::function<void(Entity building, const glm::vec3& pos)> on_building_completed;
 
+    // Flag para desabilitar renderização de barras de HP (útil no MAIN_MENU)
+    bool render_hp_bars_ = true;
+
+    void set_render_hp_bars(bool enable) { render_hp_bars_ = enable; }
+    [[nodiscard]] bool render_hp_bars() const { return render_hp_bars_; }
+
     explicit GameplayWorld(const XmbElement* proto_root = nullptr)
         : proto_root_(proto_root),
           ecs_world_(),
@@ -635,6 +669,13 @@ public:
     void set_default_animation(const aom::anim::BrgAnimationClip* clip, TextureHandle texture) {
         default_clip_ = clip;
         default_clip_tex_ = texture;
+    }
+
+    /// Verifica se o cenário de fundo do menu (ui background xpack.scn) já foi carregado
+    [[nodiscard]] bool has_background_scenario() const {
+        // Verifica se há entidades além das básicas (Town Centers, unidades de fundo)
+        // O cenário de fundo do menu tem Town Centers, unidades costeiras, etc.
+        return !units_.empty() || !building_components_.empty();
     }
 
     Entity spawn_unit(Team team, const glm::vec3& position, const UnitStats& stats = {}) {
@@ -758,8 +799,8 @@ public:
         Entity new_id = spawn_unit(team, position, stats);
 
         // Aplica HP proporcional
-        auto new_h_it = ecs_world_.healths().find(new_id);
-        if (new_h_it != ecs_world_.healths().end()) {
+        auto new_h_it = ecs_world_.healths_mut().find(new_id);
+        if (new_h_it != ecs_world_.healths_mut().end()) {
             new_h_it->second.current_hp = static_cast<int>(new_h_it->second.max_hp * hp_ratio);
             if (new_h_it->second.current_hp <= 0) new_h_it->second.current_hp = 1;
         }
@@ -1213,6 +1254,47 @@ public:
         return true;
     }
 
+    /// Attach a GRN skeletal animation to an entity.
+    bool attach_grn_animation(Entity entity,
+                              const aom::anim::GrnAnimation* anim,
+                              const aom::anim::BrgAnimationClip* base_clip,
+                              TextureHandle texture,
+                              IRenderer* renderer) {
+        if (!anim || !anim->is_valid() || !renderer || !base_clip) return false;
+        if (grn_animations_.count(entity)) return true;
+
+        // Create static mesh from first frame of base BRG clip (for base geometry)
+        const aom::anim::BrgFrame& frame0 = base_clip->frames[0];
+        const uint32_t nv = static_cast<uint32_t>(frame0.positions.size());
+        if (nv == 0) return false;
+
+        std::vector<Vertex> verts(nv);
+        for (uint32_t i = 0; i < nv; ++i) {
+            verts[i].position = frame0.positions[i];
+            verts[i].normal   = frame0.normals.size() > i ? frame0.normals[i] : glm::vec3(0.f,1.f,0.f);
+            verts[i].texcoord = base_clip->uvs.size() > i ? base_clip->uvs[i] : glm::vec2(0.f);
+            verts[i].color    = glm::vec4(1.f);
+        }
+
+        MeshHandle static_mesh = renderer->create_dynamic_mesh(
+            verts.data(), nv,
+            base_clip->indices.data(), static_cast<uint32_t>(base_clip->indices.size()));
+        if (static_mesh == INVALID_MESH) return false;
+
+        // Create GrnPlayer and set animation
+        auto player = std::make_unique<aom::anim::GrnPlayer>();
+        if (!player->set_animation(*anim)) return false;
+
+        GrnAnimationComponent gac;
+        gac.player = std::move(player);
+        gac.animation = anim;
+        gac.static_mesh = static_mesh;
+        gac.texture = texture;
+        gac.bone_matrices.resize(anim->bones.size());
+        grn_animations_[entity] = std::move(gac);
+        return true;
+    }
+
     /// Drive state machine from unit orders, evaluate morph, upload to GPU.
     void update_animations(float dt) {
         if (!anim_renderer_) return;
@@ -1291,6 +1373,24 @@ public:
 
     void set_anim_renderer(IRenderer* r) { anim_renderer_ = r; }
 
+    const std::unordered_map<Entity, GrnAnimationComponent>& grn_animations() const { return grn_animations_; }
+    std::unordered_map<Entity, GrnAnimationComponent>& grn_animations() { return grn_animations_; }
+
+    /// Render all GRN skeletal animated entities.
+    void render_grn_animated(IRenderer* renderer) const {
+        if (!renderer) return;
+        for (const auto& [entity, gac] : grn_animations_) {
+            if (!gac.is_ready()) continue;
+            const auto t_it = ecs_world_.transforms().find(entity);
+            if (t_it == ecs_world_.transforms().end()) continue;
+            const TransformComponent& tr = t_it->second;
+            glm::mat4 model = glm::translate(glm::mat4(1.f), tr.position);
+            model = glm::rotate(model, glm::radians(tr.rotation.y), glm::vec3(0.f,1.f,0.f));
+            model = glm::scale(model, tr.scale);
+            renderer->draw_mesh_skinned(gac.static_mesh, model, gac.texture, gac.bone_matrices, BlendMode::OPAQUE);
+        }
+    }
+
     std::function<void(Entity, const std::string&)> on_anim_tag;
 
     Entity select_at(const glm::vec3& point) { return selection_.select_at(point, 2.25f); }
@@ -1315,12 +1415,71 @@ public:
         auto it = building_components_.find(id);
         return (it != building_components_.end()) ? &it->second : nullptr;
     }
+
+    /// Acesso mutável ao componente de saúde (usado pelos testes).
+    HealthComponent* health_component_mutable(Entity id) {
+        auto it = ecs_world_.healths_mut().find(id);
+        return (it != ecs_world_.healths_mut().end()) ? &it->second : nullptr;
+    }
+
     const FogOfWar& fog_of_war() const { return fog_of_war_; }
 
     /// Acesso publico ao pathfinder da NavigationGrid (usado pelo save/load
     /// para reconstruir waypoints de unidades ao carregar uma partida).
     std::vector<glm::vec3> navigation_find_path(const glm::vec3& from, const glm::vec3& to) const {
         return navigation_.find_path(from, to);
+    }
+
+    /// Reconstrói a NavigationGrid a partir de um height-map.
+    /// Marca como bloqueadas as células com inclinação excessiva (encostas íngremes)
+    /// e atualiza as dimensões/escala da grade para cobrir o terreno.
+    void rebuild_navigation_from_heightmap(const std::vector<float>& heightmap,
+                                           int hm_width, int hm_height, float cell_size,
+                                           float max_slope_radians = 0.7f) {
+        // A grade de navegação deve cobrir toda a área do terreno.
+        // Usamos o height-map como base: cada célula da grade corresponde a NxN
+        // amostras do height-map (ou 1:1 se o height-map for menor).
+        const int grid_w = std::max(32, hm_width);
+        const int grid_h = std::max(32, hm_height);
+        navigation_ = NavigationGrid(grid_w, grid_h, cell_size);
+
+        if (heightmap.empty() || hm_width <= 1 || hm_height <= 1) {
+            return; // Grade padrão (tudo transponível)
+        }
+
+        // Calcular inclinação (slope) via diferenças finitas no height-map
+        // e bloquear células onde a inclinação excede o limite.
+        auto get_h = [&](int x, int z) -> float {
+            if (x < 0 || x >= hm_width || z < 0 || z >= hm_height) return 0.0f;
+            return heightmap[static_cast<size_t>(z) * hm_width + x];
+        };
+
+        for (int gz = 0; gz < grid_h; ++gz) {
+            for (int gx = 0; gx < grid_w; ++gx) {
+                // Mapear coordenada da grade para coordenada do height-map
+                const float fx = static_cast<float>(gx) / grid_w * hm_width;
+                const float fz = static_cast<float>(gz) / grid_h * hm_height;
+                const int x0 = static_cast<int>(fx);
+                const int z0 = static_cast<int>(fz);
+                const int x1 = std::min(x0 + 1, hm_width - 1);
+                const int z1 = std::min(z0 + 1, hm_height - 1);
+
+                // Bilinear sampling para altura no centro da célula
+                const float h00 = get_h(x0, z0);
+                const float h10 = get_h(x1, z0);
+                const float h01 = get_h(x0, z1);
+                const float h11 = get_h(x1, z1);
+
+                // Diferenças finitas para estimar a normal/slope
+                const float dx = (h10 - h00 + h11 - h01) * 0.5f;
+                const float dz = (h01 - h00 + h11 - h10) * 0.5f;
+                const float slope = std::atan(std::sqrt(dx * dx + dz * dz) / cell_size);
+
+                if (slope > max_slope_radians) {
+                    navigation_.set_blocked(gx, gz, true);
+                }
+            }
+        }
     }
 
     std::vector<Entity> select_box(const glm::vec3& min_point, const glm::vec3& max_point) {
@@ -1526,7 +1685,7 @@ public:
             }
             if (unit != units_.end()) {
                 const auto hp = ecs_world_.healths().find(entity);
-                if (hp != ecs_world_.healths().end()) {
+                if (hp != ecs_world_.healths().end() && render_hp_bars_) {
                     const float ratio = std::clamp(static_cast<float>(hp->second.current_hp) /
                                                    std::max(1, hp->second.max_hp), 0.0f, 1.0f);
                     renderer->draw_debug_line(p + glm::vec3(-0.7f, 1.5f, 0.0f),
@@ -1657,6 +1816,7 @@ private:
     BuildingSystem buildings_{ecs_world_.transforms_mut(), building_components_, units_};
     FogOfWar fog_of_war_;
     std::unordered_map<Entity, AnimationComponent> animations_;
+    std::unordered_map<Entity, GrnAnimationComponent> grn_animations_;
     IRenderer* anim_renderer_ = nullptr;
     const aom::anim::BrgAnimationClip* default_clip_ = nullptr;
     TextureHandle default_clip_tex_ = INVALID_TEXTURE;
