@@ -128,6 +128,10 @@ if [ ! -f "$ASSETS_DIR/main_menu.png" ] || [ ! -f "$ASSETS_DIR/button_main.png" 
     python3 "$PROJECT_DIR/scripts/extract_menu_assets.py" || true
 fi
 
+# 3.6 Generate app launcher icons for all Android densities from assets/icon.png
+echo "Generating launcher icons for all densities..."
+bash "$PROJECT_DIR/scripts/generate_app_icons.sh"
+
 # 4. Compile manifest, resources and full assets
 # -0 "" ensures font.ttf and textures are stored uncompressed for instant zero-copy loading
 aapt package -F app.unaligned.apk \
