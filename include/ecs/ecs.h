@@ -18,6 +18,8 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <string>
+#include <queue>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "renderer/renderer.h"
@@ -49,6 +51,8 @@ struct RenderableComponent : public Component {
     aom::MeshHandle mesh = aom::INVALID_MESH;
     aom::TextureHandle texture = aom::INVALID_TEXTURE;
 };
+
+
 
 /** Base class for systems */
 class System {
