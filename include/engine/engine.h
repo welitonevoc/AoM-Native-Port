@@ -732,6 +732,8 @@ private:
     UIButton* hud_action_btn2_ = nullptr;
     UIButton* hud_action_btn3_ = nullptr;
     UIButton* hud_action_btn4_ = nullptr;
+    // Tooltip dinamico exibido abaixo dos botoes de comando (custo/descricao).
+    UILabel* hud_tooltip_ = nullptr;
     glm::vec2 touch_down_pos_{0.0f, 0.0f};
     Entity last_selected_entity_ = 0;
 

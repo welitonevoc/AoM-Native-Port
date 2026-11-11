@@ -3274,6 +3274,30 @@ void Engine::render() {
             }
         }
 
+        // 6b. Barra de progresso de producao (fila de treinamento) no painel inferior.
+        if (gameplay_world_) {
+            Entity sel = gameplay_world_->selected_entity();
+            const auto* bld = gameplay_world_->get_building(sel);
+            if (bld && bld->team == Team::FRIENDLY && bld->complete &&
+                gameplay_world_->get_training_queue_count(sel) > 0) {
+                float prog = gameplay_world_->get_training_progress(sel);
+                const float bar_x = 160.0f;
+                const float bar_y = panel_y + 68.0f;
+                const float bar_w = 300.0f;
+                const float bar_h = 5.0f;
+                // Fundo escuro
+                renderer_->draw_ui_quad({bar_x, bar_y}, {bar_w, bar_h}, INVALID_TEXTURE, 0x88221105);
+                // Preenchimento dourado proporcional ao progresso
+                float fill_w = bar_w * std::clamp(prog, 0.0f, 1.0f);
+                if (fill_w > 0.0f) {
+                    renderer_->draw_ui_quad({bar_x, bar_y}, {fill_w, bar_h}, INVALID_TEXTURE, 0xFFFFD000);
+                }
+                // Borda dourada fina
+                renderer_->draw_ui_quad({bar_x, bar_y}, {bar_w, 1.0f}, INVALID_TEXTURE, 0xFFFFFFFF);
+                renderer_->draw_ui_quad({bar_x, bar_y + bar_h - 1.0f}, {bar_w, 1.0f}, INVALID_TEXTURE, 0xFFFFFFFF);
+            }
+        }
+
         // 7. Box Selection Overlay (translucent rectangle during drag-select)
         if (box_selecting_) {
             float bx = std::min(box_start_.x, box_current_.x);
@@ -6358,6 +6382,9 @@ void Engine::create_in_game_hud() {
     hud_action_btn3_ = ui_->add_button({btn_start_x, panel_y + 8.0f + btn_h + 4.0f}, {btn_w, btn_h}, "", nullptr, 0x00000000, 0x00000000);
     hud_action_btn4_ = ui_->add_button({btn_start_x + btn_w + btn_gap, panel_y + 8.0f + btn_h + 4.0f}, {btn_w, btn_h}, "", nullptr, 0x00000000, 0x00000000);
 
+    // Tooltip dinâmico (custo/descricao do comando), exibido abaixo do painel de selecao.
+    hud_tooltip_ = ui_->add_label("", {160.0f, panel_y + 78.0f}, 13.0f, 0xFF88DDFF);
+
     // ── 3. Campaign & Mission HUD references ──────────────────────────
     hud_obj_title_        = ui_->add_label("", {vw * 0.5f - 240.0f, 38.0f}, 16.0f, 0xFFFFE066);
     hud_reinforce_label_  = ui_->add_label("", {vw - 230.0f, 38.0f}, 15.0f, 0xFF88DDFF);
@@ -6595,6 +6622,25 @@ void Engine::update_in_game_hud(float dt) {
         if (hud_sel_hp_) hud_sel_hp_->text = "";
         if (hud_sel_info_) hud_sel_info_->text = "";
         hide_action_buttons();
+    }
+
+    // ── Tooltip dinamico (custo/descricao do comando principal) ─────────
+    if (hud_tooltip_) {
+        std::string tip;
+        if (sel != INVALID_ENTITY) {
+            const auto* unit = gameplay_world_->get_unit(sel);
+            const auto* bld  = gameplay_world_->get_building(sel);
+            if (unit && unit->team == Team::FRIENDLY && unit->worker) {
+                tip = "Casa: 100 Madeira (+10 Pop)  |  Quartel: 100M 50O  |  Parar: cancela ordem";
+            } else if (bld && bld->team == Team::FRIENDLY && bld->complete) {
+                if (bld->type == BuildingType::TOWN_CENTER) {
+                    tip = "Aldeano: 50 Comida  (+1 Populacao)";
+                } else if (bld->type == BuildingType::BARRACKS) {
+                    tip = "Hoplite: 60C 35O  |  Toxotes: 55M 35O";
+                }
+            }
+        }
+        hud_tooltip_->text = tip;
     }
 
     // ── 3. Update Campaign Mission HUD (Objectives, Subtitles, Reinforcements, Skip button)

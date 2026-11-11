@@ -276,6 +276,33 @@ Cada subpasta de `tests/reference/` possui seu próprio `README.md` documentando
 - [x] Todos os testes continuam passando (exit 0)
 - [x] Build-m2 compila sem erros
 
+### Fase P5 — MVP Completo / Vertical Slice 🚧 EM ANDAMENTO
+
+**Objetivo:** Entregar uma partida local mínima que começa, permite jogar (economia, construção, combate) e termina corretamente com condição de vitória.
+
+| Story | Detalhe | Status | Implementação |
+|-------|---------|--------|---------------|
+| P5.1 | HUD Completo (população, minimapa, painel de comandos, fila de produção) | ✅ | População/recursos já existiam; minimapa com blips já existia; painel de comandos com 4 botoes de acao ja existia; barra visual de progresso de producao desenhada com quads no render(); tooltip dinâmico (hud_tooltip_) com custo/descricao do comando. |
+| P5.2 | Town Center e Selecao de Grupo | ⏳ | Pendente |
+| P5.3 | Save/Load Completo e Condicao de Vitoria | ⏳ | Pendente |
+| P5.4 | IA Economica e Militar Basica | ⏳ | Pendente |
+| P5.5 | Audio Ampliado (MP3, Sound Banks, 3D, Pool SFX) | ⏳ | Pendente |
+| P5.6 | UI de XMB (uimain/commandpanel) e Localizacao | ⏳ | Pendente |
+
+**Critério de Aceitação P5→Release:**
+- [ ] HUD completo: população, minimapa, painel de comandos, fila de produção
+- [ ] Town Center implementado e funcional
+- [ ] Seleção de grupo (box select) funcionando
+- [ ] Save/load restaura partida completa (recursos + estados)
+- [ ] Vitória Conquest e Sudden Death implementadas
+- [ ] IA inimiga joga sozinha (economia + militares)
+- [ ] Áudio MP3 + sound banks + 3D + pool de SFX funcionando
+- [ ] UI de XMB com fallback
+- [ ] Todos os testes continuam passando (exit 0)
+- [ ] Build-m2 compila sem erros
+- [ ] Partida completa (spawn → economia → combate → vitória) em < 10 min
+- [ ] 60 FPS estáveis e sem OOM em 30 min (revalidar com novo conteúdo)
+
 ## Observações Finais
 - O repositório está sincronizado com o GitHub (main branch)
 - Working tree limpo após commits
