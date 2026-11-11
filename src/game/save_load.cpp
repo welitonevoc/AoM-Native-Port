@@ -93,6 +93,10 @@ struct SaveHeader {
     int32_t  wood[2];
     int32_t  gold[2];
     int32_t  favor[2];
+    // —— Condicao e resultado de vitoria (v2) ——
+    uint32_t victory_condition;
+    uint32_t victory_result;
+    float    victory_timer;
     uint32_t unit_count;
     uint32_t building_count;
 };
@@ -221,6 +225,10 @@ bool save_game_state(const std::string& path,
     hdr.wood[0]        = pool_f.wood;   hdr.wood[1]  = pool_e.wood;
     hdr.gold[0]        = pool_f.gold;   hdr.gold[1]  = pool_e.gold;
     hdr.favor[0]       = pool_f.favor;  hdr.favor[1] = pool_e.favor;
+    // Condicao/resultado de vitoria
+    hdr.victory_condition = static_cast<uint32_t>(world.victory_condition());
+    hdr.victory_result    = static_cast<uint32_t>(world.victory_result());
+    hdr.victory_timer     = world.victory_timer();
     hdr.unit_count     = static_cast<uint32_t>(save_units.size());
     hdr.building_count = static_cast<uint32_t>(save_bldgs.size());
 
@@ -273,6 +281,9 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
     out.version           = hdr.version;
     out.game_time_seconds = hdr.game_time;
     out.map_seed          = hdr.map_seed;
+    out.victory_condition = static_cast<uint8_t>(hdr.victory_condition);
+    out.victory_result    = static_cast<uint8_t>(hdr.victory_result);
+    out.victory_timer     = hdr.victory_timer;
     out.food[0]  = hdr.food[0];   out.food[1]  = hdr.food[1];
     out.wood[0]  = hdr.wood[0];   out.wood[1]  = hdr.wood[1];
     out.gold[0]  = hdr.gold[0];   out.gold[1]  = hdr.gold[1];

@@ -2467,6 +2467,13 @@ void Engine::start_game() {
     skirmish_victory_condition_ = VictoryCondition::CONQUEST;
     set_state(EngineState::IN_GAME);
 
+    // Sincronizar estado inicial de vitoria com o GameplayWorld (para save/load)
+    if (gameplay_world_) {
+        gameplay_world_->set_victory_condition(skirmish_victory_condition_);
+        gameplay_world_->set_victory_result(skirmish_victory_result_);
+        gameplay_world_->set_victory_timer(victory_display_timer_);
+    }
+
     // ── Aplicar seleção do uigodpicker (civilização / deus menor) ──
     if (god_picker_selection_made_) {
         LOGI("God picker aplicado: civilização=%s deus_menor=%s",
@@ -2492,6 +2499,10 @@ void Engine::start_game() {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
+
+    // --- Inicializar IA do inimigo (P5.4) ---
+    ai_system_ = std::make_unique<ai::AiSystem>();
+    ai_system_->initialize(Team::ENEMY, "standard");
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();
@@ -2996,6 +3007,11 @@ void Engine::update(float delta_time) {
         // Update gameplay world (movement, combat, fog, animation morph+upload)
         if (gameplay_world_) gameplay_world_->update(delta_time);
 
+        // P5.4: IA do inimigo (economia, construcao, treinamento militar, ataque)
+        if (ai_system_ && gameplay_world_) {
+            ai_system_->update(delta_time, gameplay_world_.get());
+        }
+
         // Update 3D interactive particles
         update_particles(delta_time);
 
@@ -3020,6 +3036,10 @@ void Engine::update(float delta_time) {
             skirmish_victory_result_ = check_victory(*gameplay_world_, skirmish_victory_condition_);
             if (skirmish_victory_result_ != VictoryResult::NONE) {
                 victory_display_timer_ = 0.0f;
+                // Sincronizar com o GameplayWorld (para save/load)
+                gameplay_world_->set_victory_condition(skirmish_victory_condition_);
+                gameplay_world_->set_victory_result(skirmish_victory_result_);
+                gameplay_world_->set_victory_timer(victory_display_timer_);
                 if (hud_sel_title_) {
                     if (skirmish_victory_result_ == VictoryResult::WIN) {
                         hud_sel_title_->text  = "VITORIA! O IMPERIO INIMIGO FOI DERROTADO!";
@@ -3035,6 +3055,7 @@ void Engine::update(float delta_time) {
         // Exibir botoes de fim de jogo apos 2.5s de vitoria/derrota
         if (skirmish_victory_result_ != VictoryResult::NONE && gameplay_world_) {
             victory_display_timer_ += delta_time;
+            gameplay_world_->set_victory_timer(victory_display_timer_);
             if (victory_display_timer_ >= 2.5f && victory_display_timer_ < 2.5f + delta_time) {
                 const float vw = static_cast<float>(config_.window_width);
                 const float vh = static_cast<float>(config_.window_height);
@@ -3044,12 +3065,20 @@ void Engine::update(float delta_time) {
                                [this]() {
                                    skirmish_victory_result_ = VictoryResult::NONE;
                                    victory_display_timer_   = 0.0f;
+                                   if (gameplay_world_) {
+                                       gameplay_world_->set_victory_result(VictoryResult::NONE);
+                                       gameplay_world_->set_victory_timer(0.0f);
+                                   }
                                    return_to_main_menu();
                                });
                 ui_->add_button({(vw - btn_w) * 0.5f + 120.0f, cy}, {btn_w, btn_h}, "JOGAR NOVAMENTE",
                                [this]() {
                                    skirmish_victory_result_ = VictoryResult::NONE;
                                    victory_display_timer_   = 0.0f;
+                                   if (gameplay_world_) {
+                                       gameplay_world_->set_victory_result(VictoryResult::NONE);
+                                       gameplay_world_->set_victory_timer(0.0f);
+                                   }
                                    start_game();
                                });
             }
@@ -4460,6 +4489,12 @@ void Engine::load_game(const std::string& path) {
         pool_e.favor = data.favor[1];
         accumulated_time_ = data.game_time_seconds;
         restore_saved_entities(data);
+        // Restaurar estado de vitoria (v2)
+        if (gameplay_world_) {
+            gameplay_world_->set_victory_condition(static_cast<VictoryCondition>(data.victory_condition));
+            gameplay_world_->set_victory_result(static_cast<VictoryResult>(data.victory_result));
+            gameplay_world_->set_victory_timer(data.victory_timer);
+        }
         LOGI("load_game: recursos e estado restaurados com sucesso de '%s'", p.c_str());
     }
 }
@@ -4898,6 +4933,10 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
+
+    // --- Inicializar IA do inimigo (P5.4) ---
+    ai_system_ = std::make_unique<ai::AiSystem>();
+    ai_system_->initialize(Team::ENEMY, "standard");
 
     // --- Load BRG animation clips from models.bar (carga limitada + cache) ---
     load_animation_clips();

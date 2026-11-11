@@ -18,6 +18,10 @@
 
 namespace aom {
 
+// Forward declarations (evita include circular com game/victory.h)
+enum class VictoryCondition : uint8_t;
+enum class VictoryResult : uint8_t;
+
 enum class Team : uint8_t { FRIENDLY, ENEMY };
 
 // ---------------------------------------------------------------------------
@@ -1657,6 +1661,13 @@ public:
     ResourcePool& resources_mutable() { return resources_; }
     const ResourcePool& resource_pool(Team team) const { return (team == Team::FRIENDLY) ? resources_ : enemy_resources_; }
     ResourcePool& resource_pool_mutable(Team team) { return (team == Team::FRIENDLY) ? resources_ : enemy_resources_; }
+    // —— Estado de vitoria (skirmish) —— (publicos para save_load.cpp e engine.cpp)
+    VictoryCondition victory_condition() const { return victory_condition_; }
+    VictoryResult    victory_result()    const { return victory_result_; }
+    float            victory_timer()     const { return victory_timer_; }
+    void set_victory_condition(VictoryCondition c) { victory_condition_ = c; }
+    void set_victory_result(VictoryResult r)       { victory_result_ = r; }
+    void set_victory_timer(float t)                { victory_timer_ = t; }
     const std::unordered_map<Entity, HealthComponent>& health_components() const { return ecs_world_.healths(); }
     void set_entity_hp(Entity entity, int current_hp) {
         auto it = ecs_world_.healths_mut().find(entity);
@@ -1877,6 +1888,12 @@ private:
     std::unordered_map<Entity, BuildingComponent> building_components_;
     ResourcePool resources_;
     ResourcePool enemy_resources_{500, 400, 300, 50};
+
+    // —— Estado de vitoria (skirmish) ——
+    VictoryCondition victory_condition_ = static_cast<VictoryCondition>(0);
+    VictoryResult    victory_result_    = static_cast<VictoryResult>(0);
+    float            victory_timer_     = 0.0f;
+
     NavigationGrid navigation_;
     glm::ivec2 navigation_cell(const glm::vec3& p) const {
         return {static_cast<int>(p.x + 16.0f), static_cast<int>(p.z + 16.0f)};

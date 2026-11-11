@@ -57,6 +57,11 @@ struct SaveGameData {
     float    game_time_seconds = 0.0f;
     int      map_seed          = 42;
 
+    // Condicao e resultado de vitoria (skirmish)
+    uint8_t  victory_condition = 0;   ///< VictoryCondition (0=CONQUEST,1=SUDDEN_DEATH)
+    uint8_t  victory_result    = 0;   ///< VictoryResult (0=NONE,1=WIN,2=LOSE)
+    float    victory_timer     = 0.0f;///< segundos desde o desfecho
+
     // Recursos por time (friendly=0, enemy=1)
     int food[2]  = {};
     int wood[2]  = {};
