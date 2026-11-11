@@ -22,6 +22,7 @@
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
 #include "audio/audio.h"
+#include "data/sound_def.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
 #include "aom/campaign_select_system.h"
@@ -279,6 +280,13 @@ public:
     [[nodiscard]] BarArchive* model_archive() { return models_bar_.get(); }
     [[nodiscard]] BarArchive* scenario_archive() { return scenarios_bar_.get(); }
     [[nodiscard]] BarArchive* sound_archive() { return sound_bar_.get(); }
+
+    /// P5.5: Toca um som de unidade usando o SoundDefManager (sound banks do sounds.bar).
+    /// Retorna true se um som foi disparado via sound bank.
+    bool play_sound_bank(const std::string& unit_type_name, const std::string& sound_type,
+                         const glm::vec3& world_pos, bool worker = false,
+                         const std::string& damage_type = "");
+
     [[nodiscard]] BarArchive* animation_archive() { return anim_bar_.get(); }
     [[nodiscard]] BarArchive* godpower_archive() { return godpowers_bar_.get(); }
     [[nodiscard]] CampaignManager* campaign_manager() { return campaign_mgr_.get(); }
@@ -533,6 +541,9 @@ private:
     std::unique_ptr<CampaignSelectSystem> campaign_select_system_;
     std::unique_ptr<CampaignMissionManager> mission_mgr_;
     GodPowerSystem god_powers_;
+
+    /// Gerenciador de sound banks (soundsets.xml + *_snds.xml de sounds.bar)
+    SoundDefManager sound_def_mgr_;
 
     std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<UIManager> ui_;

@@ -3508,7 +3508,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
                             const auto* t = gameplay_world_->get_transform(fsel);
                             glm::vec3 pos = t ? t->position : ground_hit;
                             std::string uname = u ? u->unit_type_name : "greek";
-                            audio_->play_unit_voice_3d("attack", pos, uname, u ? u->worker : false);
+                            if (!play_sound_bank(uname, "attack", pos, u ? u->worker : false)) {
+                                audio_->play_unit_voice_3d("attack", pos, uname, u ? u->worker : false);
+                            }
                         }
                     } else {
                         // Check if a worker is selected and tapped a resource or construction site
@@ -3521,7 +3523,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
                                     if (audio_) {
                                         const auto* t = gameplay_world_->get_transform(e);
                                         glm::vec3 pos = t ? t->position : ground_hit;
-                                        audio_->play_unit_voice_3d("move", pos, "greek", true);
+                                        if (!play_sound_bank("greek", "move", pos, true)) {
+                                            audio_->play_unit_voice_3d("move", pos, "greek", true);
+                                        }
                                     }
                                     worker_ordered = true;
                                     break;
@@ -3535,7 +3539,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
                                         if (audio_) {
                                             const auto* t = gameplay_world_->get_transform(e);
                                             glm::vec3 pos = t ? t->position : ground_hit;
-                                            audio_->play_unit_voice_3d("move", pos, "greek", true);
+                                            if (!play_sound_bank("greek", "move", pos, true)) {
+                                                audio_->play_unit_voice_3d("move", pos, "greek", true);
+                                            }
                                         }
                                         worker_ordered = true;
                                         break;
@@ -3554,7 +3560,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
                                     const auto* t = gameplay_world_->get_transform(tapped);
                                     glm::vec3 pos = t ? t->position : ground_hit;
                                     if (u && u->team == Team::FRIENDLY) {
-                                        audio_->play_unit_voice_3d("select", pos, u->unit_type_name, u->worker);
+                                        if (!play_sound_bank(u->unit_type_name, "select", pos, u->worker)) {
+                                            audio_->play_unit_voice_3d("select", pos, u->unit_type_name, u->worker);
+                                        }
                                     }
                                 }
                             } else if (gameplay_world_->selected_count() > 0) {
@@ -3567,7 +3575,9 @@ void Engine::handle_touch(const TouchEvent& touch) {
                                     const auto* t = gameplay_world_->get_transform(fsel);
                                     glm::vec3 pos = t ? t->position : ground_hit;
                                     std::string uname = u ? u->unit_type_name : "greek";
-                                    audio_->play_unit_voice_3d("move", pos, uname, u ? u->worker : false);
+                                    if (!play_sound_bank(uname, "move", pos, u ? u->worker : false)) {
+                                        audio_->play_unit_voice_3d("move", pos, uname, u ? u->worker : false);
+                                    }
                                 }
                             }
                         }
@@ -3713,6 +3723,39 @@ bool Engine::load_archives(const std::string& data_path) {
         audio_->set_sound_archive(sound_bar_.get());
     }
 
+    // ── P5.5: Carregar sound banks do sounds.bar (soundsets.xml + *_snds.xml) ──
+    if (sound_bar_->is_open()) {
+        const BarEntry* ss_entry = sound_bar_->find("soundsets.xml");
+        if (ss_entry) {
+            const std::vector<uint8_t> ss_raw = sound_bar_->extract(*ss_entry);
+            if (!ss_raw.empty()) {
+                if (auto ss_root = XmbParser::parse(ss_raw)) {
+                    if (sound_def_mgr_.load_soundsets_from_xmb(*ss_root)) {
+                        LOGI("SoundDefManager: %zu soundsets carregados de soundsets.xml",
+                             sound_def_mgr_.soundset_count());
+                    }
+                }
+            }
+        }
+        // Carrega definicoes de som por protounit (*_snds.xml)
+        const BarEntry* snd_entry = sound_bar_->find("protounit_snds.xml");
+        if (!snd_entry) {
+            // Tenta nomes alternativos da expansao
+            snd_entry = sound_bar_->find("protounit_snds2.xml");
+        }
+        if (snd_entry) {
+            const std::vector<uint8_t> snd_raw = sound_bar_->extract(*snd_entry);
+            if (!snd_raw.empty()) {
+                if (auto snd_root = XmbParser::parse(snd_raw)) {
+                    if (sound_def_mgr_.load_protounit_sounds_from_xmb(*snd_root)) {
+                        LOGI("SoundDefManager: %zu protounit sound defs carregados de *_snds.xml",
+                             sound_def_mgr_.protounit_sound_count());
+                    }
+                }
+            }
+        }
+    }
+
     // Poderes dos deuses: base e expansão são lidos separadamente para que
     // cada poder saiba se é exclusivo dos Titãs.
     {
@@ -3815,6 +3858,62 @@ bool Engine::load_game_config() {
             return true;
         }
     }
+    return false;
+}
+
+bool Engine::play_sound_bank(const std::string& unit_type_name, const std::string& sound_type,
+                             const glm::vec3& world_pos, bool worker,
+                             const std::string& damage_type) {
+    if (!audio_ || !audio_->is_sfx_enabled()) return false;
+
+    // 1. Tenta encontrar definicao de som da protounit
+    const ProtoUnitSoundDef* pud = sound_def_mgr_.find_protounit_sound(unit_type_name);
+    if (pud) {
+        for (const auto& st : pud->sound_types) {
+            if (st.type_name != sound_type) continue;
+
+            std::string set_name;
+            if (!damage_type.empty() && !st.damage_type_to_set.empty()) {
+                auto it = st.damage_type_to_set.find(damage_type);
+                if (it != st.damage_type_to_set.end()) set_name = it->second;
+            }
+            if (set_name.empty() && !st.target_to_set.empty()) {
+                set_name = st.target_to_set.count("default") ? st.target_to_set.at("default")
+                                                             : st.sound_sets.empty() ? std::string() : st.sound_sets[0];
+            }
+            if (set_name.empty() && !st.sound_sets.empty()) set_name = st.sound_sets[0];
+
+            if (!set_name.empty()) {
+                if (const SoundSetDef* ss = sound_def_mgr_.find_soundset(set_name)) {
+                    static uint32_t seed = 0;
+                    seed = (seed * 1103515245u + 12345u) % 0x7fffffffu;
+                    if (const std::string* fname = sound_def_mgr_.pick_sound(*ss, seed)) {
+                        // Toca via 3D para posicional, ou 2D se posicao invalida
+                        glm::vec3 pos = world_pos;
+                        if (pos == glm::vec3(0.0f)) pos = audio_->listener_position();
+                        audio_->play_sfx_3d(*fname, pos, 1.0f, 5.0f, 60.0f);
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Fallback: tenta soundset direto por nome (ex: "GatherChop", "MilitaryGreekSelect")
+    if (!unit_type_name.empty()) {
+        std::string set_name = unit_type_name + sound_type;
+        if (const SoundSetDef* ss = sound_def_mgr_.find_soundset(set_name)) {
+            static uint32_t seed = 0;
+            seed = (seed * 1103515245u + 12345u) % 0x7fffffffu;
+            if (const std::string* fname = sound_def_mgr_.pick_sound(*ss, seed)) {
+                glm::vec3 pos = world_pos;
+                if (pos == glm::vec3(0.0f)) pos = audio_->listener_position();
+                audio_->play_sfx_3d(*fname, pos, 1.0f, 5.0f, 60.0f);
+                return true;
+            }
+        }
+    }
+
     return false;
 }
 
