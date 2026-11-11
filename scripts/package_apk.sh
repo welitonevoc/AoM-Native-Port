@@ -247,3 +247,25 @@ echo "=== APK gerado com sucesso ==="
 echo "Arquivo: $OUTPUT_APK"
 echo "Tamanho: $APK_SIZE"
 echo "Versao:  versionCode=$VERSION_CODE, versionName=$VERSION_NAME"
+
+# 8. Copiar o APK para o sdcard (armazenamento compartilhado do Android)
+SDCARD_DIR=""
+for cand in "/sdcard" "/storage/emulated/0"; do
+    if [ -d "$cand" ] && [ -w "$cand" ]; then
+        SDCARD_DIR="$cand"
+        break
+    fi
+done
+
+if [ -n "$SDCARD_DIR" ]; then
+    APK_NAME="aom-native-v${VERSION_NAME}.apk"
+    cp "$OUTPUT_APK" "$SDCARD_DIR/$APK_NAME"
+    echo ""
+    echo "=== APK copiado para o sdcard ==="
+    echo "Arquivo: $SDCARD_DIR/$APK_NAME"
+    echo "Tamanho: $(ls -lh "$SDCARD_DIR/$APK_NAME" | awk '{print $5}')"
+else
+    echo ""
+    echo "AVISO: sdcard não encontrado ou não gravável. O APK permanece apenas em:"
+    echo "  $OUTPUT_APK"
+fi
