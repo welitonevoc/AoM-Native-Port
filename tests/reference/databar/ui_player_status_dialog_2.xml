@@ -3,11 +3,13 @@
   <player>
     <name>Jogador1</name>
     <level>10</level>
-    <rank>Expert</rank>
     <wins>15</wins>
     <losses>5</losses>
+    <rank>Platinum</rank>
   </player>
-  <buttons>
-    <button label="Ok" action="close"/>
-  </buttons>
+  <stats>
+    <games_played>20</games_played>
+    <win_rate>75%</win_rate>
+    <favorite_civilization>Greeks</favorite_civilization>
+  </stats>
 </player_status_dialog_2>

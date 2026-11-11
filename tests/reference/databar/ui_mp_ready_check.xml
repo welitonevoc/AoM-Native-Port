@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mp_ready_check>
-  <status>Waiting for players...</status>
+<ui_mp_ready_check>
+  <title>Waiting for Players</title>
   <players>
-    <player name="Player 1" ready="true"/>
+    <player name="Player 1" status="Ready"/>
     <player name="Jogador2" status="Waiting"/>
   </players>
   <buttons>
     <button label="Ready" action="set_ready"/>
     <button label="Not Ready" action="set_not_ready"/>
   </buttons>
-</mp_ready_check>
+</ui_mp_ready_check>

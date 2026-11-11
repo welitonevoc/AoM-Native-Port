@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mp_vote_dialog>
+<ui_mp_vote_dialog>
   <vote_type>Kick Player</vote_type>
   <target_player>Jogador 3</target_player>
   <votes>
@@ -11,4 +11,4 @@
     <button label="Não" action="vote_no"/>
     <button label="Fechar" action="close_vote_dialog"/>
   </buttons>
-</mp_vote_dialog>
+</ui_mp_vote_dialog>

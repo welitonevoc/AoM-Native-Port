@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mp_other_settings>
-  <setting name="fog_of_war" value="true"/>
-  <setting name="starting_age" value="Dark Age"/>
-  <setting name="victory_condition" value="Conquest"/>
+  <options>
+    <option name="Fog of War" value="true"/>
+    <option name="Starting Age" value="Dark Age"/>
+    <option name="Victory Condition" value="Conquest"/>
+    <option name="Population Cap" value="100"/>
+  </options>
   <buttons>
     <button label="Apply" action="apply_settings"/>
-    <button label="Cancel" action="return_to_menu"/>
+    <button label="Back" action="return_to_mp_menu"/>
   </buttons>
 </mp_other_settings>

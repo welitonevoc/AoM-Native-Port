@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui_fake_techtree>
-  <technology name="Hoplite" cost_food="100" cost_gold="50"/>
-  <technology name="Toxotes" cost_food="100" cost_gold="50"/>
-</ui_fake_techtree>
+<fake_techtree>
+  <technology name="Fake Tech 1" age="Archaic" cost_food="100" cost_gold="0"/>
+  <technology name="Fake Tech 2" age="Classical" cost_food="200" cost_gold="100"/>
+  <technology name="Fake Tech 3" age="Heroic" cost_food="500" cost_gold="200"/>
+</fake_techtree>

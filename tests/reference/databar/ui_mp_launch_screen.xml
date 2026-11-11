@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mp_launch_screen>
-  <title>Multiplayer Launch Screen</title>
+  <title>Multiplayer Launch</title>
   <options>
-    <option name="Join Game" action="join_game"/>
-    <option name="Create Game" action="create_game"/>
-    <button label="Back" action="return_to_menu"/>
-  </buttons>
+    <option name="New Game"/>
+    <option name="Join Game"/>
+    <option label="Main Menu" action="return_to_menu"/>
+  </options>
 </mp_launch_screen>

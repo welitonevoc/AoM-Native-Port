@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui_ingame_msg_2>
-  <message id="1">Ataque inimigo detectado</message>
-  <message id="2">Morte de unidade</message>
-  <message id="3">Recurso esgotado</message>
-</ui_ingame_msg_2>
+<ingame_message_2>
+  <message id="1">Unidade selecionada</message>
+  <message id="2">Recursos insuficientes</message>
+  <message id="3">Edifício construído</message>
+</ingame_message_1>
