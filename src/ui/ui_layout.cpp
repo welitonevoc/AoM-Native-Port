@@ -4,6 +4,7 @@
 #include <cctype>
 #include <cstdio>
 #include <sstream>
+#include <set>
 #include <android/log.h>
 
 #define LOG_TAG "AoM_UILayout"
@@ -26,6 +27,19 @@ std::string to_lower(std::string_view s) {
     return out;
 }
 
+/// Remove todos os blocos iniciais no formato $$<número>$$ do texto do XMB.
+/// Ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
+/// Colapsa espaços à esquerda (o XMB usa espaços para alinhar texto dentro dos $$ID$$).
+static std::string strip_string_ids(std::string s) {
+    while (s.size() >= 4 && s[0] == '$' && s[1] == '$') {
+        size_t end = s.find("$$", 2);
+        if (end == std::string::npos) break;
+        s.erase(0, end + 2);
+    }
+    size_t p = s.find_first_not_of(' ');
+    return (p == std::string::npos) ? s : s.substr(p);
+}
+
 /// Faz split de uma string por espaços, retornando floats
 std::vector<float> parse_floats(const std::string& str) {
     std::vector<float> out;
@@ -37,6 +51,19 @@ std::vector<float> parse_floats(const std::string& str) {
     return out;
 }
 
+/// Remove espaços em branco e quebras de linha do início e fim da string
+std::string trim(const std::string& s) {
+    size_t start = 0;
+    while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+        ++start;
+    }
+    size_t end = s.size();
+    while (end > start && std::isspace(static_cast<unsigned char>(s[end - 1]))) {
+        --end;
+    }
+    return s.substr(start, end - start);
+}
+
 } // anonymous namespace
 
 // ---------------------------------------------------------------------------
@@ -45,19 +72,23 @@ std::vector<float> parse_floats(const std::string& str) {
 
 glm::vec4 UILayoutManager::convert_size1024(const std::string& size1024,
                                               int screen_w, int screen_h) {
-    // size1024 = "x y w h" em coordenadas base 1024x768
+    // size1024 no AoM = "left top right bottom" (coordenadas absolutas em base 1024x768)
+    // NÃO é "x y w h" - precisamos calcular w = right - left, h = bottom - top
     auto vals = parse_floats(size1024);
-    float x = 0, y = 0, w = 0, h = 0;
-    if (vals.size() >= 1) x = vals[0];
-    if (vals.size() >= 2) y = vals[1];
-    if (vals.size() >= 3) w = vals[2];
-    if (vals.size() >= 4) h = vals[3];
+    float left = 0, top = 0, right = 0, bottom = 0;
+    if (vals.size() >= 1) left = vals[0];
+    if (vals.size() >= 2) top = vals[1];
+    if (vals.size() >= 3) right = vals[2];
+    if (vals.size() >= 4) bottom = vals[3];
+
+    float w_1024 = std::max(0.0f, right - left);
+    float h_1024 = std::max(0.0f, bottom - top);
 
     // Converte de base 1024x768 para a resolução atual
     float sx = static_cast<float>(screen_w) / kRefWidth;
     float sy = static_cast<float>(screen_h) / kRefHeight;
 
-    return glm::vec4(x * sx, y * sy, w * sx, h * sy);
+    return glm::vec4(left * sx, top * sy, w_1024 * sx, h_1024 * sy);
 }
 
 glm::vec3 UILayoutManager::parse_color(const std::string& color_str) {
@@ -73,10 +104,22 @@ uint32_t UILayoutManager::parse_color_rgba(const std::string& color_str, uint8_t
     uint8_t r = static_cast<uint8_t>(std::clamp(c.x, 0.0f, 255.0f));
     uint8_t g = static_cast<uint8_t>(std::clamp(c.y, 0.0f, 255.0f));
     uint8_t b = static_cast<uint8_t>(std::clamp(c.z, 0.0f, 255.0f));
-    return (static_cast<uint32_t>(r) << 24) |
-           (static_cast<uint32_t>(g) << 16) |
-           (static_cast<uint32_t>(b) << 8) |
-           static_cast<uint32_t>(alpha);
+    // Formato ARGB (igual ao restante do engine, ex: gles_renderer.cpp draw_ui_quad)
+    return (static_cast<uint32_t>(alpha) << 24) |
+           (static_cast<uint32_t>(r) << 16) |
+           (static_cast<uint32_t>(g) << 8) |
+           static_cast<uint32_t>(b);
+}
+
+uint32_t UILayoutManager::parse_color_rgba(const glm::vec3& color, uint8_t alpha) {
+    uint8_t r = static_cast<uint8_t>(std::clamp(color.x, 0.0f, 255.0f));
+    uint8_t g = static_cast<uint8_t>(std::clamp(color.y, 0.0f, 255.0f));
+    uint8_t b = static_cast<uint8_t>(std::clamp(color.z, 0.0f, 255.0f));
+    // Formato ARGB (igual ao restante do engine, ex: gles_renderer.cpp draw_ui_quad)
+    return (static_cast<uint32_t>(alpha) << 24) |
+           (static_cast<uint32_t>(r) << 16) |
+           (static_cast<uint32_t>(g) << 8) |
+           static_cast<uint32_t>(b);
 }
 
 UILayoutResult UILayoutManager::load_layout(BarArchive& bar, const std::string& xmb_name) {
@@ -149,9 +192,13 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     out.type = elem->get_attribute("type");
     if (out.type.empty()) out.type = "gadget";
 
-    // size1024 -> rect em pixels
+    LOGI("[parse] <%s type='%s'>", out.name.c_str(), out.type.c_str());
+
+    // size1024 -> rect em pixels (formato AoM: left top right bottom)
     if (elem->has_attribute("size1024")) {
-        auto rect = convert_size1024(elem->get_attribute("size1024"), screen_w, screen_h);
+        std::string sz = elem->get_attribute("size1024");
+        LOGI("[parse]   size1024 raw='%s'", sz.c_str());
+        auto rect = convert_size1024(sz, screen_w, screen_h);
         out.rect.x = rect.x;
         out.rect.y = rect.y;
         out.rect.w = rect.z;
@@ -161,12 +208,65 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     // Texto
     out.text = elem->text;
 
-    // Cores
+    // Cores (atributos do nó pai)
     if (elem->has_attribute("textcolor")) {
         out.text_color = parse_color(elem->get_attribute("textcolor"));
     }
     if (elem->has_attribute("backgroundcolor")) {
         out.bg_color = parse_color(elem->get_attribute("backgroundcolor"));
+        out.bg_color_set = true;
+    }
+
+    // ── Leitura de Elementos Filhos ──
+    // O XMB do AoM guarda propriedades em nós filhos (<text>, <textcolor>,
+    // <background>, <backgroundcolor>, <size1024>), não apenas em atributos.
+    // Log do texto direto do elemento (entre as tags de abertura/fechamento).
+    std::string elem_text = trim(elem->text);
+    if (!elem_text.empty()) {
+        LOGI("[XMB] Gadget '%s' tipo='%s' texto_direto='%s'",
+             out.name.c_str(), out.type.c_str(), elem_text.c_str());
+    }
+    for (const auto& child : elem->children) {
+        if (!child) continue;
+
+        std::string child_text = trim(child->text);
+
+        LOGI("[XMB] Gadget '%s' tem filho <%s> text='%s'",
+             out.name.c_str(), child->name.c_str(), child_text.c_str());
+
+        if (child->name == "text") {
+            out.text = child_text;
+        } else if (child->name == "textcolor") {
+            out.text_color = parse_color(child_text);
+            out.extra_attrs["textcolor"] = child_text;
+        } else if (child->name == "backgroundcolor") {
+            out.bg_color = parse_color(child_text);
+            out.extra_attrs["backgroundcolor"] = child_text;
+            out.bg_color_set = true;
+        } else if (child->name == "background") {
+            out.bg_texture = child_text;
+        } else if (child->name == "stateentry") {
+            // stateentry background="ui\ui pregame button"
+            // Captura todos os estados [0]=normal, 1=clicked, 2=rollover, 3=glow
+            std::string bg = child->get_attribute("background");
+            out.state_backgrounds.push_back(bg);
+            if (out.state_backgrounds.size() == 1 && !bg.empty()) {
+                out.bg_texture = bg;  // estado normal = fundo padrão do botão
+                LOGI("[XMB] Gadget '%s' stateentry background='%s' (estado normal)",
+                     out.name.c_str(), bg.c_str());
+            }
+        } else if (child->name == "size1024") {
+            auto rect = convert_size1024(child_text, screen_w, screen_h);
+            out.rect.x = rect.x;
+            out.rect.y = rect.y;
+            out.rect.w = rect.z;
+            out.rect.h = rect.w;
+        }
+    }
+
+    // Se o texto ainda estiver vazio, tenta atributo (fallback)
+    if (out.text.empty()) {
+        out.text = elem->get_attribute("text");
     }
 
     // Fonte
@@ -179,22 +279,50 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
         }
     }
 
-    // Textura de fundo
-    out.bg_texture = elem->get_attribute("background");
+    // Textura de fundo: só usa o atributo se o filho <background> não já definiu
+    if (out.bg_texture.empty()) {
+        out.bg_texture = elem->get_attribute("background");
+    }
 
     // Flags
     out.has_bevel = elem->has_attribute("bevel");
     out.close_button = elem->has_attribute("closebutton");
     out.title_bar = elem->get_attribute("titlebar");
+    out.hidden = elem->has_attribute("hidden");
+
+    // has_background: true se há background (atributo ou filho) ou cor de fundo
+    out.has_background = elem->has_attribute("background") ||
+                         elem->has_attribute("backgroundcolor") ||
+                         elem->has_attribute("bevel") ||
+                         !out.bg_texture.empty() ||
+                         (elem->has_attribute("backgroundcolor"));
+
+    // Ação do botão (ex: "start_game", "open_options", "open_credits", "quit_app")
+    out.action = elem->get_attribute("action");
 
     // Outros atributos (armazena para referência)
     for (const auto& attr : elem->attributes) {
         out.extra_attrs[attr.name] = attr.value;
     }
 
-    // Gadgets filhos (hierarquia)
+    // ── LOG [GADGET]: diagnóstico para identificar o gadget azul/retângulo ──
+    LOGI("[GADGET] name='%s' type='%s' rect=(%.0f,%.0f,%.0f,%.0f) bg_set=%d bg=(%.0f,%.0f,%.0f) tex='%s' text='%s' n_children=%zu",
+         out.name.c_str(), out.type.c_str(),
+         out.rect.x, out.rect.y, out.rect.w, out.rect.h,
+         out.bg_color_set,
+         out.bg_color.x, out.bg_color.y, out.bg_color.z,
+         out.bg_texture.c_str(),
+         out.text.empty() ? "-" : out.text.c_str(),
+         out.children.size());
+
+    // Gadgets filhos (hierarquia) — pula nós que são apenas propriedades
+    // (não são gadgets visuais: texto, cor, bg, tamanho, estados do botão e comando de ação)
+    static const std::set<std::string> kPropNodes = {"text", "textcolor",
+                                                     "background", "backgroundcolor",
+                                                     "size1024", "stateentry", "command"};
     for (const auto& child : elem->children) {
         if (!child) continue;
+        if (kPropNodes.count(child->name)) continue;
         UIGadgetDef child_def;
         parse_gadget(child.get(), screen_w, screen_h, child_def);
         out.children.push_back(std::move(child_def));
@@ -202,84 +330,260 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
 }
 
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
-                           int screen_w, int screen_h) {
+                           int screen_w, int screen_h,
+                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
+                           TextureResolverFn texture_resolver) {
     if (!ui) return 0;
 
     size_t created = 0;
 
-    // Função recursiva para aplicar gadgets
-    std::function<void(const UIGadgetDef&, float, float)> apply_gadget =
+    // ============================================================
+    // PASS 1: Criar painéis de fundo (backgrounds) - NÃO interativos
+    // Estes são gadgets tipo "gadget" com has_background=true
+    // Devem ser renderizados PRIMEIRO (z-order inferior)
+    // ============================================================
+    std::function<void(const UIGadgetDef&, float, float)> apply_backgrounds =
         [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
+            if (gd.hidden) return;
+
             float x = offset_x + gd.rect.x;
             float y = offset_y + gd.rect.y;
             float w = gd.rect.w;
             float h = gd.rect.h;
 
-            // Ajusta coordenadas para a tela real (convert_size1024 já usa
-            // kRefWidth/kRefHeight; aqui reaplicamos para screen_w/screen_h
-            // caso o layout tenha sido carregado com resolução de referência)
             float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
             float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
-            x = gd.rect.x * sx;
-            y = gd.rect.y * sy;
+            x = (offset_x + gd.rect.x) * sx;
+            y = (offset_y + gd.rect.y) * sy;
             w = gd.rect.w * sx;
             h = gd.rect.h * sy;
 
-            if (gd.type == "button" || gd.type == "gadget") {
-                // Cria botão
-                uint32_t color = UILayoutManager::parse_color_rgba(
-                    "", 255); // default branco
-                if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
-                    color = UILayoutManager::parse_color_rgba(
-                        gd.extra_attrs.at("textcolor"));
+            // Background panels: type="gadget" COM has_background=true
+            // Criamos como elemento NÃO interativo - apenas painel visual de fundo
+            if (gd.type == "gadget" && gd.has_background) {
+                // Cor de fundo: usa bg_color do XMB se não houver textura
+                uint32_t panel_color = 0x00000000; // transparente por padrão
+                if (!gd.bg_texture.empty()) {
+                    panel_color = 0xFFFFFFFF; // opaco para mostrar a textura
+                } else if (gd.bg_color_set) {
+                    // Ignora azul puro (0,0,255) e preto (0,0,0) que são placeholders do XMB
+                    if (gd.bg_color == glm::vec3(0, 0, 255) || gd.bg_color == glm::vec3(0, 0, 0)) {
+                        panel_color = 0xAA221105; // Pedra escura AoM (translucida)
+                    } else {
+                        panel_color = UILayoutManager::parse_color_rgba(gd.bg_color);
+                    }
                 }
 
-                auto* btn = ui_->add_button(
+                auto* btn = ui->add_button(
                     {x, y}, {w, h},
-                    [gd]() {
-                        LOGI("[UI Layout] Botão pressionado: %s", gd.name.c_str());
-                    },
-                    color,
-                    0xFFCCCCCC);
+                    []() {}, // callback vazio (não interativo)
+                    panel_color,
+                    0x00000000  // pressed color também transparente
+                );
                 if (btn) {
-                    btn->label = gd.text;
-                    btn->text_color = color;
-                    btn->text_size = gd.text_size;
+                    btn->interactive = false; // painel de fundo não recebe toque
+                    btn->label = "";
+                    btn->text_size = 0;
+                    btn->normal_tex = INVALID_TEXTURE;
+                    btn->pressed_tex = INVALID_TEXTURE;
+                    // Resolver textura de fundo do XMB via texture_resolver
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            btn->normal_tex = rt.handle;
+                            btn->current_color = 0xFFFFFFFF; // Opaco para mostrar a textura
+                            LOGI("UI Layout: background textura '%s' resolvida (handle=%u)",
+                                 gd.bg_texture.c_str(), rt.handle);
+                        } else {
+                            LOGW("UI Layout: background textura não encontrada: %s", gd.bg_texture.c_str());
+                        }
+                    }
                     ++created;
                 }
             }
-            else if (gd.type == "textBox" || gd.type == "textField") {
-                // Cria label de texto
-                uint32_t color = UILayoutManager::parse_color_rgba(
-                    "", 255);
-                if (!gd.text.empty() || gd.extra_attrs.count("textcolor")) {
-                    color = UILayoutManager::parse_color_rgba(
-                        gd.extra_attrs.count("textcolor")
-                            ? gd.extra_attrs.at("textcolor")
-                            : "");
-                }
 
-                ui_->add_label(gd.text, {x, y}, gd.text_size, color);
-                ++created;
-            }
-            else if (gd.type == "slider") {
-                // Slider (usa add_slider com callback vazio por enquanto)
-                ui_->add_slider({x, y}, {w, h}, gd.text, 0.5f,
-                                [](float) {});
-                ++created;
-            }
-
-            // Aplica filhos recursivamente
+            // Recursão para filhos (backgrounds aninhados).
+            // Passa offset NÃO escalado (reference coords): o filho escala uma vez só.
             for (const auto& child : gd.children) {
-                apply_gadget(child, x, y);
+                apply_backgrounds(child, offset_x + gd.rect.x, offset_y + gd.rect.y);
             }
         };
 
+    // ============================================================
+    // PASS 2: Criar elementos interativos (botões, textos, sliders)
+    // Renderizados DEPOIS dos backgrounds (z-order superior)
+    // ============================================================
+    std::function<void(const UIGadgetDef&, float, float)> apply_interactive =
+        [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
+            if (gd.hidden) return;
+
+            float x = offset_x + gd.rect.x;
+            float y = offset_y + gd.rect.y;
+            float w = gd.rect.w;
+            float h = gd.rect.h;
+
+            float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
+            float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
+            x = (offset_x + gd.rect.x) * sx;
+            y = (offset_y + gd.rect.y) * sy;
+            w = gd.rect.w * sx;
+            h = gd.rect.h * sy;
+
+            float scaled_text_size = std::max(14.0f, gd.text_size * sy);
+
+            // Botões interativos (type="button" ou "statebutton", case-insensitive)
+            const std::string type_lower = to_lower(gd.type);
+            if (type_lower == "button" || type_lower == "statebutton") {
+                // Limitar tamanho máximo do botão para evitar que estiquem demais
+                const float max_btn_height = 64.0f;
+                const float max_btn_width = 380.0f;
+                float btn_w = std::min(w, max_btn_width);
+                float btn_h = std::min(h, max_btn_height);
+                // Centralizar se limitou
+                float btn_x = x + (w - btn_w) * 0.5f;
+                float btn_y = y + (h - btn_h) * 0.5f;
+
+                // Resolver texto: suporta formato $$ID$$ para strings localizadas
+                std::string resolved_text = gd.text;
+                if (!resolved_text.empty() && resolved_text.size() >= 4 &&
+                    resolved_text.substr(0, 2) == "$$" && resolved_text.substr(resolved_text.size() - 2) == "$$") {
+                    std::string id = resolved_text.substr(2, resolved_text.size() - 4);
+                    // Nota: a tradução real é feita pelo Engine via tr(), aqui apenas passa o ID
+                    // O Engine fará a resolução após a criação
+                }
+
+                // Cor do fundo: branco (0xFFFFFFFF) para textura aparecer com cor cheia.
+                // Se não há bg_texture, usar cor de fundo do XMB (filho ou atributo).
+                // Se nada definido, pedra escura AoM (não azul!).
+                uint32_t fill_color = 0xFFFFFFFF;
+                if (!gd.bg_texture.empty()) {
+                    fill_color = 0xFFFFFFFF; // textura: branco (tint)
+                } else if (gd.bg_color_set) {
+                    // Ignora azul puro (0,0,255) e preto (0,0,0) que são placeholders do XMB
+                    if (gd.bg_color == glm::vec3(0, 0, 255) || gd.bg_color == glm::vec3(0, 0, 0)) {
+                        fill_color = 0xAA221105; // Pedra escura AoM (translucida)
+                    } else {
+                        fill_color = UILayoutManager::parse_color_rgba(gd.bg_color);
+                    }
+                } else if (gd.extra_attrs.count("backgroundcolor")) {
+                    fill_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("backgroundcolor"));
+                } else {
+                    fill_color = 0xAA221105; // Pedra escura AoM (translucida)
+                }
+
+                // Cor do texto: ouro AoM por padrão, ou cor especificada em textcolor
+                uint32_t text_color = 0xFFFFD000; // ouro AoM (#FFD000)
+                if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                    text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                    // text_color veio de filho <textcolor> (preto seria 0,0,0 mas é improvável)
+                    text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                }
+
+                std::function<void()> btn_callback = [gd]() {
+                    LOGI("[UI Layout] Botão pressionado: %s", gd.name.c_str());
+                };
+                if (!gd.action.empty()) {
+                    auto it = action_callbacks.find(gd.action);
+                    if (it != action_callbacks.end()) {
+                        btn_callback = it->second;
+                    }
+                }
+
+                LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s'",
+                     gd.text.c_str(), (int)x, (int)y, (int)w, (int)h, fill_color, text_color,
+                     gd.bg_texture.c_str());
+
+                auto* btn = ui->add_button(
+                    {btn_x, btn_y}, {btn_w, btn_h},
+                    btn_callback,
+                    fill_color,
+                    0xFFCCCCCC);
+                if (btn) {
+                    btn->label = strip_string_ids(gd.text); // Remove $$ID$$ inicial, ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
+                    btn->text_color = text_color;   // texto ouro, NÃO cinza
+                    btn->text_size = scaled_text_size;
+                    // Resolver textura de fundo via texture_resolver (engine fornece)
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            btn->normal_tex = rt.handle;
+                            btn->pressed_tex = rt.handle;
+                            btn->tex_width = rt.width;
+                            btn->tex_height = rt.height;
+                            // Definir borders de 9-slice baseados no tamanho da textura
+                            // (borders padrão: 10% de cada lado, mínimo 8px)
+                            float bw = static_cast<float>(rt.width) * 0.10f;
+                            float bh = static_cast<float>(rt.height) * 0.10f;
+                            if (bw < 8.0f) bw = 8.0f;
+                            if (bh < 8.0f) bh = 8.0f;
+                            btn->border_left = bw;
+                            btn->border_right = bw;
+                            btn->border_top = bh;
+                            btn->border_bottom = bh;
+                        } else {
+                            // ← FALLBACK defensivo: textura falhou, NÃO deixa retângulo branco
+                            // Usa pedra escura AoM para que o botão seja legível mesmo sem textura
+                            btn->normal_color = 0xAA221105;
+                            btn->pressed_color = 0xAA332211;
+                            btn->current_color = btn->normal_color;
+                            LOGW("UI Layout: textura nao encontrada: %s", gd.bg_texture.c_str());
+                        }
+                    }
+                    ++created;
+                }
+            }
+            // Textos
+            else if (gd.type == "textBox" || gd.type == "textField") {
+                // Pular textos de diálogos ocultos
+                if (!gd.hidden) {
+                    uint32_t color = UILayoutManager::parse_color_rgba("", 255);
+                    if (!gd.text.empty() || gd.extra_attrs.count("textcolor")) {
+                        color = UILayoutManager::parse_color_rgba(
+                            gd.extra_attrs.count("textcolor")
+                                ? gd.extra_attrs.at("textcolor")
+                                : "");
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+
+                    // Resolver texto: suporta formato $$ID$$
+                    std::string resolved_text = gd.text;
+                    if (!resolved_text.empty() && resolved_text.size() >= 4 &&
+                        resolved_text.substr(0, 2) == "$$" && resolved_text.substr(resolved_text.size() - 2) == "$$") {
+                        // ID será resolvido pelo Engine via tr()
+                    }
+
+                    ui->add_label(resolved_text, {x, y}, scaled_text_size, color);
+                    ++created;
+                }
+            }
+            // Sliders
+            else if (gd.type == "slider") {
+                ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
+                ++created;
+            }
+            // Containers lógicos invisíveis (gadget sem background) - apenas posiciona filhos
+            else if (gd.type == "gadget" && !gd.has_background) {
+                // Não cria elemento visual, apenas passa offset para filhos
+            }
+
+            // Recursão para filhos interativos.
+            // Passa offset NÃO escalado (reference coords): o filho escala uma vez só.
+            for (const auto& child : gd.children) {
+                apply_interactive(child, offset_x + gd.rect.x, offset_y + gd.rect.y);
+            }
+        };
+
+    // Executa as duas passagens em ordem
     for (const auto& root_gadget : layout.root_gadgets) {
-        apply_gadget(root_gadget, 0.0f, 0.0f);
+        apply_backgrounds(root_gadget, 0.0f, 0.0f);
+    }
+    for (const auto& root_gadget : layout.root_gadgets) {
+        apply_interactive(root_gadget, 0.0f, 0.0f);
     }
 
-    LOGI("Layout '%s' aplicado ao UI: %zu elementos criados",
+    LOGI("Layout '%s' aplicado ao UI: %zu elementos criados (backgrounds + interativos)",
          layout.layout_name.c_str(), created);
     return created;
 }

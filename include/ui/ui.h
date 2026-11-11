@@ -33,6 +33,19 @@ struct UIButton {
     TextureHandle pressed_tex = INVALID_TEXTURE;
     TextureHandle icon = INVALID_TEXTURE;
     bool is_big_button = false;
+    bool interactive = true;  // se false, o botão não recebe toques (painel de fundo)
+
+    // 9-slice borders (in pixels). When > 0, the button texture is drawn
+    // as 9 slices: 4 corners fixed, 4 edges stretched in one axis,
+    // center stretched in both. Set all to 0 for full-stretch behavior.
+    float border_left = 0.0f;
+    float border_right = 0.0f;
+    float border_top = 0.0f;
+    float border_bottom = 0.0f;
+
+    // Texture dimensions (filled by engine when loading via texture_resolver)
+    uint32_t tex_width = 0;
+    uint32_t tex_height = 0;
 
     // Slider fields
     bool is_slider = false;
@@ -136,6 +149,31 @@ public:
     [[nodiscard]] const std::vector<UIButton>& buttons() const { return buttons_; }
     [[nodiscard]] const std::vector<UILabel>& labels() const { return labels_; }
     [[nodiscard]] const std::vector<UIAnimation>& animations() const { return animations_; }
+
+    // Resolve textos no formato $$ID$$texto_fallback (ex: $$19825$$Learn To Play).
+    // Extrai o ID entre os primeiros $$ e o segundo $$, tenta traduzir, senão mostra o fallback.
+    template <typename TranslateFn>
+    void resolve_text(TranslateFn&& tr_fn) {
+        auto resolve_one = [&](std::string& s) {
+            if (s.empty() || s.size() < 4 || s.substr(0, 2) != "$$") return;
+            size_t end = s.find("$$", 2);
+            if (end == std::string::npos) return;
+            std::string id = s.substr(2, end - 2);
+            std::string fallback = s.substr(end + 2);
+            std::string translated = tr_fn(id);
+            if (!translated.empty() && translated != id) {
+                s = translated;
+            } else if (!fallback.empty()) {
+                s = fallback;
+            }
+        };
+        for (auto& btn : buttons_) {
+            resolve_one(btn.label);
+        }
+        for (auto& lbl : labels_) {
+            resolve_one(lbl.text);
+        }
+    }
 
 private:
     IRenderer* renderer_ = nullptr;

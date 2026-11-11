@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <functional>
 #include <glm/glm.hpp>
 #include "assets/xmb_parser.h"
 #include "assets/bar_archive.h"
@@ -31,14 +32,19 @@ struct UIGadgetDef {
     std::string type;           ///< gadget, textBox, textField, slider, button, dropdown, etc.
     UIGadgetRect rect;          ///< Posição e tamanho em pixels
     std::string text;           ///< Conteúdo de texto
+    std::string action;         ///< Nome da ação (ex: "start_game", "open_options", "open_credits")
     glm::vec3 text_color{0, 0, 0};      ///< Cor do texto (RGB 0-255)
     float text_size = 18.0f;    ///< Tamanho da fonte
     std::string text_font;      ///< Nome da fonte
     glm::vec3 bg_color{160, 160, 160};  ///< Cor de fundo (RGB 0-255)
+    bool bg_color_set = false;          ///< Se backgroundcolor foi definida no XMB
     std::string bg_texture;     ///< Caminho da textura de fundo (ex: "ui\ui_light_gray")
+    std::vector<std::string> state_backgrounds;  ///< Texturas de <stateentry> [0]=normal,1=clicked,2=rollover,3=glow
     bool has_bevel = false;
     bool close_button = false;
     std::string title_bar;
+    bool hidden = false;        ///< Se true, gadget e filhos não são renderizados
+    bool has_background = false;///< Se true, gadget possui background/textura definido no XMB
     std::vector<UIGadgetDef> children;  ///< Gadgets aninhados
     std::unordered_map<std::string, std::string> extra_attrs; ///< Outros atributos
 };
@@ -85,24 +91,44 @@ public:
     [[nodiscard]] static uint32_t parse_color_rgba(const std::string& color_str,
                                                     uint8_t alpha = 255);
 
+    /// Converte uma cor glm::vec3 (RGB 0-255) para uint32_t ARGB (0xAARRGGBB)
+    [[nodiscard]] static uint32_t parse_color_rgba(const glm::vec3& color,
+                                                    uint8_t alpha = 255);
+
 private:
     void parse_gadget(const XmbElement* elem, int screen_w, int screen_h,
                        UIGadgetDef& out);
 
     std::unordered_map<std::string, UILayoutResult> layouts_;
 
+public:
     // Resolução de referência do AoM (tamanho base para size1024)
     static constexpr int kRefWidth = 1024;
     static constexpr int kRefHeight = 768;
 };
+
+/// Resultado da resolução de uma textura (handle + dimensões)
+struct ResolvedTexture {
+    TextureHandle handle = INVALID_TEXTURE;
+    uint32_t width = 0;
+    uint32_t height = 0;
+};
+
+/// Função que resolve um caminho de textura (ex: "ui\\ui_light_gray")
+/// para um TextureHandle e suas dimensões em pixels.
+using TextureResolverFn = std::function<ResolvedTexture(const std::string&)>;
 
 /// Aplica um layout carregado ao UIManager, criando botões e labels
 /// @param layout  Resultado do carregamento do layout
 /// @param ui      UIManager destino
 /// @param screen_w  Largura da tela em pixels
 /// @param screen_h  Altura da tela em pixels
+/// @param action_callbacks  Mapa de nome da ação -> callback (ex: "start_game" -> lambda)
+/// @param texture_resolver  Função opcional para resolver bg_texture → TextureHandle + dimensões
 /// @return Número de elementos criados
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
-                           int screen_w, int screen_h);
+                           int screen_w, int screen_h,
+                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
+                           TextureResolverFn texture_resolver = nullptr);
 
 } // namespace aom

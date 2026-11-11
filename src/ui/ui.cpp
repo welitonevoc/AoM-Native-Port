@@ -9,6 +9,16 @@ extern "C" {
 #include <cstdio>
 #include <cmath>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOG_TAG "AoM_UI"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#else
+#define LOGI(...) printf(__VA_ARGS__)
+#define LOGE(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
 namespace aom {
 
 bool UIManager::initialize(IRenderer* renderer, int width, int height) {
@@ -29,8 +39,10 @@ void UIManager::clear() {
     buttons_.clear();
     labels_.clear();
     animations_.clear();
-    buttons_.reserve(64);
-    labels_.reserve(64);
+    // Não reserve(64): layouts com mais de 64 elementos realocam o vetor e
+    // invalidam ponteiros armazenados (ex: hud_skip_btn_). Deixar o vector
+    // gerenciar a capacidade sozinho; o chamador deve usar os ponteiros
+    // retornados por add_button() imediatamente após a criação.
 }
 
 void UIManager::update(float dt) {
@@ -49,24 +61,48 @@ void UIManager::render() {
 
     renderer_->begin_ui();
 
-    // Render animated elements
+    // PASS 1: Render background panels first (z-order inferior)
+    // São botões com normal_tex == INVALID_TEXTURE e label vazio
+    for (const auto& btn : buttons_) {
+        if (btn.label.empty() && btn.normal_tex == INVALID_TEXTURE && btn.size.x > 50.0f && btn.size.y > 50.0f) {
+            // Provavelmente um painel de fundo
+            if (btn.current_color != 0x00000000) {
+                renderer_->draw_ui_quad(btn.pos, btn.size, INVALID_TEXTURE, btn.current_color);
+            }
+        }
+    }
+
+    // PASS 2: Render animated elements
     for (const auto& anim : animations_) {
         if (anim.tex != INVALID_TEXTURE) {
             renderer_->draw_ui_quad(anim.pos, anim.size, anim.tex, 0xFFFFFFFF);
         }
     }
 
-    // Render buttons
+    // PASS 3: Render buttons (interactive elements)
     for (const auto& btn : buttons_) {
+        // Skip background panels (already rendered in pass 1)
+        if (btn.label.empty() && btn.normal_tex == INVALID_TEXTURE && btn.size.x > 50.0f && btn.size.y > 50.0f) {
+            continue;
+        }
         // Determine texture to draw
         TextureHandle cur_tex = btn.normal_tex;
         if (btn.current_color == btn.pressed_color && btn.pressed_tex != INVALID_TEXTURE) {
             cur_tex = btn.pressed_tex;
         }
 
-        // Draw button background quad
+        // Draw button background quad (9-slice when borders are set and we know texture size)
         if (cur_tex != INVALID_TEXTURE) {
-            renderer_->draw_ui_quad(btn.pos, btn.size, cur_tex, btn.current_color);
+            if (btn.border_left > 0.0f || btn.border_right > 0.0f ||
+                btn.border_top > 0.0f || btn.border_bottom > 0.0f) {
+                renderer_->draw_ui_quad_nineslice(btn.pos, btn.size, cur_tex,
+                                                  btn.tex_width, btn.tex_height,
+                                                  btn.border_left, btn.border_right,
+                                                  btn.border_top, btn.border_bottom,
+                                                  btn.current_color);
+            } else {
+                renderer_->draw_ui_quad(btn.pos, btn.size, cur_tex, btn.current_color);
+            }
         } else if ((btn.current_color >> 24) > 0) {
             renderer_->draw_ui_quad(btn.pos, btn.size, INVALID_TEXTURE, btn.current_color);
         }
@@ -174,55 +210,59 @@ void UIManager::render() {
 
 bool UIManager::handle_touch(const TouchEvent& ev) {
     if (ev.state == TouchEvent::State::DOWN) {
-        for (auto& btn : buttons_) {
-            if (hit_test(btn, ev.x, ev.y)) {
-                btn.current_color = btn.pressed_color;
+        // Percorrer de trás para frente: elementos renderizados por último (z-order superior)
+        // recebem o toque primeiro. Painéis de fundo (interactive=false) são ignorados.
+        for (auto it = buttons_.rbegin(); it != buttons_.rend(); ++it) {
+            auto& btn = *it;
+            if (!btn.interactive || !hit_test(btn, ev.x, ev.y)) continue;
 
-                if (btn.is_checkbox) {
-                    btn.is_checked = !btn.is_checked;
-                    if (audio_) audio_->play_click();
-                    if (btn.onToggle) btn.onToggle(btn.is_checked);
-                    btn.current_color = btn.normal_color;
-                    return true;
-                }
+            btn.current_color = btn.pressed_color;
 
-                if (btn.is_slider) {
-                    float left = btn.pos.x + 10.0f;
-                    float right = btn.pos.x + btn.size.x - 60.0f;
-                    float clampedX = std::clamp(ev.x, left, right);
-                    float t = (right > left) ? (clampedX - left) / (right - left) : 0.0f;
-                    btn.slider_value = t;
-                    if (audio_) audio_->play_click();
-                    if (btn.onSliderChange) btn.onSliderChange(t);
-                    return true;
-                }
-
-                // Standard button click sound
-                if (audio_) {
-                    if (btn.is_big_button) audio_->play_big_button();
-                    else audio_->play_click();
-                }
-
-                if (btn.onClick) {
-                    btn.onClick();
-                }
+            if (btn.is_checkbox) {
+                btn.is_checked = !btn.is_checked;
+                if (audio_) audio_->play_click();
+                if (btn.onToggle) btn.onToggle(btn.is_checked);
                 btn.current_color = btn.normal_color;
                 return true;
             }
-        }
-    } else if (ev.state == TouchEvent::State::MOVE) {
-        for (auto& btn : buttons_) {
-            if (btn.is_slider && hit_test(btn, ev.x, ev.y)) {
+
+            if (btn.is_slider) {
                 float left = btn.pos.x + 10.0f;
                 float right = btn.pos.x + btn.size.x - 60.0f;
                 float clampedX = std::clamp(ev.x, left, right);
                 float t = (right > left) ? (clampedX - left) / (right - left) : 0.0f;
                 btn.slider_value = t;
-                if (btn.onSliderChange) {
-                    btn.onSliderChange(t);
-                }
+                if (audio_) audio_->play_click();
+                if (btn.onSliderChange) btn.onSliderChange(t);
                 return true;
             }
+
+            // Standard button click sound
+            if (audio_) {
+                if (btn.is_big_button) audio_->play_big_button();
+                else audio_->play_click();
+            }
+
+            if (btn.onClick) {
+                btn.onClick();
+            }
+            btn.current_color = btn.normal_color;
+            return true;
+        }
+    } else if (ev.state == TouchEvent::State::MOVE) {
+        for (auto it = buttons_.rbegin(); it != buttons_.rend(); ++it) {
+            auto& btn = *it;
+            if (!btn.interactive || !btn.is_slider) continue;
+            if (!hit_test(btn, ev.x, ev.y)) continue;
+            float left = btn.pos.x + 10.0f;
+            float right = btn.pos.x + btn.size.x - 60.0f;
+            float clampedX = std::clamp(ev.x, left, right);
+            float t = (right > left) ? (clampedX - left) / (right - left) : 0.0f;
+            btn.slider_value = t;
+            if (btn.onSliderChange) {
+                btn.onSliderChange(t);
+            }
+            return true;
         }
     } else if (ev.state == TouchEvent::State::UP) {
         for (auto& btn : buttons_) {
@@ -268,6 +308,8 @@ UIButton* UIManager::add_button(const glm::vec2& pos,
     btn.normal_tex = default_btn_normal_;
     btn.pressed_tex = default_btn_pressed_;
     btn.is_big_button = (size.y >= 38.0f);
+    LOGI("[UI add_button] label='%s' normal_color=0x%08X pressed_color=0x%08X pos=(%.0f,%.0f) size=(%.0f,%.0f)",
+         label.c_str(), normal_color, pressed_color, pos.x, pos.y, size.x, size.y);
     buttons_.push_back(btn);
     return &buttons_.back();
 }
@@ -346,12 +388,25 @@ UIButton* UIManager::add_checkbox(const glm::vec2& pos,
     return &buttons_.back();
 }
 
+// Retira todos os blocos iniciais no formato $$<número>$$ do texto do XMB.
+// Ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
+// Colapsa espaços à esquerda (o XMB usa espaços para alinhar texto dentro dos $$ID$$).
+static std::string strip_string_ids(std::string s) {
+    while (s.size() >= 4 && s[0] == '$' && s[1] == '$') {
+        size_t end = s.find("$$", 2);
+        if (end == std::string::npos) break;
+        s.erase(0, end + 2);
+    }
+    size_t p = s.find_first_not_of(' ');
+    return (p == std::string::npos) ? s : s.substr(p);
+}
+
 UILabel* UIManager::add_label(const std::string& txt,
                              const glm::vec2& pos,
                              float size,
                              uint32_t color) {
     UILabel lbl;
-    lbl.text = txt;
+    lbl.text = strip_string_ids(txt);
     lbl.pos = pos;
     lbl.size = size;
     lbl.color = color;
