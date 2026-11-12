@@ -278,6 +278,17 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
         // o primeiro '.scn' do arquivo era usado e o terreno não batia com a
         // partida (ou nem existia, pois o archive usa separadores '\').
         const BarEntry* wanted = scenarios_bar_->find(scenario_path);
+        if (!wanted) {
+            std::string alt = scenario_path;
+            for (char& c : alt) { if (c == '/') c = '\\'; else if (c == '\\') c = '/'; }
+            wanted = scenarios_bar_->find(alt);
+        }
+        if (!wanted) {
+            size_t slash = scenario_path.find_last_of("/\\");
+            if (slash != std::string::npos) {
+                wanted = scenarios_bar_->find(scenario_path.substr(slash + 1));
+            }
+        }
         if (wanted) {
             data = scenarios_bar_->extract(*wanted);
             if (!data.empty()) {
@@ -285,9 +296,10 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
             }
         }
         if (data.empty()) {
-            // Fallback: primeiro '.scn' disponivel no archive
+            // Fallback: primeiro '.scn' ou '.scx' disponivel no archive
             for (const BarEntry& entry : scenarios_bar_->entries()) {
-                if (ends_with(to_lower(entry.filename), ".scn")) {
+                std::string fn = to_lower(entry.filename);
+                if (ends_with(fn, ".scn") || ends_with(fn, ".scx")) {
                     data = scenarios_bar_->extract(entry);
                     if (!data.empty()) {
                         LOGW("Height-map: cenario '%s' nao encontrado no BAR, usando '%s'",
@@ -300,13 +312,24 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
     }
     if (data.empty()) {
         // Fallback: tentar ler diretamente do filesystem
-        std::ifstream file(scenario_path, std::ios::binary);
-        if (!file) return false;
-        file.seekg(0, std::ios::end);
-        size_t sz = static_cast<size_t>(file.tellg());
-        file.seekg(0, std::ios::beg);
-        data.resize(sz);
-        file.read(reinterpret_cast<char*>(data.data()), sz);
+        std::vector<std::string> fs_candidates = {
+            scenario_path,
+            "assets/scenario/" + scenario_path,
+            config_.data_path + "/scenario/" + scenario_path,
+            "/sdcard/Documents/AoM/scenario/" + scenario_path,
+            "/sdcard/AoM/scenario/" + scenario_path
+        };
+        for (const auto& p : fs_candidates) {
+            std::ifstream file(p, std::ios::binary);
+            if (file) {
+                file.seekg(0, std::ios::end);
+                size_t sz = static_cast<size_t>(file.tellg());
+                file.seekg(0, std::ios::beg);
+                data.resize(sz);
+                file.read(reinterpret_cast<char*>(data.data()), sz);
+                if (!data.empty()) break;
+            }
+        }
     }
 
     if (data.size() < 64) {

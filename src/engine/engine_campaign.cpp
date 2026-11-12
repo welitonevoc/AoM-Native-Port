@@ -182,19 +182,22 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
         // Fase 2: aqui vai a transição para o próximo cenário
     };
 
-    // Montar caminho do .scn a partir do filename do cenário
-    // filename do .cpn vem como "spc\\aomsp04" ou "spc/aomsp04" (sem .scn)
+    // Montar caminho do .scn/.scx a partir do filename do cenário
+    // filename do .cpn/.cpx vem como "spc\\aomsp04" ou "xspc\\aomx01" (sem extensão)
     std::string scn_base = scenario->filename;
+    bool is_scx = ends_with(to_lower(scn_base), ".scx") || (scn_base.find("xspc") != std::string::npos);
     // Remove extensão se houver
     if (ends_with(to_lower(scn_base), ".scn")) scn_base = scn_base.substr(0, scn_base.size() - 4);
     if (ends_with(to_lower(scn_base), ".scx")) scn_base = scn_base.substr(0, scn_base.size() - 4);
 
-    // Normaliza separadores para / e adiciona .scn
+    // Normaliza separadores para / e adiciona extensão correta
     std::string scn_path = scn_base;
     for (char& c : scn_path) {
         if (c == '\\') c = '/';
     }
-    if (!ends_with(to_lower(scn_path), ".scn")) scn_path += ".scn";
+    if (!ends_with(to_lower(scn_path), ".scn") && !ends_with(to_lower(scn_path), ".scx")) {
+        scn_path += (is_scx ? ".scx" : ".scn");
+    }
 
     // Tenta usar Mission 1: Omens se for esse cenário (script dedicado)
     bool used_dedicated_mission = false;
@@ -213,11 +216,15 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     // Terreno 3D da campanha: o height-map vem do próprio cenário da missão
     if (terrain_mesh_ == INVALID_MESH) {
         bool heightmap_loaded = false;
-        static const char* kMissionScn[] = {
-            scn_path.c_str(),
+        std::string backslash_path = scn_path;
+        for (char& c : backslash_path) { if (c == '/') c = '\\'; }
+
+        const std::string kMissionScn[] = {
+            scn_path,
+            backslash_path,
             "spc\\aomsp04.scn", "spc/aomsp04.scn", "aomsp04.scn"
         };
-        for (const char* scn : kMissionScn) {
+        for (const auto& scn : kMissionScn) {
             if (load_scenario_heightmap(scn)) {
                 heightmap_loaded = true;
                 break;

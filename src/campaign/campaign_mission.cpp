@@ -26,11 +26,21 @@ bool CampaignMissionManager::load_scenario_data(BarArchive* scenarios_bar, const
 
     // 1. Try extracting from scenarios.bar if available
     if (scenarios_bar && scenarios_bar->file_count() > 0) {
-        const std::string candidates[] = {
-            "spc\\aomsp04.scn",
-            "spc/aomsp04.scn",
-            "aomsp04.scn"
-        };
+        std::vector<std::string> candidates;
+        if (!custom_scn_path.empty()) {
+            candidates.push_back(custom_scn_path);
+            std::string alt = custom_scn_path;
+            for (char& c : alt) { if (c == '/') c = '\\'; else if (c == '\\') c = '/'; }
+            candidates.push_back(alt);
+            size_t slash = custom_scn_path.find_last_of("/\\");
+            if (slash != std::string::npos) {
+                candidates.push_back(custom_scn_path.substr(slash + 1));
+            }
+        }
+        candidates.push_back("spc\\aomsp04.scn");
+        candidates.push_back("spc/aomsp04.scn");
+        candidates.push_back("aomsp04.scn");
+
         for (const auto& c : candidates) {
             const BarEntry* entry = scenarios_bar->find(c);
             if (entry) {
@@ -45,12 +55,17 @@ bool CampaignMissionManager::load_scenario_data(BarArchive* scenarios_bar, const
 
     // 2. Try loading from filesystem / assets
     if (scn_data.empty()) {
-        const std::vector<std::string> paths = {
-            custom_scn_path,
-            "assets/scenario/spc/aomsp04.scn",
-            "/storage/emulated/0/Documents/AoM-Native-Port/assets/scenario/spc/aomsp04.scn",
-            "/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/scenario/spc/aomsp04.scn"
-        };
+        std::vector<std::string> paths;
+        if (!custom_scn_path.empty()) {
+            paths.push_back(custom_scn_path);
+            paths.push_back("assets/scenario/" + custom_scn_path);
+            paths.push_back("/sdcard/Documents/AoM/scenario/" + custom_scn_path);
+            paths.push_back("/sdcard/AoM/scenario/" + custom_scn_path);
+        }
+        paths.push_back("assets/scenario/spc/aomsp04.scn");
+        paths.push_back("/storage/emulated/0/Documents/AoM-Native-Port/assets/scenario/spc/aomsp04.scn");
+        paths.push_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/scenario/spc/aomsp04.scn");
+
         for (const auto& p : paths) {
             if (p.empty()) continue;
             std::ifstream file(p, std::ios::binary);
@@ -70,7 +85,11 @@ bool CampaignMissionManager::load_scenario_data(BarArchive* scenarios_bar, const
         ScenarioHeader header = ScenarioTriggerSystem::parse_scenario_header(scn_data.data(), scn_data.size(), false);
         if (header.valid) {
             authentic_scn_loaded_ = true;
-            scenario_title_ = "Omens (Agouros)";
+            if (!custom_scn_path.empty()) {
+                scenario_title_ = custom_scn_path;
+            } else {
+                scenario_title_ = "Omens (Agouros)";
+            }
             LOGI("Scenario valid: %s, creator: %s, format: %s",
                  scenario_title_.c_str(), header.creator_app.c_str(), header.format_magic.c_str());
             return true;
