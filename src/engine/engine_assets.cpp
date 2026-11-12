@@ -25,9 +25,11 @@ extern "C" {
 
 #include <algorithm>
 #include <array>
+#include <cerrno>
 #include <cctype>
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -419,7 +421,12 @@ bool Engine::load_archives(const std::string& data_path) {
         bool ok = false;
         if (fs::exists(base_file, ec)) {
             ok = bar.open(base_file.string());
-            LOGI("[DATA] open %s -> %s", base_file.string().c_str(), ok ? "ok" : "falhou");
+            if (ok) {
+                LOGI("[DATA] open %s -> ok", base_file.string().c_str());
+            } else {
+                int err = errno;
+                LOGW("[DATA] open %s -> falhou (errno=%d: %s)", base_file.string().c_str(), err, strerror(err));
+            }
         } else {
             LOGW("[DATA] open %s -> arquivo nao existe", base_file.string().c_str());
         }
@@ -428,7 +435,8 @@ bool Engine::load_archives(const std::string& data_path) {
                 ok = true;
                 LOGI("[DATA] mount expansao %s -> ok", expansion_file.string().c_str());
             } else {
-                LOGW("[DATA] mount expansao %s -> falhou", expansion_file.string().c_str());
+                int err = errno;
+                LOGW("[DATA] mount expansao %s -> falhou (errno=%d: %s)", expansion_file.string().c_str(), err, strerror(err));
             }
         } else {
             LOGW("[DATA] expansao %s -> nao existe", expansion_file.string().c_str());
