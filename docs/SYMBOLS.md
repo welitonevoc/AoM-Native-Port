@@ -213,7 +213,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `parse_cub_file` 36-79 (44)
 - `load_cub_definition` 81-101 (21)
 
-## src/assets/ddt_texture.cpp (559 linhas)
+## src/assets/ddt_texture.cpp (541 linhas)
 - `read_u16` 25-28 (4)
 - `read_u32` 30-35 (6)
 - `expand_565` 37-41 (5)
@@ -229,8 +229,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `block_size_for` 270-277 (8)
 - `DdtLoader::load` 281-357 (77)
 - `DdtLoader::load` 359-361 (3)
-- `DdtTexture::decode_rgba` 363-550 (188)
-- `DdtTexture::is_compressed` 552-556 (5)
+- `DdtTexture::decode_rgba` 363-532 (170)
+- `DdtTexture::is_compressed` 534-538 (5)
 
 ## src/assets/xmb_parser.cpp (402 linhas)
 - `utf16le_to_utf8` 14-49 (36)

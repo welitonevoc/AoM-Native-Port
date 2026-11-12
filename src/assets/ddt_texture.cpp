@@ -396,52 +396,34 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
         }
 
         case DdtFormat::PALETTE: {
-            // 1. Expansão de cor BGR555 (Azul nos bits altos, Vermelho nos baixos)
-            auto expand_bgr555 = [](uint16_t v, uint8_t& r, uint8_t& g, uint8_t& b) {
-                b = ((v >> 10) & 0x1F); b = (b << 3) | (b >> 2);
-                g = ((v >>  5) & 0x1F); g = (g << 3) | (g >> 2);
-                r = ((v      ) & 0x1F); r = (r << 3) | (r >> 2);
-            };
-
-            // 2. Detectar se é 4BPP (2 pixels por byte) ou 8BPP (1 pixel por byte)
-            // O AoM salva 4BPP como (width * height) / 2 bytes.
-            bool is_4bpp = (mip.data.size() < pixel_count);
+            if (palette.size() < 2 || mip.data.size() < pixel_count) {
+                return {};
+            }
+            const size_t num_colors = palette.size() / 2;
+            const bool has_alpha4 = (alpha_bits == 4 && mip.data.size() >= pixel_count + (pixel_count + 1) / 2);
+            const uint8_t* a4 = has_alpha4 ? (mip.data.data() + pixel_count) : nullptr;
 
             for (size_t i = 0; i < pixel_count; ++i) {
-                uint8_t idx = 0;
-
-                if (is_4bpp) {
-                    // Lê 2 pixels por byte (Nibble alto = pixel par, Nibble baixo = pixel ímpar)
-                    uint8_t packed = mip.data[i >> 1];
-                    idx = (i & 1) ? (packed & 0x0F) : ((packed >> 4) & 0x0F);
-                } else {
-                    // Lê 1 pixel por byte
-                    idx = mip.data[i];
-                }
-
-                // Proteção contra índice fora da paleta
-                size_t num_colors = palette.size() / 2;
+                size_t idx = mip.data[i];
                 if (idx >= num_colors) idx = 0;
 
                 const uint16_t val = read_u16(palette.data() + idx * 2);
                 uint8_t* dst = output.data() + i * 4;
 
-                // 3. Aplica a cor (BGR555)
-                expand_bgr555(val, dst[0], dst[1], dst[2]);
+                // 1. Expansão de cor RGB555 autêntica do AoM
+                expand_555(val, dst[0], dst[1], dst[2]);
 
-                // 4. Alpha
-                dst[3] = 255; // Fallback opaco
-                if (alpha_bits == 4 && palette_offset_alpha4 > 0) {
-                    // Lê da tabela de alpha 4-bit separada
-                    const uint8_t* a4 = mip.data.data() + palette_offset_alpha4;
-                    if ((i >> 1) < mip.data.size()) {
-                        uint8_t packed_a = a4[i >> 1];
-                        uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
-                        dst[3] = nib * 17; // Expande 0-15 para 0-255
-                    }
+                // 2. Alpha de 4 bits posicionado após a tabela de índices de pixels
+                if (a4) {
+                    const uint8_t packed_a = a4[i >> 1];
+                    const uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
+                    dst[3] = nib * 17;
                 } else if (alpha_bits == 1) {
-                    // Alpha binário
-                    dst[3] = (idx == 0) ? 0 : 255;
+                    dst[3] = (idx == 0 && val == 0) ? 0 : 255;
+                } else if (alpha_bits == 0) {
+                    dst[3] = 255;
+                } else {
+                    dst[3] = (idx == 0 && val == 0) ? 0 : 255;
                 }
             }
             return output;
