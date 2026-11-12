@@ -398,25 +398,40 @@ bool Engine::load_archives(const std::string& data_path) {
     anim_bar_ = std::make_unique<BarArchive>();
     godpowers_bar_ = std::make_unique<BarArchive>();
 
-    auto find_archive = [](const fs::path& base, const std::string& sub, const std::string& name) -> fs::path {
+    auto find_archive = [&](const fs::path& base, const std::string& sub, const std::string& name) -> fs::path {
         std::error_code ec;
         fs::path p1 = base / sub / name;
-        if (fs::exists(p1, ec)) return p1;
+        if (fs::exists(p1, ec)) {
+            LOGI("[DATA] encontrado: %s", p1.string().c_str());
+            return p1;
+        }
         fs::path p2 = base / name;
-        if (fs::exists(p2, ec)) return p2;
+        if (fs::exists(p2, ec)) {
+            LOGI("[DATA] encontrado: %s", p2.string().c_str());
+            return p2;
+        }
+        LOGW("[DATA] nao encontrado: %s/%s ou %s/%s", base.string().c_str(), sub.c_str(), base.string().c_str(), name.c_str());
         return p1;
     };
 
-    auto open_pair = [](BarArchive& bar, const fs::path& base_file, const fs::path& expansion_file) -> bool {
+    auto open_pair = [&](BarArchive& bar, const fs::path& base_file, const fs::path& expansion_file) -> bool {
         std::error_code ec;
         bool ok = false;
         if (fs::exists(base_file, ec)) {
             ok = bar.open(base_file.string());
+            LOGI("[DATA] open %s -> %s", base_file.string().c_str(), ok ? "ok" : "falhou");
+        } else {
+            LOGW("[DATA] open %s -> arquivo nao existe", base_file.string().c_str());
         }
         if (fs::exists(expansion_file, ec)) {
             if (bar.mount(expansion_file.string())) {
                 ok = true;
+                LOGI("[DATA] mount expansao %s -> ok", expansion_file.string().c_str());
+            } else {
+                LOGW("[DATA] mount expansao %s -> falhou", expansion_file.string().c_str());
             }
+        } else {
+            LOGW("[DATA] expansao %s -> nao existe", expansion_file.string().c_str());
         }
         return ok;
     };

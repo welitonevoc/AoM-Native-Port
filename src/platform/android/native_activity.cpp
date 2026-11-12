@@ -406,6 +406,8 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
         candidates.push_back(internal + "/AoM");
         candidates.push_back(internal);
     }
+    // Armazenamento interno do app (onde o Java copia os .bar) tem prioridade.
+    candidates.emplace_back("/storage/emulated/0/Android/data/com.aom.nativeport/files/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM");
     candidates.emplace_back("/sdcard/Documents/AoM");
     candidates.emplace_back("/storage/emulated/0/Download/AoM");

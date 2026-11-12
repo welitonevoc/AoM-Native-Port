@@ -32,7 +32,7 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` (novo) e os `create_*_menu` à mão. Definir qual manda no MAIN_MENU.
 3. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 4. ❓ **Tela cheia de água na cinemática de missão**: câmera da cinemática (`CampaignMissionManager`/`CameraTrack`). `CameraTrack::update` sobrescreve aspect/near/far.
-5. ❓ **Dados**: se o app mostrar "DADOS DO JOGO NAO ENCONTRADOS", checar `adb shell ls -R .../files/AoM` e o log `Discovered AoM data`.
+5. ✅ **Dados**: corrigido `resolve_game_data_root` em `native_activity.cpp` para priorizar o armazenamento interno do app (`/storage/emulated/0/Android/data/com.aom.nativeport/files/AoM`) antes de `Documents/AoM`, que pode existir vazio e causar falso positivo. Pendente: rebuild + testar no dispositivo.
 
 ## Riscos do repositório
 - ⚠ `assets_bar/textures/textures.bar` (85 MB) e `textures2.bar` (34 MB) estão no GitHub público. São dados do jogo comercial:
