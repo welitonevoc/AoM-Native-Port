@@ -36,8 +36,10 @@ static std::string strip_string_ids(std::string s) {
         if (end == std::string::npos) break;
         s.erase(0, end + 2);
     }
-    size_t p = s.find_first_not_of(' ');
-    return (p == std::string::npos) ? s : s.substr(p);
+    size_t p = s.find_first_not_of(" \t\r\n");
+    if (p == std::string::npos) return "";
+    size_t q = s.find_last_not_of(" \t\r\n");
+    return s.substr(p, q - p + 1);
 }
 
 /// Faz split de uma string por espaços, retornando floats

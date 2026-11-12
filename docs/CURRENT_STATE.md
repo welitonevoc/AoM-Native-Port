@@ -36,5 +36,5 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - Raiz poluída: `PLANO_P0..P5.md`, `PROGRESSO.md`, `fix_engine.py`, `offtec_menus.py`... Mover para `docs/archive/` e `tools/`.
 
 ## Próximos passos (ordem)
-1. Definir qual sistema de menu é o oficial; implementar `texturecoords` + comandos básicos no layout XMB.
+1. ✅ Menu XMB oficial com texturas PNG de titans_menu_parts e centralização widescreen concluídos.
 2. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).

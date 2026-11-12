@@ -349,6 +349,7 @@ public:
 
     /// Read asset binary content from APK assets or fallback filesystem
     std::vector<uint8_t> read_asset(const std::string& name);
+    TextureHandle load_png_asset(const std::string& name, int* out_w = nullptr, int* out_h = nullptr);
 
     // 3D Interactive Particle System
     void spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size = 0.15f);

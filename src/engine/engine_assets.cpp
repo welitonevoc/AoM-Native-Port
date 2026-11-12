@@ -149,22 +149,24 @@ std::vector<uint8_t> Engine::read_asset(const std::string& name) {
     return {};
 }
 
+TextureHandle Engine::load_png_asset(const std::string& name, int* out_w, int* out_h) {
+    if (!renderer_) return INVALID_TEXTURE;
+    auto bytes = read_asset(name);
+    if (bytes.empty()) return INVALID_TEXTURE;
+    int w = 0, h = 0, comp = 0;
+    unsigned char* data = stbi_load_from_memory(
+        bytes.data(), static_cast<int>(bytes.size()), &w, &h, &comp, 4);
+    if (!data) return INVALID_TEXTURE;
+    TextureHandle t = renderer_->create_texture(w, h, data);
+    stbi_image_free(data);
+    if (out_w) *out_w = w;
+    if (out_h) *out_h = h;
+    LOGI("Loaded PNG asset '%s' (%dx%d)", name.c_str(), w, h);
+    return t;
+}
+
 bool Engine::load_core_ui_textures() {
     if (!renderer_) return false;
-
-    // Helper: load PNG from asset, decode with stb_image
-    auto load_png_asset = [&](const std::string& name) -> TextureHandle {
-        auto bytes = read_asset(name);
-        if (bytes.empty()) return INVALID_TEXTURE;
-        int w = 0, h = 0, comp = 0;
-        unsigned char* data = stbi_load_from_memory(
-            bytes.data(), static_cast<int>(bytes.size()), &w, &h, &comp, 4);
-        if (!data) return INVALID_TEXTURE;
-        TextureHandle t = renderer_->create_texture(w, h, data);
-        stbi_image_free(data);
-        LOGI("Loaded PNG asset '%s' (%dx%d)", name.c_str(), w, h);
-        return t;
-    };
 
     // Helper: load DDT from textures.bar by name
     auto load_ddt_bar = [&](const std::string& name) -> TextureHandle {

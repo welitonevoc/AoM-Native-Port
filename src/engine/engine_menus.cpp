@@ -1304,13 +1304,40 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
                 rt.width = static_cast<uint32_t>(dit->second.x);
                 rt.height = static_cast<uint32_t>(dit->second.y);
             }
-            // Também indexar pelo nome original para cache futuro
             texture_cache_[name] = h;
             texture_dimensions_[name] = texture_dimensions_[normalized];
             LOGI("UI texture resolved: '%s' -> '%s' (handle=%u, %ux%u)",
                  name.c_str(), normalized.c_str(), h, rt.width, rt.height);
         } else {
-            LOGE("UI texture NOT FOUND: '%s' (tried '%s')", name.c_str(), normalized.c_str());
+            // 4) Se não encontrou no BAR, tentar carregar de PNG em assets (ex: titans_menu_parts/)
+            std::string png_name = name;
+            if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
+                png_name = png_name.substr(3);
+            }
+            for (char& c : png_name) {
+                if (c == ' ' || c == '\\' || c == '/') c = '_';
+                else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+            }
+            if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
+                png_name += ".png";
+            }
+            int pw = 0, ph = 0;
+            h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
+            if (h == INVALID_TEXTURE) {
+                h = load_png_asset(png_name, &pw, &ph);
+            }
+            if (h != INVALID_TEXTURE) {
+                rt.handle = h;
+                rt.width = static_cast<uint32_t>(pw);
+                rt.height = static_cast<uint32_t>(ph);
+                texture_cache_[name] = h;
+                texture_dimensions_[name] = glm::ivec2(pw, ph);
+                LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
+                     name.c_str(), png_name.c_str(), h, pw, ph);
+            } else {
+                LOGE("UI texture NOT FOUND: '%s' (tried '%s', '%s')",
+                     name.c_str(), normalized.c_str(), png_name.c_str());
+            }
         }
         return rt;
     };

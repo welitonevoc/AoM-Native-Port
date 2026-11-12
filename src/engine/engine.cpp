@@ -536,6 +536,10 @@ void Engine::render() {
             renderer_->draw_ui_quad({(vw - fw) * 0.5f, (vh - fh) * 0.5f},
                                     {fw, fh}, menu_bg_tex_, 0xFFFFFFFF);
         } else {
+            // Imagem de fundo autêntica do menu principal (main_menu.png)
+            if (main_menu_tex_ != INVALID_TEXTURE) {
+                renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, main_menu_tex_, 0xFFFFFFFF);
+            }
             // 1b. Skybox procedural atmosférico (cubemap ou faces)
             if (skybox_cubemap_ != INVALID_TEXTURE) {
                 renderer_->draw_skybox_cubemap(skybox_cubemap_, 65.0f);
