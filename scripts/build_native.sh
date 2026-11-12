@@ -93,7 +93,7 @@ fi
     -DCMAKE_SHELL="$SHELL_BIN" \
     -DCMAKE_BUILD_TYPE=Release
 
-"$MAKE_BIN" -C "$ROOT/build-m2" SHELL="$SHELL_BIN" -j"$(nproc 2>/dev/null || echo 4)"
+"$MAKE_BIN" -C "$ROOT/build-m2" aom_native SHELL="$SHELL_BIN" -j"$(nproc 2>/dev/null || echo 4)"
 
 # Record the exact source revision represented by this native library. This is
 # consumed by package_apk.sh to prevent packaging a stale build artifact.
