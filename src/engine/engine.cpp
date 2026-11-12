@@ -555,7 +555,7 @@ void Engine::render() {
         }
         renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
                          -water_plane_.w,  // water_level (Y world)
-                         terrain_height_,  // terrain_height
+                         -2.5f,            // terrain_height no leito marinho
                          water_tex_);      // water texture from textures.bar
 
         // 3. Entidades 3D (tropas, prédios, animações)
@@ -603,7 +603,7 @@ void Engine::render() {
         }
         renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
                          -water_plane_.w,  // water_level (Y world)
-                         terrain_height_,  // terrain_height
+                         -2.5f,            // terrain_height no leito marinho para profundidade e azul oceânico autêntico
                          water_tex_);      // water texture from textures.bar
 
         if (model_mesh_ != INVALID_MESH) {
@@ -788,6 +788,8 @@ bool Engine::recreate_renderer(void* native_window) {
     // O contexto antigo morreu: nenhum handle guardado no Engine vale mais (ver invalidate_gpu_handles).
     invalidate_gpu_handles();
     load_core_ui_textures();
+    load_textures();
+    load_models();
     // Após recriar o renderer, todos os handles de OpenGL são invalidados.
     // Limpa o cache para que as texturas sejam recarregadas sob demanda
     // (evita usar handles antigos inválidos em texturas de portal, água, etc.).

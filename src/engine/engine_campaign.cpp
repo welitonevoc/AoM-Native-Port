@@ -199,10 +199,15 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
         scn_path += (is_scx ? ".scx" : ".scn");
     }
 
-    // Tenta usar Mission 1: Omens se for esse cenário (script dedicado)
+    // Tenta usar Mission 1: Omens se for esse cenário (script dedicado com cinemática, dublagem e Kraken)
     bool used_dedicated_mission = false;
     if (scn_path.find("aomsp04") != std::string::npos ||
-        scenario->display_name.find("Omens") != std::string::npos) {
+        scn_path.find("aomsp01") != std::string::npos ||
+        scenario->filename.find("aomsp04") != std::string::npos ||
+        scenario->filename.find("aomsp01") != std::string::npos ||
+        scenario->display_name.find("Omens") != std::string::npos ||
+        scenario->display_name.find("Agouros") != std::string::npos ||
+        scenario->display_name.find("Killer") != std::string::npos) {
         mission_mgr_->init_mission_omens(gameplay_world_.get(), scenarios_bar_.get(),
                                          scn_path, &camera_);
         used_dedicated_mission = true;
@@ -214,7 +219,12 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
         start_generic_mission(scn_path);
     }
 
-    // Terreno 3D da campanha: o height-map vem do próprio cenário da missão
+    // Terreno 3D da campanha: forçar regeneração a partir do cenário escolhido
+    if (terrain_mesh_ != INVALID_MESH && renderer_) {
+        renderer_->destroy_mesh(terrain_mesh_);
+        terrain_mesh_ = INVALID_MESH;
+    }
+
     if (terrain_mesh_ == INVALID_MESH) {
         bool heightmap_loaded = false;
         std::string backslash_path = scn_path;
