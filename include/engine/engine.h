@@ -33,6 +33,7 @@
 #include "campaign/campaign_mission.h"
 #include "game/save_load.h"
 #include "game/victory.h"
+#include "graphics/lighting.h"
 #include "game/god_powers.h"
 #include "assets/cube_map.h"
 
@@ -385,6 +386,7 @@ private:
     TextureHandle load_ddt_texture(const std::string& material_name);
     bool load_game_config();
     bool load_lighting(const std::string& path);
+    bool set_lighting(const std::string& name);
     bool load_strings(const std::string& path);
     std::string tr(const std::string& key) const;
 
@@ -696,6 +698,7 @@ private:
     std::vector<Particle> particles_;
     Camera camera_;
     DirectionalLight dir_light_;
+    LightingManager lighting_mgr_;
 
     /// —— P3.5: Sistema de partículas baseado em .prt ——
     std::unique_ptr<aom::PrtParticleSystem> prt_particles_;

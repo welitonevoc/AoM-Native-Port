@@ -533,6 +533,7 @@ bool Engine::load_archives(const std::string& data_path) {
     }
 
     archives_loaded_ = (textures_bar_->file_count() > 0 || data_bar_->file_count() > 0);
+    load_lighting("default.lgt");
     LOGI("Loaded archives: data=%zu, textures=%zu, models=%zu, scenarios=%zu, sounds=%zu, "
          "anim=%zu, godpowers=%zu (valid=%d)",
          data_bar_->file_count(), textures_bar_->file_count(), models_bar_->file_count(),
@@ -1031,7 +1032,78 @@ TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
 }
 
 bool Engine::load_lighting(const std::string& path) {
-    (void)path;
+    std::string filename = path;
+    const size_t slash = filename.find_last_of("\\/");
+    if (slash != std::string::npos) filename.erase(0, slash + 1);
+
+    // 1. Tentar carregar de APK assets (lighting/<file> ou <file>)
+    std::vector<uint8_t> bytes = read_asset("lighting/" + filename);
+    if (bytes.empty()) bytes = read_asset(filename);
+
+    std::string content;
+    if (!bytes.empty()) {
+        content.assign(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    } else {
+        // 2. Fallback: carregar de arquivo no sistema de arquivos
+        std::vector<std::string> candidates = {
+            path,
+            config_.data_path + "/" + path,
+            config_.data_path + "/data/" + filename,
+            "/sdcard/Documents/AoM/data/" + filename,
+            "/storage/emulated/0/Documents/AoM/data/" + filename
+        };
+        for (const auto& c : candidates) {
+            std::ifstream in(c);
+            if (in.is_open()) {
+                content.assign((std::istreambuf_iterator<char>(in)),
+                               std::istreambuf_iterator<char>());
+                break;
+            }
+        }
+    }
+
+    if (content.empty()) {
+        LOGW("load_lighting: '%s' nao encontrado nos assets nem no disco", path.c_str());
+        return false;
+    }
+
+    bool ok = lighting_mgr_.parse_lgt_text(content, filename);
+    if (ok) {
+        // Se este foi o primeiro conjunto ou o padrão, aplica imediatamente à cena
+        const auto* active = lighting_mgr_.active_set();
+        if (active) {
+            dir_light_.direction = active->calculate_sun_direction();
+            dir_light_.color = active->get_sun_color_normalized();
+            dir_light_.ambient = active->get_ambient_normalized();
+            LOGI("load_lighting: conjunto '%s' carregado e aplicado (sun dir=[%.2f, %.2f, %.2f], sun color=[%.2f, %.2f, %.2f], ambient=[%.2f, %.2f, %.2f])",
+                 active->name.c_str(),
+                 dir_light_.direction.x, dir_light_.direction.y, dir_light_.direction.z,
+                 dir_light_.color.r, dir_light_.color.g, dir_light_.color.b,
+                 dir_light_.ambient.r, dir_light_.ambient.g, dir_light_.ambient.b);
+        }
+    }
+    return ok;
+}
+
+bool Engine::set_lighting(const std::string& name) {
+    if (!lighting_mgr_.set_active(name)) {
+        // Tenta carregar sob demanda se ainda não estiver em cache
+        std::string filename = name;
+        if (filename.size() < 4 || filename.substr(filename.size() - 4) != ".lgt") {
+            filename += ".lgt";
+        }
+        if (!load_lighting(filename)) return false;
+    }
+
+    const auto* active = lighting_mgr_.active_set();
+    if (!active) return false;
+
+    dir_light_.direction = active->calculate_sun_direction();
+    dir_light_.color = active->get_sun_color_normalized();
+    dir_light_.ambient = active->get_ambient_normalized();
+    LOGI("set_lighting: ativado '%s' (dir=[%.2f, %.2f, %.2f])",
+         active->name.c_str(),
+         dir_light_.direction.x, dir_light_.direction.y, dir_light_.direction.z);
     return true;
 }
 

@@ -187,6 +187,7 @@ aapt package -F app.unaligned.apk \
   -0 ttf \
   -0 png \
   -0 ddt \
+  -0 lgt \
   -0 mp3 \
   -0 wav \
   -I "$ANDROID_JAR" -f

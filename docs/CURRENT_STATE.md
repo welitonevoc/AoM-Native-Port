@@ -9,6 +9,8 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ `recreate_renderer()` limpa `texture_cache_`. ❓ conferir se os demais handles (água, terreno, UI) também são zerados.
 - ✅ `ui_layout.cpp`: lê `stateentry`, `hidden`, `statebutton`, `z`, `texturecoords` (UV atlas) e comandos nativos AoM (`gadgetReal`, `modeEnter`, `exit`); remove o prefixo `$$id$$` do texto.
 - ✅ `MyNativeActivity.java`: copia todos os archives base e expansão (`textures2.bar`, `data2.bar`, `models2.bar`, `scenarios2.bar`, `sounds2.bar`, `anim2.bar`, `godpowers2.bar`).
+- ✅ DDT formato 3 (PALETTE 256 cores): corrigido layout RGB555 e offset alpha 4-bit (`ddt_texture.cpp`).
+- ✅ LightingManager e arquivos `.lgt`: 11 presets de iluminação solar/ambiente integrados ao motor e empacotados no APK.
 - ✅ Modularização concluída (Blocos 1 a 10):
   - `src/engine/engine_assets.cpp` (1.096 linhas, 24 métodos de assets/texturas).
   - `src/engine/engine_multiplayer.cpp` (367 linhas de MP integradas e desduplicadas).
