@@ -33,6 +33,7 @@ set(AOM_SOURCES
     src/renderer/camera_track.cpp
     src/ui/ui.cpp
     src/ui/ui_layout.cpp
+    src/ui/button_set.cpp
     src/ui/menu_system.cpp
     src/ai/ai_system.cpp
     src/video/video_player.cpp
@@ -431,6 +432,7 @@ target_link_libraries(test_water_bodies PRIVATE
 add_executable(test_ui_layout
     src/tests/test_ui_layout.cpp
     src/ui/ui_layout.cpp
+    src/ui/button_set.cpp
     src/ui/ui.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp

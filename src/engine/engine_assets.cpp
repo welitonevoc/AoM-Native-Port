@@ -549,6 +549,11 @@ bool Engine::load_game_config() {
                  game_data_.unit_count(), game_data_.god_count(), game_data_.tech_count());
         }
 
+        // Carrega definições de botões da interface (buttonsets.xmb)
+        if (button_set_manager_.load_from_bar(*data_bar_)) {
+            LOGI("ButtonSetManager: %zu buttonsets carregados do BAR", button_set_manager_.count());
+        }
+
         const BarEntry* entry = data_bar_->find("proto.xmb");
         if (entry) {
             const std::vector<uint8_t> raw = data_bar_->extract(*entry);
@@ -560,6 +565,15 @@ bool Engine::load_game_config() {
                     return true;
                 }
             }
+        }
+    }
+
+    // Fallback: carregar buttonsets dos assets do APK se não vier do BAR
+    if (button_set_manager_.count() == 0) {
+        auto btn_bytes = read_asset("buttonsets.xmb");
+        if (!btn_bytes.empty()) {
+            button_set_manager_.load_from_xmb_data(btn_bytes);
+            LOGI("ButtonSetManager: %zu buttonsets carregados dos assets do APK", button_set_manager_.count());
         }
     }
 

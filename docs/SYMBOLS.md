@@ -56,7 +56,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/gameplay.h (2165 linhas) **GRANDE**
 
-## include/engine/engine.h (807 linhas)
+## include/engine/engine.h (815 linhas)
 
 ## include/fonts/font_system.h (93 linhas)
 
@@ -84,11 +84,13 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/renderer/renderer.h (386 linhas)
 
+## include/ui/button_set.h (64 linhas)
+
 ## include/ui/menu_system.h (117 linhas)
 
 ## include/ui/ui.h (206 linhas)
 
-## include/ui/ui_layout.h (139 linhas)
+## include/ui/ui_layout.h (142 linhas)
 
 ## include/video/media_decoder.h (86 linhas)
 
@@ -386,7 +388,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 871-871 (1)
 - `Engine::prev_model` 872-872 (1)
 
-## src/engine/engine_assets.cpp (1171 linhas)
+## src/engine/engine_assets.cpp (1185 linhas)
 - `create_procedural_grass` 40-59 (20)
 - `create_procedural_cliff` 61-81 (21)
 - `create_procedural_water_normal` 83-100 (18)
@@ -397,22 +399,22 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_grn_clips` 303-356 (54)
 - `Engine::select_animation_clip` 358-387 (30)
 - `Engine::load_archives` 389-543 (155)
-- `Engine::load_game_config` 545-576 (32)
-- `Engine::load_textures` 578-678 (101)
-- `Engine::load_skybox_cube` 680-707 (28)
-- `Engine::load_skybox_faces` 709-824 (116)
-- `Engine::load_water_body_textures` 826-867 (42)
-- `Engine::load_prt_particles` 869-895 (27)
-- `Engine::load_models` 897-953 (57)
-- `Engine::build_texture_key_index` 955-969 (15)
-- `Engine::log_bar_names_containing` 971-981 (11)
-- `Engine::load_ddt_texture` 983-1032 (50)
-- `Engine::load_lighting` 1034-1086 (53)
-- `Engine::set_lighting` 1088-1108 (21)
-- `Engine::load_strings` 1110-1113 (4)
-- `Engine::tr` 1115-1119 (5)
-- `Engine::load_ui_strings` 1121-1163 (43)
-- `Engine::get_model_entry` 1165-1168 (4)
+- `Engine::load_game_config` 545-590 (46)
+- `Engine::load_textures` 592-692 (101)
+- `Engine::load_skybox_cube` 694-721 (28)
+- `Engine::load_skybox_faces` 723-838 (116)
+- `Engine::load_water_body_textures` 840-881 (42)
+- `Engine::load_prt_particles` 883-909 (27)
+- `Engine::load_models` 911-967 (57)
+- `Engine::build_texture_key_index` 969-983 (15)
+- `Engine::log_bar_names_containing` 985-995 (11)
+- `Engine::load_ddt_texture` 997-1046 (50)
+- `Engine::load_lighting` 1048-1100 (53)
+- `Engine::set_lighting` 1102-1122 (21)
+- `Engine::load_strings` 1124-1127 (4)
+- `Engine::tr` 1129-1133 (5)
+- `Engine::load_ui_strings` 1135-1177 (43)
+- `Engine::get_model_entry` 1179-1182 (4)
 
 ## src/engine/engine_campaign.cpp (427 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
@@ -443,7 +445,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## src/engine/engine_internal.h (47 linhas)
 
-## src/engine/engine_menus.cpp (1594 linhas) **GRANDE**
+## src/engine/engine_menus.cpp (1595 linhas) **GRANDE**
 - `Engine::create_main_menu` 24-26 (3)
 - `Engine::create_campaign_selection_menu` 29-45 (17)
 - `Engine::create_game_list_menu` 48-71 (24)
@@ -545,16 +547,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::create_single_player_menu` 1214-1216 (3)
 - `Engine::create_random_map_menu` 1218-1220 (3)
 - `Engine::load_ui_layout` 1224-1237 (14)
-- `Engine::show_ui_layout` 1239-1355 (117)
-- `Engine::show_techtree` 1357-1361 (5)
-- `Engine::show_tribute` 1363-1367 (5)
-- `Engine::show_sound_settings` 1369-1373 (5)
-- `Engine::create_cinematics_menu` 1377-1379 (3)
-- `Engine::create_history_menu` 1381-1383 (3)
-- `Engine::create_menu_screen` 1385-1414 (30)
-- `Engine::create_main_menu_from_xmb` 1416-1465 (50)
-- `Engine::create_main_menu_fallback` 1467-1532 (66)
-- `Engine::create_command_panel_from_xmb` 1534-1590 (57)
+- `Engine::show_ui_layout` 1239-1356 (118)
+- `Engine::show_techtree` 1358-1362 (5)
+- `Engine::show_tribute` 1364-1368 (5)
+- `Engine::show_sound_settings` 1370-1374 (5)
+- `Engine::create_cinematics_menu` 1378-1380 (3)
+- `Engine::create_history_menu` 1382-1384 (3)
+- `Engine::create_menu_screen` 1386-1415 (30)
+- `Engine::create_main_menu_from_xmb` 1417-1466 (50)
+- `Engine::create_main_menu_fallback` 1468-1533 (66)
+- `Engine::create_command_panel_from_xmb` 1535-1591 (57)
 
 ## src/engine/engine_multiplayer.cpp (399 linhas)
 - `Engine::open_multiplayer` 12-38 (27)
@@ -1012,6 +1014,14 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `test_fps_label` 100-109 (10)
 - `main` 111-118 (8)
 
+## src/ui/button_set.cpp (128 linhas)
+- `trim` 25-30 (6)
+- `parse_floats` 32-40 (9)
+- `ButtonSetManager::load_from_xmb_data` 44-97 (54)
+- `ButtonSetManager::load_from_bar` 99-113 (15)
+- `ButtonSetManager::get_set` 115-121 (7)
+- `ButtonSetManager::has_set` 123-125 (3)
+
 ## src/ui/menu_system.cpp (247 linhas)
 - `MenuSystem::MenuSystem` 15-21 (7)
 - `MenuSystem::initialize` 25-28 (4)
@@ -1052,19 +1062,19 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `UIManager::add_background_quad` 419-433 (15)
 - `UIManager::hit_test` 435-438 (4)
 
-## src/ui/ui_layout.cpp (652 linhas)
-- `to_lower` 23-28 (6)
-- `strip_string_ids` 33-43 (11)
-- `parse_floats` 46-54 (9)
-- `trim` 57-67 (11)
-- `UILayoutManager::convert_size1024` 75-94 (20)
-- `UILayoutManager::parse_color` 96-102 (7)
-- `UILayoutManager::parse_color_rgba` 104-114 (11)
-- `UILayoutManager::parse_color_rgba` 116-125 (10)
-- `UILayoutManager::load_layout` 127-146 (20)
-- `UILayoutManager::load_layout_from_data` 148-187 (40)
-- `UILayoutManager::parse_gadget` 189-357 (169)
-- `apply_layout_to_ui` 359-649 (291)
+## src/ui/ui_layout.cpp (699 linhas)
+- `to_lower` 24-29 (6)
+- `strip_string_ids` 34-44 (11)
+- `parse_floats` 47-55 (9)
+- `trim` 58-68 (11)
+- `UILayoutManager::convert_size1024` 76-95 (20)
+- `UILayoutManager::parse_color` 97-103 (7)
+- `UILayoutManager::parse_color_rgba` 105-115 (11)
+- `UILayoutManager::parse_color_rgba` 117-126 (10)
+- `UILayoutManager::load_layout` 128-147 (20)
+- `UILayoutManager::load_layout_from_data` 149-188 (40)
+- `UILayoutManager::parse_gadget` 190-358 (169)
+- `apply_layout_to_ui` 360-696 (337)
 
 ## src/video/media_decoder.cpp (371 linhas)
 - `MediaDecoder::MediaDecoder` 60-60 (1)

@@ -1344,7 +1344,8 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
 
     size_t created = apply_layout_to_ui(*layout, ui_.get(),
                                          static_cast<int>(vw), static_cast<int>(vh),
-                                         action_callbacks, texture_resolver);
+                                         action_callbacks, texture_resolver,
+                                         &button_set_manager_);
     LOGI("[DIAG] show_ui_layout('uipregamenew.xmb'): %zu elementos criados", created);
 
     // Resolver textos $$ID$$ usando as strings do Engine

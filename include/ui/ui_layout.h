@@ -18,6 +18,8 @@
 
 namespace aom {
 
+class ButtonSetManager;
+
 /// Coordenadas de um gadget em tela (já convertidas de size1024 para pixels)
 struct UIGadgetRect {
     float x = 0.0f;
@@ -133,6 +135,7 @@ using TextureResolverFn = std::function<ResolvedTexture(const std::string&)>;
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                            int screen_w, int screen_h,
                            const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
-                           TextureResolverFn texture_resolver = nullptr);
+                           TextureResolverFn texture_resolver = nullptr,
+                           const ButtonSetManager* button_sets = nullptr);
 
 } // namespace aom

@@ -21,6 +21,7 @@
 #include "data/proto_unit.h"
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
+#include "ui/button_set.h"
 #include "ui/menu_system.h"
 #include "audio/audio.h"
 #include "data/sound_def.h"
@@ -336,6 +337,10 @@ public:
     /// Retorna o gerenciador de layouts para inspeção.
     [[nodiscard]] UILayoutManager& ui_layout_manager() { return ui_layout_manager_; }
 
+    /// Retorna o gerenciador de conjuntos de botões (buttonsets).
+    [[nodiscard]] const ButtonSetManager& button_set_manager() const { return button_set_manager_; }
+    [[nodiscard]] ButtonSetManager& button_set_manager() { return button_set_manager_; }
+
     /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
     /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
     [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name);
@@ -584,6 +589,9 @@ private:
 
     /// Gerenciador de layouts de UI do data.bar (XMB: uitechtree.xml, uitributedlg.xml, etc.)
     UILayoutManager ui_layout_manager_;
+
+    /// Gerenciador de buttonsets do data.bar / assets (buttonsets.xmb)
+    ButtonSetManager button_set_manager_;
 
     std::unordered_map<std::string, aom::TextureHandle> texture_cache_;
     /// Dimensões (largura x altura) de cada textura carregada (para 9-slice)

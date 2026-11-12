@@ -12,6 +12,7 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ DDT formato 3 (PALETTE 256 cores): corrigido layout RGB555 e offset alpha 4-bit (`ddt_texture.cpp`).
 - ✅ LightingManager e arquivos `.lgt`: 11 presets de iluminação solar/ambiente integrados ao motor e empacotados no APK.
 - ✅ Cenários `.scn`/`.scx`: suporte unificado e resolução flexível de caminhos no `scenarios.bar`/`scenarios2.bar` e disco.
+- ✅ `ButtonSetManager` e `buttonsets.xmb`: decodificação e aplicação de texturas e UVs para botões (`buttonLong`, `checkBtn`, etc.) e empacotamento no APK.
 - ✅ Modularização concluída (Blocos 1 a 10):
   - `src/engine/engine_assets.cpp` (1.096 linhas, 24 métodos de assets/texturas).
   - `src/engine/engine_multiplayer.cpp` (367 linhas de MP integradas e desduplicadas).

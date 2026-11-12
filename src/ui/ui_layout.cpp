@@ -1,4 +1,5 @@
 #include "ui/ui_layout.h"
+#include "ui/button_set.h"
 
 #include <algorithm>
 #include <cctype>
@@ -359,7 +360,8 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                            int screen_w, int screen_h,
                            const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
-                           TextureResolverFn texture_resolver) {
+                           TextureResolverFn texture_resolver,
+                           const ButtonSetManager* button_sets) {
     if (!ui) return 0;
 
     size_t created = 0;
@@ -561,8 +563,53 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     btn->label = strip_string_ids(gd.text); // Remove $$ID$$ inicial, ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
                     btn->text_color = text_color;   // texto ouro, NÃO cinza
                     btn->text_size = scaled_text_size;
-                    // Resolver textura de fundo via texture_resolver (engine fornece)
-                    if (!gd.bg_texture.empty() && texture_resolver) {
+                    // 1) Resolver texturas a partir de ButtonSet (usebuttonset ou padrão do AoM)
+                    std::string btn_set_name;
+                    if (gd.extra_attrs.count("usebuttonset")) {
+                        btn_set_name = gd.extra_attrs.at("usebuttonset");
+                    } else if (button_sets && gd.bg_texture.empty() && !gd.has_texture_coords) {
+                        if (button_sets->has_set("buttonLong")) {
+                            btn_set_name = "buttonLong";
+                        }
+                    }
+
+                    if (button_sets && !btn_set_name.empty() && texture_resolver) {
+                        const auto* bs = button_sets->get_set(btn_set_name);
+                        if (bs) {
+                            if (!bs->normal_tex.empty()) {
+                                ResolvedTexture rt = texture_resolver(bs->normal_tex);
+                                if (rt.handle != INVALID_TEXTURE) {
+                                    btn->normal_tex = rt.handle;
+                                    btn->tex_width = rt.width;
+                                    btn->tex_height = rt.height;
+                                }
+                            }
+                            if (!bs->depressed_tex.empty()) {
+                                ResolvedTexture rt = texture_resolver(bs->depressed_tex);
+                                if (rt.handle != INVALID_TEXTURE) {
+                                    btn->pressed_tex = rt.handle;
+                                } else {
+                                    btn->pressed_tex = btn->normal_tex;
+                                }
+                            } else {
+                                btn->pressed_tex = btn->normal_tex;
+                            }
+                            if (bs->has_texture_coords && !btn->has_uv) {
+                                btn->has_uv = true;
+                                btn->uv_min = glm::vec2(bs->texture_coords.x, bs->texture_coords.y);
+                                btn->uv_max = glm::vec2(bs->texture_coords.z, bs->texture_coords.w);
+                            }
+                            if (btn->tex_width > 0 && btn->tex_height > 0) {
+                                float bw = static_cast<float>(btn->tex_width) * 0.10f;
+                                float bh = static_cast<float>(btn->tex_height) * 0.10f;
+                                btn->border_left = btn->border_right = std::max(8.0f, bw);
+                                btn->border_top = btn->border_bottom = std::max(8.0f, bh);
+                            }
+                        }
+                    }
+
+                    // 2) Se não veio de buttonset, resolver textura de fundo via gd.bg_texture
+                    if (btn->normal_tex == INVALID_TEXTURE && !gd.bg_texture.empty() && texture_resolver) {
                         ResolvedTexture rt = texture_resolver(gd.bg_texture);
                         if (rt.handle != INVALID_TEXTURE) {
                             btn->normal_tex = rt.handle;
