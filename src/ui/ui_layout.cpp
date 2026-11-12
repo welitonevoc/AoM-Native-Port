@@ -367,75 +367,75 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     // Estes são gadgets tipo "gadget" com has_background=true
     // Devem ser renderizados PRIMEIRO (z-order inferior)
     // ============================================================
+    const float scale = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
+    const float offset_center_x = std::max(0.0f, (static_cast<float>(screen_w) - UILayoutManager::kRefWidth * scale) * 0.5f);
+
     std::function<void(const UIGadgetDef&, float, float)> apply_backgrounds =
-        [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
+        [&](const UIGadgetDef& gd, float, float) {
             if (gd.hidden) return;
 
-            float x = offset_x + gd.rect.x;
-            float y = offset_y + gd.rect.y;
-            float w = gd.rect.w;
-            float h = gd.rect.h;
-
-            float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
-            float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
-            x = (offset_x + gd.rect.x) * sx;
-            y = (offset_y + gd.rect.y) * sy;
-            w = gd.rect.w * sx;
-            h = gd.rect.h * sy;
+            // size1024 no AoM é coordenada absoluta de tela em base 1024x768
+            float x = offset_center_x + gd.rect.x * scale;
+            float y = gd.rect.y * scale;
+            float w = gd.rect.w * scale;
+            float h = gd.rect.h * scale;
 
             // Background panels: type="gadget" COM has_background=true
             // Criamos como elemento NÃO interativo - apenas painel visual de fundo
             if (gd.type == "gadget" && gd.has_background) {
-                // Cor de fundo: usa bg_color do XMB se não houver textura
-                uint32_t panel_color = 0x00000000; // transparente por padrão
-                if (!gd.bg_texture.empty()) {
-                    panel_color = 0xFFFFFFFF; // opaco para mostrar a textura
-                } else if (gd.bg_color_set) {
-                    // Ignora azul puro (0,0,255) e preto (0,0,0) que são placeholders do XMB
-                    if (gd.bg_color == glm::vec3(0, 0, 255) || gd.bg_color == glm::vec3(0, 0, 0)) {
-                        panel_color = 0xAA221105; // Pedra escura AoM (translucida)
+                // Tenta resolver a textura primeiro se houver
+                TextureHandle tex_handle = INVALID_TEXTURE;
+                if (!gd.bg_texture.empty() && texture_resolver) {
+                    ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                    tex_handle = rt.handle;
+                    if (tex_handle != INVALID_TEXTURE) {
+                        LOGI("UI Layout: background textura '%s' resolvida (handle=%u)",
+                             gd.bg_texture.c_str(), rt.handle);
                     } else {
+                        LOGW("UI Layout: background textura não encontrada: %s", gd.bg_texture.c_str());
+                    }
+                }
+
+                // SÓ desenha painel de fundo se:
+                // a) Teve textura resolvida com sucesso, OU
+                // b) Não tem textura, mas tem cor explícita definida no XMB que não seja azul/preto placeholder
+                uint32_t panel_color = 0x00000000;
+                if (tex_handle != INVALID_TEXTURE) {
+                    panel_color = 0xFFFFFFFF; // Opaco para exibir textura
+                } else if (gd.bg_texture.empty() && gd.bg_color_set) {
+                    if (gd.bg_color != glm::vec3(0, 0, 255) && gd.bg_color != glm::vec3(0, 0, 0)) {
                         panel_color = UILayoutManager::parse_color_rgba(gd.bg_color);
                     }
                 }
 
-                auto* btn = ui->add_button(
-                    {x, y}, {w, h},
-                    []() {}, // callback vazio (não interativo)
-                    panel_color,
-                    0x00000000  // pressed color também transparente
-                );
-                if (btn) {
-                    btn->interactive = false; // painel de fundo não recebe toque
-                    btn->label = "";
-                    btn->text_size = 0;
-                    btn->normal_tex = INVALID_TEXTURE;
-                    btn->pressed_tex = INVALID_TEXTURE;
-                    if (gd.has_texture_coords) {
-                        btn->has_uv = true;
-                        btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
-                        btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
-                    }
-                    // Resolver textura de fundo do XMB via texture_resolver
-                    if (!gd.bg_texture.empty() && texture_resolver) {
-                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
-                        if (rt.handle != INVALID_TEXTURE) {
-                            btn->normal_tex = rt.handle;
-                            btn->current_color = 0xFFFFFFFF; // Opaco para mostrar a textura
-                            LOGI("UI Layout: background textura '%s' resolvida (handle=%u)",
-                                 gd.bg_texture.c_str(), rt.handle);
-                        } else {
-                            LOGW("UI Layout: background textura não encontrada: %s", gd.bg_texture.c_str());
+                // Se não tem textura nem cor válida, NÃO cria o quad (permanece transparente)
+                if (panel_color != 0x00000000 || tex_handle != INVALID_TEXTURE) {
+                    auto* btn = ui->add_button(
+                        {x, y}, {w, h},
+                        []() {}, // callback vazio (não interativo)
+                        panel_color,
+                        0x00000000  // pressed color também transparente
+                    );
+                    if (btn) {
+                        btn->interactive = false; // painel de fundo não recebe toque
+                        btn->label = "";
+                        btn->text_size = 0;
+                        btn->normal_tex = tex_handle;
+                        btn->pressed_tex = tex_handle;
+                        btn->current_color = panel_color;
+                        if (gd.has_texture_coords) {
+                            btn->has_uv = true;
+                            btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
+                            btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
                         }
+                        ++created;
                     }
-                    ++created;
                 }
             }
 
-            // Recursão para filhos (backgrounds aninhados).
-            // Passa offset NÃO escalado (reference coords): o filho escala uma vez só.
+            // Recursão para filhos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_backgrounds(child, offset_x + gd.rect.x, offset_y + gd.rect.y);
+                apply_backgrounds(child, 0.0f, 0.0f);
             }
         };
 
@@ -444,34 +444,24 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     // Renderizados DEPOIS dos backgrounds (z-order superior)
     // ============================================================
     std::function<void(const UIGadgetDef&, float, float)> apply_interactive =
-        [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
+        [&](const UIGadgetDef& gd, float, float) {
             if (gd.hidden) return;
 
-            float x = offset_x + gd.rect.x;
-            float y = offset_y + gd.rect.y;
-            float w = gd.rect.w;
-            float h = gd.rect.h;
+            // size1024 no AoM é coordenada absoluta de tela em base 1024x768
+            float x = offset_center_x + gd.rect.x * scale;
+            float y = gd.rect.y * scale;
+            float w = gd.rect.w * scale;
+            float h = gd.rect.h * scale;
 
-            float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
-            float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
-            x = (offset_x + gd.rect.x) * sx;
-            y = (offset_y + gd.rect.y) * sy;
-            w = gd.rect.w * sx;
-            h = gd.rect.h * sy;
-
-            float scaled_text_size = std::max(14.0f, gd.text_size * sy);
+            float scaled_text_size = std::max(14.0f, gd.text_size * scale);
 
             // Botões interativos (type="button" ou "statebutton", case-insensitive)
             const std::string type_lower = to_lower(gd.type);
             if (type_lower == "button" || type_lower == "statebutton") {
-                // Limitar tamanho máximo do botão para evitar que estiquem demais
-                const float max_btn_height = 64.0f;
-                const float max_btn_width = 380.0f;
-                float btn_w = std::min(w, max_btn_width);
-                float btn_h = std::min(h, max_btn_height);
-                // Centralizar se limitou
-                float btn_x = x + (w - btn_w) * 0.5f;
-                float btn_y = y + (h - btn_h) * 0.5f;
+                float btn_w = w;
+                float btn_h = h;
+                float btn_x = x;
+                float btn_y = y;
 
                 // Resolver texto: suporta formato $$ID$$ para strings localizadas
                 std::string resolved_text = gd.text;
@@ -589,10 +579,13 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                             btn->border_bottom = bh;
                         } else {
                             // ← FALLBACK defensivo: textura falhou, NÃO deixa retângulo branco
-                            // Usa pedra escura AoM para que o botão seja legível mesmo sem textura
+                            // Usa pedra escura AoM com texto ouro para que o botão seja perfeitamente legível
                             btn->normal_color = 0xAA221105;
                             btn->pressed_color = 0xAA332211;
                             btn->current_color = btn->normal_color;
+                            btn->text_color = 0xFFFFD000;
+                            btn->normal_tex = INVALID_TEXTURE;
+                            btn->pressed_tex = INVALID_TEXTURE;
                             LOGW("UI Layout: textura nao encontrada: %s", gd.bg_texture.c_str());
                         }
                     }
@@ -634,10 +627,9 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                 // Não cria elemento visual, apenas passa offset para filhos
             }
 
-            // Recursão para filhos interativos.
-            // Passa offset NÃO escalado (reference coords): o filho escala uma vez só.
+            // Recursão para filhos interativos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_interactive(child, offset_x + gd.rect.x, offset_y + gd.rect.y);
+                apply_interactive(child, 0.0f, 0.0f);
             }
         };
 

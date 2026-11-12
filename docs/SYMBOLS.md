@@ -1049,7 +1049,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `UIManager::add_background_quad` 419-433 (15)
 - `UIManager::hit_test` 435-438 (4)
 
-## src/ui/ui_layout.cpp (658 linhas)
+## src/ui/ui_layout.cpp (650 linhas)
 - `to_lower` 23-28 (6)
 - `strip_string_ids` 33-41 (9)
 - `parse_floats` 44-52 (9)
@@ -1061,7 +1061,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `UILayoutManager::load_layout` 125-144 (20)
 - `UILayoutManager::load_layout_from_data` 146-185 (40)
 - `UILayoutManager::parse_gadget` 187-355 (169)
-- `apply_layout_to_ui` 357-655 (299)
+- `apply_layout_to_ui` 357-647 (291)
 
 ## src/video/media_decoder.cpp (371 linhas)
 - `MediaDecoder::MediaDecoder` 60-60 (1)
