@@ -210,6 +210,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
 
     // Para outros cenários, usa missão genérica (terrain + entidades básicas)
     if (!used_dedicated_mission) {
+        mission_mgr_.reset();
         start_generic_mission(scn_path);
     }
 
