@@ -279,6 +279,9 @@ public:
 
     bool recreate_renderer(void* native_window);
     void release_renderer();
+    /// Zera TODOS os handles de GPU (texturas/malhas). Chamar quando o contexto GL é destruído/recriado:
+    /// handles são nomes GL crus e, num contexto novo, os mesmos números passam a designar outras texturas.
+    void invalidate_gpu_handles();
 
     [[nodiscard]] EngineState state() const { return state_; }
     void set_callbacks(const EngineCallbacks& callbacks) { callbacks_ = callbacks; }

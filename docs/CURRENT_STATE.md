@@ -6,7 +6,7 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Resolvedor tolerante de nomes de textura (`texture_key`, logs `[TEX]`) em `load_ddt_texture`.
 - ✅ DDT formatos 5 e 6: decodificação com escolha automática de layout (`ddt5_auto.h` e `ddt6_auto.h`).
 - ✅ Toque: `interactive` + percurso reverso dos botões; `color == 0` não vira mais branco opaco.
-- ✅ `recreate_renderer()` limpa `texture_cache_`. ❓ conferir se os demais handles (água, terreno, UI) também são zerados.
+- ✅ `recreate_renderer()` chama `invalidate_gpu_handles()`: zera todos os handles de GPU (UI, malhas, terreno, água) evitando colisão de texturas.
 - ✅ `ui_layout.cpp`: lê `stateentry`, `hidden`, `statebutton`, `z`, `texturecoords` (UV atlas) e comandos nativos AoM (`gadgetReal`, `modeEnter`, `exit`); remove o prefixo `$$id$$` do texto.
 - ✅ `MyNativeActivity.java`: copia todos os archives base e expansão (`textures2.bar`, `data2.bar`, `models2.bar`, `scenarios2.bar`, `sounds2.bar`, `anim2.bar`, `godpowers2.bar`).
 - ✅ DDT formato 3 (PALETTE 256 cores): corrigido layout RGB555 e offset alpha 4-bit (`ddt_texture.cpp`).

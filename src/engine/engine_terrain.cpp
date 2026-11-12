@@ -195,6 +195,14 @@ void Engine::add_skybox_quad(std::vector<Vertex>& verts, std::vector<uint32_t>& 
 void Engine::generate_terrain() {
     if (!renderer_) return;
     load_textures();
+    LOGI("[GLHANDLES] terreno: base=%u blend=%u bank=%u agua=%u | UI: splash=%u loading=%u menu=%u botao=%u",
+         terrain_texture_, terrain_blend_tex_, terrain_bank_tex_, water_normal_tex_,
+         splash_tex_, loading_tex_, main_menu_tex_, button_main_tex_);
+    if (terrain_texture_ != INVALID_TEXTURE &&
+        (terrain_texture_ == splash_tex_ || terrain_texture_ == loading_tex_ ||
+         terrain_texture_ == main_menu_tex_ || terrain_texture_ == button_main_tex_)) {
+        LOGE("[GLHANDLES] COLISÃO: a textura do terreno tem o mesmo handle de uma textura de UI (handle obsoleto)");
+    }
 
     const int GRID = 48;
     const float SIZE = 48.0f;
@@ -269,6 +277,9 @@ void Engine::generate_terrain() {
 // ── P2.1: Terreno Real — Loader de Height-Map de Cenários .scn ───────────────
 bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
     if (!renderer_) return false;
+    if (terrain_texture_ == INVALID_TEXTURE) {
+        load_textures();
+    }
 
     // Ler arquivo do scenarios.bar ou do filesystem
     std::vector<uint8_t> data;

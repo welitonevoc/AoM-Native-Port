@@ -750,6 +750,34 @@ void Engine::resize(int width, int height) {
     }
 }
 
+void Engine::invalidate_gpu_handles() {
+    // UI
+    splash_tex_ = loading_tex_ = main_menu_tex_ = INVALID_TEXTURE;
+    button_main_tex_ = button_clicked_tex_ = minimap_tex_ = INVALID_TEXTURE;
+    menu_bg_tex_ = INVALID_TEXTURE; menu_bg_w_ = menu_bg_h_ = 0;
+    cinematic_frame_tex_ = INVALID_TEXTURE;
+    // Modelos / partículas
+    model_mesh_ = hoplite_mesh_ = INVALID_MESH;
+    model_texture_ = hoplite_texture_ = INVALID_TEXTURE;
+    model_cache_.clear();
+    prt_particle_tex_ = INVALID_TEXTURE;
+    prt_particles_.reset();
+    // Céu
+    skydome_mesh_ = skybox_mesh_ = INVALID_MESH;
+    skydome_texture_ = skybox_cubemap_ = INVALID_TEXTURE;
+    for (auto& f : skybox_faces_) f = INVALID_TEXTURE;
+    // Terreno / água / névoa
+    terrain_mesh_ = INVALID_MESH;
+    terrain_texture_ = terrain_blend_tex_ = INVALID_TEXTURE;
+    terrain_bank_tex_ = terrain_outer_bank_tex_ = INVALID_TEXTURE;
+    water_normal_tex_ = water_tex_ = INVALID_TEXTURE;
+    fog_tex_ = INVALID_TEXTURE;
+    // Caches por nome
+    texture_cache_.clear();
+    texture_dimensions_.clear();
+    texture_miss_logged_.clear();
+}
+
 bool Engine::recreate_renderer(void* native_window) {
     if (!renderer_) return init_renderer(config_, native_window);
     renderer_->shutdown();
@@ -757,6 +785,8 @@ bool Engine::recreate_renderer(void* native_window) {
         LOGE("Failed to recreate renderer");
         return false;
     }
+    // O contexto antigo morreu: nenhum handle guardado no Engine vale mais (ver invalidate_gpu_handles).
+    invalidate_gpu_handles();
     load_core_ui_textures();
     // Após recriar o renderer, todos os handles de OpenGL são invalidados.
     // Limpa o cache para que as texturas sejam recarregadas sob demanda
