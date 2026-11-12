@@ -45,6 +45,10 @@ struct UIGadgetDef {
     std::string title_bar;
     bool hidden = false;        ///< Se true, gadget e filhos não são renderizados
     bool has_background = false;///< Se true, gadget possui background/textura definido no XMB
+    glm::vec4 texture_coords{0.0f, 0.0f, 1.0f, 1.0f}; ///< UVs [u0, v0, u1, v1]
+    bool has_texture_coords = false;
+    std::string command;        ///< Comando nativo AoM (<command> ou atributo)
+    int z = 0;                  ///< Z-order do gadget
     std::vector<UIGadgetDef> children;  ///< Gadgets aninhados
     std::unordered_map<std::string, std::string> extra_attrs; ///< Outros atributos
 };

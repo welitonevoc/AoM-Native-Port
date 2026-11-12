@@ -1,22 +1,14 @@
-﻿#include "engine/engine.h"
+#include "engine/engine.h"
+#include "engine_internal.h"
 #include "network/network_manager.h"
+#include "ui/ui.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <string>
 
-#define LOG_TAG "AoM-Engine"
-#ifdef __ANDROID__
-#include <android/log.h>
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#else
-#define LOGI(...) std::printf(__VA_ARGS__)
-#define LOGW(...) std::printf(__VA_ARGS__)
-#define LOGE(...) std::fprintf(stderr, __VA_ARGS__)
-#endif
-
 namespace aom {
+
 void Engine::open_multiplayer() {
     LOGI("Opening Multiplayer...");
     auto& nm = net::NetworkManager::instance();
@@ -45,13 +37,9 @@ void Engine::open_multiplayer() {
     set_state(EngineState::MULTIPLAYER_LAN);
 }
 
-
-
 void Engine::create_multiplayer_menu() {
     open_multiplayer();
 }
-
-
 
 void Engine::create_multiplayer_lan_menu() {
     clear_ui();
@@ -69,7 +57,7 @@ void Engine::create_multiplayer_lan_menu() {
     const float btn_h = 42.0f;
     const float gap = 12.0f;
 
-    // â”€â”€ Coluna 1: Hospedar & Conexao Direta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Coluna 1: Hospedar & Conexao Direta ────────────────────────────
     float y1 = vh * 0.18f;
     ui_->add_label("COORDENAR PARTIDA (HOST):", {col1_x, y1}, 20.0f, 0xFFFFD000);
     y1 += 32.0f;
@@ -132,7 +120,7 @@ void Engine::create_multiplayer_lan_menu() {
         create_multiplayer_lan_menu();
     });
 
-    // â”€â”€ Coluna 2: Jogos em LAN Descobertos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Coluna 2: Jogos em LAN Descobertos ──────────────────────────────
     float y2 = vh * 0.18f;
     ui_->add_label("JOGOS EM LAN DETECTADOS (UDP 2300):", {col2_x, y2}, 20.0f, 0xFFFFD000);
     y2 += 32.0f;
@@ -164,15 +152,13 @@ void Engine::create_multiplayer_lan_menu() {
         create_multiplayer_lan_menu();
     });
 
-    // â”€â”€ Barra Inferior: Voltar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Barra Inferior: Voltar ─────────────────────────────────────────
     float back_w = 260.0f;
     ui_->add_button({(vw - back_w) * 0.5f, vh * 0.86f}, {back_w, 46.0f}, "VOLTAR AO MENU", [this]() {
         net::NetworkManager::instance().stop_lan_discovery();
         return_to_main_menu();
     });
 }
-
-
 
 void Engine::create_multiplayer_lobby_menu() {
     clear_ui();
@@ -187,7 +173,7 @@ void Engine::create_multiplayer_lobby_menu() {
     bool is_host = nm.is_host();
     int my_slot = nm.my_slot_id();
 
-    // â”€â”€ Cabecalho do Lobby â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Cabecalho do Lobby ─────────────────────────────────────────────
     std::string role_str = is_host ? "[HOST / COORDENADOR]" : "[CLIENTE]";
     char title_buf[128];
     std::snprintf(title_buf, sizeof(title_buf), "SALA MULTIJOGADOR: %s - %s",
@@ -199,7 +185,7 @@ void Engine::create_multiplayer_lobby_menu() {
                   net::DEFAULT_AOM_PORT, my_slot + 1, is_host ? "Host" : "Jogador");
     ui_->add_label(sub_buf, {vw * 0.05f, vh * 0.09f}, 14.0f, 0xFFCCCCCC);
 
-    // â”€â”€ Tabela de Slots (Esquerda / Centro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Tabela de Slots (Esquerda / Centro) ────────────────────────────
     const float slot_x = vw * 0.05f;
     const float slot_w = vw * 0.58f;
     const float slot_h = 36.0f;
@@ -299,7 +285,7 @@ void Engine::create_multiplayer_lobby_menu() {
         }
     }
 
-    // â”€â”€ Coluna Direita: Configuracoes & Bate-Papo (Taunts) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Coluna Direita: Configuracoes & Bate-Papo (Taunts) ─────────────
     const float right_x = vw * 0.66f;
     const float right_w = vw * 0.29f;
     float right_y = vh * 0.14f;
@@ -374,7 +360,7 @@ void Engine::create_multiplayer_lobby_menu() {
     ui_->add_button({right_x + tw + 6.0f, right_y}, {tw, 32.0f}, "25 (Ataque)", [&nm]() { nm.send_chat("25"); });
     ui_->add_button({right_x + (tw + 6.0f) * 2.0f, right_y}, {tw, 32.0f}, "33 (GG)", [&nm]() { nm.send_chat("33"); });
 
-    // â”€â”€ Barra Inferior: Acoes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Barra Inferior: Acoes ──────────────────────────────────────────
     if (is_host) {
         float launch_w = 300.0f;
         ui_->add_button({(vw - launch_w) * 0.5f, vh * 0.86f}, {launch_w, 46.0f},
@@ -391,41 +377,22 @@ void Engine::create_multiplayer_lobby_menu() {
     });
 }
 
-
-
 void Engine::network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port) {
     LOGI("Iniciando host multiplayer...");
-    if (network_manager_) {
-        network_manager_->host_game(game_name, player_name, port);
-    }
+    net::NetworkManager::instance().host_game(game_name, player_name, port);
 }
-
-
 
 void Engine::network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name) {
     LOGI("Tentando conectar em: %s:%d", host_ip.c_str(), port);
-    if (network_manager_) {
-        network_manager_->join_game(host_ip, port, player_name);
-    }
+    net::NetworkManager::instance().join_game(host_ip, port, player_name);
 }
-
-
 
 void Engine::network_leave_session() {
-    if (network_manager_) {
-        network_manager_->leave_session();
-    }
+    net::NetworkManager::instance().leave_session();
 }
-
-
 
 void Engine::network_update(float dt) {
-    if (network_manager_) {
-        network_manager_->update(dt);
-    }
+    net::NetworkManager::instance().update(dt);
 }
-
-
-
 
 } // namespace aom

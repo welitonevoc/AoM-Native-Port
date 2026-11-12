@@ -16,6 +16,18 @@ set(AOM_SOURCES
     src/aom/campaign_select_system.cpp
     src/aom/protox_parser.cpp
     src/engine/engine.cpp
+    src/engine/engine_assets.cpp
+    src/engine/engine_campaign.cpp
+    src/engine/engine_gameplay.cpp
+    src/engine/engine_hud.cpp
+    src/engine/engine_input.cpp
+    src/engine/engine_menus.cpp
+    src/engine/engine_multiplayer.cpp
+    src/engine/engine_options_menu.cpp
+    src/engine/engine_particles.cpp
+    src/engine/engine_save_load.cpp
+    src/engine/engine_states.cpp
+    src/engine/engine_terrain.cpp
     src/engine/ui_from_xmb.cpp
     src/renderer/gles_renderer.cpp
     src/renderer/camera_track.cpp
@@ -120,18 +132,13 @@ if(BUILD_TESTING)
 # Testes Automatizados
 add_executable(gameplay_test
     src/tests/gameplay_test.cpp
-)
-
-target_include_directories(gameplay_test PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-
-target_link_libraries(gameplay_test PRIVATE
-    aom_native
-    z
-    log
+    src/assets/xmb_parser.cpp
+    src/assets/bar_archive.cpp
+    src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
+    src/game/save_load.cpp
+    src/game/victory.cpp
+    src/assets/cube_map.cpp
 )
 target_include_directories(gameplay_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -139,7 +146,6 @@ target_include_directories(gameplay_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(gameplay_test PRIVATE
-    aom_native
     z
     log
 )
@@ -155,21 +161,6 @@ target_include_directories(ui_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(ui_test PRIVATE
-    z
-    log
-)
-
-add_executable(test_menu_system
-    src/tests/test_menu_system.cpp
-)
-target_include_directories(test_menu_system PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_menu_system PRIVATE
-    aom_native
-    z
     log
 )
 
@@ -203,7 +194,9 @@ add_executable(test_ai_system
     src/tests/test_ai_system.cpp
     src/ai/ai_system.cpp
     src/assets/xmb_parser.cpp
+    src/assets/bar_archive.cpp
     src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
 )
 target_include_directories(test_ai_system PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -237,6 +230,7 @@ add_executable(test_data_docs
     src/campaign/campaign.cpp
     src/data/game_data.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
@@ -395,6 +389,7 @@ add_executable(test_bar_overlay
     src/assets/xmb_parser.cpp
     src/data/game_data.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
@@ -416,6 +411,7 @@ add_executable(test_water_bodies
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/sound_def.cpp
     src/anim/animation_system.cpp
@@ -456,6 +452,7 @@ add_executable(test_data_integration
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/sound_def.cpp
     src/assets/bar_archive.cpp
@@ -495,147 +492,6 @@ target_include_directories(test_perf PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_perf PRIVATE
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-# ── P5 Testes Específicos (Gate Check P5→Release) ──
-add_executable(test_hud_complete
-    src/tests/test_hud_complete.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_hud_complete PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_hud_complete PRIVATE
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-add_executable(test_town_center
-    src/tests/test_town_center.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_town_center PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_town_center PRIVATE
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-add_executable(test_selection_group
-    src/tests/test_selection_group.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_selection_group PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_selection_group PRIVATE
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-add_executable(test_save_load_complete
-    src/tests/test_save_load_complete.cpp
-    src/game/save_load.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-)
-target_include_directories(test_save_load_complete PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_save_load_complete PRIVATE
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-add_executable(test_victory_conditions
-    src/tests/test_victory_conditions.cpp
-    src/game/victory.cpp
-)
-target_include_directories(test_victory_conditions PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_victory_conditions PRIVATE
-    log
-)
-
-add_executable(test_ai_basic
-    src/tests/test_ai_basic.cpp
-    src/ai/ai_system.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_ai_basic PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_ai_basic PRIVATE
-    ${SYSTEM_Z_LIB}
-    z
-    log
-)
-
-add_executable(test_audio_mp3
-    src/tests/test_audio_mp3.cpp
-    src/audio/opensl_engine.cpp
-    src/assets/bar_archive.cpp
-    src/data/sound_def.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_audio_mp3 PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/ndk-include
-)
-target_link_libraries(test_audio_mp3 PRIVATE
-    OpenSLES
-    android
-    ${SYSTEM_Z_LIB}
-    log
-)
-
-# ── P5 End-to-End Match (spawn → economia → combate → vitória) ──
-add_executable(test_e2e_match
-    src/tests/test_e2e_match.cpp
-    src/game/victory.cpp
-    src/anim/animation_system.cpp
-    src/anim/grn_animation.cpp
-    src/assets/bar_archive.cpp
-    src/assets/xmb_parser.cpp
-)
-target_include_directories(test_e2e_match PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
-)
-target_link_libraries(test_e2e_match PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )

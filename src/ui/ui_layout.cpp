@@ -255,6 +255,8 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
                 LOGI("[XMB] Gadget '%s' stateentry background='%s' (estado normal)",
                      out.name.c_str(), bg.c_str());
             }
+        } else if (child->name == "command") {
+            out.command = child_text;
         } else if (child->name == "size1024") {
             auto rect = convert_size1024(child_text, screen_w, screen_h);
             out.rect.x = rect.x;
@@ -267,6 +269,24 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     // Se o texto ainda estiver vazio, tenta atributo (fallback)
     if (out.text.empty()) {
         out.text = elem->get_attribute("text");
+    }
+
+    // texturecoords -> uv_min / uv_max (formato AoM: u0 v0 u1 v1)
+    if (elem->has_attribute("texturecoords")) {
+        auto coords = parse_floats(elem->get_attribute("texturecoords"));
+        if (coords.size() >= 4) {
+            out.texture_coords = glm::vec4(coords[0], coords[1], coords[2], coords[3]);
+            out.has_texture_coords = true;
+        }
+    }
+
+    // z-order
+    if (elem->has_attribute("z")) {
+        try {
+            out.z = std::stoi(elem->get_attribute("z"));
+        } catch (...) {
+            out.z = 0;
+        }
     }
 
     // Fonte
@@ -299,6 +319,11 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
 
     // Ação do botão (ex: "start_game", "open_options", "open_credits", "quit_app")
     out.action = elem->get_attribute("action");
+
+    // Comando nativo do AoM via atributo se não veio como filho <command>
+    if (out.command.empty() && elem->has_attribute("command")) {
+        out.command = elem->get_attribute("command");
+    }
 
     // Outros atributos (armazena para referência)
     for (const auto& attr : elem->attributes) {
@@ -386,6 +411,11 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     btn->text_size = 0;
                     btn->normal_tex = INVALID_TEXTURE;
                     btn->pressed_tex = INVALID_TEXTURE;
+                    if (gd.has_texture_coords) {
+                        btn->has_uv = true;
+                        btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
+                        btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
+                    }
                     // Resolver textura de fundo do XMB via texture_resolver
                     if (!gd.bg_texture.empty() && texture_resolver) {
                         ResolvedTexture rt = texture_resolver(gd.bg_texture);
@@ -488,6 +518,37 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     if (it != action_callbacks.end()) {
                         btn_callback = it->second;
                     }
+                } else if (!gd.command.empty()) {
+                    auto it = action_callbacks.find(gd.command);
+                    if (it != action_callbacks.end()) {
+                        btn_callback = it->second;
+                    } else {
+                        btn_callback = [action_callbacks, cmd = gd.command, name = gd.name]() {
+                            LOGI("[UI Layout] Executando comando para '%s': %s", name.c_str(), cmd.c_str());
+                            if (cmd.find("exit(") != std::string::npos || cmd.find("quit") != std::string::npos) {
+                                auto a = action_callbacks.find("quit_app");
+                                if (a != action_callbacks.end()) a->second();
+                            } else if (cmd.find("modeEnter(\"SinglePlayerSetup\")") != std::string::npos ||
+                                       cmd.find("startRandomGame") != std::string::npos) {
+                                auto a = action_callbacks.find("start_game");
+                                if (a != action_callbacks.end()) a->second();
+                            } else if (cmd.find("modeEnter(\"Campaign\")") != std::string::npos ||
+                                       cmd.find("campaignStart") != std::string::npos) {
+                                auto a = action_callbacks.find("open_campaign");
+                                if (a != action_callbacks.end()) a->second();
+                            } else if (cmd.find("subModeEnter(\"PreGame\",\"Options\")") != std::string::npos ||
+                                       cmd.find("open_options") != std::string::npos) {
+                                auto a = action_callbacks.find("open_options");
+                                if (a != action_callbacks.end()) a->second();
+                            } else if (cmd.find("uiOpenSavedGameBrowser") != std::string::npos) {
+                                auto a = action_callbacks.find("uiOpenSavedGameBrowser");
+                                if (a != action_callbacks.end()) a->second();
+                            } else if (cmd.find("gadgetReal(\"MainMenuOptions\")") != std::string::npos) {
+                                auto a = action_callbacks.find("return_to_main_menu");
+                                if (a != action_callbacks.end()) a->second();
+                            }
+                        };
+                    }
                 }
 
                 LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s'",
@@ -500,6 +561,11 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     fill_color,
                     0xFFCCCCCC);
                 if (btn) {
+                    if (gd.has_texture_coords) {
+                        btn->has_uv = true;
+                        btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
+                        btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
+                    }
                     btn->label = strip_string_ids(gd.text); // Remove $$ID$$ inicial, ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
                     btn->text_color = text_color;   // texto ouro, NÃO cinza
                     btn->text_size = scaled_text_size;

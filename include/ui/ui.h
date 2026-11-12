@@ -47,6 +47,11 @@ struct UIButton {
     uint32_t tex_width = 0;
     uint32_t tex_height = 0;
 
+    // UV coordinates for texture atlases
+    glm::vec2 uv_min{0.0f, 0.0f};
+    glm::vec2 uv_max{1.0f, 1.0f};
+    bool has_uv = false;
+
     // Slider fields
     bool is_slider = false;
     float slider_value = 0.0f;

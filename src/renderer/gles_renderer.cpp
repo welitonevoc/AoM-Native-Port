@@ -1540,6 +1540,60 @@ public:
         glDisable(GL_BLEND);
     }
 
+    void draw_ui_quad_uv(const glm::vec2& pos, const glm::vec2& size,
+                         TextureHandle tex,
+                         const glm::vec2& uv_min, const glm::vec2& uv_max,
+                         uint32_t color) override {
+        if (!program_) return;
+
+        if (tex == INVALID_TEXTURE) {
+            if (white_tex_ == INVALID_TEXTURE) {
+                const uint32_t white_pixel = 0xFFFFFFFF;
+                white_tex_ = create_texture(1, 1, reinterpret_cast<const uint8_t*>(&white_pixel));
+            }
+            tex = white_tex_;
+        }
+        if (tex == INVALID_TEXTURE) return;
+
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        const float vw = width_ > 0 ? static_cast<float>(width_) : 1.0f;
+        const float vh = height_ > 0 ? static_cast<float>(height_) : 1.0f;
+        const float sx = size.x / vw;
+        const float sy = size.y / vh;
+        const float ox = (2.0f * pos.x + size.x) / vw - 1.0f;
+        const float oy = 1.0f - (2.0f * pos.y + size.y) / vh;
+
+        glUseProgram(program_);
+        glUniform2f(scale_loc_, sx, sy);
+        glUniform2f(offset_loc_, ox, oy);
+        glUniform2f(uv_scale_loc_, uv_max.x - uv_min.x, uv_max.y - uv_min.y);
+        glUniform2f(uv_offset_loc_, uv_min.x, uv_min.y);
+
+        float ca = ((color >> 24) & 0xff) / 255.0f;
+        float cr = ((color >> 16) & 0xff) / 255.0f;
+        float cg = ((color >> 8) & 0xff) / 255.0f;
+        float cb = (color & 0xff) / 255.0f;
+        glUniform4f(color_loc_, cr, cg, cb, ca);
+
+        glUniform1i(tex_loc_, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(tex));
+        glBindVertexArray(quad_vao_);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glUseProgram(0);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
+
     void draw_ui_quad_nineslice(const glm::vec2& pos, const glm::vec2& size,
                                  TextureHandle tex,
                                  uint32_t tex_w, uint32_t tex_h,

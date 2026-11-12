@@ -297,6 +297,12 @@ public:
     virtual void draw_ui_quad(const glm::vec2& pos, const glm::vec2& size,
                                TextureHandle texture, uint32_t color = 0xFFFFFFFF) = 0;
 
+    /// Draw a textured quad with specific UV coordinates (UI element / atlas sub-rect)
+    virtual void draw_ui_quad_uv(const glm::vec2& pos, const glm::vec2& size,
+                                 TextureHandle texture,
+                                 const glm::vec2& uv_min, const glm::vec2& uv_max,
+                                 uint32_t color = 0xFFFFFFFF) = 0;
+
     /// Draw a 9-slice textured quad (UI element with borders)
     virtual void draw_ui_quad_nineslice(const glm::vec2& pos, const glm::vec2& size,
                                          TextureHandle texture,

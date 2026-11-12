@@ -1,5 +1,6 @@
 #include "assets/ddt_texture.h"
 #include "assets/ddt5_auto.h"
+#include "assets/ddt6_auto.h"
 #ifdef __ANDROID__
 #include <android/log.h>
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "AoM-DDT", __VA_ARGS__)
@@ -487,6 +488,23 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                 if (mip.width >= 32 && mip.height >= 32) s_prefer = l5;  // mips minúsculas não decidem
             }
 
+            // Formato 6: blocos de 16 bytes (DXT3 / DXT5 / cor+alpha4), escolhido automaticamente.
+            ddt6::Layout l6{ddt6::DXT5, true};
+            if (format == DdtFormat::AOM_8BPP) {
+                static thread_local ddt6::Layout s_prefer6{ddt6::DXT5, true};
+                double sc6 = 0.0;
+                l6 = ddt6::choose_layout(mip.data.data(), mip.data.size(),
+                                         mip.width, mip.height, s_prefer6, &sc6);
+#ifdef __ANDROID__
+                if (l6.mode != s_prefer6.mode || l6.c565 != s_prefer6.c565) {
+                    __android_log_print(ANDROID_LOG_INFO, "AoM-DDT6",
+                        "layout escolhido: modo=%d (0=DXT3 1=DXT5 2=alpha4+cor 3=cor+alpha4) rgb565=%d score=%.1f (%ux%u)",
+                        int(l6.mode), l6.c565, sc6, mip.width, mip.height);
+                }
+#endif
+                if (mip.width >= 32 && mip.height >= 32) s_prefer6 = l6;
+            }
+
             for (uint32_t by = 0; by < blocks_y; ++by) {
                 for (uint32_t bx = 0; bx < blocks_x; ++bx) {
                     switch (format) {
@@ -506,7 +524,15 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                             break;
                         }
                         case DdtFormat::AOM_8BPP: {
-                            decode_aom_8bpp_block(in, output, mip.width, mip.height, bx, by);
+                            ddt5::Px px[16];
+                            ddt6::decode_block(in, l6, px);
+                            for (uint32_t y = 0; y < 4; ++y)
+                                for (uint32_t x = 0; x < 4; ++x) {
+                                    const ddt5::Px& p = px[4 * y + x];
+                                    store_pixel(output, mip.width, mip.height,
+                                                bx * 4 + x, by * 4 + y,
+                                                Rgba{p.r, p.g, p.b, p.a});
+                                }
                             break;
                         }
                         default:

@@ -91,9 +91,11 @@ void UIManager::render() {
             cur_tex = btn.pressed_tex;
         }
 
-        // Draw button background quad (9-slice when borders are set and we know texture size)
+        // Draw button background quad (UV sub-rect, 9-slice or standard)
         if (cur_tex != INVALID_TEXTURE) {
-            if (btn.border_left > 0.0f || btn.border_right > 0.0f ||
+            if (btn.has_uv) {
+                renderer_->draw_ui_quad_uv(btn.pos, btn.size, cur_tex, btn.uv_min, btn.uv_max, btn.current_color);
+            } else if (btn.border_left > 0.0f || btn.border_right > 0.0f ||
                 btn.border_top > 0.0f || btn.border_bottom > 0.0f) {
                 renderer_->draw_ui_quad_nineslice(btn.pos, btn.size, cur_tex,
                                                   btn.tex_width, btn.tex_height,
