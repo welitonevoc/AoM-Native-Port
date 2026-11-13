@@ -188,11 +188,11 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
                 model->total_faces += num_faces;
                 model->meshes.push_back(std::move(mesh));
 
-                // Assign pending texture name from earlier MTRL chunk
+                // Assign pending texture name from earlier MTRL chunk to new mesh
                 if (!model->pending_texture_name.empty() &&
                     model->meshes.back().texture_name.empty()) {
                     model->meshes.back().texture_name = model->pending_texture_name;
-                    model->pending_texture_name.clear();
+                    // Keep pending for any additional meshes (MTRL applies to all)
                 }
             }
         } else if (std::memcmp(tag, "MTRL", 4) == 0) {
@@ -222,10 +222,16 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
             }
             if (!tex_name.empty()) {
                 model->textures.push_back(tex_name);
-                // Assign to last mesh if exists, otherwise store for next mesh
-                if (!model->meshes.empty() && model->meshes.back().texture_name.empty()) {
-                    model->meshes.back().texture_name = tex_name;
-                } else {
+                // Assign to ALL existing meshes that don't have texture yet
+                bool assigned = false;
+                for (auto& mesh : model->meshes) {
+                    if (mesh.texture_name.empty()) {
+                        mesh.texture_name = tex_name;
+                        assigned = true;
+                    }
+                }
+                // Also store for any future meshes
+                if (!assigned) {
                     model->pending_texture_name = tex_name;
                 }
             }
