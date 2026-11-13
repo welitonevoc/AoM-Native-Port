@@ -1,7 +1,8 @@
-# CURRENT_STATE — baseado no commit 445d1ad (11/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado no commit 50a21ea (13/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
+- ✅ BRG parser: chunk `MTRL` antes de `MESI` tratado com `pending_texture_name` (`brg_model.cpp`). Fallback para `mesh.texture_name` em `load_models()` (`engine_assets.cpp`).
 - ✅ `engine.h` sem as duplicatas antigas (enum e métodos de menu).
 - ✅ Resolvedor tolerante de nomes de textura (`texture_key`, logs `[TEX]`) em `load_ddt_texture`.
 - ✅ DDT formatos 5 e 6: decodificação com escolha automática de layout (`ddt5_auto.h` e `ddt6_auto.h`).

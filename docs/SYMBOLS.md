@@ -22,7 +22,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/assets/bar_archive.h (175 linhas)
 
-## include/assets/brg_model.h (50 linhas)
+## include/assets/brg_model.h (51 linhas)
 
 ## include/assets/cube_map.h (33 linhas)
 
@@ -198,16 +198,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `BarArchive::parse_file` 299-444 (146)
 - `BarArchive::decompress_l33t` 446-474 (29)
 
-## src/assets/brg_model.cpp (346 linhas)
+## src/assets/brg_model.cpp (356 linhas)
 - `half_to_float` 24-42 (19)
 - `read_u16` 44-48 (5)
 - `read_u32` 50-54 (5)
 - `read_f32` 56-60 (5)
 - `compute_normals` 62-90 (29)
-- `parse_brg` 94-246 (153)
-- `load_brg_model_data` 248-261 (14)
-- `load_brg_model` 263-282 (20)
-- `create_procedural_brg` 284-343 (60)
+- `parse_brg` 94-256 (163)
+- `load_brg_model_data` 258-271 (14)
+- `load_brg_model` 273-292 (20)
+- `create_procedural_brg` 294-353 (60)
 
 ## src/assets/cube_map.cpp (104 linhas)
 - `trim` 21-26 (6)
