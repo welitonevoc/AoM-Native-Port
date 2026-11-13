@@ -32,13 +32,13 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 
 ## Em aberto
 1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` e os procedurais. XMB ativo no MAIN_MENU com botões e pórtico autênticos.
-2. ✅ **Pórtico Translúcido Autêntico**: Carregamento prioritário de `textures2.bar` (`ui\ui pregame *.ddt`) com alfa real de 4-bit (`ddt_texture.cpp`, `engine_menus.cpp`), eliminando o PNG opaco de fundo recortado.
+2. ✅ **Eliminação Definitiva das Scanlines do Pórtico**: Decodificação row-interleaved em DDT formato 3 com alpha 4-bit (`stride = width + width/2` bytes por scanline) em `ddt_texture.cpp`.
 3. ✅ **Ondas e Espuma na Praia**: Shader de água atualizado com ondulação ampla visível e cristas de espuma branca na arrebentação costeira da ilha (`gles_renderer.cpp`).
 4. ✅ **Tropas Atlantes na Praia**: Spawn de unidades atlantes autênticas (Murmillo e Arcus) patrulhando a beira-mar desobstruída (`engine_gameplay.cpp`).
 5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu autêntico com pórtico transparente, espuma nas ondas e tropas atlantes no APK v1.0.11131854.
-2. Validar visibilidade das tropas atlantes marchando e movimento das ondas de espuma.
+1. ✅ Menu autêntico com pórtico contínuo sem scanlines e mar com espuma no APK v1.0.11131902.
+2. Validar nitidez contínua do mármore do pórtico e transparência real da cena.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 

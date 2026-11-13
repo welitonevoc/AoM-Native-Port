@@ -430,6 +430,38 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             }
             const bool is_rgb444 = (max_val <= 0x0FFF && max_val > 0x001F);
 
+            const size_t alpha_row_len = (mip.width + 1) / 2;
+            const size_t row_stride = mip.width + alpha_row_len;
+            const bool is_row_interleaved = (alpha_bits == 4 && mip.data.size() >= mip.height * row_stride);
+
+            if (is_row_interleaved) {
+                // Formato oficial AoM UI: cada linha tem width bytes de índice + width/2 bytes de alpha
+                for (uint32_t y = 0; y < mip.height; ++y) {
+                    const uint8_t* row_indices = mip.data.data() + y * row_stride;
+                    const uint8_t* row_alpha = row_indices + mip.width;
+                    for (uint32_t x = 0; x < mip.width; ++x) {
+                        size_t idx = row_indices[x];
+                        if (idx >= num_colors) idx = 0;
+                        const uint16_t val = read_u16(palette.data() + idx * 2);
+                        const size_t out_idx = (y * mip.width + x) * 4;
+                        uint8_t* dst = output.data() + out_idx;
+
+                        if (is_rgb444) {
+                            dst[0] = ((val >> 8) & 0x0F) * 17;
+                            dst[1] = ((val >> 4) & 0x0F) * 17;
+                            dst[2] = (val & 0x0F) * 17;
+                        } else {
+                            expand_555(val, dst[0], dst[1], dst[2]);
+                        }
+
+                        const uint8_t packed_a = row_alpha[x >> 1];
+                        const uint8_t nib = (x & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
+                        dst[3] = nib * 17;
+                    }
+                }
+                return output;
+            }
+
             const bool has_alpha4 = (alpha_bits == 4 && mip.data.size() >= pixel_count + (pixel_count + 1) / 2);
             const uint8_t* a4 = has_alpha4 ? (mip.data.data() + pixel_count) : nullptr;
             bool a4_has_data = false;
