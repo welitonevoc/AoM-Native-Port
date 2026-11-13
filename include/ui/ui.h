@@ -34,6 +34,8 @@ struct UIButton {
     TextureHandle icon = INVALID_TEXTURE;
     bool is_big_button = false;
     bool interactive = true;  // se false, o botão não recebe toques (painel de fundo)
+    bool visible = true;      // visibilidade para submenus do AoM (gadgetReal/gadgetUnReal)
+    std::string tag;          // nome do gadget pai/grupo (ex: "MainMenuOptions", "CampaignSubMenu")
 
     // 9-slice borders (in pixels). When > 0, the button texture is drawn
     // as 9 slices: 4 corners fixed, 4 edges stretched in one axis,
@@ -69,6 +71,8 @@ struct UILabel {
     float size = 18.0f;
     uint32_t color = 0xFFFFD000;
     bool shadow = true;
+    bool visible = true;
+    std::string tag;
 };
 
 struct UIAnimation {
@@ -157,9 +161,13 @@ public:
                                   TextureHandle tex = INVALID_TEXTURE,
                                   uint32_t color = 0xFFFFFFFF);
 
+    void set_group_visible(const std::string& tag, bool visible);
+
     [[nodiscard]] const std::vector<UIButton>& buttons() const { return buttons_; }
     [[nodiscard]] const std::vector<UILabel>& labels() const { return labels_; }
     [[nodiscard]] const std::vector<UIAnimation>& animations() const { return animations_; }
+    std::vector<UIButton>& buttons_mut() { return buttons_; }
+    std::vector<UILabel>& labels_mut() { return labels_; }
 
     // Resolve textos no formato $$ID$$texto_fallback (ex: $$19825$$Learn To Play).
     // Extrai o ID entre os primeiros $$ e o segundo $$, tenta traduzir, senão mostra o fallback.

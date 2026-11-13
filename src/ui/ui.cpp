@@ -64,6 +64,7 @@ void UIManager::render() {
     // PASS 1: Render background panels first (z-order inferior)
     // São botões com normal_tex == INVALID_TEXTURE e label vazio
     for (const auto& btn : buttons_) {
+        if (!btn.visible) continue;
         if (btn.label.empty() && btn.normal_tex == INVALID_TEXTURE && btn.size.x > 50.0f && btn.size.y > 50.0f) {
             // Provavelmente um painel de fundo
             if (btn.current_color != 0x00000000) {
@@ -81,6 +82,7 @@ void UIManager::render() {
 
     // PASS 3: Render buttons (interactive elements)
     for (const auto& btn : buttons_) {
+        if (!btn.visible) continue;
         // Skip background panels (already rendered in pass 1)
         if (btn.label.empty() && btn.normal_tex == INVALID_TEXTURE && btn.size.x > 50.0f && btn.size.y > 50.0f) {
             continue;
@@ -201,6 +203,7 @@ void UIManager::render() {
 
     // Render labels
     for (const auto& lbl : labels_) {
+        if (!lbl.visible) continue;
         if (lbl.shadow) {
             renderer_->draw_ui_text(lbl.text, {lbl.pos.x + 1.5f, lbl.pos.y + 1.5f}, lbl.size, 0xFF000000);
         }
@@ -216,7 +219,7 @@ bool UIManager::handle_touch(const TouchEvent& ev) {
         // recebem o toque primeiro. Painéis de fundo (interactive=false) são ignorados.
         for (auto it = buttons_.rbegin(); it != buttons_.rend(); ++it) {
             auto& btn = *it;
-            if (!btn.interactive || !hit_test(btn, ev.x, ev.y)) continue;
+            if (!btn.visible || !btn.interactive || !hit_test(btn, ev.x, ev.y)) continue;
 
             btn.current_color = btn.pressed_color;
 
@@ -272,6 +275,19 @@ bool UIManager::handle_touch(const TouchEvent& ev) {
         }
     }
     return false;
+}
+
+void UIManager::set_group_visible(const std::string& tag, bool visible) {
+    for (auto& btn : buttons_) {
+        if (btn.tag == tag) {
+            btn.visible = visible;
+        }
+    }
+    for (auto& lbl : labels_) {
+        if (lbl.tag == tag) {
+            lbl.visible = visible;
+        }
+    }
 }
 
 void UIManager::on_touch_event(const TouchEvent& ev) {

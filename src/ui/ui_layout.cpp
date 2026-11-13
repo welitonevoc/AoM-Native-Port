@@ -374,9 +374,10 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     const float scale = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
     const float offset_center_x = std::max(0.0f, (static_cast<float>(screen_w) - UILayoutManager::kRefWidth * scale) * 0.5f);
 
-    std::function<void(const UIGadgetDef&, float, float)> apply_backgrounds =
-        [&](const UIGadgetDef& gd, float, float) {
-            if (gd.hidden) return;
+    std::function<void(const UIGadgetDef&, const std::string&, bool)> apply_backgrounds =
+        [&](const UIGadgetDef& gd, const std::string& parent_tag, bool parent_hidden) {
+            bool is_hidden = parent_hidden || gd.hidden;
+            std::string current_tag = gd.name.empty() ? parent_tag : gd.name;
 
             // size1024 no AoM é coordenada absoluta de tela em base 1024x768
             float x = offset_center_x + gd.rect.x * scale;
@@ -422,6 +423,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     );
                     if (btn) {
                         btn->interactive = false; // painel de fundo não recebe toque
+                        btn->visible = !is_hidden;
+                        btn->tag = current_tag;
                         btn->label = "";
                         btn->text_size = 0;
                         btn->normal_tex = tex_handle;
@@ -439,7 +442,7 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
 
             // Recursão para filhos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_backgrounds(child, 0.0f, 0.0f);
+                apply_backgrounds(child, current_tag, is_hidden);
             }
         };
 
@@ -447,9 +450,10 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     // PASS 2: Criar elementos interativos (botões, textos, sliders)
     // Renderizados DEPOIS dos backgrounds (z-order superior)
     // ============================================================
-    std::function<void(const UIGadgetDef&, float, float)> apply_interactive =
-        [&](const UIGadgetDef& gd, float, float) {
-            if (gd.hidden) return;
+    std::function<void(const UIGadgetDef&, const std::string&, bool)> apply_interactive =
+        [&](const UIGadgetDef& gd, const std::string& parent_tag, bool parent_hidden) {
+            bool is_hidden = parent_hidden || gd.hidden;
+            std::string current_tag = gd.name.empty() ? parent_tag : gd.name;
 
             // size1024 no AoM é coordenada absoluta de tela em base 1024x768
             float x = offset_center_x + gd.rect.x * scale;
@@ -472,18 +476,12 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                 if (!resolved_text.empty() && resolved_text.size() >= 4 &&
                     resolved_text.substr(0, 2) == "$$" && resolved_text.substr(resolved_text.size() - 2) == "$$") {
                     std::string id = resolved_text.substr(2, resolved_text.size() - 4);
-                    // Nota: a tradução real é feita pelo Engine via tr(), aqui apenas passa o ID
-                    // O Engine fará a resolução após a criação
                 }
 
-                // Cor do fundo: branco (0xFFFFFFFF) para textura aparecer com cor cheia.
-                // Se não há bg_texture, usar cor de fundo do XMB (filho ou atributo).
-                // Se nada definido, pedra escura AoM (não azul!).
                 uint32_t fill_color = 0xFFFFFFFF;
                 if (!gd.bg_texture.empty()) {
                     fill_color = 0xFFFFFFFF; // textura: branco (tint)
                 } else if (gd.bg_color_set) {
-                    // Ignora azul puro (0,0,255) e preto (0,0,0) que são placeholders do XMB
                     if (gd.bg_color == glm::vec3(0, 0, 255) || gd.bg_color == glm::vec3(0, 0, 0)) {
                         fill_color = 0xAA221105; // Pedra escura AoM (translucida)
                     } else {
@@ -495,59 +493,79 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     fill_color = 0xAA221105; // Pedra escura AoM (translucida)
                 }
 
-                // Cor do texto: ouro AoM por padrão, ou cor especificada em textcolor
                 uint32_t text_color = 0xFFFFD000; // ouro AoM (#FFD000)
                 if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
                     text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
                 } else if (gd.text_color != glm::vec3(0, 0, 0)) {
-                    // text_color veio de filho <textcolor> (preto seria 0,0,0 mas é improvável)
                     text_color = UILayoutManager::parse_color_rgba(gd.text_color);
                 }
 
-                std::function<void()> btn_callback = [gd]() {
-                    LOGI("[UI Layout] Botão pressionado: %s", gd.name.c_str());
-                };
-                if (!gd.action.empty()) {
-                    auto it = action_callbacks.find(gd.action);
-                    if (it != action_callbacks.end()) {
-                        btn_callback = it->second;
-                    }
-                } else if (!gd.command.empty()) {
-                    auto it = action_callbacks.find(gd.command);
-                    if (it != action_callbacks.end()) {
-                        btn_callback = it->second;
-                    } else {
-                        btn_callback = [action_callbacks, cmd = gd.command, name = gd.name]() {
-                            LOGI("[UI Layout] Executando comando para '%s': %s", name.c_str(), cmd.c_str());
-                            if (cmd.find("exit(") != std::string::npos || cmd.find("quit") != std::string::npos) {
-                                auto a = action_callbacks.find("quit_app");
-                                if (a != action_callbacks.end()) a->second();
-                            } else if (cmd.find("modeEnter(\"SinglePlayerSetup\")") != std::string::npos ||
-                                       cmd.find("startRandomGame") != std::string::npos) {
-                                auto a = action_callbacks.find("start_game");
-                                if (a != action_callbacks.end()) a->second();
-                            } else if (cmd.find("modeEnter(\"Campaign\")") != std::string::npos ||
-                                       cmd.find("campaignStart") != std::string::npos) {
-                                auto a = action_callbacks.find("open_campaign");
-                                if (a != action_callbacks.end()) a->second();
-                            } else if (cmd.find("subModeEnter(\"PreGame\",\"Options\")") != std::string::npos ||
-                                       cmd.find("open_options") != std::string::npos) {
-                                auto a = action_callbacks.find("open_options");
-                                if (a != action_callbacks.end()) a->second();
-                            } else if (cmd.find("uiOpenSavedGameBrowser") != std::string::npos) {
-                                auto a = action_callbacks.find("uiOpenSavedGameBrowser");
-                                if (a != action_callbacks.end()) a->second();
-                            } else if (cmd.find("gadgetReal(\"MainMenuOptions\")") != std::string::npos) {
-                                auto a = action_callbacks.find("return_to_main_menu");
-                                if (a != action_callbacks.end()) a->second();
-                            }
-                        };
-                    }
-                }
+                std::function<void()> btn_callback = [ui, action_callbacks, cmd = gd.command, name = gd.name]() {
+                    LOGI("[UI Layout] Executando comando para '%s': %s", name.c_str(), cmd.c_str());
 
-                LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s'",
+                    // 1. Processar alternância nativa de submenus (gadgetReal / gadgetUnReal)
+                    auto parse_gadget_names = [](const std::string& s, const std::string& prefix) -> std::vector<std::string> {
+                        std::vector<std::string> res;
+                        size_t p = 0;
+                        while ((p = s.find(prefix, p)) != std::string::npos) {
+                            size_t start = p + prefix.size();
+                            size_t end = s.find(')', start);
+                            if (end != std::string::npos) {
+                                std::string a = s.substr(start, end - start);
+                                while (!a.empty() && (a.front() == '"' || a.front() == ' ' || a.front() == '\t')) a.erase(a.begin());
+                                while (!a.empty() && (a.back() == '"' || a.back() == ' ' || a.back() == '\t')) a.pop_back();
+                                if (!a.empty()) res.push_back(a);
+                                p = end + 1;
+                            } else break;
+                        }
+                        return res;
+                    };
+
+                    if (ui) {
+                        for (const auto& t : parse_gadget_names(cmd, "gadgetReal(")) {
+                            LOGI("[UI Layout] gadgetReal -> %s", t.c_str());
+                            ui->set_group_visible(t, true);
+                        }
+                        for (const auto& t : parse_gadget_names(cmd, "gadgetUnReal(")) {
+                            LOGI("[UI Layout] gadgetUnReal -> %s", t.c_str());
+                            ui->set_group_visible(t, false);
+                        }
+                    }
+
+                    // 2. Comandos de jogo e transições
+                    if (cmd.find("exit(") != std::string::npos || cmd.find("quit") != std::string::npos) {
+                        auto a = action_callbacks.find("quit_app");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("modeEnter(\"SinglePlayerSetup\")") != std::string::npos ||
+                               cmd.find("startRandomGame") != std::string::npos) {
+                        auto a = action_callbacks.find("start_game");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("campaignStart") != std::string::npos ||
+                               cmd.find("modeEnter(\"Campaign\")") != std::string::npos) {
+                        auto a = action_callbacks.find("open_campaign");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("subModeEnter(\"PreGame\",\"Options\")") != std::string::npos ||
+                               cmd.find("open_options") != std::string::npos) {
+                        auto a = action_callbacks.find("open_options");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("uiOpenSavedGameBrowser") != std::string::npos) {
+                        auto a = action_callbacks.find("uiOpenSavedGameBrowser");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("uiOpenRecordGameBrowser") != std::string::npos) {
+                        auto a = action_callbacks.find("uiOpenSavedGameBrowser");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("doMPSetup") != std::string::npos) {
+                        auto a = action_callbacks.find("open_multiplayer");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("gadgetReal(\"MainMenuOptions\")") != std::string::npos) {
+                        auto a = action_callbacks.find("return_to_main_menu");
+                        if (a != action_callbacks.end()) a->second();
+                    }
+                };
+
+                LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s' hidden=%d",
                      gd.text.c_str(), (int)x, (int)y, (int)w, (int)h, fill_color, text_color,
-                     gd.bg_texture.c_str());
+                     gd.bg_texture.c_str(), (int)is_hidden);
 
                 auto* btn = ui->add_button(
                     {btn_x, btn_y}, {btn_w, btn_h},
@@ -555,6 +573,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     fill_color,
                     0xFFCCCCCC);
                 if (btn) {
+                    btn->visible = !is_hidden;
+                    btn->tag = current_tag;
                     if (gd.has_texture_coords) {
                         btn->has_uv = true;
                         btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
@@ -675,13 +695,21 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                         // ID será resolvido pelo Engine via tr()
                     }
 
-                    ui->add_label(resolved_text, {x, y}, scaled_text_size, color);
+                    auto* lbl = ui->add_label(resolved_text, {x, y}, scaled_text_size, color);
+                    if (lbl) {
+                        lbl->visible = !is_hidden;
+                        lbl->tag = current_tag;
+                    }
                     ++created;
                 }
             }
             // Sliders
             else if (gd.type == "slider") {
-                ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
+                auto* s = ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
+                if (s) {
+                    s->visible = !is_hidden;
+                    s->tag = current_tag;
+                }
                 ++created;
             }
             // Containers lógicos invisíveis (gadget sem background) - apenas posiciona filhos
@@ -691,16 +719,16 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
 
             // Recursão para filhos interativos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_interactive(child, 0.0f, 0.0f);
+                apply_interactive(child, current_tag, is_hidden);
             }
         };
 
     // Executa as duas passagens em ordem
     for (const auto& root_gadget : layout.root_gadgets) {
-        apply_backgrounds(root_gadget, 0.0f, 0.0f);
+        apply_backgrounds(root_gadget, "", false);
     }
     for (const auto& root_gadget : layout.root_gadgets) {
-        apply_interactive(root_gadget, 0.0f, 0.0f);
+        apply_interactive(root_gadget, "", false);
     }
 
     LOGI("Layout '%s' aplicado ao UI: %zu elementos criados (backgrounds + interativos)",

@@ -33,12 +33,12 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 ## Em aberto / Resolvidos
 1. ✅ **Decodificação DDT Formato 3**: Índices contínuos + buffer alpha 4-bit (sem row-interleave falso) corrigem as scanlines e restauram silhueta do pórtico e botões (`ddt_texture.cpp`).
 2. ✅ **Botões Autênticos XMB**: `gd.bg_texture` e `state_backgrounds` sobrepõem textura padrão, aplicando textura autêntica `ui\ui pregame button` com coordenadas UV (`ui_layout.cpp`).
-3. ✅ **Cenário 3D com Tropas Atlantes e Floresta**: `gameplay_world_` instanciado no `MAIN_MENU` executa `populate_menu_background_scene()`, renderizando tropas, árvores e casas na praia.
-4. ✅ **Ondas e Espuma Dinâmica**: Shader de água atualizado com ondulação costeira e arrebentação de espuma na praia da ilha (`gles_renderer.cpp`).
+3. ✅ **Submenus XMB Dinâmicos**: `gadgetReal` e `gadgetUnReal` despacham alternância nativa de visibilidade de submenus (Learn, Campaign, SinglePlayer, More) em `UIManager` (`ui_layout.cpp`, `ui.cpp`).
+4. ✅ **Cenário 3D com Tropas Atlantes e Floresta**: `gameplay_world_` instanciado no `MAIN_MENU` executa `populate_menu_background_scene()`, renderizando tropas, árvores e casas na praia.
 5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu autêntico com pórtico de mármore e botões autênticos no APK v1.0.11131921.
-2. Validar tropas atlantes patrulhando a beira-mar e ausência de scanlines no pórtico.
+1. ✅ Menu autêntico com pórtico de mármore, botões autênticos e navegação XMB no APK v1.0.11132017.
+2. Validar transição suave dos submenus ao clicar nos botões do pórtico.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 
