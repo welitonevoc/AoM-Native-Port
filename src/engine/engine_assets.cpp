@@ -975,6 +975,20 @@ bool Engine::load_models() {
                     tex = load_ddt_texture(cand);
                     if (tex != INVALID_TEXTURE) break;
                 }
+                // Fallback específico para textflare (menu flares) - usa cursor_flare existente
+                if (tex == INVALID_TEXTURE && mesh_tex == "textflare") {
+                    for (const std::string& cand : {
+                             "cursors/cursor_flare.ddt",
+                             "sfx x lampades flare.ddt",
+                             "icons/ui minimap flare.ddt",
+                         }) {
+                        tex = load_ddt_texture(cand);
+                        if (tex != INVALID_TEXTURE) {
+                            LOGI("load_models: fallback textflare -> '%s'", cand.c_str());
+                            break;
+                        }
+                    }
+                }
             }
         }
 
