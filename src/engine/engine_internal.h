@@ -20,12 +20,15 @@ inline void aom_file_log_write(int prio, const char* tag, const char* fmt, ...) 
     va_end(ap);
 
     static FILE* s_logfile = nullptr;
-    static bool s_tried_open = false;
-    if (!s_tried_open) {
-        s_tried_open = true;
+    static int s_retry_count = 0;
+    if (!s_logfile && (++s_retry_count % 10 == 1)) {
         const char* paths[] = {
             "/sdcard/log.txt",
             "/storage/emulated/0/log.txt",
+            "/storage/emulated/0/Documents/log.txt",
+            "/sdcard/Documents/log.txt",
+            "/storage/emulated/0/Download/log.txt",
+            "/sdcard/Download/log.txt",
             "/sdcard/AoM/log.txt",
             "/storage/emulated/0/AoM/log.txt",
             "/sdcard/aom_log.txt",
