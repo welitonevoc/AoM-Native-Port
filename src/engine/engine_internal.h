@@ -8,9 +8,50 @@
 #define LOG_TAG "AoM-Engine"
 #ifdef __ANDROID__
 #include <android/log.h>
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#include <cstdio>
+#include <cstdarg>
+
+namespace aom {
+inline void aom_file_log_write(int prio, const char* tag, const char* fmt, ...) {
+    va_list ap, ap_file;
+    va_start(ap, fmt);
+    va_copy(ap_file, ap);
+    __android_log_vprint(prio, tag, fmt, ap);
+    va_end(ap);
+
+    static FILE* s_logfile = nullptr;
+    static bool s_tried_open = false;
+    if (!s_tried_open) {
+        s_tried_open = true;
+        const char* paths[] = {
+            "/storage/emulated/0/AoM/log.txt",
+            "/sdcard/AoM/log.txt",
+            "/storage/emulated/0/Documents/AoM/log.txt",
+            "/storage/emulated/0/aom_log.txt",
+            "/sdcard/aom_log.txt"
+        };
+        for (const char* p : paths) {
+            s_logfile = std::fopen(p, "a");
+            if (s_logfile) {
+                std::fprintf(s_logfile, "=== AoM Session Log Started ===\n");
+                std::fflush(s_logfile);
+                break;
+            }
+        }
+    }
+    if (s_logfile) {
+        std::fprintf(s_logfile, "[%s] ", tag);
+        std::vfprintf(s_logfile, fmt, ap_file);
+        std::fprintf(s_logfile, "\n");
+        std::fflush(s_logfile);
+    }
+    va_end(ap_file);
+}
+} // namespace aom
+
+#define LOGI(...) ::aom::aom_file_log_write(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) ::aom::aom_file_log_write(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) ::aom::aom_file_log_write(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #else
 #include <cstdio>
 #define LOGI(...) std::printf(__VA_ARGS__)

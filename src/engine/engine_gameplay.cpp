@@ -369,64 +369,10 @@ void Engine::populate_menu_background_scene() {
 }
 
 void Engine::start_menu_background() {
-    LOGI("start_menu_background: iniciando vídeo de fundo do menu");
-
-    menu_bg_ = std::make_unique<aom::video::MediaDecoder>();
-    menu_bg_->on_frame = [this](const aom::video::VideoFrame& frame) {
-        if (!renderer_ || frame.width == 0 || frame.height == 0) return;
-        if (menu_bg_tex_ == INVALID_TEXTURE ||
-            frame.width != menu_bg_w_ || frame.height != menu_bg_h_) {
-            if (menu_bg_tex_ != INVALID_TEXTURE) {
-                renderer_->destroy_texture(menu_bg_tex_);
-            }
-            menu_bg_tex_ = renderer_->create_texture(
-                frame.width, frame.height, frame.rgba.data());
-            menu_bg_w_ = frame.width;
-            menu_bg_h_ = frame.height;
-            LOGI("menu_bg: textura criada %ux%u", menu_bg_w_, menu_bg_h_);
-        } else {
-            renderer_->update_texture(menu_bg_tex_, frame.width, frame.height, frame.rgba.data());
-        }
-    };
-    menu_bg_->on_eos = [this]() {
-        menu_bg_restart_ = true;
-    };
-
-    // Tenta abrir o vídeo de fundo do menu (mesmo mecanismo de assets do cinematic queue)
-    std::string cache_dir;
-    if (native_activity_) {
-        auto* act = static_cast<ANativeActivity*>(native_activity_);
-        if (act && act->internalDataPath) cache_dir = act->internalDataPath;
-    }
-    if (cache_dir.empty() && !config_.data_path.empty()) {
-        cache_dir = config_.data_path + "/cinematic";
-    }
-    if (cache_dir.empty()) cache_dir = "/data/local/tmp";
-
-    // Tenta abrir assets comuns de vídeo de fundo do menu do AoM: The Titans
-    const char* candidates[] = {
-        "assets/avi/menu_bg.mp4",
-        "assets/avi/introcg.mp4",
-        "assets/avi/xintrocg.mp4",
-        "assets/avi/aom-logo.mp4",
-    };
-    bool opened = false;
-    for (const char* candidate : candidates) {
-        if (asset_manager_ && media_decoder_->open_asset(asset_manager_, candidate, cache_dir)) {
-            // Reutiliza o media_decoder_ já existente? Não: queremos um decodidor dedicado
-            // para o menu. O open_asset acima foi só para testar se o arquivo existe.
-            // Na verdade precisamos abrir no menu_bg_:
-            if (menu_bg_->open_asset(asset_manager_, candidate, cache_dir)) {
-                LOGI("menu_bg: vídeo aberto: %s", candidate);
-                opened = true;
-                break;
-            }
-        }
-    }
-    if (!opened) {
-        LOGW("menu_bg: nenhum vídeo de fundo encontrado; usará fundo estático");
-        menu_bg_.reset();
-    }
+    // Menu de The Titans utiliza cena 3D nativa e imagem estática, sem vídeo de fundo
+    LOGI("start_menu_background: menu video desativado (usando cena 3D/fundo limpo)");
+    menu_bg_.reset();
+    menu_bg_tex_ = INVALID_TEXTURE;
 }
 
 } // namespace aom

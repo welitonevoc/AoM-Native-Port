@@ -2,6 +2,7 @@
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
+- ✅ Logger em arquivo no shared storage (`/sdcard/AoM/log.txt`) integrado em `engine_internal.h` e `native_activity.cpp`. Desativado vídeo com glitch no fundo de `MAIN_MENU` (`engine_gameplay.cpp`).
 - ✅ BRG parser & assets: chunk `MTRL` atribui textura a TODOS os meshes (`brg_model.cpp`) e fallback `textflare -> cursors/cursor_flare.ddt` em `load_models()` (`engine_assets.cpp`).
 - ✅ `engine.h` sem as duplicatas antigas (enum e métodos de menu).
 - ✅ Resolvedor tolerante de nomes de textura (`texture_key`, logs `[TEX]`) em `load_ddt_texture`.
