@@ -24,11 +24,12 @@ inline void aom_file_log_write(int prio, const char* tag, const char* fmt, ...) 
     if (!s_tried_open) {
         s_tried_open = true;
         const char* paths[] = {
-            "/storage/emulated/0/AoM/log.txt",
+            "/sdcard/log.txt",
+            "/storage/emulated/0/log.txt",
             "/sdcard/AoM/log.txt",
-            "/storage/emulated/0/Documents/AoM/log.txt",
-            "/storage/emulated/0/aom_log.txt",
-            "/sdcard/aom_log.txt"
+            "/storage/emulated/0/AoM/log.txt",
+            "/sdcard/aom_log.txt",
+            "/storage/emulated/0/aom_log.txt"
         };
         for (const char* p : paths) {
             s_logfile = std::fopen(p, "a");
