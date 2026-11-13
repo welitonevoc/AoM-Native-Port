@@ -25,6 +25,7 @@ struct BrgModel {
     std::string name;
     std::vector<BrgMesh> meshes;
     std::vector<std::string> textures;
+    std::string pending_texture_name; // MTRL texture name seen before any MESI
     uint32_t total_vertices = 0;
     uint32_t total_faces = 0;
 };

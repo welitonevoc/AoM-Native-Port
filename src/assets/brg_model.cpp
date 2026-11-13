@@ -187,6 +187,13 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
                 model->total_vertices += num_verts;
                 model->total_faces += num_faces;
                 model->meshes.push_back(std::move(mesh));
+
+                // Assign pending texture name from earlier MTRL chunk
+                if (!model->pending_texture_name.empty() &&
+                    model->meshes.back().texture_name.empty()) {
+                    model->meshes.back().texture_name = model->pending_texture_name;
+                    model->pending_texture_name.clear();
+                }
             }
         } else if (std::memcmp(tag, "MTRL", 4) == 0) {
             size_t next_tag = size;
@@ -215,8 +222,11 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
             }
             if (!tex_name.empty()) {
                 model->textures.push_back(tex_name);
+                // Assign to last mesh if exists, otherwise store for next mesh
                 if (!model->meshes.empty() && model->meshes.back().texture_name.empty()) {
                     model->meshes.back().texture_name = tex_name;
+                } else {
+                    model->pending_texture_name = tex_name;
                 }
             }
             pos = next_tag;
