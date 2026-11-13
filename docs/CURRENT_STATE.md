@@ -30,15 +30,15 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
   - `src/engine/engine_gameplay.cpp` (436 linhas, partida RTS `start_game`, entidades iniciais e background 3D).
   - `src/engine/engine.cpp` reduzido de 7.307 para 840 linhas (apenas Core: init/update/render/lifecycle). 100% dos testes e libaom_native passando.
 
-## Em aberto
-1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` e os procedurais. XMB ativo no MAIN_MENU com botões e pórtico autênticos.
-2. ✅ **Eliminação Definitiva das Scanlines do Pórtico**: Decodificação row-interleaved em DDT formato 3 com alpha 4-bit (`stride = width + width/2` bytes por scanline) em `ddt_texture.cpp`.
-3. ✅ **Ondas e Espuma na Praia**: Shader de água atualizado com ondulação ampla visível e cristas de espuma branca na arrebentação costeira da ilha (`gles_renderer.cpp`).
-4. ✅ **Tropas Atlantes na Praia**: Spawn de unidades atlantes autênticas (Murmillo e Arcus) patrulhando a beira-mar desobstruída (`engine_gameplay.cpp`).
+## Em aberto / Resolvidos
+1. ✅ **Decodificação DDT Formato 3**: Índices contínuos + buffer alpha 4-bit (sem row-interleave falso) corrigem as scanlines e restauram silhueta do pórtico e botões (`ddt_texture.cpp`).
+2. ✅ **Botões Autênticos XMB**: `gd.bg_texture` e `state_backgrounds` sobrepõem textura padrão, aplicando textura autêntica `ui\ui pregame button` com coordenadas UV (`ui_layout.cpp`).
+3. ✅ **Cenário 3D com Tropas Atlantes e Floresta**: `gameplay_world_` instanciado no `MAIN_MENU` executa `populate_menu_background_scene()`, renderizando tropas, árvores e casas na praia.
+4. ✅ **Ondas e Espuma Dinâmica**: Shader de água atualizado com ondulação costeira e arrebentação de espuma na praia da ilha (`gles_renderer.cpp`).
 5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu autêntico com pórtico contínuo sem scanlines e mar com espuma no APK v1.0.11131902.
-2. Validar nitidez contínua do mármore do pórtico e transparência real da cena.
+1. ✅ Menu autêntico com pórtico de mármore e botões autênticos no APK v1.0.11131921.
+2. Validar tropas atlantes patrulhando a beira-mar e ausência de scanlines no pórtico.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 

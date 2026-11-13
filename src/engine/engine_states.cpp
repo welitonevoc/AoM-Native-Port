@@ -60,7 +60,10 @@ void Engine::set_state(EngineState new_state) {
             }
 
             // ── 2. Carregar cenário de fundo 3D do menu (modo menu background) ──
-            if (!gameplay_world_ || !gameplay_world_->has_background_scenario()) {
+            if (!gameplay_world_) {
+                gameplay_world_ = std::make_unique<GameplayWorld>();
+            }
+            if (!gameplay_world_->has_background_scenario()) {
                 start_generic_mission("~aom_pgs_atlantis.scx", true);
             }
 

@@ -608,24 +608,37 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                         }
                     }
 
-                    // 2) Se não veio de buttonset, resolver textura de fundo via gd.bg_texture
-                    if (btn->normal_tex == INVALID_TEXTURE && !gd.bg_texture.empty() && texture_resolver) {
+                    // 2) Se tem gd.bg_texture (ou veio de stateentry), resolver textura autêntica do BAR
+                    if (!gd.bg_texture.empty() && texture_resolver) {
                         ResolvedTexture rt = texture_resolver(gd.bg_texture);
                         if (rt.handle != INVALID_TEXTURE) {
                             btn->normal_tex = rt.handle;
                             btn->pressed_tex = rt.handle;
                             btn->tex_width = rt.width;
                             btn->tex_height = rt.height;
-                            // Definir borders de 9-slice baseados no tamanho da textura
-                            // (borders padrão: 10% de cada lado, mínimo 8px)
-                            float bw = static_cast<float>(rt.width) * 0.10f;
-                            float bh = static_cast<float>(rt.height) * 0.10f;
-                            if (bw < 8.0f) bw = 8.0f;
-                            if (bh < 8.0f) bh = 8.0f;
-                            btn->border_left = bw;
-                            btn->border_right = bw;
-                            btn->border_top = bh;
-                            btn->border_bottom = bh;
+
+                            // Se houver estado clicado explícito nos state_backgrounds[1]
+                            if (gd.state_backgrounds.size() > 1 && !gd.state_backgrounds[1].empty()) {
+                                ResolvedTexture rt_clk = texture_resolver(gd.state_backgrounds[1]);
+                                if (rt_clk.handle != INVALID_TEXTURE) {
+                                    btn->pressed_tex = rt_clk.handle;
+                                }
+                            }
+
+                            if (!btn->has_uv) {
+                                // Definir borders de 9-slice apenas se não tiver UV direta
+                                float bw = static_cast<float>(rt.width) * 0.10f;
+                                float bh = static_cast<float>(rt.height) * 0.10f;
+                                if (bw < 8.0f) bw = 8.0f;
+                                if (bh < 8.0f) bh = 8.0f;
+                                btn->border_left = bw;
+                                btn->border_right = bw;
+                                btn->border_top = bh;
+                                btn->border_bottom = bh;
+                            } else {
+                                btn->border_left = btn->border_right = 0.0f;
+                                btn->border_top = btn->border_bottom = 0.0f;
+                            }
                         } else {
                             // ← FALLBACK defensivo: textura falhou, NÃO deixa retângulo branco
                             // Usa pedra escura AoM com texto ouro para que o botão seja perfeitamente legível

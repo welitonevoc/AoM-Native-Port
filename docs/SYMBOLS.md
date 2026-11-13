@@ -215,7 +215,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `parse_cub_file` 36-79 (44)
 - `load_cub_definition` 81-101 (21)
 
-## src/assets/ddt_texture.cpp (612 linhas)
+## src/assets/ddt_texture.cpp (581 linhas)
 - `read_u16` 25-28 (4)
 - `read_u32` 30-35 (6)
 - `expand_565` 37-41 (5)
@@ -231,8 +231,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `block_size_for` 270-277 (8)
 - `DdtLoader::load` 281-364 (84)
 - `DdtLoader::load` 366-368 (3)
-- `DdtTexture::decode_rgba` 370-603 (234)
-- `DdtTexture::is_compressed` 605-609 (5)
+- `DdtTexture::decode_rgba` 370-572 (203)
+- `DdtTexture::is_compressed` 574-578 (5)
 
 ## src/assets/xmb_parser.cpp (402 linhas)
 - `utf16le_to_utf8` 14-49 (36)
@@ -597,8 +597,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::open_save_game_menu` 255-293 (39)
 - `Engine::save_game_slot` 295-305 (11)
 
-## src/engine/engine_states.cpp (543 linhas)
-- `Engine::set_state` 10-540 (531)
+## src/engine/engine_states.cpp (546 linhas)
+- `Engine::set_state` 10-543 (534)
 
 ## src/engine/engine_terrain.cpp (650 linhas)
 - `Engine::set_water_color_from_body` 13-28 (16)
@@ -1062,7 +1062,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `UIManager::add_background_quad` 419-433 (15)
 - `UIManager::hit_test` 435-438 (4)
 
-## src/ui/ui_layout.cpp (699 linhas)
+## src/ui/ui_layout.cpp (712 linhas)
 - `to_lower` 24-29 (6)
 - `strip_string_ids` 34-44 (11)
 - `parse_floats` 47-55 (9)
@@ -1074,7 +1074,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `UILayoutManager::load_layout` 128-147 (20)
 - `UILayoutManager::load_layout_from_data` 149-188 (40)
 - `UILayoutManager::parse_gadget` 190-358 (169)
-- `apply_layout_to_ui` 360-696 (337)
+- `apply_layout_to_ui` 360-709 (350)
 
 ## src/video/media_decoder.cpp (371 linhas)
 - `MediaDecoder::MediaDecoder` 60-60 (1)
