@@ -122,11 +122,7 @@ public class MyNativeActivity extends android.app.NativeActivity {
      * por SAF funciona sem essa permissão.
      */
     private void requestStorageAccessIfNeeded() {
-        if (hasStoragePermission() || hasImportedGameData()) return;
-
-        SharedPreferences preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-        if (preferences.getBoolean("storage_prompted", false)) return;
-        preferences.edit().putBoolean("storage_prompted", true).apply();
+        if (hasStoragePermission()) return;
 
         if (android.os.Build.VERSION.SDK_INT >= 30) {
             try {
@@ -139,11 +135,10 @@ public class MyNativeActivity extends android.app.NativeActivity {
                     startActivity(intent);
                 } catch (Exception ignored) {}
             }
-        } else {
-            requestPermissions(
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_STORAGE);
         }
+        requestPermissions(
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_STORAGE);
     }
 
 
