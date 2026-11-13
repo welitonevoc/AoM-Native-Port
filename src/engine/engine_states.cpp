@@ -79,7 +79,7 @@ void Engine::set_state(EngineState new_state) {
             camera_.target = glm::vec3(-4.0f, 0.5f, -2.0f);
             
             // ── 5. Povoar cena 3D de fundo com elementos do The Titans ─────────────
-            if (gameplay_world_ && !gameplay_world_->has_background_scenario()) {
+            if (gameplay_world_) {
                 populate_menu_background_scene();
             }
 

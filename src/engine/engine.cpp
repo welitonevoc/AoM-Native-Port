@@ -297,8 +297,7 @@ void Engine::update(float delta_time) {
         }
     } else if (state_ == EngineState::MAIN_MENU) {
         // ── MAIN_MENU: fundo 3D animado (ondas, tropas, câmera panorâmica) ──
-        // Câmera orbital panorâmica lenta
-        yaw_ += delta_time * 0.02f;  // rotação bem lenta
+        // Câmera fixa cinematográfica original (sem rotação artificial contínua)
         const float cx = camera_.target.x + std::sin(yaw_) * std::cos(pitch_) * radius_;
         const float cy = camera_.target.y + std::sin(pitch_) * radius_ + 2.0f;
         const float cz = camera_.target.z + std::cos(yaw_) * std::cos(pitch_) * radius_;

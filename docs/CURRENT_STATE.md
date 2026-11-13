@@ -32,13 +32,13 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 
 ## Em aberto
 1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` e os procedurais. XMB ativo no MAIN_MENU com botões e pórtico autênticos.
-2. ✅ **Cenário 3D animado do Menu (The Titans)**: `~aom_pgs_atlantis.scx` configurado em `MAIN_MENU` (`engine_states.cpp`), carregando oceano, skydome e iluminação solar.
-3. ✅ **Startup sem ANR no Android**: `load_models()` otimizado para não processar 11.496 modelos síncronos na UI thread (`engine_assets.cpp`).
-4. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
-5. ❓ **Tela cheia de água na cinemática de missão**: câmera da cinemática (`CampaignMissionManager`/`CameraTrack`).
+2. ✅ **Câmera Fixa e Estável no Menu**: Removida rotação artificial contínua em `Engine::update` (`engine.cpp`), mantendo câmera estática cinematográfica de The Titans.
+3. ✅ **Paleta 32-bit BGRA em DDT Formato 3**: `ddt_texture.cpp` lê paleta 32-bit de terreno (`grassa.ddt`, `cliffgreeka.ddt`) eliminando tons avermelhados errados.
+4. ✅ **Cenário 3D com Árvores e Tropas**: `populate_menu_background_scene()` ativado no `MAIN_MENU` (`engine_states.cpp`), spawnando edifícios, pinheiros, carvalhos e tropas.
+5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu XMB oficial com texturas PNG autênticas e cenário 3D `~aom_pgs_atlantis.scx` no APK v1.0.11131715.
-2. Validar carregamento do oceano/terreno e câmera orbital no menu.
+1. ✅ Menu XMB oficial com câmera fixa, árvores, tropas e paleta de terreno corrigida no APK v1.0.11131741.
+2. Validar tonalidade verde da costa de Atlantis e posicionamento das tropas/árvores.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 

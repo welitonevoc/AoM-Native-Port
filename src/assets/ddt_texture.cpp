@@ -300,9 +300,13 @@ std::unique_ptr<DdtTexture> DdtLoader::load(const uint8_t* data, size_t size) {
     if (tex->format == DdtFormat::PALETTE) {
         if (size < 40) return nullptr;
         const uint32_t num_colors = read_u32(data + 16);
+        const uint32_t pal_offset_32 = read_u32(data + 20);
         uint32_t pal_offset = read_u32(data + 24);
         if (pal_offset == 0) {
             pal_offset = read_u32(data + 32);
+        }
+        if (pal_offset == 0) {
+            pal_offset = read_u32(data + 36);
         }
         if (pal_offset == 0) {
             pal_offset = 48;
@@ -312,7 +316,10 @@ std::unique_ptr<DdtTexture> DdtLoader::load(const uint8_t* data, size_t size) {
         tex->palette_offset_1 = read_u32(data + 28);
         tex->palette_offset_alpha1 = read_u32(data + 32);
         tex->palette_offset_alpha4 = read_u32(data + 36);
-        if (pal_offset + num_colors * 2 <= size) {
+
+        if (pal_offset_32 != 0 && pal_offset_32 + num_colors * 4 <= size) {
+            tex->palette.assign(data + pal_offset_32, data + pal_offset_32 + num_colors * 4);
+        } else if (pal_offset + num_colors * 2 <= size) {
             tex->palette.assign(data + pal_offset, data + pal_offset + num_colors * 2);
         }
         mip_table_offset += 24; // palette metadata
@@ -399,6 +406,22 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             if (palette.size() < 2 || mip.data.size() < pixel_count) {
                 return {};
             }
+
+            if (palette.size() >= 1024) {
+                const size_t num_colors_32 = palette.size() / 4;
+                for (size_t i = 0; i < pixel_count; ++i) {
+                    size_t idx = mip.data[i];
+                    if (idx >= num_colors_32) idx = 0;
+                    const uint8_t* p = palette.data() + idx * 4;
+                    uint8_t* dst = output.data() + i * 4;
+                    dst[0] = p[2]; // R
+                    dst[1] = p[1]; // G
+                    dst[2] = p[0]; // B
+                    dst[3] = (alpha_bits == 0) ? 255 : p[3];
+                }
+                return output;
+            }
+
             const size_t num_colors = palette.size() / 2;
             uint16_t max_val = 0;
             for (size_t c = 0; c < num_colors; ++c) {
