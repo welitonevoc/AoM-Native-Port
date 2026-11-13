@@ -295,16 +295,18 @@ out vec4 vColor;
 out float vWaterDepth;
 
 void main() {
-    // Ondulação simples estilo AoM 2002
-    float wave = sin(aPos.x * 0.6 + uTime * 1.5) * cos(aPos.z * 0.6 + uTime * 1.2) * 0.03;
+    // Ondulação visível estilo The Titans (ondas amplas e perceptíveis)
+    float wave = (sin(aPos.x * 0.35 + uTime * 1.8) * cos(aPos.z * 0.35 + uTime * 1.4) +
+                  sin(aPos.x * 0.7 - uTime * 1.1)) * 0.07;
     vec3 animatedPos = aPos + vec3(0.0, wave, 0.0);
     vec4 worldPos = uModel * vec4(animatedPos, 1.0);
     vWorldPos = worldPos.xyz;
     vTex = aTex;
     vColor = aColor;
 
-    // Profundidade da água (world space): usado no fragment para foam/cor
-    vWaterDepth = clamp((uWaterLevel - uTerrainHeight) / 2.0, 0.0, 1.0);
+    // Gradiente de profundidade costeiro dinâmico da ilha (área central rasa -> mar aberto fundo)
+    float dist = length(aPos.xz);
+    vWaterDepth = clamp((dist - 8.0) / 16.0, 0.0, 1.0);
 
     gl_Position = uViewProj * worldPos;
 }
@@ -330,9 +332,9 @@ uniform float uWaterLevel;
 out vec4 fragColor;
 
 void main() {
-    // 1. Coordenadas UV largas e suaves (sem granulação de alta frequência)
-    vec2 uv1 = vWorldPos.xz * 0.05 + vec2(uTime * 0.015, uTime * 0.01);
-    vec2 uv2 = vWorldPos.xz * 0.07 - vec2(uTime * 0.01, uTime * 0.018);
+    // 1. Coordenadas UV duplas para fluxo de ondas
+    vec2 uv1 = vWorldPos.xz * 0.06 + vec2(uTime * 0.02, uTime * 0.015);
+    vec2 uv2 = vWorldPos.xz * 0.08 - vec2(uTime * 0.015, uTime * 0.022);
 
     float wave1 = 0.5, wave2 = 0.5;
     if (uHasWaterTex != 0) {
@@ -341,31 +343,28 @@ void main() {
     }
     float surface = (wave1 + wave2) * 0.5;
 
-    // 2. Cor base clássica do AoM (azul-marinho suave, sem brilho metálico)
-    vec3 deepColor    = vec3(0.18, 0.36, 0.52);
-    vec3 shallowColor = vec3(0.38, 0.58, 0.68);
+    // 2. Cores da água de The Titans: turquesa costeiro para azul-marinho profundo
+    vec3 deepColor    = vec3(0.12, 0.32, 0.56);
+    vec3 shallowColor = vec3(0.26, 0.60, 0.72);
 
-    // Profundidade passada do vertex (0.0 = raso/praia, 1.0 = fundo)
     float waterDepth = vWaterDepth;
+    vec3 waterColor = mix(shallowColor, deepColor, waterDepth);
+    waterColor += (surface - 0.5) * 0.08;
 
-    // Cor interpolada pela profundidade
-    vec3 waterColor  = mix(shallowColor, deepColor, waterDepth);
-    waterColor += (surface - 0.5) * 0.06; // Variação muito subtil na água
+    // 3. Faixas dinâmicas de espuma branca quebrando na rebentação da praia
+    float shoreZone = 1.0 - smoothstep(0.0, 0.60, waterDepth);
+    float foamWave  = sin(waterDepth * 22.0 - uTime * 3.2 + surface * 3.0);
+    float foamShore = smoothstep(0.50, 0.85, foamWave) * shoreZone;
 
-    // 3. Faixas de espuma branca na rebentação da praia (estilo The Titans)
-    float shoreZone = 1.0 - smoothstep(0.0, 0.65, waterDepth);
-    float foamWave  = sin(waterDepth * 18.0 + uTime * 2.2 + surface * 2.0);
-    float foamMask  = smoothstep(0.55, 0.85, foamWave) * shoreZone;
+    // Cristas de espuma nas ondas em mar aberto
+    float waveCrest = smoothstep(0.70, 0.95, sin(vWorldPos.x * 0.6 + uTime * 2.2) * cos(vWorldPos.z * 0.6 + uTime * 1.8));
+    float foamMask = clamp(foamShore * 1.3 + waveCrest * 0.35, 0.0, 1.0);
 
-    // Espuma extra colada na areia (beach edge)
-    float beachEdge = 1.0 - smoothstep(0.0, 0.12, waterDepth);
-    foamMask = clamp(foamMask + beachEdge * 0.8, 0.0, 1.0);
+    // Composição com espuma branca pura brilhante
+    vec3 finalColor = mix(waterColor, vec3(0.94, 0.97, 1.0), foamMask);
 
-    // Composição final
-    vec3 finalColor = mix(waterColor, vec3(0.92, 0.95, 0.98), foamMask);
-
-    // Alpha: mais transparente na praia, mais opaco no fundo, espuma aumenta opacidade
-    float alpha = clamp(0.45 + waterDepth * 0.45 + foamMask * 0.3, 0.0, 0.92);
+    // Alpha suave
+    float alpha = clamp(0.60 + waterDepth * 0.35 + foamMask * 0.25, 0.0, 0.96);
 
     fragColor = vec4(finalColor, alpha);
 }

@@ -459,8 +459,8 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                     const uint8_t packed_a = a4[i >> 1];
                     const uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
                     dst[3] = nib * 17;
-                } else if (alpha_bits > 0 || idx == 0) {
-                    dst[3] = (idx == 0 && val == 0) ? 0 : 255;
+                } else if (alpha_bits > 0) {
+                    dst[3] = (idx == 0) ? 0 : 255;
                 } else {
                     dst[3] = 255;
                 }

@@ -279,50 +279,42 @@ void Engine::populate_menu_background_scene() {
         gameplay_world_->spawn_scenery_object(name, pos, 1.0f, tex);
     }
 
-    // ── 3. Tropas terrestres na praia ────────────────────────────────────────
-    UnitStats hoplite_stats;
-    hoplite_stats.name = "Hoplite";
-    hoplite_stats.max_hp = 120.0f;
-    hoplite_stats.move_speed = 3.8f;
-    hoplite_stats.attack_damage = 12.0f;
-    hoplite_stats.attack_range = 2.2f;
-    hoplite_stats.attack_cooldown = 1.5f;
-    hoplite_stats.los = 14.0f;
-    hoplite_stats.worker = false;
-    hoplite_stats.pop_cost = 2;
+    // ── 3. Tropas Atlantes na praia visível (The Titans) ───────────────────
+    UnitStats murmillo_stats;
+    murmillo_stats.name = "Murmillo";
+    murmillo_stats.max_hp = 140.0f;
+    murmillo_stats.move_speed = 4.0f;
+    murmillo_stats.attack_damage = 14.0f;
+    murmillo_stats.attack_range = 2.0f;
+    murmillo_stats.attack_cooldown = 1.4f;
+    murmillo_stats.los = 16.0f;
 
-    UnitStats toxotes_stats;
-    toxotes_stats.name = "Toxotes";
-    toxotes_stats.max_hp = 80.0f;
-    toxotes_stats.move_speed = 4.2f;
-    toxotes_stats.attack_damage = 9.0f;
-    toxotes_stats.attack_range = 12.0f;
-    toxotes_stats.attack_cooldown = 2.0f;
-    toxotes_stats.los = 16.0f;
-    toxotes_stats.worker = false;
-    toxotes_stats.pop_cost = 2;
+    UnitStats arcus_stats;
+    arcus_stats.name = "Arcus";
+    arcus_stats.max_hp = 85.0f;
+    arcus_stats.move_speed = 4.2f;
+    arcus_stats.attack_damage = 11.0f;
+    arcus_stats.attack_range = 14.0f;
+    arcus_stats.attack_cooldown = 1.8f;
+    arcus_stats.los = 18.0f;
 
-    // Tropas amigas patrulhando
-    Entity h1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-4.0f, 0.0f, 1.5f), hoplite_stats);
-    Entity h2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 2.5f), hoplite_stats);
-    Entity h3 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.0f, 0.0f, 1.0f), hoplite_stats);
-    Entity t1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-5.0f, 0.0f, 2.0f), toxotes_stats);
-    Entity t2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-4.0f, 0.0f, 3.0f), toxotes_stats);
+    // Tropas atlantes no flanco esquerdo (ao lado do pórtico, na praia)
+    Entity m1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-9.0f, 0.0f, -1.0f), murmillo_stats);
+    Entity m2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-8.0f, 0.0f, 1.0f), murmillo_stats);
+    Entity a1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-10.0f, 0.0f, 0.5f), arcus_stats);
 
-    gameplay_world_->order_move(h1, glm::vec3(-2.0f, 0.0f, 2.0f));
-    gameplay_world_->order_move(h2, glm::vec3(-1.0f, 0.0f, 3.0f));
-    gameplay_world_->order_move(h3, glm::vec3(0.0f, 0.0f, 1.5f));
-    gameplay_world_->order_move(t1, glm::vec3(-1.0f, 0.0f, 2.5f));
-    gameplay_world_->order_move(t2, glm::vec3(0.0f, 0.0f, 2.0f));
+    gameplay_world_->order_move(m1, glm::vec3(-7.0f, 0.0f, 2.0f));
+    gameplay_world_->order_move(m2, glm::vec3(-6.0f, 0.0f, 3.0f));
+    gameplay_world_->order_move(a1, glm::vec3(-8.0f, 0.0f, 2.5f));
 
-    // Tropas inimigas
-    Entity eh1 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(6.0f, 0.0f, 4.0f), hoplite_stats);
-    Entity eh2 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(7.0f, 0.0f, 5.0f), hoplite_stats);
-    Entity et1 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(8.0f, 0.0f, 3.0f), toxotes_stats);
+    // Tropas atlantes no flanco direito (ao lado do mar e falésia)
+    Entity m3 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(4.0f, 0.0f, 1.0f), murmillo_stats);
+    Entity m4 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(5.0f, 0.0f, 2.0f), murmillo_stats);
+    Entity a2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(6.0f, 0.0f, 0.5f), arcus_stats);
 
-    gameplay_world_->order_move(eh1, glm::vec3(5.0f, 0.0f, 5.0f));
-    gameplay_world_->order_move(eh2, glm::vec3(6.0f, 0.0f, 6.0f));
-    gameplay_world_->order_move(et1, glm::vec3(7.0f, 0.0f, 4.0f));
+    gameplay_world_->order_move(m3, glm::vec3(2.0f, 0.0f, 2.5f));
+    gameplay_world_->order_move(m4, glm::vec3(3.0f, 0.0f, 3.5f));
+    gameplay_world_->order_move(a2, glm::vec3(4.5f, 0.0f, 2.0f));
 
     // ── 4. Unidade Mítica Voadora (Pegasus) cruzando a tela ──────────────────
     UnitStats pegasus_stats;

@@ -32,13 +32,13 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 
 ## Em aberto
 1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` e os procedurais. XMB ativo no MAIN_MENU com botões e pórtico autênticos.
-2. ✅ **Câmera Fixa e Estável no Menu**: Removida rotação artificial contínua em `Engine::update` (`engine.cpp`), mantendo câmera estática cinematográfica de The Titans.
-3. ✅ **Paleta 32-bit BGRA em DDT Formato 3**: `ddt_texture.cpp` lê paleta 32-bit de terreno (`grassa.ddt`, `cliffgreeka.ddt`) eliminando tons avermelhados errados.
-4. ✅ **Cenário 3D com Árvores e Tropas**: `populate_menu_background_scene()` ativado no `MAIN_MENU` (`engine_states.cpp`), spawnando edifícios, pinheiros, carvalhos e tropas.
+2. ✅ **Pórtico Translúcido Autêntico**: Carregamento prioritário de `textures2.bar` (`ui\ui pregame *.ddt`) com alfa real de 4-bit (`ddt_texture.cpp`, `engine_menus.cpp`), eliminando o PNG opaco de fundo recortado.
+3. ✅ **Ondas e Espuma na Praia**: Shader de água atualizado com ondulação ampla visível e cristas de espuma branca na arrebentação costeira da ilha (`gles_renderer.cpp`).
+4. ✅ **Tropas Atlantes na Praia**: Spawn de unidades atlantes autênticas (Murmillo e Arcus) patrulhando a beira-mar desobstruída (`engine_gameplay.cpp`).
 5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu XMB oficial com câmera fixa, árvores, tropas e paleta de terreno corrigida no APK v1.0.11131741.
-2. Validar tonalidade verde da costa de Atlantis e posicionamento das tropas/árvores.
+1. ✅ Menu autêntico com pórtico transparente, espuma nas ondas e tropas atlantes no APK v1.0.11131854.
+2. Validar visibilidade das tropas atlantes marchando e movimento das ondas de espuma.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 

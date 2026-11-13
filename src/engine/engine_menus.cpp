@@ -1299,29 +1299,13 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
             png_name += ".png";
         }
 
-        int pw = 0, ph = 0;
-        TextureHandle h = INVALID_TEXTURE;
-        if (png_name.rfind("ui_pregame", 0) == 0) {
-            h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
-            if (h != INVALID_TEXTURE) {
-                rt.handle = h;
-                rt.width = static_cast<uint32_t>(pw);
-                rt.height = static_cast<uint32_t>(ph);
-                texture_cache_[name] = h;
-                texture_dimensions_[name] = glm::ivec2(pw, ph);
-                LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
-                     name.c_str(), png_name.c_str(), h, pw, ph);
-                return rt;
-            }
-        }
-
-        // 3) Normalizar e carregar de textures_bar_ (UI textures ficam em textures.bar, não data.bar)
+        // 2) Tentar carregar textura original do textures.bar/textures2.bar primeiro (com alfa real nativo)
         std::string normalized = name;
         if (normalized.size() < 4 ||
             normalized.substr(normalized.size() - 4) != ".ddt") {
             normalized += ".ddt";
         }
-        h = load_ddt_texture(normalized);
+        TextureHandle h = load_ddt_texture(normalized);
         if (h != INVALID_TEXTURE) {
             rt.handle = h;
             auto dit = texture_dimensions_.find(normalized);
@@ -1331,12 +1315,13 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
             }
             texture_cache_[name] = h;
             texture_dimensions_[name] = texture_dimensions_[normalized];
-            LOGI("UI texture resolved: '%s' -> '%s' (handle=%u, %ux%u)",
+            LOGI("UI texture resolved from authentic BAR: '%s' -> '%s' (handle=%u, %ux%u)",
                  name.c_str(), normalized.c_str(), h, rt.width, rt.height);
             return rt;
         }
 
-        // 4) Fallback geral para qualquer outro PNG em assets
+        // 3) Fallback para PNG em assets caso não esteja no BAR
+        int pw = 0, ph = 0;
         h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
         if (h == INVALID_TEXTURE) {
             h = load_png_asset(png_name, &pw, &ph);
@@ -1347,8 +1332,9 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
             rt.height = static_cast<uint32_t>(ph);
             texture_cache_[name] = h;
             texture_dimensions_[name] = glm::ivec2(pw, ph);
-            LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
+            LOGI("UI texture resolved from PNG fallback: '%s' -> '%s' (handle=%u, %ux%u)",
                  name.c_str(), png_name.c_str(), h, pw, ph);
+            return rt;
         } else {
             LOGE("UI texture NOT FOUND: '%s' (tried '%s', '%s')",
                  name.c_str(), normalized.c_str(), png_name.c_str());
