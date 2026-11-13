@@ -31,17 +31,14 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
   - `src/engine/engine.cpp` reduzido de 7.307 para 840 linhas (apenas Core: init/update/render/lifecycle). 100% dos testes e libaom_native passando.
 
 ## Em aberto
-1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` (novo) e os `create_*_menu` à mão. Definir qual manda no MAIN_MENU.
-3. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
-4. ❓ **Tela cheia de água na cinemática de missão**: câmera da cinemática (`CampaignMissionManager`/`CameraTrack`). `CameraTrack::update` sobrescreve aspect/near/far.
-5. ✅ **Dados**: corrigido `resolve_game_data_root` em `native_activity.cpp` para priorizar o armazenamento interno do app. Copiados todos os `.bar` (data, textures, models, scenarios, sounds, anim, godpowers) para `/storage/emulated/0/Android/data/com.aom.nativeport/files/AoM/`. Logcat confirma: `Loaded archives: data=137, textures=6782, models=11496, scenarios=99, sounds=2468, anim=1068, godpowers=71 (valid=1)`. Todos os `.bar` abertos com sucesso (`open -> ok`, `mount expansao -> ok`). Sem falhas de permissão.
-   - Melhoria: `open_pair` agora loga `errno` e `strerror` quando `open`/`mount` falham, permitindo distinguir EACCES de arquivo corrompido.
-
-## Riscos do repositório
-- ⚠ `assets_bar/textures/textures.bar` (85 MB) e `textures2.bar` (34 MB) estão no GitHub público. São dados do jogo comercial:
-  possível violação de direitos autorais e repo pesado. Tirar do Git (e do histórico) e usar `.gitignore`.
-- Raiz poluída: `PLANO_P0..P5.md`, `PROGRESSO.md`, `fix_engine.py`, `offtec_menus.py`... Mover para `docs/archive/` e `tools/`.
+1. ❓ **Dois sistemas de menu** coexistem: XMB (`ui_layout.cpp`), `src/ui/menu_system.cpp` e os procedurais. XMB ativo no MAIN_MENU com botões e pórtico autênticos.
+2. ✅ **Cenário 3D animado do Menu (The Titans)**: `~aom_pgs_atlantis.scx` configurado em `MAIN_MENU` (`engine_states.cpp`), carregando oceano, skydome e iluminação solar.
+3. ✅ **Startup sem ANR no Android**: `load_models()` otimizado para não processar 11.496 modelos síncronos na UI thread (`engine_assets.cpp`).
+4. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
+5. ❓ **Tela cheia de água na cinemática de missão**: câmera da cinemática (`CampaignMissionManager`/`CameraTrack`).
 
 ## Próximos passos (ordem)
-1. ✅ Menu XMB oficial com texturas PNG de titans_menu_parts e centralização widescreen concluídos.
-2. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
+1. ✅ Menu XMB oficial com texturas PNG autênticas e cenário 3D `~aom_pgs_atlantis.scx` no APK v1.0.11131715.
+2. Validar carregamento do oceano/terreno e câmera orbital no menu.
+3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
+

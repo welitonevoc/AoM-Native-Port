@@ -935,8 +935,10 @@ bool Engine::load_models() {
     if (!renderer_ || !models_bar_) return false;
 
     int loaded = 0;
+    const int max_initial_models = 80;
     for (const BarEntry& entry : models_bar_->entries()) {
         if (!ends_with(to_lower(entry.filename), ".brg")) continue;
+        if (loaded >= max_initial_models) break;
 
         auto model = load_brg_model_data(models_bar_.get(), entry.filename);
         if (!model || model->meshes.empty()) continue;

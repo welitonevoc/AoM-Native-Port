@@ -61,7 +61,7 @@ void Engine::set_state(EngineState new_state) {
 
             // ── 2. Carregar cenário de fundo 3D do menu (modo menu background) ──
             if (!gameplay_world_ || !gameplay_world_->has_background_scenario()) {
-                start_generic_mission("ui background xpack.scn", true);
+                start_generic_mission("~aom_pgs_atlantis.scx", true);
             }
 
             // ── 3. Garantir terreno e skydome 3D ativos para o menu animado ──

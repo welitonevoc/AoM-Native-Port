@@ -298,10 +298,11 @@ void Engine::start_generic_mission(const std::string& scenario_filename, bool me
         if (entry) {
             scn_data = scenarios_bar_->extract(*entry);
         }
-        // Fallback: primeiro .scn disponível
+        // Fallback: primeiro cenário .scx ou .scn disponível
         if (scn_data.empty()) {
             for (const BarEntry& e : scenarios_bar_->entries()) {
-                if (ends_with(to_lower(e.filename), ".scn")) {
+                const std::string low = to_lower(e.filename);
+                if (ends_with(low, ".scx") || ends_with(low, ".scn")) {
                     scn_data = scenarios_bar_->extract(e);
                     if (!scn_data.empty()) {
                         LOGW("Generic mission: '%s' não encontrado, usando '%s'",
