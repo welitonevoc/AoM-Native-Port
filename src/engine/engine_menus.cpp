@@ -1286,17 +1286,42 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
             return rt;
         }
 
-        // 2) Normalizar: NÃO converter \ → / aqui. O BarArchive::normalize()
-        //    já trata barras invertidas e barras normais de forma bidirecional.
-        //    Apenas garantir extensão .ddt.
+        // 2) Tentar carregar de PNG limpo em assets/titans_menu_parts/ para texturas ui_pregame
+        std::string png_name = name;
+        if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
+            png_name = png_name.substr(3);
+        }
+        for (char& c : png_name) {
+            if (c == ' ' || c == '\\' || c == '/') c = '_';
+            else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+        if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
+            png_name += ".png";
+        }
+
+        int pw = 0, ph = 0;
+        TextureHandle h = INVALID_TEXTURE;
+        if (png_name.rfind("ui_pregame", 0) == 0) {
+            h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
+            if (h != INVALID_TEXTURE) {
+                rt.handle = h;
+                rt.width = static_cast<uint32_t>(pw);
+                rt.height = static_cast<uint32_t>(ph);
+                texture_cache_[name] = h;
+                texture_dimensions_[name] = glm::ivec2(pw, ph);
+                LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
+                     name.c_str(), png_name.c_str(), h, pw, ph);
+                return rt;
+            }
+        }
+
+        // 3) Normalizar e carregar de textures_bar_ (UI textures ficam em textures.bar, não data.bar)
         std::string normalized = name;
         if (normalized.size() < 4 ||
             normalized.substr(normalized.size() - 4) != ".ddt") {
             normalized += ".ddt";
         }
-
-        // 3) Carregar de textures_bar_ (UI textures ficam em textures.bar, não data.bar)
-        TextureHandle h = load_ddt_texture(normalized);
+        h = load_ddt_texture(normalized);
         if (h != INVALID_TEXTURE) {
             rt.handle = h;
             auto dit = texture_dimensions_.find(normalized);
@@ -1308,36 +1333,25 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
             texture_dimensions_[name] = texture_dimensions_[normalized];
             LOGI("UI texture resolved: '%s' -> '%s' (handle=%u, %ux%u)",
                  name.c_str(), normalized.c_str(), h, rt.width, rt.height);
+            return rt;
+        }
+
+        // 4) Fallback geral para qualquer outro PNG em assets
+        h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
+        if (h == INVALID_TEXTURE) {
+            h = load_png_asset(png_name, &pw, &ph);
+        }
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            rt.width = static_cast<uint32_t>(pw);
+            rt.height = static_cast<uint32_t>(ph);
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = glm::ivec2(pw, ph);
+            LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
+                 name.c_str(), png_name.c_str(), h, pw, ph);
         } else {
-            // 4) Se não encontrou no BAR, tentar carregar de PNG em assets (ex: titans_menu_parts/)
-            std::string png_name = name;
-            if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
-                png_name = png_name.substr(3);
-            }
-            for (char& c : png_name) {
-                if (c == ' ' || c == '\\' || c == '/') c = '_';
-                else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-            }
-            if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
-                png_name += ".png";
-            }
-            int pw = 0, ph = 0;
-            h = load_png_asset("titans_menu_parts/" + png_name, &pw, &ph);
-            if (h == INVALID_TEXTURE) {
-                h = load_png_asset(png_name, &pw, &ph);
-            }
-            if (h != INVALID_TEXTURE) {
-                rt.handle = h;
-                rt.width = static_cast<uint32_t>(pw);
-                rt.height = static_cast<uint32_t>(ph);
-                texture_cache_[name] = h;
-                texture_dimensions_[name] = glm::ivec2(pw, ph);
-                LOGI("UI texture resolved from PNG asset: '%s' -> '%s' (handle=%u, %ux%u)",
-                     name.c_str(), png_name.c_str(), h, pw, ph);
-            } else {
-                LOGE("UI texture NOT FOUND: '%s' (tried '%s', '%s')",
-                     name.c_str(), normalized.c_str(), png_name.c_str());
-            }
+            LOGE("UI texture NOT FOUND: '%s' (tried '%s', '%s')",
+                 name.c_str(), normalized.c_str(), png_name.c_str());
         }
         return rt;
     };

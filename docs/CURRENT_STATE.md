@@ -11,7 +11,7 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ `recreate_renderer()` chama `invalidate_gpu_handles()`: zera todos os handles de GPU (UI, malhas, terreno, água) evitando colisão de texturas.
 - ✅ `ui_layout.cpp`: lê `stateentry`, `hidden`, `statebutton`, `z`, `texturecoords` (UV atlas) e comandos nativos AoM (`gadgetReal`, `modeEnter`, `exit`); remove o prefixo `$$id$$` do texto.
 - ✅ `MyNativeActivity.java`: copia todos os archives base e expansão (`textures2.bar`, `data2.bar`, `models2.bar`, `scenarios2.bar`, `sounds2.bar`, `anim2.bar`, `godpowers2.bar`).
-- ✅ DDT formato 3 (PALETTE 256 cores): corrigido layout RGB555 e offset alpha 4-bit (`ddt_texture.cpp`).
+- ✅ DDT formato 3 (PALETTE): corrigido layout RGB444 (12-bit) e validação de alpha a4 (`ddt_texture.cpp`). Texturas `ui_pregame` priorizam PNGs limpos de `titans_menu_parts/` fatiados com transparência alfa autêntica (`engine_menus.cpp`).
 - ✅ LightingManager e arquivos `.lgt`: 11 presets de iluminação solar/ambiente integrados ao motor e empacotados no APK.
 - ✅ Cenários `.scn`/`.scx`: suporte unificado e resolução flexível de caminhos no `scenarios.bar`/`scenarios2.bar` e disco.
 - ✅ `ButtonSetManager` e `buttonsets.xmb`: decodificação e aplicação de texturas e UVs para botões (`buttonLong`, `checkBtn`, etc.) e empacotamento no APK.

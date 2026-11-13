@@ -400,8 +400,22 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                 return {};
             }
             const size_t num_colors = palette.size() / 2;
+            uint16_t max_val = 0;
+            for (size_t c = 0; c < num_colors; ++c) {
+                uint16_t v = read_u16(palette.data() + c * 2);
+                if (v > max_val) max_val = v;
+            }
+            const bool is_rgb444 = (max_val <= 0x0FFF && max_val > 0x001F);
+
             const bool has_alpha4 = (alpha_bits == 4 && mip.data.size() >= pixel_count + (pixel_count + 1) / 2);
             const uint8_t* a4 = has_alpha4 ? (mip.data.data() + pixel_count) : nullptr;
+            bool a4_has_data = false;
+            if (a4) {
+                const size_t a4_len = (pixel_count + 1) / 2;
+                for (size_t k = 0; k < a4_len; ++k) {
+                    if (a4[k] != 0) { a4_has_data = true; break; }
+                }
+            }
 
             for (size_t i = 0; i < pixel_count; ++i) {
                 size_t idx = mip.data[i];
@@ -410,20 +424,22 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                 const uint16_t val = read_u16(palette.data() + idx * 2);
                 uint8_t* dst = output.data() + i * 4;
 
-                // 1. Expansão de cor RGB555 autêntica do AoM
-                expand_555(val, dst[0], dst[1], dst[2]);
+                if (is_rgb444) {
+                    dst[0] = ((val >> 8) & 0x0F) * 17;
+                    dst[1] = ((val >> 4) & 0x0F) * 17;
+                    dst[2] = (val & 0x0F) * 17;
+                } else {
+                    expand_555(val, dst[0], dst[1], dst[2]);
+                }
 
-                // 2. Alpha de 4 bits posicionado após a tabela de índices de pixels
-                if (a4) {
+                if (a4_has_data) {
                     const uint8_t packed_a = a4[i >> 1];
                     const uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
                     dst[3] = nib * 17;
-                } else if (alpha_bits == 1) {
+                } else if (alpha_bits > 0 || idx == 0) {
                     dst[3] = (idx == 0 && val == 0) ? 0 : 255;
-                } else if (alpha_bits == 0) {
-                    dst[3] = 255;
                 } else {
-                    dst[3] = (idx == 0 && val == 0) ? 0 : 255;
+                    dst[3] = 255;
                 }
             }
             return output;

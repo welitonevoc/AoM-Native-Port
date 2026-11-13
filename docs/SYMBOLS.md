@@ -215,7 +215,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `parse_cub_file` 36-79 (44)
 - `load_cub_definition` 81-101 (21)
 
-## src/assets/ddt_texture.cpp (541 linhas)
+## src/assets/ddt_texture.cpp (557 linhas)
 - `read_u16` 25-28 (4)
 - `read_u32` 30-35 (6)
 - `expand_565` 37-41 (5)
@@ -231,8 +231,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `block_size_for` 270-277 (8)
 - `DdtLoader::load` 281-357 (77)
 - `DdtLoader::load` 359-361 (3)
-- `DdtTexture::decode_rgba` 363-532 (170)
-- `DdtTexture::is_compressed` 534-538 (5)
+- `DdtTexture::decode_rgba` 363-548 (186)
+- `DdtTexture::is_compressed` 550-554 (5)
 
 ## src/assets/xmb_parser.cpp (402 linhas)
 - `utf16le_to_utf8` 14-49 (36)
@@ -443,9 +443,9 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::handle_touch` 9-241 (233)
 - `Engine::adjust_camera_zoom` 243-245 (3)
 
-## src/engine/engine_internal.h (88 linhas)
+## src/engine/engine_internal.h (92 linhas)
 
-## src/engine/engine_menus.cpp (1595 linhas) **GRANDE**
+## src/engine/engine_menus.cpp (1609 linhas) **GRANDE**
 - `Engine::create_main_menu` 24-26 (3)
 - `Engine::create_campaign_selection_menu` 29-45 (17)
 - `Engine::create_game_list_menu` 48-71 (24)
@@ -547,16 +547,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::create_single_player_menu` 1214-1216 (3)
 - `Engine::create_random_map_menu` 1218-1220 (3)
 - `Engine::load_ui_layout` 1224-1237 (14)
-- `Engine::show_ui_layout` 1239-1356 (118)
-- `Engine::show_techtree` 1358-1362 (5)
-- `Engine::show_tribute` 1364-1368 (5)
-- `Engine::show_sound_settings` 1370-1374 (5)
-- `Engine::create_cinematics_menu` 1378-1380 (3)
-- `Engine::create_history_menu` 1382-1384 (3)
-- `Engine::create_menu_screen` 1386-1415 (30)
-- `Engine::create_main_menu_from_xmb` 1417-1466 (50)
-- `Engine::create_main_menu_fallback` 1468-1533 (66)
-- `Engine::create_command_panel_from_xmb` 1535-1591 (57)
+- `Engine::show_ui_layout` 1239-1370 (132)
+- `Engine::show_techtree` 1372-1376 (5)
+- `Engine::show_tribute` 1378-1382 (5)
+- `Engine::show_sound_settings` 1384-1388 (5)
+- `Engine::create_cinematics_menu` 1392-1394 (3)
+- `Engine::create_history_menu` 1396-1398 (3)
+- `Engine::create_menu_screen` 1400-1429 (30)
+- `Engine::create_main_menu_from_xmb` 1431-1480 (50)
+- `Engine::create_main_menu_fallback` 1482-1547 (66)
+- `Engine::create_command_panel_from_xmb` 1549-1605 (57)
 
 ## src/engine/engine_multiplayer.cpp (399 linhas)
 - `Engine::open_multiplayer` 12-38 (27)
