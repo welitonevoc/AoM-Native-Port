@@ -952,6 +952,7 @@ bool Engine::load_models() {
         if (ends_with(to_lower(base), ".brg")) {
             base = base.substr(0, base.size() - 4);
         }
+        // Primeiro tenta baseado no nome do arquivo BRG
         for (const std::string& cand : {
                  base + ".ddt",
                  base + " diffuse.ddt",
@@ -960,6 +961,21 @@ bool Engine::load_models() {
              }) {
             tex = load_ddt_texture(cand);
             if (tex != INVALID_TEXTURE) break;
+        }
+        // Fallback: se o mesh tem nome de textura próprio, tenta usar
+        if (tex == INVALID_TEXTURE && model && !model->meshes.empty()) {
+            const std::string& mesh_tex = model->meshes[0].texture_name;
+            if (!mesh_tex.empty()) {
+                for (const std::string& cand : {
+                         mesh_tex + ".ddt",
+                         mesh_tex + " diffuse.ddt",
+                         mesh_tex + "_diffuse.ddt",
+                         mesh_tex + ".bti",
+                     }) {
+                    tex = load_ddt_texture(cand);
+                    if (tex != INVALID_TEXTURE) break;
+                }
+            }
         }
 
         const ProtoUnitData* unit_stats = nullptr;
