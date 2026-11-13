@@ -516,6 +516,9 @@ void Engine::render() {
         renderer_->draw_ui_text(prog_buf, {bar_x, bar_y - 28.0f}, 18.0f, 0xFFFFD000);
     } else if (state_ == EngineState::MAIN_MENU) {
         // ── MAIN_MENU com fundo 3D animado (cenário costeiro The Titans) ──────
+        renderer_->set_camera(camera_);
+        renderer_->set_light(dir_light_);
+
         // 1. Vídeo de fundo do menu (se disponível) — desenha primeiro para ficar atrás de tudo
         if (menu_bg_tex_ != INVALID_TEXTURE) {
             const float aspect_vid = static_cast<float>(menu_bg_w_) / menu_bg_h_;
@@ -526,8 +529,8 @@ void Engine::render() {
             renderer_->draw_ui_quad({(vw - fw) * 0.5f, (vh - fh) * 0.5f},
                                     {fw, fh}, menu_bg_tex_, 0xFFFFFFFF);
         } else {
-            // Imagem de fundo autêntica do menu principal (main_menu.png)
-            if (main_menu_tex_ != INVALID_TEXTURE) {
+            // Imagem de fundo estática como fallback caso não haja terreno 3D carregado
+            if (terrain_mesh_ == INVALID_MESH && main_menu_tex_ != INVALID_TEXTURE) {
                 renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, main_menu_tex_, 0xFFFFFFFF);
             }
             // 1b. Skybox procedural atmosférico (cubemap ou faces)

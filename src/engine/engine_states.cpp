@@ -47,12 +47,7 @@ void Engine::set_state(EngineState new_state) {
                 gameplay_world_->set_render_hp_bars(false);
             }
             
-            // ── Carregar cenário de fundo 3D do menu (modo menu background) ──
-            if (!gameplay_world_ || !gameplay_world_->has_background_scenario()) {
-                start_generic_mission("ui background xpack.scn", true);
-            }
-
-            // ── Verificar se recursos de jogo já foram carregados (evita recarregar a cada volta ao MAIN_MENU) ──
+            // ── 1. Carregar archives e recursos primeiro para que cenários e modelos existam ──
             if (!resources_loaded_) {
                 LOGI("Carregando recursos de jogo para MAIN_MENU...");
                 if (!gameplay_world_ || model_mesh_ == INVALID_MESH || !prt_particles_) {
@@ -64,13 +59,26 @@ void Engine::set_state(EngineState new_state) {
                 resources_loaded_ = true;
             }
 
-            // ── Configurar câmera isométrica estilo The Titans ──────────────────
+            // ── 2. Carregar cenário de fundo 3D do menu (modo menu background) ──
+            if (!gameplay_world_ || !gameplay_world_->has_background_scenario()) {
+                start_generic_mission("ui background xpack.scn", true);
+            }
+
+            // ── 3. Garantir terreno e skydome 3D ativos para o menu animado ──
+            if (terrain_mesh_ == INVALID_MESH) {
+                generate_terrain();
+            }
+            if (skydome_mesh_ == INVALID_MESH) {
+                generate_skydome();
+            }
+
+            // ── 4. Configurar câmera isométrica estilo The Titans ──────────────────
             radius_ = 32.0f;
             yaw_ = -0.35f;
             pitch_ = 0.65f;
             camera_.target = glm::vec3(-4.0f, 0.5f, -2.0f);
             
-            // ── Povoar cena 3D de fundo com elementos do The Titans ─────────────
+            // ── 5. Povoar cena 3D de fundo com elementos do The Titans ─────────────
             if (gameplay_world_ && !gameplay_world_->has_background_scenario()) {
                 populate_menu_background_scene();
             }

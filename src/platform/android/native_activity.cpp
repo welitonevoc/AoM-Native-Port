@@ -66,11 +66,11 @@ double get_time() {
 /// estrutura plana (data.bar), usada por instalações antigas.
 bool contains_game_data(const std::filesystem::path& dir) {
     std::error_code ec;
-    return std::filesystem::is_regular_file(dir / "data" / "data.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "textures" / "textures.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "data.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "textures.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "models" / "models.bar", ec);
+    const bool has_data = std::filesystem::is_regular_file(dir / "data" / "data.bar", ec) ||
+                          std::filesystem::is_regular_file(dir / "data.bar", ec);
+    const bool has_textures = std::filesystem::is_regular_file(dir / "textures" / "textures.bar", ec) ||
+                              std::filesystem::is_regular_file(dir / "textures.bar", ec);
+    return has_data && has_textures;
 }
 
 /// Resolve a pasta real dos dados. Além da própria pasta candidata, aceita um
@@ -407,7 +407,9 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
         candidates.push_back(internal + "/AoM");
         candidates.push_back(internal);
     }
-    // Armazenamento interno do app (onde o Java copia os .bar) tem prioridade.
+    // Instalações completas do jogo (com todos os .bar: textures, models, scenarios, etc.) têm prioridade máxima.
+    candidates.emplace_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology");
+    candidates.emplace_back("/sdcard/Download/Games/PC/Age of Mythology/Age of Mythology");
     candidates.emplace_back("/storage/emulated/0/Android/data/com.aom.nativeport/files/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM");
     candidates.emplace_back("/sdcard/Documents/AoM");
@@ -416,8 +418,6 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
     candidates.emplace_back("/storage/emulated/0/AoM");
     candidates.emplace_back("/sdcard/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM-Native-Port/data");
-    candidates.emplace_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology");
-    candidates.emplace_back("/sdcard/Download/Games/PC/Age of Mythology/Age of Mythology");
     candidates.emplace_back("/storage/emulated/0/Download/Age of Mythology");
     candidates.emplace_back("/sdcard/Download/Age of Mythology");
 
