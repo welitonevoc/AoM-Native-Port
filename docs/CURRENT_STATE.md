@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11132303 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11132321 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -22,5 +22,5 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 4. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11132303 gerado em `/sdcard/aom-native-v1.0.11132303.apk`.
+1. ✅ APK v1.0.11132321 gerado em `/sdcard/aom-native-v1.0.11132321.apk`.
 2. Validar interatividade dos botões do menu pregame.

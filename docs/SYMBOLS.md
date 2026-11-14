@@ -28,7 +28,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/assets/ddt5_auto.h (121 linhas)
 
-## include/assets/ddt6_auto.h (149 linhas)
+## include/assets/ddt6_auto.h (153 linhas)
 
 ## include/assets/ddt_texture.h (99 linhas)
 
@@ -215,7 +215,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `parse_cub_file` 36-79 (44)
 - `load_cub_definition` 81-101 (21)
 
-## src/assets/ddt_texture.cpp (620 linhas)
+## src/assets/ddt_texture.cpp (613 linhas)
 - `read_u16` 25-28 (4)
 - `read_u32` 30-35 (6)
 - `expand_565` 37-41 (5)
@@ -231,8 +231,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `block_size_for` 270-277 (8)
 - `DdtLoader::load` 281-376 (96)
 - `DdtLoader::load` 378-380 (3)
-- `DdtTexture::decode_rgba` 382-611 (230)
-- `DdtTexture::is_compressed` 613-617 (5)
+- `DdtTexture::decode_rgba` 382-604 (223)
+- `DdtTexture::is_compressed` 606-610 (5)
 
 ## src/assets/xmb_parser.cpp (402 linhas)
 - `utf16le_to_utf8` 14-49 (36)
@@ -909,12 +909,12 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `data_root` 10-13 (4)
 - `main` 17-215 (199)
 
-## src/tests/test_ddt_reference.cpp (200 linhas)
-- `data_root` 19-22 (4)
-- `to_lower` 24-29 (6)
-- `ends_with_ic` 31-34 (4)
-- `compare_rgba_to_png` 46-83 (38)
-- `main` 87-199 (113)
+## src/tests/test_ddt_reference.cpp (199 linhas)
+- `data_root` 18-21 (4)
+- `to_lower` 23-28 (6)
+- `ends_with_ic` 30-33 (4)
+- `compare_rgba_to_png` 45-82 (38)
+- `main` 86-198 (113)
 
 ## src/tests/test_e2e_match.cpp (159 linhas)
 - `check` 12-16 (5)

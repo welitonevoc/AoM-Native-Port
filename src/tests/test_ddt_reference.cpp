@@ -1,7 +1,6 @@
 #include "assets/bar_archive.h"
 #include "assets/ddt_texture.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <cstdio>
