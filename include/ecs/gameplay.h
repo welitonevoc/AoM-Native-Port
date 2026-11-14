@@ -8,6 +8,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 #include <deque>
 #include <unordered_map>
 #include <vector>
@@ -1772,6 +1776,27 @@ public:
                 const Camera* camera = nullptr) const {
         if (!renderer) return;
 
+        // ── Diagnóstico [RENDER]: uma linha a cada ~3 s com o que realmente foi desenhado ──
+        struct RenderDbg {
+            int total = 0, culled = 0, drawn = 0, no_mesh = 0;
+            glm::vec3 first_pos{0.0f}, first_scale{0.0f};
+            unsigned first_mesh = 0, first_tex = 0;
+            const Camera* cam = nullptr;
+            ~RenderDbg() {
+                static int frame = 0;
+                if ((++frame % 180) != 1) return;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, "AoM-Engine",
+                    "[RENDER] entidades=%d culled=%d sem_malha=%d desenhadas=%d | 1a: pos=(%.1f,%.1f,%.1f) scale=(%.2f,%.2f,%.2f) mesh=%u tex=%u | cam=(%.1f,%.1f,%.1f) alvo=(%.1f,%.1f,%.1f)",
+                    total, culled, no_mesh, drawn, first_pos.x, first_pos.y, first_pos.z,
+                    first_scale.x, first_scale.y, first_scale.z, first_mesh, first_tex,
+                    cam ? cam->position.x : 0.f, cam ? cam->position.y : 0.f, cam ? cam->position.z : 0.f,
+                    cam ? cam->target.x : 0.f, cam ? cam->target.y : 0.f, cam ? cam->target.z : 0.f);
+#endif
+            }
+        } dbg;
+        dbg.cam = camera;
+
         // ── Culling: frustum + distância ──────────────────────────────────────
         // Calcula os planos do frustum UMA única vez por frame (não por entidade).
         const Camera* cam = camera;
@@ -1811,7 +1836,8 @@ public:
             }
             // Culling por frustum/distância: não renderiza o que não está na vista.
             const float radius = std::max({std::abs(transform.scale.x), std::abs(transform.scale.y), std::abs(transform.scale.z)}) * 1.5f;
-            if (culled(transform.position, radius)) continue;
+            ++dbg.total;
+            if (culled(transform.position, radius)) { ++dbg.culled; continue; }
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f), transform.position);
             model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
@@ -1840,7 +1866,12 @@ public:
                     entity_texture = hoplite_texture;
                 }
             }
-            if (entity_mesh == INVALID_MESH) continue;
+            if (entity_mesh == INVALID_MESH) { ++dbg.no_mesh; continue; }
+            if (dbg.drawn == 0) {
+                dbg.first_pos = transform.position; dbg.first_scale = scale;
+                dbg.first_mesh = static_cast<unsigned>(entity_mesh); dbg.first_tex = static_cast<unsigned>(entity_texture);
+            }
+            ++dbg.drawn;
             renderer->draw_mesh(entity_mesh, model, entity_texture, BlendMode::OPAQUE);
             const uint32_t team_color = unit && static_cast<Team>(unit->team) == Team::ENEMY
                 ? 0xFF3333FFu : 0xFF33CC33u;

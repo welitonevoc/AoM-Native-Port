@@ -1457,6 +1457,18 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
     entry_cache.texture = tex;
     model_cache_models_[entry->filename] = std::move(model);
     entry_cache.model = model_cache_models_[entry->filename].get();
+    if (entry_cache.model && !entry_cache.model->meshes.empty()) {
+        // Diagnóstico: caixa envolvente da malha (escala/posição reais do BRG)
+        glm::vec3 bmin(1e9f), bmax(-1e9f);
+        size_t nv = 0;
+        for (const auto& m : entry_cache.model->meshes) {
+            for (const auto& v : m.vertices) { bmin = glm::min(bmin, v.position); bmax = glm::max(bmax, v.position); ++nv; }
+        }
+        LOGI("[BRGBOUNDS] '%s' malhas=%zu verts=%zu min=(%.2f,%.2f,%.2f) max=(%.2f,%.2f,%.2f) tamanho=(%.2f,%.2f,%.2f)",
+             entry->filename.c_str(), entry_cache.model->meshes.size(), nv,
+             bmin.x, bmin.y, bmin.z, bmax.x, bmax.y, bmax.z,
+             bmax.x - bmin.x, bmax.y - bmin.y, bmax.z - bmin.z);
+    }
     LOGI("get_model_entry on-demand loaded '%s' -> mesh=%u, tex=%u",
          entry->filename.c_str(), mesh, tex);
     return &entry_cache;

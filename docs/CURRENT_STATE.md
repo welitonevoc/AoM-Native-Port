@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141529 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141547 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -10,16 +10,16 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Mapeamento Exaustivo dos BARs (`src/engine/generated_unit_visuals.inc`): 50+ classes mapeadas.
 - ✅ Pipeline BRG → glTF → GLES (`brg_to_gltf.py`, bfloat16, morph targets).
 - ✅ Offset MTRL (`pos + 64`) e candidatos de textura (`bronze.ddt`, `copper.ddt`, etc.).
+- ✅ Tratamento de Alpha Shader (`discard < 0.01`, `outAlpha >= 0.90`) e estados de `BlendMode`.
 
-## Correções aplicadas nesta iteração (Visibilidade & Alpha de Tropas/Edifícios)
-- ✅ **Tratamento de Alpha no Fragment Shader (`src/renderer/gles_renderer.cpp`)**:
-  - `discard` ajustado de `< 0.25` para `< 0.01` (evita descarte de fragmentos de tropas cujas texturas DDT possuem alpha baixo para máscaras/specular).
-  - Saída forçada para opaca em texturas de unidade: `outAlpha = max(baseColor.a, 0.90)`.
-- ✅ **Gerenciamento de `BlendMode` (`src/renderer/gles_renderer.cpp`)**:
-  - `draw_mesh` e `draw_mesh_skinned` configuram `glDisable(GL_BLEND)` e `glDepthMask(GL_TRUE)` para `BlendMode::OPAQUE`, além de suporte a `ALPHA_BLEND` e `ADDITIVE`.
-- ✅ **Escala de Renderização RTS (`include/ecs/gameplay.h`)**:
-  - Ajustado fator de visualização na câmera para unidades (×2.0) e edifícios (×2.5).
+## Diagnósticos Ativos nesta Versão (`render_diag.patch`)
+- ✅ **Log `[RENDER]` a cada ~3s (`include/ecs/gameplay.h`)**:
+  - Contagem precisa de `entidades`, `culled` (frustum/distância), `sem_malha` e `desenhadas`.
+  - Reporta `pos`, `scale`, `mesh`, `tex` da 1ª entidade, e coordenadas da `cam` e `alvo`.
+- ✅ **Log `[BRGBOUNDS]` no carregamento (`src/engine/engine_assets.cpp`)**:
+  - Reporta contagem de vértices e caixa envolvente (`min`, `max`, `tamanho`) das malhas BRG sob demanda.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141529 gerado e assinado em `/sdcard/aom-native-v1.0.11141529.apk`.
-2. Instalar o APK v1.0.11141529 e testar na Campanha (Prologue) a visualização das malhas 3D das tropas e construções.
+1. ✅ APK v1.0.11141547 gerado e assinado em `/sdcard/aom-native-v1.0.11141547.apk`.
+2. Rodar campanha e coletar saída logcat com `[RENDER]` e `[BRGBOUNDS]`.
+3. Prosseguir com decodificação do DDT formato 3 (paleta com 4-bit alpha) via referências PNG em `tests/reference/`.

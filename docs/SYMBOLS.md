@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2230 linhas) **GRANDE**
+## include/ecs/gameplay.h (2261 linhas) **GRANDE**
 
 ## include/engine/engine.h (818 linhas)
 
@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1511 linhas) **GRANDE**
+## src/engine/engine_assets.cpp (1523 linhas) **GRANDE**
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -416,8 +416,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_strings` 1213-1216 (4)
 - `Engine::tr` 1218-1222 (5)
 - `Engine::load_ui_strings` 1224-1343 (120)
-- `Engine::get_model_entry` 1345-1463 (119)
-- `Engine::resolve_unit_visual` 1465-1508 (44)
+- `Engine::get_model_entry` 1345-1475 (131)
+- `Engine::resolve_unit_visual` 1477-1520 (44)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
