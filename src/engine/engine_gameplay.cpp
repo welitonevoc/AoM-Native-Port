@@ -384,7 +384,8 @@ void Engine::apply_unit_visual(Entity entity, const std::string& name) {
     TextureHandle clip_tex = INVALID_TEXTURE;
     select_animation_clip(clip, clip_tex);
     if (clip && clip->is_valid()) {
-        gameplay_world_->attach_animation(entity, clip, clip_tex, renderer_.get());
+        TextureHandle anim_tex = (me && me->texture != INVALID_TEXTURE) ? me->texture : clip_tex;
+        gameplay_world_->attach_animation(entity, clip, anim_tex, renderer_.get());
     }
 }
 

@@ -159,8 +159,9 @@ std::unique_ptr<GrnAnimation> parse_grn(const uint8_t* data, size_t size,
         return nullptr;
     }
 
-    // Verifica magic "GRN"
-    if (std::memcmp(data, "GRN", 3) != 0) {
+    // Verifica magic "GRN" ou assinatura oficial Granny 2 binary (\x2A\x30\x39\x04 / "*09\x04")
+    static const uint8_t kGrannyMagic[4] = {0x2A, 0x30, 0x39, 0x04};
+    if (std::memcmp(data, "GRN", 3) != 0 && std::memcmp(data, kGrannyMagic, 4) != 0) {
         LOGE("parse_grn: arquivo não tem magic GRN válido");
         return nullptr;
     }

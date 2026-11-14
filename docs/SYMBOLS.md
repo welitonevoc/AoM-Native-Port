@@ -52,9 +52,9 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/data/water_bodies.h (117 linhas)
 
-## include/ecs/ecs.h (174 linhas)
+## include/ecs/ecs.h (184 linhas)
 
-## include/ecs/gameplay.h (2256 linhas) **GRANDE**
+## include/ecs/gameplay.h (2257 linhas) **GRANDE**
 
 ## include/engine/engine.h (818 linhas)
 
@@ -136,7 +136,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `AnimationSystem::find_script` 457-460 (4)
 - `AnimationSystem::find_clip` 462-465 (4)
 
-## src/anim/grn_animation.cpp (253 linhas)
+## src/anim/grn_animation.cpp (254 linhas)
 - `read_u16` 23-25 (3)
 - `read_u32` 26-29 (4)
 - `read_f32` 30-34 (5)
@@ -147,8 +147,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `GrnPlayer::interpolate_rotation` 72-88 (17)
 - `GrnPlayer::interpolate_scale` 90-106 (17)
 - `GrnPlayer::evaluate` 108-149 (42)
-- `parse_grn` 155-239 (85)
-- `load_grn_animation` 241-249 (9)
+- `parse_grn` 155-240 (86)
+- `load_grn_animation` 242-250 (9)
 
 ## src/anim/prt_particle.cpp (335 linhas)
 - `trim` 24-29 (6)
@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1523 linhas) **GRANDE**
+## src/engine/engine_assets.cpp (1525 linhas) **GRANDE**
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -398,26 +398,26 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_png_asset` 154-168 (15)
 - `Engine::load_core_ui_textures` 170-240 (71)
 - `Engine::load_animation_clips` 242-303 (62)
-- `Engine::load_grn_clips` 305-358 (54)
-- `Engine::select_animation_clip` 360-389 (30)
-- `Engine::load_archives` 391-566 (176)
-- `Engine::load_game_config` 568-613 (46)
-- `Engine::load_textures` 615-695 (81)
-- `Engine::load_skybox_cube` 697-724 (28)
-- `Engine::load_skybox_faces` 726-841 (116)
-- `Engine::load_water_body_textures` 843-884 (42)
-- `Engine::load_prt_particles` 886-912 (27)
-- `Engine::load_models` 914-1013 (100)
-- `Engine::build_texture_key_index` 1015-1029 (15)
-- `Engine::log_bar_names_containing` 1031-1041 (11)
-- `Engine::load_ddt_texture` 1043-1135 (93)
-- `Engine::load_lighting` 1137-1189 (53)
-- `Engine::set_lighting` 1191-1211 (21)
-- `Engine::load_strings` 1213-1216 (4)
-- `Engine::tr` 1218-1222 (5)
-- `Engine::load_ui_strings` 1224-1343 (120)
-- `Engine::get_model_entry` 1345-1475 (131)
-- `Engine::resolve_unit_visual` 1477-1520 (44)
+- `Engine::load_grn_clips` 305-360 (56)
+- `Engine::select_animation_clip` 362-391 (30)
+- `Engine::load_archives` 393-568 (176)
+- `Engine::load_game_config` 570-615 (46)
+- `Engine::load_textures` 617-697 (81)
+- `Engine::load_skybox_cube` 699-726 (28)
+- `Engine::load_skybox_faces` 728-843 (116)
+- `Engine::load_water_body_textures` 845-886 (42)
+- `Engine::load_prt_particles` 888-914 (27)
+- `Engine::load_models` 916-1015 (100)
+- `Engine::build_texture_key_index` 1017-1031 (15)
+- `Engine::log_bar_names_containing` 1033-1043 (11)
+- `Engine::load_ddt_texture` 1045-1137 (93)
+- `Engine::load_lighting` 1139-1191 (53)
+- `Engine::set_lighting` 1193-1213 (21)
+- `Engine::load_strings` 1215-1218 (4)
+- `Engine::tr` 1220-1224 (5)
+- `Engine::load_ui_strings` 1226-1345 (120)
+- `Engine::get_model_entry` 1347-1477 (131)
+- `Engine::resolve_unit_visual` 1479-1522 (44)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
@@ -431,12 +431,12 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 434-436 (3)
 - `Engine::play_named_cinematic` 438-446 (9)
 
-## src/engine/engine_gameplay.cpp (440 linhas)
+## src/engine/engine_gameplay.cpp (441 linhas)
 - `Engine::start_game` 20-230 (211)
 - `Engine::populate_menu_background_scene` 232-364 (133)
 - `Engine::start_menu_background` 366-371 (6)
-- `Engine::apply_unit_visual` 373-389 (17)
-- `Engine::resolve_building_visual` 391-437 (47)
+- `Engine::apply_unit_visual` 373-390 (18)
+- `Engine::resolve_building_visual` 392-438 (47)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)

@@ -1450,8 +1450,6 @@ public:
         };
         for (const auto& [entity, ac] : animations_) {
             if (!ac.is_ready()) continue;
-            auto u_it = units_.find(entity);
-            if (u_it != units_.end() && u_it->second.mesh != INVALID_MESH) continue;
             const auto t_it = ecs_world_.transforms().find(entity);
             if (t_it == ecs_world_.transforms().end()) continue;
             const TransformComponent& tr = t_it->second;
@@ -1833,6 +1831,9 @@ public:
             const auto* unit = (u_it != units_.end()) ? &u_it->second : nullptr;
             if (unit && static_cast<Team>(unit->team) == Team::ENEMY && !fog_of_war_.is_visible(transform.position)) {
                 continue; // Enemy unit hidden in fog of war!
+            }
+            if (unit && animations_.count(entity) && animations_.at(entity).is_ready()) {
+                continue; // Rendered dynamically by render_animated() with active vertex morphing
             }
             // Culling por frustum/distância: não renderiza o que não está na vista.
             const float radius = std::max({std::abs(transform.scale.x), std::abs(transform.scale.y), std::abs(transform.scale.z)}) * 1.5f;

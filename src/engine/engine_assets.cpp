@@ -303,17 +303,19 @@ bool Engine::load_animation_clips(size_t max_clips) {
 }
 
 bool Engine::load_grn_clips(size_t max_clips) {
-    if (!anim_bar_ || anim_bar_->file_count() == 0) return false;
+    BarArchive* source_bar = (models_bar_ && models_bar_->file_count() > 0) ? models_bar_.get() : anim_bar_.get();
+    if (!source_bar || source_bar->file_count() == 0) return false;
 
     const auto t0 = std::chrono::steady_clock::now();
 
-    // Prioriza os clips das unidades jogáveis.
-    static const char* kPreferred[] = {"hoplite", "villager", "toxotes", "minotaur",
+    // Prioriza os clips das unidades e heróis jogáveis (hop = hoplite, ark = arkantos, etc.).
+    static const char* kPreferred[] = {"hop", "ark", "aman", "ajax", "agamem",
+                                        "hoplite", "villager", "toxotes", "minotaur",
                                         "archer",   "cavalry",  "infantry", "soldier"};
 
     std::vector<std::string> preferred;
     std::vector<std::string> fallback;
-    for (const BarEntry& entry : anim_bar_->entries()) {
+    for (const BarEntry& entry : source_bar->entries()) {
         const std::string low = to_lower(entry.filename);
         if (!ends_with(low, ".grn")) continue;
         bool is_preferred = false;
@@ -337,9 +339,9 @@ bool Engine::load_grn_clips(size_t max_clips) {
     size_t loaded = 0;
     grn_clips_.clear();
     for (const std::string& name : candidates) {
-        const BarEntry* entry = anim_bar_->find(name);
+        const BarEntry* entry = source_bar->find(name);
         if (!entry) continue;
-        const std::vector<uint8_t> data = anim_bar_->extract(*entry);
+        const std::vector<uint8_t> data = source_bar->extract(*entry);
         if (data.empty()) continue;
         auto anim = aom::anim::parse_grn(data.data(), data.size(), name);
         if (anim && anim->is_valid()) {
