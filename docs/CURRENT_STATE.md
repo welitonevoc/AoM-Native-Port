@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141604 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141609 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -11,14 +11,13 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Pipeline BRG → glTF → GLES (`brg_to_gltf.py`, bfloat16, morph targets).
 - ✅ Offset MTRL (`pos + 64`) e candidatos de textura (`bronze.ddt`, `copper.ddt`, etc.).
 - ✅ `glDepthMask(GL_TRUE)` garantido no `begin_frame` antes de `glClear`.
+- ✅ Vértices e `kMeshVertexSrc` corrigidos sem skinning indevido (malhas 3D renderizando normalmente).
 
-## Causa Raiz Descoberta e Corrigida nesta Versão (Vértices Colapsando em Zero)
-- ✅ **Correção Crítica do Vertex Shader de Malhas (`kMeshVertexSrc` em `gles_renderer.cpp`)**:
-  - `kMeshVertexSrc` continha erroneamente código de skinning esquelético (`skinnedPos += aBoneWeights * uBoneMatrices...`).
-  - Como `create_mesh` não envia atributos de ossos para malhas estáticas e `draw_mesh` não carrega `uBoneMatrices`, `skinnedPos` resultava em `vec4(0.0)`.
-  - **Resultado:** todos os vértices de todas as malhas de entidades (Hoplitas, Casas, Árvores, Rochas) colapsavam matematicamente em `gl_Position = (0, 0, 0, 0)`!
-  - **Fix:** Restaurado cálculo direto de malha estática: `vec4 worldPos = uModel * vec4(aPos, 1.0); gl_Position = uViewProj * worldPos;`.
+## Correções Aplicadas nesta Versão (Escala Canônica 1:1)
+- ✅ **Remoção de Multiplicadores Paliativos (`include/ecs/gameplay.h`)**:
+  - Removidos `scale *= 2.0f` (unidades) e `scale *= 2.5f` (edifícios).
+  - Como o `[BRGBOUNDS]` confirmou que as malhas BRG originais possuem dimensões exatas de fábrica em metros (ex.: Hoplita com 1,75 m, Centro da Cidade com 10,5 m), a cena agora renderiza com escala 1:1 autêntica do jogo.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141604 gerado e assinado em `/sdcard/aom-native-v1.0.11141604.apk`.
-2. Testar campanha e verificar se todas as unidades e edifícios aparecem perfeitamente renderizados na tela.
+1. ✅ APK v1.0.11141609 gerado e assinado em `/sdcard/aom-native-v1.0.11141609.apk`.
+2. Validar proporções das unidades, construções e recursos no mapa.
