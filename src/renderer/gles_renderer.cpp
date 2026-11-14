@@ -304,9 +304,9 @@ void main() {
     vTex = aTex;
     vColor = aColor;
 
-    // Gradiente de profundidade costeiro dinâmico da ilha (área central rasa -> mar aberto fundo)
-    float dist = length(aPos.xz);
-    vWaterDepth = clamp((dist - 8.0) / 16.0, 0.0, 1.0);
+    // Gradiente de profundidade costeiro dinâmico da ilha (costa noroeste rasa -> mar aberto sudeste fundo)
+    float coastDist = (aPos.x + aPos.z) * 0.7071;
+    vWaterDepth = clamp((coastDist + 2.0) / 16.0, 0.0, 1.0);
 
     gl_Position = uViewProj * worldPos;
 }
@@ -356,8 +356,8 @@ void main() {
     float foamWave  = sin(waterDepth * 22.0 - uTime * 3.2 + surface * 3.0);
     float foamShore = smoothstep(0.50, 0.85, foamWave) * shoreZone;
 
-    // Cristas de espuma nas ondas em mar aberto
-    float waveCrest = smoothstep(0.70, 0.95, sin(vWorldPos.x * 0.6 + uTime * 2.2) * cos(vWorldPos.z * 0.6 + uTime * 1.8));
+    // Cristas de espuma nas ondas em mar aberto alinhadas com a costa
+    float waveCrest = smoothstep(0.75, 0.98, sin((vWorldPos.x + vWorldPos.z) * 0.5 + uTime * 2.2) * cos((vWorldPos.x - vWorldPos.z) * 0.4 - uTime * 1.5));
     float foamMask = clamp(foamShore * 1.3 + waveCrest * 0.35, 0.0, 1.0);
 
     // Composição com espuma branca pura brilhante
@@ -1426,6 +1426,7 @@ public:
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
+        glDepthMask(GL_FALSE); // Água transparente não bloqueia depth buffer de objetos
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1467,6 +1468,8 @@ public:
         glBindVertexArray(water_vao_);
         glDrawElements(GL_TRIANGLES, water_index_count_, GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
+
+        glDepthMask(GL_TRUE); // Restaura escrita normal de profundidade
 
         if (normal_map != INVALID_TEXTURE) {
             glBindTexture(GL_TEXTURE_2D, 0);

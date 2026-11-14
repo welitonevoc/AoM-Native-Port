@@ -424,7 +424,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     if (btn) {
                         btn->interactive = false; // painel de fundo não recebe toque
                         btn->visible = !is_hidden;
-                        btn->tag = current_tag;
+                        btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                        btn->group_tag = parent_tag;
                         btn->label = "";
                         btn->text_size = 0;
                         btn->normal_tex = tex_handle;
@@ -574,7 +575,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     0xFFCCCCCC);
                 if (btn) {
                     btn->visible = !is_hidden;
-                    btn->tag = current_tag;
+                    btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                    btn->group_tag = parent_tag;
                     if (gd.has_texture_coords) {
                         btn->has_uv = true;
                         btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
@@ -698,7 +700,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     auto* lbl = ui->add_label(resolved_text, {x, y}, scaled_text_size, color);
                     if (lbl) {
                         lbl->visible = !is_hidden;
-                        lbl->tag = current_tag;
+                        lbl->tag = gd.name.empty() ? parent_tag : gd.name;
+                        lbl->group_tag = parent_tag;
                     }
                     ++created;
                 }
@@ -708,7 +711,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                 auto* s = ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
                 if (s) {
                     s->visible = !is_hidden;
-                    s->tag = current_tag;
+                    s->tag = gd.name.empty() ? parent_tag : gd.name;
+                    s->group_tag = parent_tag;
                 }
                 ++created;
             }

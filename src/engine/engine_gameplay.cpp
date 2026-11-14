@@ -254,14 +254,14 @@ void Engine::populate_menu_background_scene() {
     ModelEntry* murmillo_me = get_model_entry("infantry x 2 sword fighter_walka.brg");
     ModelEntry* arcus_me = get_model_entry("archer x arcus_walka.brg");
 
-    // ── 2. Edifícios Atlantes na encosta costeira ─────────────────────────────
-    Entity m_bld1 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-4.5f, 0.7f, -3.5f), 1.0f,
+    // ── 2. Edifícios Atlantes na encosta noroeste ────────────────────────────
+    Entity m_bld1 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-4.5f, 0.9f, -4.5f), 1.0f,
                                                    BuildingType::HOUSE, "Manor Atlante");
-    Entity m_bld2 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-6.2f, 1.0f, -0.5f), 1.0f,
+    Entity m_bld2 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-5.5f, 1.1f, -2.5f), 1.0f,
                                                    BuildingType::HOUSE, "Manor Atlante");
-    Entity b_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-4.0f, 0.6f, 3.2f), 1.0f,
+    Entity b_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-3.2f, 0.7f, -5.0f), 1.0f,
                                                    BuildingType::BARRACKS, "Quartel Atlante");
-    Entity l_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(0.5f, -0.1f, -6.5f), 1.0f,
+    Entity l_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(1.5f, 0.0f, -4.0f), 1.0f,
                                                    BuildingType::TOWER, "Farol");
 
     if (manor_me && manor_me->mesh != INVALID_MESH) {
@@ -277,21 +277,21 @@ void Engine::populate_menu_background_scene() {
 
     // ── 3. Vegetação e Rochas na praia de Atlântida ───────────────────────────
     if (palm_me && palm_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-1.2f, 0.2f, -2.0f), 1.1f, palm_me->texture, palm_me->mesh);
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-0.8f, 0.1f, 1.2f), 1.0f, palm_me->texture, palm_me->mesh);
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-0.5f, 0.05f, 4.5f), 1.2f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-2.0f, 0.3f, -2.5f), 1.1f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-1.2f, 0.2f, -1.0f), 1.0f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-0.5f, 0.1f, 0.5f), 1.2f, palm_me->texture, palm_me->mesh);
     }
     if (oak_me && oak_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-5.2f, 0.9f, -5.0f), 1.3f, oak_me->texture, oak_me->mesh);
-        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-6.8f, 1.1f, 2.2f), 1.2f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-6.0f, 1.2f, -4.0f), 1.3f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-4.8f, 1.0f, -1.5f), 1.2f, oak_me->texture, oak_me->mesh);
     }
     if (pine_me && pine_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(-7.5f, 1.2f, -3.2f), 1.4f, pine_me->texture, pine_me->mesh);
+        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(-7.0f, 1.3f, -2.0f), 1.4f, pine_me->texture, pine_me->mesh);
     }
     if (rock_me && rock_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(0.8f, -0.2f, -1.5f), 1.5f, rock_me->texture, rock_me->mesh);
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(1.2f, -0.4f, 1.8f), 1.8f, rock_me->texture, rock_me->mesh);
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(0.5f, -0.1f, 4.0f), 1.3f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(-0.5f, 0.0f, -2.8f), 1.5f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(0.5f, -0.2f, -0.8f), 1.8f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(1.2f, -0.3f, 1.5f), 1.3f, rock_me->texture, rock_me->mesh);
     }
 
     // ── 4. Tropas Atlantes patrulhando na beira da praia ─────────────────────
@@ -314,13 +314,13 @@ void Engine::populate_menu_background_scene() {
     arcus_stats.los = 20.0f;
 
     // Murmillo 1 na praia
-    Entity m1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(0.0f, 0.0f, -0.5f), murmillo_stats);
+    Entity m1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.8f, 0.25f, -2.0f), murmillo_stats);
     // Murmillo 2 um pouco acima na areia
-    Entity m2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-0.8f, 0.15f, 1.0f), murmillo_stats);
+    Entity m2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.0f, 0.15f, -0.5f), murmillo_stats);
     // Arcus 1 com arco na faixa litorânea
-    Entity a1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-0.3f, 0.05f, -2.5f), arcus_stats);
+    Entity a1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.5f, 0.40f, -3.2f), arcus_stats);
     // Arcus 2 perto do quartel
-    Entity a2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.0f, 0.4f, 2.5f), arcus_stats);
+    Entity a2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.20f, -1.2f), arcus_stats);
 
     if (murmillo_me && murmillo_me->mesh != INVALID_MESH) {
         gameplay_world_->set_unit_visuals(m1, murmillo_me->mesh, murmillo_me->texture);

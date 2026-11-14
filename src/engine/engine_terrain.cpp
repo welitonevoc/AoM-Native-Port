@@ -210,19 +210,19 @@ void Engine::generate_terrain() {
     const float HALF = SIZE * 0.5f;
 
     auto calc_elevation = [](float wx, float wz) -> float {
-        // Encosta costeira de Atlântida: terra firme a oeste (-X), descendo em praia suave até o mar a leste (+X)
-        float bay_curve = std::sin(wz * 0.15f) * 2.0f;
-        float dist_to_shore = (wx - bay_curve);
-        // Terra firme (oeste): platô suave com colinas onduladas
-        float land_height = 0.8f + std::sin(wx * 0.2f) * std::cos(wz * 0.2f) * 0.4f;
-        // Penhasco na extremidade norte/oeste
-        if (wx < -6.0f && wz < -2.0f) {
-            land_height += std::sin((wx + 6.0f) * 0.25f) * 1.4f;
+        // Encosta costeira de Atlântida: terra firme a noroeste (-X, -Z), descendo em praia diagonal até o mar a sudeste (+X, +Z)
+        float shore_axis = (wx + wz) * 0.7071f;
+        float bay_curve = std::sin((wx - wz) * 0.18f) * 1.8f;
+        float dist_to_shore = shore_axis - bay_curve;
+        // Terra firme (noroeste): platô com colinas e elevação
+        float land_height = 0.9f + std::sin(wx * 0.25f) * std::cos(wz * 0.25f) * 0.5f;
+        if (wx + wz < -6.0f) {
+            land_height += 1.2f + std::sin((wx + wz) * 0.2f) * 0.6f;
         }
-        // Mar profundo (leste)
-        float sea_height = -2.2f + std::sin(wx * 0.1f + wz * 0.1f) * 0.2f;
-        // Transição suave pela praia (-1.5 a +2.0 unidades da margem)
-        float t = std::clamp((dist_to_shore + 1.0f) / 3.5f, 0.0f, 1.0f);
+        // Mar profundo (sudeste)
+        float sea_height = -2.5f + std::sin(wx * 0.1f + wz * 0.1f) * 0.2f;
+        // Transição suave pela praia (-1.5 a +2.5 unidades da margem diagonal)
+        float t = std::clamp((dist_to_shore + 1.2f) / 3.8f, 0.0f, 1.0f);
         return glm::mix(land_height, sea_height, t);
     };
 

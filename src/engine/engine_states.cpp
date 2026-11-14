@@ -79,10 +79,10 @@ void Engine::set_state(EngineState new_state) {
             water_plane_ = glm::vec4(0.0f, 1.0f, 0.0f, 0.5f);
 
             // ── 4. Configurar câmera isométrica autêntica estilo The Titans ────────
-            radius_ = 18.0f;
-            yaw_ = 0.45f;
-            pitch_ = 0.35f;
-            camera_.target = glm::vec3(-1.0f, 0.5f, 0.0f);
+            radius_ = 16.0f;
+            yaw_ = -2.88f;  // ~ -165 graus (visão noroeste com mar sudeste à direita)
+            pitch_ = 0.38f; // ~ 22 graus
+            camera_.target = glm::vec3(-2.0f, 0.4f, -0.5f);
             
             // ── 5. Povoar cena 3D de fundo com elementos do The Titans ─────────────
             if (gameplay_world_) {

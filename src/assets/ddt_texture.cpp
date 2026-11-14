@@ -301,23 +301,35 @@ std::unique_ptr<DdtTexture> DdtLoader::load(const uint8_t* data, size_t size) {
         if (size < 40) return nullptr;
         const uint32_t num_colors = read_u32(data + 16);
         const uint32_t pal_offset_32 = read_u32(data + 20);
-        uint32_t pal_offset = read_u32(data + 24);
-        if (pal_offset == 0) {
-            pal_offset = read_u32(data + 32);
-        }
-        if (pal_offset == 0) {
-            pal_offset = read_u32(data + 36);
-        }
-        if (pal_offset == 0) {
+        const uint32_t pal_offset_0 = read_u32(data + 24);
+        const uint32_t pal_offset_1 = read_u32(data + 28);
+        const uint32_t pal_offset_a1 = read_u32(data + 32);
+        const uint32_t pal_offset_a4 = read_u32(data + 36);
+
+        uint32_t pal_offset = 0;
+        if (tex->alpha_bits == 4 && pal_offset_a4 != 0) {
+            pal_offset = pal_offset_a4;
+        } else if (tex->alpha_bits == 1 && pal_offset_a1 != 0) {
+            pal_offset = pal_offset_a1;
+        } else if (pal_offset_0 != 0) {
+            pal_offset = pal_offset_0;
+        } else if (pal_offset_1 != 0) {
+            pal_offset = pal_offset_1;
+        } else if (pal_offset_a1 != 0) {
+            pal_offset = pal_offset_a1;
+        } else if (pal_offset_a4 != 0) {
+            pal_offset = pal_offset_a4;
+        } else {
             pal_offset = 48;
         }
-        tex->num_colors = num_colors;
-        tex->palette_offset_0 = pal_offset;
-        tex->palette_offset_1 = read_u32(data + 28);
-        tex->palette_offset_alpha1 = read_u32(data + 32);
-        tex->palette_offset_alpha4 = read_u32(data + 36);
 
-        if (pal_offset_32 != 0 && pal_offset_32 + num_colors * 4 <= size) {
+        tex->num_colors = num_colors;
+        tex->palette_offset_0 = pal_offset_0;
+        tex->palette_offset_1 = pal_offset_1;
+        tex->palette_offset_alpha1 = pal_offset_a1;
+        tex->palette_offset_alpha4 = pal_offset_a4;
+
+        if (tex->alpha_bits == 0 && pal_offset_32 != 0 && pal_offset_32 + num_colors * 4 <= size) {
             tex->palette.assign(data + pal_offset_32, data + pal_offset_32 + num_colors * 4);
         } else if (pal_offset + num_colors * 2 <= size) {
             tex->palette.assign(data + pal_offset, data + pal_offset + num_colors * 2);
@@ -423,23 +435,61 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             }
 
             const size_t num_colors = palette.size() / 2;
+            const size_t blocks = static_cast<size_t>((mip.width + 3) / 4) * ((mip.height + 3) / 4);
+
+            // Formato 3 com alpha 4-bit (UI e botões de mármore):
+            // Armazenado em blocos 4x4 de 24 bytes (16B índices + 8B alpha 4-bit) em ordem column-major
+            if (alpha_bits == 4 && mip.data.size() >= blocks * 24) {
+                const uint32_t bx_count = (mip.width + 3) / 4;
+                const uint32_t by_count = (mip.height + 3) / 4;
+                size_t block_idx = 0;
+                for (uint32_t bx = 0; bx < bx_count; ++bx) {
+                    for (uint32_t by = 0; by < by_count; ++by) {
+                        const uint8_t* blk = mip.data.data() + block_idx * 24;
+                        block_idx++;
+                        const uint8_t* indices = blk;
+                        const uint8_t* alpha = blk + 16;
+                        for (uint32_t py = 0; py < 4; ++py) {
+                            for (uint32_t px = 0; px < 4; ++px) {
+                                const uint32_t gx = bx * 4 + px;
+                                const uint32_t gy = by * 4 + py;
+                                if (gx >= mip.width || gy >= mip.height) continue;
+                                const uint32_t p = py * 4 + px;
+                                size_t idx = indices[p];
+                                if (idx >= num_colors) idx = 0;
+                                const uint16_t val = read_u16(palette.data() + idx * 2);
+                                const uint8_t ab = alpha[p >> 1];
+                                const uint8_t a4 = (p & 1) ? (ab & 0x0F) : ((ab >> 4) & 0x0F);
+                                const size_t out_p = (gy * mip.width + gx) * 4;
+                                expand_444(val, output[out_p + 0], output[out_p + 1], output[out_p + 2]);
+                                output[out_p + 3] = a4 * 17;
+                            }
+                        }
+                    }
+                }
+                return output;
+            }
+
+            // Formato 3 com alpha 1-bit (A1R5G5B5 linear):
+            if (alpha_bits == 1 && mip.data.size() >= pixel_count) {
+                for (size_t i = 0; i < pixel_count; ++i) {
+                    size_t idx = mip.data[i];
+                    if (idx >= num_colors) idx = 0;
+                    const uint16_t val = read_u16(palette.data() + idx * 2);
+                    uint8_t* dst = output.data() + i * 4;
+                    expand_555(val, dst[0], dst[1], dst[2]);
+                    dst[3] = (val & 0x8000) ? 255 : 0;
+                }
+                return output;
+            }
+
+            // Formato 3 sem alpha (RGB565 / RGB555 linear):
             uint16_t max_val = 0;
             for (size_t c = 0; c < num_colors; ++c) {
                 uint16_t v = read_u16(palette.data() + c * 2);
                 if (v > max_val) max_val = v;
             }
-            const bool is_rgb444 = (max_val <= 0x0FFF && max_val > 0x001F);
-
-
-            const bool has_alpha4 = (alpha_bits == 4 && mip.data.size() >= pixel_count + (pixel_count + 1) / 2);
-            const uint8_t* a4 = has_alpha4 ? (mip.data.data() + pixel_count) : nullptr;
-            bool a4_has_data = false;
-            if (a4) {
-                const size_t a4_len = (pixel_count + 1) / 2;
-                for (size_t k = 0; k < a4_len; ++k) {
-                    if (a4[k] != 0) { a4_has_data = true; break; }
-                }
-            }
+            const bool is_565 = (max_val > 0x7FFF);
 
             for (size_t i = 0; i < pixel_count; ++i) {
                 size_t idx = mip.data[i];
@@ -448,23 +498,12 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                 const uint16_t val = read_u16(palette.data() + idx * 2);
                 uint8_t* dst = output.data() + i * 4;
 
-                if (is_rgb444) {
-                    dst[0] = ((val >> 8) & 0x0F) * 17;
-                    dst[1] = ((val >> 4) & 0x0F) * 17;
-                    dst[2] = (val & 0x0F) * 17;
+                if (is_565) {
+                    expand_565(val, dst[0], dst[1], dst[2]);
                 } else {
                     expand_555(val, dst[0], dst[1], dst[2]);
                 }
-
-                if (a4_has_data) {
-                    const uint8_t packed_a = a4[i >> 1];
-                    const uint8_t nib = (i & 1) ? (packed_a & 0x0F) : ((packed_a >> 4) & 0x0F);
-                    dst[3] = nib * 17;
-                } else if (alpha_bits > 0) {
-                    dst[3] = (idx == 0) ? 0 : 255;
-                } else {
-                    dst[3] = 255;
-                }
+                dst[3] = 255;
             }
             return output;
         }

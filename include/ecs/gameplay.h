@@ -1753,7 +1753,7 @@ public:
     void render(IRenderer* renderer, MeshHandle mesh, TextureHandle texture,
                 MeshHandle hoplite_mesh, TextureHandle hoplite_texture,
                 const Camera* camera = nullptr) const {
-        if (!renderer || (mesh == INVALID_MESH && hoplite_mesh == INVALID_MESH)) return;
+        if (!renderer) return;
 
         // ── Culling: frustum + distância ──────────────────────────────────────
         // Calcula os planos do frustum UMA única vez por frame (não por entidade).

@@ -295,8 +295,18 @@ void Engine::update(float delta_time) {
         if (loading_progress_ >= 1.0f && state_timer_ >= 1.8f) {
             set_state(EngineState::MAIN_MENU);
         }
-    } else if (state_ == EngineState::MAIN_MENU) {
-        // ── MAIN_MENU: fundo 3D animado (ondas, tropas, câmera panorâmica) ──
+    } else if (state_ == EngineState::MAIN_MENU ||
+               state_ == EngineState::OPTIONS ||
+               state_ == EngineState::UI_OPTIONS_MENU ||
+               state_ == EngineState::UI_OPTIONS_AUDIO ||
+               state_ == EngineState::UI_OPTIONS_VIDEO ||
+               state_ == EngineState::UI_OPTIONS_GAMEPLAY ||
+               state_ == EngineState::UI_OPTIONS_NETWORK ||
+               state_ == EngineState::UI_OPTIONS_CONTROLS ||
+               state_ == EngineState::CREDITS ||
+               state_ == EngineState::MULTIPLAYER_LAN ||
+               state_ == EngineState::MULTIPLAYER_LOBBY) {
+        // ── Fundo 3D animado do menu e telas modais (ondas, tropas, atmosfera) ──
         // Câmera fixa cinematográfica original (sem rotação artificial contínua)
         const float cx = camera_.target.x + std::sin(yaw_) * std::cos(pitch_) * radius_;
         const float cy = camera_.target.y + std::sin(pitch_) * radius_ + 2.0f;
@@ -513,49 +523,46 @@ void Engine::render() {
         char prog_buf[64];
         std::snprintf(prog_buf, sizeof(prog_buf), "Carregando a Era dos Deuses... %.0f%%", loading_progress_ * 100.0f);
         renderer_->draw_ui_text(prog_buf, {bar_x, bar_y - 28.0f}, 18.0f, 0xFFFFD000);
-    } else if (state_ == EngineState::MAIN_MENU) {
-        // ── MAIN_MENU com fundo 3D animado (cenário costeiro The Titans) ──────
+    } else if (state_ == EngineState::MAIN_MENU ||
+               state_ == EngineState::OPTIONS ||
+               state_ == EngineState::UI_OPTIONS_MENU ||
+               state_ == EngineState::UI_OPTIONS_AUDIO ||
+               state_ == EngineState::UI_OPTIONS_VIDEO ||
+               state_ == EngineState::UI_OPTIONS_GAMEPLAY ||
+               state_ == EngineState::UI_OPTIONS_NETWORK ||
+               state_ == EngineState::UI_OPTIONS_CONTROLS ||
+               state_ == EngineState::CREDITS ||
+               state_ == EngineState::MULTIPLAYER_LAN ||
+               state_ == EngineState::MULTIPLAYER_LOBBY) {
+        // ── MAIN_MENU e Telas Modais com fundo 3D (cenário costeiro The Titans) ──────
         renderer_->set_camera(camera_);
         renderer_->set_light(dir_light_);
 
-        // 1. Vídeo de fundo do menu (se disponível) — desenha primeiro para ficar atrás de tudo
-        if (menu_bg_tex_ != INVALID_TEXTURE) {
-            const float aspect_vid = static_cast<float>(menu_bg_w_) / menu_bg_h_;
-            const float aspect_dst = vw / vh;
-            float fw = vw, fh = vh;
-            if (aspect_dst > aspect_vid) { fw = vh * aspect_vid; }
-            else                         { fh = vw / aspect_vid; }
-            renderer_->draw_ui_quad({(vw - fw) * 0.5f, (vh - fh) * 0.5f},
-                                    {fw, fh}, menu_bg_tex_, 0xFFFFFFFF);
+        // 1. Skybox procedural atmosférico (cubemap ou faces)
+        if (skybox_cubemap_ != INVALID_TEXTURE) {
+            renderer_->draw_skybox_cubemap(skybox_cubemap_, 65.0f);
         } else {
-            // Imagem de fundo estática como fallback caso não haja terreno 3D carregado
-            if (terrain_mesh_ == INVALID_MESH && main_menu_tex_ != INVALID_TEXTURE) {
-                renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, main_menu_tex_, 0xFFFFFFFF);
-            }
-            // 1b. Skybox procedural atmosférico (cubemap ou faces)
-            if (skybox_cubemap_ != INVALID_TEXTURE) {
-                renderer_->draw_skybox_cubemap(skybox_cubemap_, 65.0f);
-            } else {
-                renderer_->draw_skybox(skybox_faces_, 65.0f);
-            }
+            renderer_->draw_skybox(skybox_faces_, 65.0f);
         }
 
-        // 2. Terreno 3D & Water Plane
+        // 2. Terreno 3D
         if (terrain_mesh_ != INVALID_MESH) {
             renderer_->draw_terrain(terrain_mesh_, terrain_texture_, terrain_blend_tex_,
                                  terrain_bank_tex_, terrain_outer_bank_tex_);
         }
-        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
-                         -water_plane_.w,  // water_level (Y world)
-                         -2.5f,            // terrain_height no leito marinho
-                         water_tex_);      // water texture from textures.bar
 
-        // 3. Entidades 3D (tropas, prédios, animações)
+        // 3. Entidades 3D (tropas, prédios, árvores e animações) - desenhadas antes da água transparente
         if (gameplay_world_) {
             gameplay_world_->render(renderer_.get(), model_mesh_, model_texture_, hoplite_mesh_, hoplite_texture_, &camera_);
             gameplay_world_->render_animated(renderer_.get(), &camera_);
             gameplay_world_->render_grn_animated(renderer_.get(), &camera_);
         }
+
+        // 4. Água transparente com blend
+        renderer_->draw_water(water_plane_, water_normal_tex_, accumulated_time_, water_color_,
+                         -water_plane_.w,  // water_level (Y world)
+                         -2.5f,            // terrain_height no leito marinho
+                         water_tex_);      // water texture from textures.bar
 
         // 4. Partículas 3D
         render_particles();
@@ -563,18 +570,12 @@ void Engine::render() {
             prt_particles_->render(renderer_.get(), prt_particle_tex_);
         }
 
-        // 5. UI por cima (pórtico central + 7 botões)
-        if (ui_) ui_->render();
-    } else if (state_ == EngineState::OPTIONS || state_ == EngineState::CREDITS ||
-               state_ == EngineState::MULTIPLAYER_LAN || state_ == EngineState::MULTIPLAYER_LOBBY) {
-        // Background with darkened stone modal
-        TextureHandle bg = (main_menu_tex_ != INVALID_TEXTURE) ? main_menu_tex_ : loading_tex_;
-        if (bg != INVALID_TEXTURE) {
-            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, bg, 0xFFFFFFFF);
+        // 5. Overlay modal translúcido estilo pedra AoM para telas de opções/créditos/mp
+        if (state_ != EngineState::MAIN_MENU) {
+            renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, INVALID_TEXTURE, 0xB0110802);
         }
-        renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, INVALID_TEXTURE, 0xCC110802);
 
-        // Render UI
+        // 6. UI por cima
         if (ui_) ui_->render();
     } else if (state_ == EngineState::IN_GAME) {
         // 3D Scene Rendering
@@ -722,6 +723,12 @@ void Engine::resize(int width, int height) {
             create_main_menu();
             break;
         case EngineState::OPTIONS:
+        case EngineState::UI_OPTIONS_MENU:
+        case EngineState::UI_OPTIONS_AUDIO:
+        case EngineState::UI_OPTIONS_VIDEO:
+        case EngineState::UI_OPTIONS_GAMEPLAY:
+        case EngineState::UI_OPTIONS_NETWORK:
+        case EngineState::UI_OPTIONS_CONTROLS:
             create_options_menu();
             break;
         case EngineState::CREDITS:

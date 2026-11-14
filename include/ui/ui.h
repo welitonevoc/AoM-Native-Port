@@ -35,7 +35,8 @@ struct UIButton {
     bool is_big_button = false;
     bool interactive = true;  // se false, o botão não recebe toques (painel de fundo)
     bool visible = true;      // visibilidade para submenus do AoM (gadgetReal/gadgetUnReal)
-    std::string tag;          // nome do gadget pai/grupo (ex: "MainMenuOptions", "CampaignSubMenu")
+    std::string tag;          // nome do gadget próprio (ex: "LearnToPlaySubButton")
+    std::string group_tag;    // tag do container pai (ex: "MainMenuOptions", "LearnSubMenu")
 
     // 9-slice borders (in pixels). When > 0, the button texture is drawn
     // as 9 slices: 4 corners fixed, 4 edges stretched in one axis,
@@ -73,6 +74,7 @@ struct UILabel {
     bool shadow = true;
     bool visible = true;
     std::string tag;
+    std::string group_tag;
 };
 
 struct UIAnimation {

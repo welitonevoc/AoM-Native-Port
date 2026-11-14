@@ -29,26 +29,7 @@ void Engine::create_options_menu() {
         {"CONTROLS", EngineState::UI_OPTIONS_CONTROLS},
     };
 
-    // PRIMEIRO: Tenta usar o layout XMB autêntico do jogo
-    if (load_ui_layout("uioptionsmenu.xmb")) {
-        size_t created = show_ui_layout("uioptionsmenu.xmb");
-        if (created > 0) {
-            LOGI("create_options_menu: uioptionsmenu.xmb aplicado com %zu elementos", created);
-            return;
-        }
-    }
-
-    if (load_ui_layout("uisoundsetdlg.xmb")) {
-        size_t created = show_ui_layout("uisoundsetdlg.xmb");
-        if (created > 0) {
-            LOGI("create_options_menu: uisoundsetdlg.xmb aplicado com %zu elementos", created);
-            return;
-        }
-    }
-
-    // FALLBACK: Menu hardcoded fiel ao original Age of Mythology: The Titans com sistema de abas
-    LOGI("create_options_menu: layouts XMB não disponíveis, usando fallback com sistema de abas");
-
+    // Menu autêntico com sistema de abas fiéis ao Age of Mythology: The Titans
     clear_ui();
 
     const float vw = static_cast<float>(config_.window_width);

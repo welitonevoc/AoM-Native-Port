@@ -215,11 +215,16 @@ void UIManager::render() {
 
 bool UIManager::handle_touch(const TouchEvent& ev) {
     if (ev.state == TouchEvent::State::DOWN) {
+        LOGI("[GADGET] Touch DOWN em (%.1f, %.1f)", ev.x, ev.y);
         // Percorrer de trás para frente: elementos renderizados por último (z-order superior)
         // recebem o toque primeiro. Painéis de fundo (interactive=false) são ignorados.
         for (auto it = buttons_.rbegin(); it != buttons_.rend(); ++it) {
             auto& btn = *it;
             if (!btn.visible || !btn.interactive || !hit_test(btn, ev.x, ev.y)) continue;
+
+            LOGI("[GADGET] Hit button: label='%s' tag='%s' pos=(%.1f,%.1f) size=(%.1f,%.1f) cb=%d",
+                 btn.label.c_str(), btn.tag.c_str(), btn.pos.x, btn.pos.y, btn.size.x, btn.size.y,
+                 btn.onClick ? 1 : 0);
 
             btn.current_color = btn.pressed_color;
 
@@ -278,16 +283,21 @@ bool UIManager::handle_touch(const TouchEvent& ev) {
 }
 
 void UIManager::set_group_visible(const std::string& tag, bool visible) {
+    size_t count = 0;
     for (auto& btn : buttons_) {
-        if (btn.tag == tag) {
+        if (btn.tag == tag || btn.group_tag == tag) {
             btn.visible = visible;
+            ++count;
         }
     }
     for (auto& lbl : labels_) {
-        if (lbl.tag == tag) {
+        if (lbl.tag == tag || lbl.group_tag == tag) {
             lbl.visible = visible;
+            ++count;
         }
     }
+    LOGI("[GADGET] set_group_visible('%s', visible=%d) afetou %zu elementos",
+         tag.c_str(), (int)visible, count);
 }
 
 void UIManager::on_touch_event(const TouchEvent& ev) {
