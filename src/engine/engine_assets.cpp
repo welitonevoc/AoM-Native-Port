@@ -1437,35 +1437,11 @@ ModelEntry* Engine::resolve_unit_visual(const std::string& unit_name) {
 
     std::vector<std::string> candidates;
 
-    if (low.find("villager") != std::string::npos || low.find("worker") != std::string::npos || low.find("citizen") != std::string::npos) {
-        if (low.find("norse") != std::string::npos || low.find("gatherer") != std::string::npos) {
-            candidates = {"villager n male_idlea.brg", "villager n gatherer_idlea.brg", "villager n male_attackb.brg"};
-        } else if (low.find("egyptian") != std::string::npos) {
-            candidates = {"villager e male_idlea.brg", "villager e female_minea.brg"};
-        } else if (low.find("atlantean") != std::string::npos) {
-            candidates = {"villager x citizen_idlea.brg", "villager x citizen_walka.brg"};
-        } else {
-            // Greek default
-            candidates = {"villager g greek_idlea.brg", "villager g male_idlea.brg", "villager g female_minea.brg", "villager g male_walka.brg"};
-        }
-    } else if (low.find("hoplite") != std::string::npos) {
-        candidates = {"infantry g hoplite_idlea.brg", "infantry g hoplite_attacka.brg", "infantry g hoplite_walka.brg"};
-    } else if (low.find("toxotes") != std::string::npos || low.find("archer") != std::string::npos) {
-        candidates = {"archer g toxotes_idlea.brg", "toxotes_idlea.brg", "archer g toxotes_attacka.brg"};
-    } else if (low.find("minotaur") != std::string::npos) {
-        candidates = {"special g minotaur_idlea.brg", "g minotaur_idlea.brg", "g minotaur_walka.brg"};
-    } else if (low.find("murmillo") != std::string::npos) {
-        candidates = {"infantry x 2 sword fighter_idlea.brg", "infantry x 2 sword fighter_walka.brg"};
-    } else if (low.find("arcus") != std::string::npos) {
-        candidates = {"archer x arcus_idlea.brg", "archer x arcus_walka.brg"};
-    } else if (low.find("hippikon") != std::string::npos || low.find("cavalry") != std::string::npos) {
-        candidates = {"cavalry g hippikon_idlea.brg", "cavalry g hippikon_flaila.brg"};
-    } else if (low.find("arkantos") != std::string::npos) {
-        candidates = {"scenario a arkantos_idlea.brg", "scenario a arkantos_walka.brg"};
-    } else if (low.find("pirate") != std::string::npos) {
-        candidates = {"infantry g hoplite_attacka.brg", "infantry g hoplite_idlea.brg"};
-    } else if (low.find("kraken") != std::string::npos) {
-        candidates = {"special g minotaur_idlea.brg"};
+#include "generated_unit_visuals.inc"
+
+    // Fallbacks para aldeões genéricos caso o nome seja apenas "Villager" ou "Worker"
+    if (candidates.empty() && (low.find("villager") != std::string::npos || low.find("worker") != std::string::npos)) {
+        candidates = {"villager g female_idlea.brg", "villager g male_idlea.brg", "villager n male_idlea.brg"};
     }
 
     // 1. Mapeia tipo -> BRG preferido (idlea > walka > outros)

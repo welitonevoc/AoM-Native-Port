@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1501 linhas) **GRANDE**
+## src/engine/engine_assets.cpp (1477 linhas)
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -417,7 +417,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::tr` 1217-1221 (5)
 - `Engine::load_ui_strings` 1223-1342 (120)
 - `Engine::get_model_entry` 1344-1429 (86)
-- `Engine::resolve_unit_visual` 1431-1498 (68)
+- `Engine::resolve_unit_visual` 1431-1474 (44)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
