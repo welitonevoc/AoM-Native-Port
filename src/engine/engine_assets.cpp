@@ -1392,8 +1392,11 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
         size_t pos = clean_base.rfind(suf);
         if (pos != std::string::npos) {
             std::string root = clean_base.substr(0, pos);
-            candidates.push_back(root + ".ddt");
+            candidates.push_back(root + " bronze.ddt");
+            candidates.push_back(root + " copper.ddt");
+            candidates.push_back(root + " standard.ddt");
             candidates.push_back(root + " map.ddt");
+            candidates.push_back(root + ".ddt");
             candidates.push_back(root + " diffuse.ddt");
             candidates.push_back(root + "_diffuse.ddt");
         }

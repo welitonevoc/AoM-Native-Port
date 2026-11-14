@@ -276,10 +276,10 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
 
             // Structured MTRL name reading (ptasev spec: 20 bytes hdr + 48 bytes mat floats + name)
             std::string tex_name;
-            if (pos + 68 <= next_tag) {
+            if (pos + 64 <= next_tag) {
                 uint32_t name_len = read_u32(data + pos + 12);
-                if (name_len > 0 && name_len < 256 && pos + 68 + name_len <= size) {
-                    tex_name = std::string(reinterpret_cast<const char*>(data + pos + 68), name_len);
+                if (name_len > 0 && name_len < 256 && pos + 64 + name_len <= size) {
+                    tex_name = std::string(reinterpret_cast<const char*>(data + pos + 64), name_len);
                 }
             }
 

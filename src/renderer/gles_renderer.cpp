@@ -182,6 +182,7 @@ void main() {
     vec3 L = normalize(-uLightDir);
     float diff = max(dot(N, L), 0.0);
     vec3 lighting = uAmbient + uLightColor * diff;
+    lighting = max(lighting, vec3(0.35));
 
     vec4 baseColor = (uHasTex != 0) ? texture(uTex, vTex) : vColor;
     if (baseColor.a < 0.25) discard;
