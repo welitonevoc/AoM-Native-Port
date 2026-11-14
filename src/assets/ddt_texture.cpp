@@ -1,16 +1,11 @@
 #include "assets/ddt_texture.h"
 #include "assets/ddt5_auto.h"
 #include "assets/ddt6_auto.h"
-#ifdef __ANDROID__
-#include <android/log.h>
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "AoM-DDT", __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, "AoM-DDT", __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "AoM-DDT", __VA_ARGS__)
-#else
-#define LOGI(...) ((void)0)
-#define LOGW(...) ((void)0)
-#define LOGE(...) ((void)0)
-#endif
+#include "engine/logger.h"
+#define LOG_TAG "AoM-DDT"
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 #include <algorithm>
 #include <cstdio>
@@ -447,6 +442,9 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                 const uint32_t by_count = (mip.height + 3) / 4;
                 const uint32_t fields = (mip.height >= 64 && mip.height % 64 == 0)
                     ? mip.height / 64 : 1;
+                LOGI("[DDT3-DIAG] %ux%u alpha4 blocks=%zu (bx=%u, by=%u, fields=%u, data_sz=%zu, num_c=%zu, pal_offsets: 0=%u, 1=%u, a1=%u, a4=%u)",
+                     mip.width, mip.height, blocks, bx_count, by_count, fields, mip.data.size(), num_colors,
+                     palette_offset_0, palette_offset_1, palette_offset_alpha1, palette_offset_alpha4);
                 size_t block_idx = 0;
                 for (uint32_t bx = 0; bx < bx_count; ++bx) {
                     for (uint32_t by = 0; by < by_count; ++by) {
@@ -475,6 +473,18 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                         }
                     }
                 }
+                size_t opaque = 0, trans = 0, semi = 0;
+                for (size_t i = 0; i < mip.width * mip.height; ++i) {
+                    uint8_t a = output[i * 4 + 3];
+                    if (a == 255) opaque++;
+                    else if (a == 0) trans++;
+                    else semi++;
+                }
+                const size_t cp = (mip.height / 2 * mip.width + mip.width / 2) * 4;
+                LOGI("[DDT3-STATS] %ux%u: opaque=%zu, trans=%zu, semi=%zu | corner0=(%u,%u,%u,%u) center=(%u,%u,%u,%u)",
+                     mip.width, mip.height, opaque, trans, semi,
+                     output[0], output[1], output[2], output[3],
+                     output[cp + 0], output[cp + 1], output[cp + 2], output[cp + 3]);
                 return output;
             }
 

@@ -6,12 +6,12 @@
 #include <cstdio>
 #include <sstream>
 #include <set>
-#include <android/log.h>
+#include "engine/logger.h"
 
 #define LOG_TAG "AoM_UILayout"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 namespace aom {
 

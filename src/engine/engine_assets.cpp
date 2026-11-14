@@ -1125,18 +1125,20 @@ TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
     auto rgba = ddt->decode_rgba(0);
     if (rgba.empty()) { LOGW("[TEX] '%s' (%s): decode_rgba vazio (formato %d)", material_name.c_str(), resolved.c_str(), int(ddt->format)); return INVALID_TEXTURE; }
 
-    if (material_name.find("ui") != std::string::npos || material_name.find("button") != std::string::npos) {
-        LOGI("[UI-DDT] '%s' (%s): %ux%u fmt=%d abits=%u -> GL_RGBA",
-             material_name.c_str(), resolved.c_str(), ddt->width, ddt->height,
-             int(ddt->format), ddt->alpha_bits);
-    }
-
     TextureHandle handle = renderer_->create_texture(
         ddt->width, ddt->height, rgba.data());
+    if (material_name.find("ui") != std::string::npos || material_name.find("button") != std::string::npos) {
+        LOGI("[UI-DDT] '%s' (%s): %ux%u fmt=%d abits=%u -> GL handle=%u",
+             material_name.c_str(), resolved.c_str(), ddt->width, ddt->height,
+             int(ddt->format), ddt->alpha_bits, handle);
+    }
     if (handle != INVALID_TEXTURE) {
         texture_cache_[material_name] = handle;
         texture_dimensions_[material_name] = glm::ivec2(
             static_cast<int>(ddt->width), static_cast<int>(ddt->height));
+    } else {
+        LOGE("[TEX] Falha ao criar textura OpenGL para '%s' (%ux%u)",
+             material_name.c_str(), ddt->width, ddt->height);
     }
     return handle;
 }

@@ -9,15 +9,10 @@ extern "C" {
 #include <cstdio>
 #include <cmath>
 
-#ifdef __ANDROID__
-#include <android/log.h>
+#include "engine/logger.h"
 #define LOG_TAG "AoM_UI"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#else
-#define LOGI(...) printf(__VA_ARGS__)
-#define LOGE(...) fprintf(stderr, __VA_ARGS__)
-#endif
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 namespace aom {
 

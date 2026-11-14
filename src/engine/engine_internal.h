@@ -5,63 +5,16 @@
 #include <cctype>
 #include <vector>
 
+#include "engine/logger.h"
+
+#ifndef LOG_TAG
 #define LOG_TAG "AoM-Engine"
-#ifdef __ANDROID__
-#include <android/log.h>
-#include <cstdio>
-#include <cstdarg>
-
-namespace aom {
-inline void aom_file_log_write(int prio, const char* tag, const char* fmt, ...) {
-    va_list ap, ap_file;
-    va_start(ap, fmt);
-    va_copy(ap_file, ap);
-    __android_log_vprint(prio, tag, fmt, ap);
-    va_end(ap);
-
-    static FILE* s_logfile = nullptr;
-    static int s_retry_count = 0;
-    if (!s_logfile && (++s_retry_count % 10 == 1)) {
-        const char* paths[] = {
-            "/sdcard/log.txt",
-            "/storage/emulated/0/log.txt",
-            "/storage/emulated/0/Documents/log.txt",
-            "/sdcard/Documents/log.txt",
-            "/storage/emulated/0/Download/log.txt",
-            "/sdcard/Download/log.txt",
-            "/sdcard/AoM/log.txt",
-            "/storage/emulated/0/AoM/log.txt",
-            "/sdcard/aom_log.txt",
-            "/storage/emulated/0/aom_log.txt"
-        };
-        for (const char* p : paths) {
-            s_logfile = std::fopen(p, "a");
-            if (s_logfile) {
-                std::fprintf(s_logfile, "=== AoM Session Log Started ===\n");
-                std::fflush(s_logfile);
-                break;
-            }
-        }
-    }
-    if (s_logfile) {
-        std::fprintf(s_logfile, "[%s] ", tag);
-        std::vfprintf(s_logfile, fmt, ap_file);
-        std::fprintf(s_logfile, "\n");
-        std::fflush(s_logfile);
-    }
-    va_end(ap_file);
-}
-} // namespace aom
-
-#define LOGI(...) ::aom::aom_file_log_write(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) ::aom::aom_file_log_write(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) ::aom::aom_file_log_write(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#else
-#include <cstdio>
-#define LOGI(...) std::printf(__VA_ARGS__)
-#define LOGW(...) std::printf(__VA_ARGS__)
-#define LOGE(...) std::fprintf(stderr, __VA_ARGS__)
 #endif
+
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
+#define LOGD(...) AOM_LOGD(LOG_TAG, __VA_ARGS__)
 
 namespace aom {
 

@@ -25,10 +25,11 @@
 #include <vector>
 
 #include "../../engine/engine_internal.h"
+#undef LOG_TAG
 #define LOG_TAG "AoM-Native"
-#define LOGI(...) ::aom::aom_file_log_write(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) ::aom::aom_file_log_write(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) ::aom::aom_file_log_write(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 namespace {
 

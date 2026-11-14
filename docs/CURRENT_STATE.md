@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11132321 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11132339 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -11,16 +11,17 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Resolvedor de Nomes de Texturas BRG: heurística de fallback para `* map.ddt` em animações.
 
 ## Correções aplicadas (14/11/2026)
-- ✅ **De-interleaving vertical para PALETTE alpha_bits=4**: texturas com altura múltipla de 64 usam campos verticais intercalados de 64px cada (ex: 256x256 = 4 campos). Fórmula correta: `gy = row_in_field * fields + field` onde `field = dr/64`, `row_in_field = dr%64`.
-- ✅ **Layout fixo para Formato 5 (AOM_5BPP)**: removido auto-detect por suavidade de luminância, que falha em texturas com alpha 1-bit (recortes). Agora usa layout fixo `{0, 6, 4, false, false, false}` (C A I, idx MSB, alpha LSB, RGB555).
-- ✅ **Scoring corrigido para Formato 6 (AOM_8BPP)**: penalidade de alpha não-uniforme agora é acionada apenas quando `alpha_max - alpha_min > 128` (mistura opaco/transparente), não quando há alpha uniformemente semi-transparente (legítimo em alpha 4-bit).
+- ✅ **Sistema de Logging Unificado (`include/engine/logger.h`)**: timestamps `[HH:MM:SS.mmm]`, gravação simultânea no Logcat e `/sdcard/log.txt` com flush imediato.
+- ✅ **Conexão dos Módulos Silenciosos ao `log.txt`**: `ddt_texture.cpp`, `ui_layout.cpp`, `ui.cpp`, `gles_renderer.cpp` e `bar_archive.cpp` gravam diagnósticos diretamente no arquivo.
+- ✅ **Diagnósticos de DDT e UI no Log**: dumps de offsets de paleta, blocos, estatísticas de alpha e handles GL.
+- ✅ **De-interleaving vertical para PALETTE alpha_bits=4**: campos verticais de 64px para texturas com altura múltipla de 64.
+- ✅ **Layout fixo para Formato 5 (AOM_5BPP)** e **Scoring para Formato 6**.
 
 ## Em aberto / Resolvidos
-1. ✅ **Logo e Botões de UI**: Decodificação 4x4 column-major 24B/bloco perfeitamente alinhada e nítida.
-2. ✅ **Tropas, Casas e Árvores do Menu**: Removido guard clause de `GameplayWorld::render`.
+1. ✅ **Sistema de Relatório e Logs**: Conectado e formatado em `/sdcard/log.txt`.
+2. ❓ **Texturas de UI e Logo**: Analisar logs detalhados do novo APK para verificar decodificação exata.
 3. ⬜ **Wire-up de Cliques XMB**: Implementação dos comandos de ação (`campaignStart`, `subModeEnter`).
-4. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11132321 gerado em `/sdcard/aom-native-v1.0.11132321.apk`.
-2. Validar interatividade dos botões do menu pregame.
+1. ✅ APK v1.0.11132339 gerado em `/sdcard/aom-native-v1.0.11132339.apk`.
+2. Executar e inspecionar diagnósticos detalhados em `/sdcard/log.txt`.
