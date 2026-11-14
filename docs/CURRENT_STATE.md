@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11132339 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11140010 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -23,5 +23,5 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 3. ⬜ **Wire-up de Cliques XMB**: Implementação dos comandos de ação (`campaignStart`, `subModeEnter`).
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11132339 gerado em `/sdcard/aom-native-v1.0.11132339.apk`.
+1. ✅ APK v1.0.11140010 gerado em `/sdcard/aom-native-v1.0.11140010.apk`.
 2. Executar e inspecionar diagnósticos detalhados em `/sdcard/log.txt`.
