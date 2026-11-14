@@ -407,6 +407,9 @@ void Engine::resolve_building_visual(Entity building, BuildingType type, const s
                 ? "building x manor a age1.brg"
                 : "building g housea age1.brg";
             break;
+        case BuildingType::TOWER:
+            brg = "building e lighthouse.brg";
+            break;
         default:
             if (name_lower.find("settlement") != std::string::npos || name_lower.find("cidade") != std::string::npos) {
                 brg = "building g settlement0.brg";

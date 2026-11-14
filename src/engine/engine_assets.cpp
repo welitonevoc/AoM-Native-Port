@@ -1460,6 +1460,12 @@ ModelEntry* Engine::resolve_unit_visual(const std::string& unit_name) {
         candidates = {"archer x arcus_idlea.brg", "archer x arcus_walka.brg"};
     } else if (low.find("hippikon") != std::string::npos || low.find("cavalry") != std::string::npos) {
         candidates = {"cavalry g hippikon_idlea.brg", "cavalry g hippikon_flaila.brg"};
+    } else if (low.find("arkantos") != std::string::npos) {
+        candidates = {"scenario a arkantos_idlea.brg", "scenario a arkantos_walka.brg"};
+    } else if (low.find("pirate") != std::string::npos) {
+        candidates = {"infantry g hoplite_attacka.brg", "infantry g hoplite_idlea.brg"};
+    } else if (low.find("kraken") != std::string::npos) {
+        candidates = {"special g minotaur_idlea.brg"};
     }
 
     // 1. Mapeia tipo -> BRG preferido (idlea > walka > outros)

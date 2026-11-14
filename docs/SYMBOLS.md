@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1495 linhas)
+## src/engine/engine_assets.cpp (1501 linhas) **GRANDE**
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -417,7 +417,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::tr` 1217-1221 (5)
 - `Engine::load_ui_strings` 1223-1342 (120)
 - `Engine::get_model_entry` 1344-1429 (86)
-- `Engine::resolve_unit_visual` 1431-1492 (62)
+- `Engine::resolve_unit_visual` 1431-1498 (68)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
@@ -431,12 +431,12 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 434-436 (3)
 - `Engine::play_named_cinematic` 438-446 (9)
 
-## src/engine/engine_gameplay.cpp (437 linhas)
+## src/engine/engine_gameplay.cpp (440 linhas)
 - `Engine::start_game` 20-230 (211)
 - `Engine::populate_menu_background_scene` 232-364 (133)
 - `Engine::start_menu_background` 366-371 (6)
 - `Engine::apply_unit_visual` 373-389 (17)
-- `Engine::resolve_building_visual` 391-434 (44)
+- `Engine::resolve_building_visual` 391-437 (47)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)
