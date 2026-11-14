@@ -268,6 +268,7 @@ public:
     void restore_saved_entities(const SaveGameData& data);
     void open_options();
     void open_credits();
+    std::string tr(const std::string& key) const;
     void open_multiplayer();
     void return_to_main_menu();
     void quit_app();
@@ -396,7 +397,6 @@ private:
     bool load_lighting(const std::string& path);
     bool set_lighting(const std::string& name);
     bool load_strings(const std::string& path);
-    std::string tr(const std::string& key) const;
 
     /// P5.6: Carrega strings da UI para a tabela de localização (base PT-BR).
     void load_ui_strings();

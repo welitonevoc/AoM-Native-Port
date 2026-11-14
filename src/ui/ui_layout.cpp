@@ -433,8 +433,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                         btn->current_color = panel_color;
                         if (gd.has_texture_coords) {
                             btn->has_uv = true;
-                            btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
-                            btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
+                            btn->uv_min = glm::vec2(gd.texture_coords.x, 1.0f - gd.texture_coords.w);
+                            btn->uv_max = glm::vec2(gd.texture_coords.z, 1.0f - gd.texture_coords.y);
                         }
                         ++created;
                     }
@@ -579,10 +579,10 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     btn->group_tag = parent_tag;
                     if (gd.has_texture_coords) {
                         btn->has_uv = true;
-                        btn->uv_min = glm::vec2(gd.texture_coords.x, gd.texture_coords.y);
-                        btn->uv_max = glm::vec2(gd.texture_coords.z, gd.texture_coords.w);
+                        btn->uv_min = glm::vec2(gd.texture_coords.x, 1.0f - gd.texture_coords.w);
+                        btn->uv_max = glm::vec2(gd.texture_coords.z, 1.0f - gd.texture_coords.y);
                     }
-                    btn->label = strip_string_ids(gd.text); // Remove $$ID$$ inicial, ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
+                    btn->label = gd.text; // Mantém ID e fallback para resolução via ui->resolve_text
                     btn->text_color = text_color;   // texto ouro, NÃO cinza
                     btn->text_size = scaled_text_size;
                     // 1) Resolver texturas a partir de ButtonSet (usebuttonset ou padrão do AoM)
@@ -618,8 +618,8 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                             }
                             if (bs->has_texture_coords && !btn->has_uv) {
                                 btn->has_uv = true;
-                                btn->uv_min = glm::vec2(bs->texture_coords.x, bs->texture_coords.y);
-                                btn->uv_max = glm::vec2(bs->texture_coords.z, bs->texture_coords.w);
+                                btn->uv_min = glm::vec2(bs->texture_coords.x, 1.0f - bs->texture_coords.w);
+                                btn->uv_max = glm::vec2(bs->texture_coords.z, 1.0f - bs->texture_coords.y);
                             }
                             if (btn->tex_width > 0 && btn->tex_height > 0) {
                                 float bw = static_cast<float>(btn->tex_width) * 0.10f;

@@ -90,7 +90,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ui/menu_system.h (117 linhas)
 
-## include/ui/ui.h (216 linhas)
+## include/ui/ui.h (242 linhas)
 
 ## include/ui/ui_layout.h (142 linhas)
 
@@ -167,10 +167,10 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `PrtParticleSystem::update` 278-308 (31)
 - `PrtParticleSystem::render` 310-332 (23)
 
-## src/aom/campaign_select_system.cpp (101 linhas)
-- `CampaignSelectSystem::initialize` 14-83 (70)
-- `CampaignSelectSystem::shutdown` 85-91 (7)
-- `CampaignSelectSystem::start_scenario` 93-98 (6)
+## src/aom/campaign_select_system.cpp (105 linhas)
+- `CampaignSelectSystem::initialize` 14-87 (74)
+- `CampaignSelectSystem::shutdown` 89-95 (7)
+- `CampaignSelectSystem::start_scenario` 97-102 (6)
 
 ## src/aom/protox_parser.cpp (409 linhas)
 - `ProtoxParser::ParseDamageType` 115-120 (6)
@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1355 linhas)
+## src/engine/engine_assets.cpp (1432 linhas)
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -415,8 +415,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::set_lighting` 1200-1220 (21)
 - `Engine::load_strings` 1222-1225 (4)
 - `Engine::tr` 1227-1231 (5)
-- `Engine::load_ui_strings` 1233-1275 (43)
-- `Engine::get_model_entry` 1277-1352 (76)
+- `Engine::load_ui_strings` 1233-1352 (120)
+- `Engine::get_model_entry` 1354-1429 (76)
 
 ## src/engine/engine_campaign.cpp (428 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)

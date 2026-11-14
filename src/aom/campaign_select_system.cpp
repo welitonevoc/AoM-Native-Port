@@ -78,6 +78,10 @@ bool CampaignSelectSystem::initialize(Engine* engine, UIManager* ui, Engine* pro
                         if (provider_) provider_->return_to_main_menu();
                     });
 
+    if (ui_ && provider_) {
+        ui_->resolve_text([this](const std::string& k) { return provider_->tr(k); });
+    }
+
     initialized_ = true;
     return true;
 }

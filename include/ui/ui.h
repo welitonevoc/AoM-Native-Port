@@ -176,16 +176,42 @@ public:
     template <typename TranslateFn>
     void resolve_text(TranslateFn&& tr_fn) {
         auto resolve_one = [&](std::string& s) {
-            if (s.empty() || s.size() < 4 || s.substr(0, 2) != "$$") return;
-            size_t end = s.find("$$", 2);
-            if (end == std::string::npos) return;
-            std::string id = s.substr(2, end - 2);
-            std::string fallback = s.substr(end + 2);
-            std::string translated = tr_fn(id);
-            if (!translated.empty() && translated != id) {
+            if (s.empty()) return;
+            while (!s.empty() && (s.back() == ' ' || s.back() == '\t' || s.back() == '\r' || s.back() == '\n')) {
+                s.pop_back();
+            }
+            if (s.size() >= 4 && s[0] == '$' && s[1] == '$') {
+                std::string last_id;
+                size_t p = 0;
+                while (p + 2 < s.size() && s[p] == '$' && s[p + 1] == '$') {
+                    size_t end = s.find("$$", p + 2);
+                    if (end == std::string::npos) break;
+                    last_id = s.substr(p + 2, end - (p + 2));
+                    p = end + 2;
+                }
+                std::string fallback = s.substr(p);
+                while (!fallback.empty() && (fallback.front() == ' ' || fallback.front() == '\t')) fallback.erase(fallback.begin());
+                while (!fallback.empty() && (fallback.back() == ' ' || fallback.back() == '\t')) fallback.pop_back();
+
+                std::string translated;
+                if (!last_id.empty()) {
+                    translated = tr_fn(last_id);
+                }
+                if (translated.empty() || translated == last_id) {
+                    if (!fallback.empty()) {
+                        translated = tr_fn(fallback);
+                    }
+                }
+                if (!translated.empty() && translated != last_id && translated != fallback) {
+                    s = translated;
+                } else if (!fallback.empty()) {
+                    s = fallback;
+                }
+                return;
+            }
+            std::string translated = tr_fn(s);
+            if (!translated.empty() && translated != s) {
                 s = translated;
-            } else if (!fallback.empty()) {
-                s = fallback;
             }
         };
         for (auto& btn : buttons_) {
