@@ -443,6 +443,7 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                      palette_offset_0, palette_offset_1, palette_offset_alpha1, palette_offset_alpha4);
                 const uint8_t* in = mip.data.data();
                 for (uint32_t y = 0; y < mip.height; ++y) {
+                    const uint32_t out_y = mip.height - 1 - y;
                     for (uint32_t x = 0; x < mip.width; x += 4) {
                         const uint16_t alpha = read_u16(in);
                         in += 2;
@@ -473,7 +474,7 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                             const uint8_t b = static_cast<uint8_t>((val & 0x0F) * 17);
                             const uint8_t a = static_cast<uint8_t>(a_nibbles[p] * 17);
 
-                            const size_t out_p = (static_cast<size_t>(y) * mip.width + (x + p)) * 4;
+                            const size_t out_p = (static_cast<size_t>(out_y) * mip.width + (x + p)) * 4;
                             output[out_p + 0] = r;
                             output[out_p + 1] = g;
                             output[out_p + 2] = b;
