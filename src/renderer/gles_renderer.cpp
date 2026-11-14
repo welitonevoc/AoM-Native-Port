@@ -126,36 +126,18 @@ layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTex;
 layout(location = 3) in vec4 aColor;
-layout(location = 4) in vec4 aBoneIndices;
-layout(location = 5) in vec4 aBoneWeights;
 
 uniform mat4 uModel;
 uniform mat4 uViewProj;
 uniform mat3 uNormalMat;
-uniform mat4 uBoneMatrices[64];
 
 out vec3 vNormal;
 out vec2 vTex;
 out vec4 vColor;
 
 void main() {
-    // Skinning: compute world position using bone matrices
-    vec4 skinnedPos = vec4(0.0);
-    skinnedPos += aBoneWeights.x * uBoneMatrices[int(aBoneIndices.x)] * vec4(aPos, 1.0);
-    skinnedPos += aBoneWeights.y * uBoneMatrices[int(aBoneIndices.y)] * vec4(aPos, 1.0);
-    skinnedPos += aBoneWeights.z * uBoneMatrices[int(aBoneIndices.z)] * vec4(aPos, 1.0);
-    skinnedPos += aBoneWeights.w * uBoneMatrices[int(aBoneIndices.w)] * vec4(aPos, 1.0);
-    
-    vec3 skinnedNormal = vec3(0.0);
-    vec4 normalVec = vec4(aNormal, 0.0);
-    skinnedNormal += aBoneWeights.x * mat3(uBoneMatrices[int(aBoneIndices.x)]) * aNormal;
-    skinnedNormal += aBoneWeights.y * mat3(uBoneMatrices[int(aBoneIndices.y)]) * aNormal;
-    skinnedNormal += aBoneWeights.z * mat3(uBoneMatrices[int(aBoneIndices.z)]) * aNormal;
-    skinnedNormal += aBoneWeights.w * mat3(uBoneMatrices[int(aBoneIndices.w)]) * aNormal;
-    skinnedNormal = normalize(skinnedNormal);
-
-    vec4 worldPos = uModel * skinnedPos;
-    vNormal = normalize(uNormalMat * skinnedNormal);
+    vec4 worldPos = uModel * vec4(aPos, 1.0);
+    vNormal = normalize(uNormalMat * aNormal);
     vTex = aTex;
     vColor = aColor;
     gl_Position = uViewProj * worldPos;

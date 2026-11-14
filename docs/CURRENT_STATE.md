@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141556 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141604 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -10,18 +10,15 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Mapeamento Exaustivo dos BARs (`src/engine/generated_unit_visuals.inc`): 50+ classes mapeadas.
 - ✅ Pipeline BRG → glTF → GLES (`brg_to_gltf.py`, bfloat16, morph targets).
 - ✅ Offset MTRL (`pos + 64`) e candidatos de textura (`bronze.ddt`, `copper.ddt`, etc.).
-- ✅ Diagnósticos `[RENDER]` (~3s) e `[BRGBOUNDS]` em execução.
+- ✅ `glDepthMask(GL_TRUE)` garantido no `begin_frame` antes de `glClear`.
 
-## Correções Aplicadas nesta Versão (GLES Pipeline & Depth Clear)
-- ✅ **Garantia de Limpeza do Depth Buffer (`src/renderer/gles_renderer.cpp`)**:
-  - `glDepthMask(GL_TRUE)` forçado imediatamente antes de `glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)` no `begin_frame` (evita falha silenciosa de `glClear(GL_DEPTH_BUFFER_BIT)` quando passadas 2D/UI anteriores deixam `glDepthMask(GL_FALSE)`).
-- ✅ **Shader de Malha 3D sem Discard e com Fallback Sólido (`src/renderer/gles_renderer.cpp`)**:
-  - Removido `discard` prematuro (evita sumiço de malhas cujas texturas possuem canal alpha zerado ou não-preenchido).
-  - Malhas sem textura (`uHasTex == 0`) usam cor magenta sólida `(1.0, 0.0, 1.0, 1.0)` como diagnóstico visual imediato.
-  - Saída do fragmento forçada com alpha `1.0` opaco.
-- ✅ **Log de Draw Call (`src/renderer/gles_renderer.cpp`)**:
-  - `[DRAW_MESH]` periódico reportando `mesh`, contagem de índices, `tex` e `blend`.
+## Causa Raiz Descoberta e Corrigida nesta Versão (Vértices Colapsando em Zero)
+- ✅ **Correção Crítica do Vertex Shader de Malhas (`kMeshVertexSrc` em `gles_renderer.cpp`)**:
+  - `kMeshVertexSrc` continha erroneamente código de skinning esquelético (`skinnedPos += aBoneWeights * uBoneMatrices...`).
+  - Como `create_mesh` não envia atributos de ossos para malhas estáticas e `draw_mesh` não carrega `uBoneMatrices`, `skinnedPos` resultava em `vec4(0.0)`.
+  - **Resultado:** todos os vértices de todas as malhas de entidades (Hoplitas, Casas, Árvores, Rochas) colapsavam matematicamente em `gl_Position = (0, 0, 0, 0)`!
+  - **Fix:** Restaurado cálculo direto de malha estática: `vec4 worldPos = uModel * vec4(aPos, 1.0); gl_Position = uViewProj * worldPos;`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141556 gerado e assinado em `/sdcard/aom-native-v1.0.11141556.apk`.
-2. Rodar e verificar se os modelos aparecem texturizados (ou magenta se sem textura) e checar os logs `[RENDER]`, `[BRGBOUNDS]` e `[DRAW_MESH]`.
+1. ✅ APK v1.0.11141604 gerado e assinado em `/sdcard/aom-native-v1.0.11141604.apk`.
+2. Testar campanha e verificar se todas as unidades e edifícios aparecem perfeitamente renderizados na tela.
