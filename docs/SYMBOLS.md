@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2209 linhas) **GRANDE**
+## include/ecs/gameplay.h (2215 linhas) **GRANDE**
 
 ## include/engine/engine.h (815 linhas)
 

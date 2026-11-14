@@ -1831,11 +1831,17 @@ public:
                 ? 0xFF3333FFu : 0xFF33CC33u;
             const glm::vec3 p = transform.position;
             if (sel) {
-                // Four short debug segments form a ground selection marker.
-                renderer->draw_debug_line(p + glm::vec3(-0.8f, 0.02f, -0.8f), p + glm::vec3(0.8f, 0.02f, -0.8f), 0xFFFFFF00u);
-                renderer->draw_debug_line(p + glm::vec3(0.8f, 0.02f, -0.8f), p + glm::vec3(0.8f, 0.02f, 0.8f), 0xFFFFFF00u);
-                renderer->draw_debug_line(p + glm::vec3(0.8f, 0.02f, 0.8f), p + glm::vec3(-0.8f, 0.02f, 0.8f), 0xFFFFFF00u);
-                renderer->draw_debug_line(p + glm::vec3(-0.8f, 0.02f, 0.8f), p + glm::vec3(-0.8f, 0.02f, -0.8f), 0xFFFFFF00u);
+                // Anel de selecao no chao (verde = aliado, vermelho = inimigo), estilo AoM.
+                const uint32_t ring_col = (unit && static_cast<Team>(unit->team) == Team::ENEMY) ? 0xFFDD3333u : 0xFF33DD33u;
+                constexpr int kRingSeg = 24;
+                constexpr float kRingRadius = 0.8f;
+                glm::vec3 ring_prev = p + glm::vec3(kRingRadius, 0.02f, 0.0f);
+                for (int i = 1; i <= kRingSeg; ++i) {
+                    const float a = 6.2831853f * static_cast<float>(i) / static_cast<float>(kRingSeg);
+                    const glm::vec3 ring_cur = p + glm::vec3(std::cos(a) * kRingRadius, 0.02f, std::sin(a) * kRingRadius);
+                    renderer->draw_debug_line(ring_prev, ring_cur, ring_col);
+                    ring_prev = ring_cur;
+                }
             }
             if (unit) {
                 const auto hp = ecs_world_.healths().find(entity);
