@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11140229 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11140959 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -17,7 +17,8 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
   - Removido reflexo especular PBR excessivo em favor da iluminação clássica de AoM.
   - Integrada textura de caustics `water0000.ddt` (`uWaterTex`) com coordenadas UV duplas em movimento.
   - Adicionadas ondas com cristas de espuma volumosa quebrando na praia (`surfZone` / `crestFoam`) e marulhar dinâmico da maré na orla (`washFoam`).
+- ✅ **Linhas de Navegação de Tropas (`gameplay.h`)**: Caminho verde e cruz amarela de destino passam a ser desenhados apenas quando a unidade estiver explicitamente selecionada (`unit.has_move_order && selected`), removendo os vetores visíveis de patrulha das tropas de fundo e do mapa.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11140229 gerado e assinado em `/sdcard/aom-native-v1.0.11140229.apk`.
-2. Validar no dispositivo as espumas quebrando na praia, o Solar Atlante e as patrulhas nos flancos abertos.
+1. ✅ APK v1.0.11140959 gerado e assinado em `/sdcard/aom-native-v1.0.11140959.apk`.
+2. Validar no dispositivo o mar fluido, o telhado do Solar/Manor e as tropas sem linhas indesejadas.

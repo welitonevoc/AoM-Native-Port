@@ -1899,7 +1899,7 @@ public:
                 }
             }
             // 3. Waypoint movement path (neon green) & target marker (yellow cross)
-            else if (unit.has_move_order && (selected || static_cast<Team>(unit.team) == Team::FRIENDLY)) {
+            else if (unit.has_move_order && selected) {
                 glm::vec3 curr = unit_pos + glm::vec3(0.0f, 0.05f, 0.0f);
                 for (size_t wi = unit.waypoint_index; wi < unit.waypoints.size(); ++wi) {
                     glm::vec3 next_pt = unit.waypoints[wi] + glm::vec3(0.0f, 0.05f, 0.0f);
