@@ -57,6 +57,12 @@ void Engine::start_game() {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
+    gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
+        resolve_unit_visual(e, type);
+    };
+    gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
+        resolve_building_visual(e, type, name);
+    };
 
     // --- Inicializar IA do inimigo (P5.4) ---
     ai_system_ = std::make_unique<ai::AiSystem>();
@@ -80,13 +86,13 @@ void Engine::start_game() {
 
     const std::vector<UnitSpawn> spawns = {
         // Friendly base (esquerda)
-        {{-3.0f, 0.0f, 0.0f},  Team::FRIENDLY, "Hoplite",      "infantry g hoplite_idlea.brg"},
-        {{-1.5f, 0.0f,  1.0f}, Team::FRIENDLY, "Toxotes",      "archer g toxotes_idlea.brg"},
-        {{-1.5f, 0.0f, -1.0f}, Team::FRIENDLY, "Villager Greek", nullptr},
+        {{-3.0f, 0.0f, 0.0f},  Team::FRIENDLY, "Hoplite",        "infantry g hoplite_attacka.brg"},
+        {{-1.5f, 0.0f,  1.0f}, Team::FRIENDLY, "Toxotes",        "toxotes_idlea.brg"},
+        {{-1.5f, 0.0f, -1.0f}, Team::FRIENDLY, "Villager Greek", "villager g female_minea.brg"},
         // Enemy base (direita)
-        {{ 3.0f, 0.0f, 0.0f},  Team::ENEMY,    "Hoplite",      "infantry g hoplite_idlea.brg"},
-        {{ 1.5f, 0.0f,  1.0f},  Team::ENEMY,    "Toxotes",      "archer g toxotes_idlea.brg"},
-        {{ 1.5f, 0.0f, -1.0f},  Team::ENEMY,    "Hoplite",      "infantry g hoplite_idlea.brg"},
+        {{ 3.0f, 0.0f, 0.0f},  Team::ENEMY,    "Hoplite",        "infantry g hoplite_attacka.brg"},
+        {{ 1.5f, 0.0f,  1.0f},  Team::ENEMY,    "Toxotes",        "toxotes_idlea.brg"},
+        {{ 1.5f, 0.0f, -1.0f},  Team::ENEMY,    "Hoplite",        "infantry g hoplite_attacka.brg"},
     };
 
     const aom::anim::BrgAnimationClip* clip = nullptr;
@@ -111,14 +117,10 @@ void Engine::start_game() {
         if (s.brg_name) {
             if (auto* me = get_model_entry(s.brg_name)) {
                 if (me->mesh != INVALID_MESH) {
-                    // Armazenar mesh/textura na AnimationComponent via attach_animation
-                    // ou usar diretamente no render. Aqui usamos o default_clip para
-                    // animação; a mesh específica será usada pelo render se houver.
+                    gameplay_world_->set_unit_visuals(e, me->mesh, me->texture);
                     if (clip && clip->is_valid()) {
                         gameplay_world_->attach_animation(e, clip, clip_tex, renderer_.get());
                     }
-                    // TODO: associar mesh específica por entidade (pode exigir
-                    // render_animated por entidade com mesh individual).
                     LOGI("Spawned %s (%s) brg=%s clip=%s mesh=%u tex=%u",
                          s.unit_name, s.team == Team::FRIENDLY ? "friendly" : "enemy",
                          s.brg_name, clip ? clip->name.c_str() : "none",
@@ -366,6 +368,93 @@ void Engine::start_menu_background() {
     LOGI("start_menu_background: menu video desativado (usando cena 3D/fundo limpo)");
     menu_bg_.reset();
     menu_bg_tex_ = INVALID_TEXTURE;
+}
+
+void Engine::resolve_unit_visual(Entity unit, const std::string& type_name) {
+    if (!gameplay_world_) return;
+    std::string name_lower = type_name;
+    std::transform(name_lower.begin(), name_lower.end(), name_lower.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+
+    const char* brg = nullptr;
+    if (name_lower.find("villager") != std::string::npos || name_lower.find("worker") != std::string::npos) {
+        if (name_lower.find("norse") != std::string::npos || name_lower.find("gatherer") != std::string::npos) {
+            brg = "villager n male_attackb.brg";
+        } else if (name_lower.find("egyptian") != std::string::npos) {
+            brg = "villager e female_minea.brg";
+        } else {
+            brg = "villager g female_minea.brg";
+        }
+    } else if (name_lower.find("hoplite") != std::string::npos) {
+        brg = "infantry g hoplite_attacka.brg";
+    } else if (name_lower.find("toxotes") != std::string::npos || name_lower.find("archer") != std::string::npos) {
+        brg = "toxotes_idlea.brg";
+    } else if (name_lower.find("minotaur") != std::string::npos) {
+        brg = "g minotaur_idlea.brg";
+    } else if (name_lower.find("murmillo") != std::string::npos) {
+        brg = "infantry x 2 sword fighter_walka.brg";
+    } else if (name_lower.find("arcus") != std::string::npos) {
+        brg = "archer x arcus_walka.brg";
+    } else if (name_lower.find("hippikon") != std::string::npos || name_lower.find("cavalry") != std::string::npos) {
+        brg = "cavalry g hippikon_flaila.brg";
+    } else {
+        brg = "infantry g hoplite_attacka.brg";
+    }
+
+    if (brg) {
+        if (auto* me = get_model_entry(brg)) {
+            if (me->mesh != INVALID_MESH) {
+                gameplay_world_->set_unit_visuals(unit, me->mesh, me->texture);
+                LOGI("resolve_unit_visual: entity=%u '%s' -> brg='%s', mesh=%u, tex=%u",
+                     unit, type_name.c_str(), brg, me->mesh, me->texture);
+            }
+        }
+    }
+}
+
+void Engine::resolve_building_visual(Entity building, BuildingType type, const std::string& type_name) {
+    if (!gameplay_world_) return;
+    std::string name_lower = type_name;
+    std::transform(name_lower.begin(), name_lower.end(), name_lower.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+
+    const char* brg = nullptr;
+    switch (type) {
+        case BuildingType::TOWN_CENTER:
+            brg = "building g settlement0.brg";
+            break;
+        case BuildingType::BARRACKS:
+            brg = "building g barracksage1.brg";
+            break;
+        case BuildingType::HOUSE:
+            brg = (name_lower.find("manor") != std::string::npos || name_lower.find("atlante") != std::string::npos)
+                ? "building x manor a age1.brg"
+                : "building g housea age1.brg";
+            break;
+        default:
+            if (name_lower.find("settlement") != std::string::npos || name_lower.find("cidade") != std::string::npos) {
+                brg = "building g settlement0.brg";
+            } else if (name_lower.find("manor") != std::string::npos || name_lower.find("solar") != std::string::npos) {
+                brg = "building x manor a age1.brg";
+            } else if (name_lower.find("barracks") != std::string::npos || name_lower.find("quartel") != std::string::npos) {
+                brg = "building g barracksage1.brg";
+            } else if (name_lower.find("house") != std::string::npos || name_lower.find("casa") != std::string::npos) {
+                brg = "building g housea age1.brg";
+            } else if (name_lower.find("lighthouse") != std::string::npos || name_lower.find("farol") != std::string::npos) {
+                brg = "building e lighthouse.brg";
+            }
+            break;
+    }
+
+    if (brg) {
+        if (auto* me = get_model_entry(brg)) {
+            if (me->mesh != INVALID_MESH) {
+                gameplay_world_->set_building_visuals(building, me->mesh, me->texture);
+                LOGI("resolve_building_visual: entity=%u '%s' -> brg='%s', mesh=%u, tex=%u",
+                     building, type_name.c_str(), brg, me->mesh, me->texture);
+            }
+        }
+    }
 }
 
 } // namespace aom

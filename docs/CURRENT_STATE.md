@@ -1,26 +1,20 @@
-# CURRENT_STATE — baseado na versão 1.0.11141005 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141030 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
-- ✅ Decoder DDT Formato 3 (PALETTE 4-bit Alpha DecodeBt8As4444): Logo Titans, pórtico e botões renderizam 100% opacos e na orientação correta.
-- ✅ Mapeamento UV de Botões (`ui_layout.cpp`): inversão de V nos botões e ButtonSets; jade e molduras renderizam perfeitamente.
-- ✅ Localização PT-BR dos Menus (`engine_assets.cpp`): IDs oficiais (`19825`..`23603`) traduzidos para Português.
-- ✅ Centralização Exata de Textos de Botões (`ui.cpp` & `gles_renderer.cpp`): `measure_ui_text` com suporte a caracteres acentuados PT-BR.
-- ✅ Decodificação de Alpha DDT Formato 5 (`ddt5_auto.h` & `ddt_texture.cpp`): Máscara 1-bit alpha corrigida e diffuse sólido.
+- ✅ Decoder DDT Formato 3 & 5 (PALETTE 4-bit Alpha & 1-bit diffuse): Menus, botões e texturas sólidos.
+- ✅ Mapeamento UV e Centralização PT-BR dos Menus (`ui_layout.cpp`, `ui.cpp`, `gles_renderer.cpp`).
+- ✅ Parser BRG (`brg_model.cpp`): Vértices float32 de 12 bytes corrigidos para construções, palmeiras e rochas.
+- ✅ Shader de Água Estilizado (`gles_renderer.cpp`): Caustics `water0000.ddt` e espuma de rebentação na costa.
+- ✅ Seleção AoM (`gameplay.h`): Anel circular verde/vermelho no chão e waypoints apenas na unidade selecionada.
 
 ## Correções aplicadas nesta iteração (14/11/2026)
-- ✅ **Parser de Geometria BRG (`brg_model.cpp`)**: Corrigida a leitura de posições de vértices de 12 bytes (`float32` x,y,z) para modelos com `vert_stride == 4` (edifícios como Manor/Solar, palmeiras e rochas). Resolvido o desalinhamento que corrompia malhas, UVs e materiais.
-- ✅ **Posicionamento e Elevação de Entidades do Menu (`engine_gameplay.cpp` & `gameplay.h`)**:
-  - Solar Atlante (Manor 1 & 2), Quartel, Farol, palmeiras e patrulhas de Murmillo e Arcus reposicionados para os flancos visíveis da tela (platô esquerdo Screen X ~ 22% a 28% e praia direita Screen X ~ 68% a 74%), sem oclusão pelo pórtico central (Screen X = 32% a 68%).
-  - `update_orders` em `gameplay.h` ajustado para navegar no plano horizontal XZ com `tr.velocity.y = 0.0f`, eliminando o afundamento das tropas abaixo do terreno.
-- ✅ **Shader de Água Estilizado e Espuma de Rebentação (`gles_renderer.cpp`)**:
-  - Removido reflexo especular PBR excessivo em favor da iluminação clássica de AoM.
-  - Integrada textura de caustics `water0000.ddt` (`uWaterTex`) com coordenadas UV duplas em movimento.
-  - Adicionadas ondas com cristas de espuma volumosa quebrando na praia (`surfZone` / `crestFoam`) e marulhar dinâmico da maré na orla (`washFoam`).
-- ✅ **Seleção e Navegação de Tropas (`gameplay.h`)**:
-  - Substituído o quadrado amarelo por um anel circular no chão (24 segmentos, raio 0.8) verde para aliados (`0xFF33DD33`) e vermelho para inimigos (`0xFFDD3333`), estilo AoM.
-  - Caminho verde e cruz amarela de destino desenhados apenas para unidades selecionadas (`unit.has_move_order && selected`).
+- ✅ **Resolução e Vinculação de Visuais de Unidades/Edifícios (`gameplay.h`, `engine.h`, `engine_gameplay.cpp`, `engine_campaign.cpp`)**:
+  - Implementado `on_unit_spawned` e `on_building_placed` em `GameplayWorld`, disparados em todo spawn/construção.
+  - Criado `resolve_unit_visual` e `resolve_building_visual` no `Engine`, mapeando tipos (Hoplite, Toxotes, Villager Greek/Norse/Egyptian, Murmillo, Arcus, Minotaur, Town Center, Barracks, Manor, House) diretamente para seus arquivos `.brg` e `.ddt` autênticos dos BARs.
+  - Corrigido `start_game()` e `start_generic_mission()` para associar malhas e texturas BRG às unidades e edifícios em vez de cair em meshes nulas ou placeholders de 32 vértices com linhas de depuração.
+  - Em `render_animated`, evitada sobreposição de mesh placeholder se a unidade já possuir modelo específico atribuído.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141005 gerado e assinado em `/sdcard/aom-native-v1.0.11141005.apk`.
-2. Validar no dispositivo o mar fluido, o telhado do Solar/Manor e o anel circular de seleção.
+1. ✅ APK v1.0.11141030 gerado e assinado em `/sdcard/aom-native-v1.0.11141030.apk`.
+2. Validar no dispositivo as malhas 3D de soldados, aldeões e centros de cidade renderizando no gameplay.

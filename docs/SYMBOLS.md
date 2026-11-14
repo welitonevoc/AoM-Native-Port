@@ -54,9 +54,9 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2215 linhas) **GRANDE**
+## include/ecs/gameplay.h (2226 linhas) **GRANDE**
 
-## include/engine/engine.h (815 linhas)
+## include/engine/engine.h (817 linhas)
 
 ## include/engine/logger.h (133 linhas)
 
@@ -418,22 +418,24 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_ui_strings` 1213-1332 (120)
 - `Engine::get_model_entry` 1334-1409 (76)
 
-## src/engine/engine_campaign.cpp (428 linhas)
+## src/engine/engine_campaign.cpp (442 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
 - `Engine::start_campaign_mission` 67-78 (12)
-- `Engine::start_campaign_mission` 80-288 (209)
-- `Engine::start_generic_mission` 290-379 (90)
-- `Engine::replay_opening_cinematics` 381-389 (9)
-- `Engine::play_titans_cinematics` 391-398 (8)
-- `Engine::play_outtakes_cinematic` 400-407 (8)
-- `Engine::play_credits_cinematic` 409-411 (3)
-- `Engine::play_titans_credits_cinematic` 413-415 (3)
-- `Engine::play_named_cinematic` 417-425 (9)
+- `Engine::start_campaign_mission` 80-294 (215)
+- `Engine::start_generic_mission` 296-393 (98)
+- `Engine::replay_opening_cinematics` 395-403 (9)
+- `Engine::play_titans_cinematics` 405-412 (8)
+- `Engine::play_outtakes_cinematic` 414-421 (8)
+- `Engine::play_credits_cinematic` 423-425 (3)
+- `Engine::play_titans_credits_cinematic` 427-429 (3)
+- `Engine::play_named_cinematic` 431-439 (9)
 
-## src/engine/engine_gameplay.cpp (372 linhas)
-- `Engine::start_game` 20-228 (209)
-- `Engine::populate_menu_background_scene` 230-362 (133)
-- `Engine::start_menu_background` 364-369 (6)
+## src/engine/engine_gameplay.cpp (461 linhas)
+- `Engine::start_game` 20-230 (211)
+- `Engine::populate_menu_background_scene` 232-364 (133)
+- `Engine::start_menu_background` 366-371 (6)
+- `Engine::resolve_unit_visual` 373-413 (41)
+- `Engine::resolve_building_visual` 415-458 (44)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)

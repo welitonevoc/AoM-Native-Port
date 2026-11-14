@@ -653,6 +653,8 @@ public:
     std::function<void(Entity attacker, Entity target, const glm::vec3& hit_pos)> on_combat_hit;
     std::function<void(const glm::vec3& pos)> on_building_sparks;
     std::function<void(Entity building, const glm::vec3& pos)> on_building_completed;
+    std::function<void(Entity unit, const std::string& type_name)> on_unit_spawned;
+    std::function<void(Entity building, BuildingType type, const std::string& type_name)> on_building_placed;
 
     // Flag para desabilitar renderização de barras de HP (útil no MAIN_MENU)
     bool render_hp_bars_ = true;
@@ -731,6 +733,10 @@ public:
         // Auto-attach default animation if available
         if (default_clip_ && default_clip_->is_valid() && anim_renderer_) {
             attach_animation(id, default_clip_, default_clip_tex_, anim_renderer_);
+        }
+
+        if (on_unit_spawned) {
+            on_unit_spawned(id, u.unit_type_name);
         }
 
         return id;
@@ -1071,6 +1077,9 @@ public:
             navigation_.set_blocked(cell.x + 1, cell.y, true);
             navigation_.set_blocked(cell.x, cell.y + 1, true);
             navigation_.set_blocked(cell.x + 1, cell.y + 1, true);
+        }
+        if (on_building_placed) {
+            on_building_placed(id, type, name);
         }
         return id;
     }
@@ -1437,6 +1446,8 @@ public:
         };
         for (const auto& [entity, ac] : animations_) {
             if (!ac.is_ready()) continue;
+            auto u_it = units_.find(entity);
+            if (u_it != units_.end() && u_it->second.mesh != INVALID_MESH) continue;
             const auto t_it = ecs_world_.transforms().find(entity);
             if (t_it == ecs_world_.transforms().end()) continue;
             const TransformComponent& tr = t_it->second;

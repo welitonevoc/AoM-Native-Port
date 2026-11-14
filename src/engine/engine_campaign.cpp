@@ -101,6 +101,12 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     gameplay_world_ = std::make_unique<GameplayWorld>(game_config_root_.get());
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
+    gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
+        resolve_unit_visual(e, type);
+    };
+    gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
+        resolve_building_visual(e, type, name);
+    };
 
     // --- Inicializar IA do inimigo (P5.4) ---
     ai_system_ = std::make_unique<ai::AiSystem>();
@@ -333,6 +339,14 @@ void Engine::start_generic_mission(const std::string& scenario_filename, bool me
 
     // No modo menu_background, NÃO spawnar entidades — apenas carregar terrain/heightmap
     if (!menu_background_mode) {
+        if (gameplay_world_) {
+            gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
+                resolve_unit_visual(e, type);
+            };
+            gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
+                resolve_building_visual(e, type, name);
+            };
+        }
         // Spawn entidades básicas para missão genérica (Town Center + unidades iniciais)
         gameplay_world_->place_town_center(Team::FRIENDLY, glm::vec3(-6.0f, 0.0f, 0.0f), true);
         gameplay_world_->place_town_center(Team::ENEMY, glm::vec3(6.0f, 0.0f, 0.0f), true);
