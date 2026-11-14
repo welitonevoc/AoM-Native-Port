@@ -34,7 +34,7 @@ O projeto atual foca em um ciclo jogável rápido e estável com os seguintes el
 - **Mapa Procedural:** Terreno com elevação e texturização dinâmica.
 - **Interface & HUD:** Painel de recursos, status de unidades e menu de ações.
 
-Para mais detalhes sobre o planejamento, consulte [`docs/MVP.md`](docs/MVP.md) e [`docs/ANALISE_COMPLETA.md`](docs/ANALISE_COMPLETA.md).
+Para mais detalhes sobre o planejamento e a engenharia reversa dos formatos e subsistemas, consulte [`docs/ARQUITETURA_E_DESCOBERTAS.md`](docs/ARQUITETURA_E_DESCOBERTAS.md), [`docs/MVP.md`](docs/MVP.md) e [`docs/ANALISE_COMPLETA.md`](docs/ANALISE_COMPLETA.md).
 
 ---
 
