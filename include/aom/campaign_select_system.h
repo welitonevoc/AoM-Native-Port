@@ -45,6 +45,15 @@ public:
     /// Numero de cenarios disponiveis na tela.
     [[nodiscard]] size_t scenario_count() const { return scenarios_.size(); }
 
+    /// Seleciona o cenario pelo indice e atualiza a interface.
+    void select_scenario(size_t index);
+
+    /// Alterna a pagina de cenarios na coluna esquerda (+1 / -1).
+    void change_page(int delta);
+
+    /// Define o nivel de dificuldade selecionado (0=Facil, 1=Moderado, 2=Dificil, 3=Tita).
+    void set_difficulty(int diff);
+
 private:
     /// Cenario exibido na lista.
     struct Entry {
@@ -52,13 +61,27 @@ private:
         bool expansion = false;                     ///< true se veio da expansao The Titans
     };
 
+    /// Reconstrói a interface em duas colunas.
+    void rebuild_ui();
+
     /// Inicia o cenario escolhido.
     void start_scenario(const Entry& entry) const;
+
+    /// Obtém o mapa regional correspondente ao cenário.
+    std::string get_map_for_scenario(const std::string& filename, bool expansion) const;
+
+    /// Obtém a sinopse/briefing do cenário.
+    std::string get_briefing_for_scenario(const std::string& filename, const std::string& title) const;
 
     Engine* engine_ = nullptr;
     UIManager* ui_ = nullptr;
     Engine* provider_ = nullptr;
+    int width_ = 1024;
+    int height_ = 768;
     std::vector<Entry> scenarios_;
+    size_t selected_index_ = 0;
+    size_t current_page_ = 0;
+    int difficulty_ = 1; // 0=Facil, 1=Moderado, 2=Dificil, 3=Tita
     bool initialized_ = false;
 };
 

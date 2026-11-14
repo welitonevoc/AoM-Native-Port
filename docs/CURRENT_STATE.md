@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141653 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141710 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -10,18 +10,18 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Mapeamento Exaustivo dos BARs (`src/engine/generated_unit_visuals.inc`): 50+ classes mapeadas.
 - ✅ `glDepthMask(GL_TRUE)` garantido no `begin_frame` antes de `glClear`.
 - ✅ Terreno 128×128m (`kTerrainTileSize = 2.0f`) e Câmera RTS calibrada (`radius_ = 65.0f`, `pitch_ = 0.85f`).
+- ✅ Orientação Suave / Heading Lerp (`ecs.h`) e suporte a clips Granny 2 / GRN (`grn_animation.cpp`).
+- ✅ Renderização Dinâmica de Unidades com Morphing Ativo (`gameplay.h`).
 
-## Correções Aplicadas nesta Versão (Animação de Movimento & Heading Lerp)
-- ✅ **Orientação Suave / Heading Lerp (`include/ecs/ecs.h`)**:
-  - `MovementSystem::update` agora calcula o ângulo alvo `atan2(vx, vz)` pelo menor percurso e interpola suavemente `tr.rotation.y`.
-  - Elimina o deslizamento estático de lado/costas e previne rotações instantâneas ou em falso.
-- ✅ **Suporte a Clips Granny 2 / GRN (`src/anim/grn_animation.cpp` & `engine_assets.cpp`)**:
-  - `parse_grn` atualizado para validar a assinatura binária oficial do Granny 2 (`0x2A 0x30 0x39 0x04` / `*09\x04`).
-  - `load_grn_clips` agora consome de `models_bar_` (onde residem os 584 arquivos `.grn` de heróis e tropas) com prefixos de unidades (`hop`, `ark`, `aman`, `ajax`).
-- ✅ **Renderização Dinâmica de Unidades com Morphing Ativo (`include/ecs/gameplay.h`)**:
-  - `render_animated` agora desenha as malhas com interpolação de vértices de unidades sem descartá-las por possuírem malha estática de pose.
-  - `render` estático ignora entidades que possuem componente de animação ativo, evitando sobreposição.
+## Correções Aplicadas nesta Versão (Menu de Campanha Autêntico em Duas Colunas)
+- ✅ **Menu de Seleção em Duas Colunas (`campaign_select_system.cpp` & `.h`)**:
+  - Coluna esquerda: Lista de missões paginada (7 por tela) com navegação `[ < Anterior ]`, `[ Próximo > ]` e destaque dourado no cenário selecionado.
+  - Coluna direita: Cartão detalhado da missão contendo número e título, mapa regional 2D autêntico (`campmap_atlantis7.ddt`, `campmap_greece7.ddt`, `campmap_egypt7.ddt`, `campmap_norselands3.ddt`), sinopse/briefing do cenário, seletor de 4 níveis de dificuldade (Fácil, Moderado, Difícil, Titã) e botão proeminente `[ ▶ INICIAR MISSÃO ]`.
+- ✅ **Segurança de Execução da UI (`src/ui/ui.cpp`)**:
+  - Callback de botões armazena ponteiro de função local antes de restaurar cor do botão, prevenindo use-after-free quando o clique reconstrói ou limpa a UI.
+- ✅ **API de Textura (`include/engine/engine.h`)**:
+  - `load_ddt_texture` tornado público no `Engine` para permitir carregamento dinâmico de mapas da campanha e ícones de interface.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141653 gerado e assinado em `/sdcard/aom-native-v1.0.11141653.apk`.
-2. Validar marcha das unidades e transição de heading no mapa da campanha.
+1. ✅ APK v1.0.11141710 gerado e assinado em `/sdcard/aom-native-v1.0.11141710.apk`.
+2. Validar transições de mapa e início de missão a partir da nova interface de seleção.

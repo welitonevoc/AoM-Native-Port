@@ -246,10 +246,11 @@ bool UIManager::handle_touch(const TouchEvent& ev) {
                 else audio_->play_click();
             }
 
-            if (btn.onClick) {
-                btn.onClick();
-            }
+            auto cb = btn.onClick;
             btn.current_color = btn.normal_color;
+            if (cb) {
+                cb();
+            }
             return true;
         }
     } else if (ev.state == TouchEvent::State::MOVE) {

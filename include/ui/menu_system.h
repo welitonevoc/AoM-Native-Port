@@ -34,7 +34,7 @@ struct MenuButton {
     glm::vec2 position;
     glm::vec2 size;
     uint32_t normal_color = 0xFF2A5EFF;
-    uint32_t pressed_color = 0xFF1E4A8DFF;
+    uint32_t pressed_color = 0xFF1E4A8D;
     uint32_t current_color = 0xFFFFFFFF;
     uint32_t text_color = 0xFFFFD000;
     float text_size = 20.0f;

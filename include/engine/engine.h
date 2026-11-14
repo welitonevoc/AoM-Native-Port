@@ -300,6 +300,9 @@ public:
     [[nodiscard]] BarArchive* scenario_archive() { return scenarios_bar_.get(); }
     [[nodiscard]] BarArchive* sound_archive() { return sound_bar_.get(); }
 
+    /// Carrega textura .ddt pelo nome do material ou arquivo.
+    TextureHandle load_ddt_texture(const std::string& material_name);
+
     /// P5.5: Toca um som de unidade usando o SoundDefManager (sound banks do sounds.bar).
     /// Retorna true se um som foi disparado via sound bank.
     bool play_sound_bank(const std::string& unit_type_name, const std::string& sound_type,
@@ -395,7 +398,6 @@ private:
     bool load_archives(const std::string& data_path);
     bool load_textures();
     bool load_models();
-    TextureHandle load_ddt_texture(const std::string& material_name);
     bool load_game_config();
     bool load_lighting(const std::string& path);
     bool set_lighting(const std::string& name);

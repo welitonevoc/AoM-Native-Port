@@ -14,7 +14,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/anim/prt_particle.h (105 linhas)
 
-## include/aom/campaign_select_system.h (66 linhas)
+## include/aom/campaign_select_system.h (89 linhas)
 
 ## include/aom/protox_parser.hpp (81 linhas)
 
@@ -56,7 +56,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/gameplay.h (2257 linhas) **GRANDE**
 
-## include/engine/engine.h (818 linhas)
+## include/engine/engine.h (820 linhas)
 
 ## include/engine/logger.h (133 linhas)
 
@@ -167,10 +167,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `PrtParticleSystem::update` 278-308 (31)
 - `PrtParticleSystem::render` 310-332 (23)
 
-## src/aom/campaign_select_system.cpp (105 linhas)
-- `CampaignSelectSystem::initialize` 14-87 (74)
-- `CampaignSelectSystem::shutdown` 89-95 (7)
-- `CampaignSelectSystem::start_scenario` 97-102 (6)
+## src/aom/campaign_select_system.cpp (341 linhas)
+- `CampaignSelectSystem::initialize` 14-47 (34)
+- `CampaignSelectSystem::select_scenario` 49-53 (5)
+- `CampaignSelectSystem::change_page` 55-67 (13)
+- `CampaignSelectSystem::set_difficulty` 69-72 (4)
+- `CampaignSelectSystem::get_map_for_scenario` 74-104 (31)
+- `CampaignSelectSystem::get_briefing_for_scenario` 106-123 (18)
+- `CampaignSelectSystem::rebuild_ui` 125-325 (201)
+- `CampaignSelectSystem::shutdown` 327-333 (7)
+- `CampaignSelectSystem::start_scenario` 335-338 (4)
 
 ## src/aom/protox_parser.cpp (409 linhas)
 - `ProtoxParser::ParseDamageType` 115-120 (6)
@@ -1048,25 +1054,25 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `MenuSystem::update_current_menu_state` 235-242 (8)
 - `MenuSystem::process_menu_actions` 244-245 (2)
 
-## src/ui/ui.cpp (460 linhas)
+## src/ui/ui.cpp (461 linhas)
 - `UIManager::initialize` 19-25 (7)
 - `UIManager::shutdown` 27-31 (5)
 - `UIManager::clear` 33-41 (9)
 - `UIManager::update` 43-52 (10)
 - `UIManager::render` 54-207 (154)
-- `UIManager::handle_touch` 209-276 (68)
-- `UIManager::set_group_visible` 278-294 (17)
-- `UIManager::on_touch_event` 296-298 (3)
-- `UIManager::add_animation` 300-313 (14)
-- `UIManager::add_button` 315-336 (22)
-- `UIManager::add_button` 338-344 (7)
-- `UIManager::add_button` 346-372 (27)
-- `UIManager::add_slider` 374-391 (18)
-- `UIManager::add_checkbox` 393-410 (18)
-- `strip_string_ids` 415-423 (9)
-- `UIManager::add_label` 425-436 (12)
-- `UIManager::add_background_quad` 438-452 (15)
-- `UIManager::hit_test` 454-457 (4)
+- `UIManager::handle_touch` 209-277 (69)
+- `UIManager::set_group_visible` 279-295 (17)
+- `UIManager::on_touch_event` 297-299 (3)
+- `UIManager::add_animation` 301-314 (14)
+- `UIManager::add_button` 316-337 (22)
+- `UIManager::add_button` 339-345 (7)
+- `UIManager::add_button` 347-373 (27)
+- `UIManager::add_slider` 375-392 (18)
+- `UIManager::add_checkbox` 394-411 (18)
+- `strip_string_ids` 416-424 (9)
+- `UIManager::add_label` 426-437 (12)
+- `UIManager::add_background_quad` 439-453 (15)
+- `UIManager::hit_test` 455-458 (4)
 
 ## src/ui/ui_layout.cpp (744 linhas)
 - `to_lower` 24-29 (6)
