@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11132207 (13/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11132303 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -10,6 +10,11 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Bloqueio de Zoom da Câmera no Menu: `adjust_camera_zoom` desativado fora de `IN_GAME`.
 - ✅ Resolvedor de Nomes de Texturas BRG: heurística de fallback para `* map.ddt` em animações.
 
+## Correções aplicadas (14/11/2026)
+- ✅ **De-interleaving vertical para PALETTE alpha_bits=4**: texturas com altura múltipla de 64 usam campos verticais intercalados de 64px cada (ex: 256x256 = 4 campos). Fórmula correta: `gy = row_in_field * fields + field` onde `field = dr/64`, `row_in_field = dr%64`.
+- ✅ **Layout fixo para Formato 5 (AOM_5BPP)**: removido auto-detect por suavidade de luminância, que falha em texturas com alpha 1-bit (recortes). Agora usa layout fixo `{0, 6, 4, false, false, false}` (C A I, idx MSB, alpha LSB, RGB555).
+- ✅ **Scoring corrigido para Formato 6 (AOM_8BPP)**: penalidade de alpha não-uniforme agora é acionada apenas quando `alpha_max - alpha_min > 128` (mistura opaco/transparente), não quando há alpha uniformemente semi-transparente (legítimo em alpha 4-bit).
+
 ## Em aberto / Resolvidos
 1. ✅ **Logo e Botões de UI**: Decodificação 4x4 column-major 24B/bloco perfeitamente alinhada e nítida.
 2. ✅ **Tropas, Casas e Árvores do Menu**: Removido guard clause de `GameplayWorld::render`.
@@ -17,5 +22,5 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 4. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11132207 gerado em `/sdcard/aom-native-v1.0.11132207.apk`.
+1. ✅ APK v1.0.11132303 gerado em `/sdcard/aom-native-v1.0.11132303.apk`.
 2. Validar interatividade dos botões do menu pregame.

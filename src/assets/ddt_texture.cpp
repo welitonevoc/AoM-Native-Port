@@ -438,10 +438,15 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             const size_t blocks = static_cast<size_t>((mip.width + 3) / 4) * ((mip.height + 3) / 4);
 
             // Formato 3 com alpha 4-bit (UI e botões de mármore):
-            // Armazenado em blocos 4x4 de 24 bytes (16B índices + 8B alpha 4-bit) em ordem column-major
+            // Armazenado em blocos 4x4 de 24 bytes (16B índices + 8B alpha 4-bit).
+            // Texturas com altura múltipla de 64 usam campos verticais intercalados
+            // de 64px cada (de-interleaving vertical). Ex: 256x256 = 4 campos.
+            // Leitura column-major (bx exterior, by interior) com deposição de-interleaved.
             if (alpha_bits == 4 && mip.data.size() >= blocks * 24) {
                 const uint32_t bx_count = (mip.width + 3) / 4;
                 const uint32_t by_count = (mip.height + 3) / 4;
+                const uint32_t fields = (mip.height >= 64 && mip.height % 64 == 0)
+                    ? mip.height / 64 : 1;
                 size_t block_idx = 0;
                 for (uint32_t bx = 0; bx < bx_count; ++bx) {
                     for (uint32_t by = 0; by < by_count; ++by) {
@@ -452,7 +457,10 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                         for (uint32_t py = 0; py < 4; ++py) {
                             for (uint32_t px = 0; px < 4; ++px) {
                                 const uint32_t gx = bx * 4 + px;
-                                const uint32_t gy = by * 4 + py;
+                                const uint32_t dr = by * 4 + py;
+                                const uint32_t field = dr / 64;
+                                const uint32_t row_in_field = dr % 64;
+                                const uint32_t gy = row_in_field * fields + field;
                                 if (gx >= mip.width || gy >= mip.height) continue;
                                 const uint32_t p = py * 4 + px;
                                 size_t idx = indices[p];
@@ -529,25 +537,10 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             const uint32_t blocks_y = (mip.height + 3) / 4;
             const uint8_t* in = mip.data.data();
 
-            // Formato 5: o layout interno do bloco de 10 bytes é escolhido automaticamente
-            // (ordem dos campos, bits dos índices, RGB555/565) pela imagem mais coerente.
-            ddt5::Layout l5{};
-            if (format == DdtFormat::AOM_5BPP) {
-                static thread_local ddt5::Layout s_prefer{0, 6, 4, false, false, false};
-                double sc = 0.0;
-                l5 = ddt5::choose_layout(mip.data.data(), mip.data.size(),
-                                         mip.width, mip.height, s_prefer, &sc);
-#ifdef __ANDROID__
-                if (l5.pc != s_prefer.pc || l5.pi != s_prefer.pi || l5.pa != s_prefer.pa ||
-                    l5.idx_msb != s_prefer.idx_msb || l5.alpha_msb != s_prefer.alpha_msb ||
-                    l5.c565 != s_prefer.c565) {
-                    __android_log_print(ANDROID_LOG_INFO, "AoM-DDT5",
-                        "layout escolhido: cores@%d indices@%d alpha@%d idxMSB=%d alphaMSB=%d rgb565=%d score=%.1f (%ux%u)",
-                        l5.pc, l5.pi, l5.pa, l5.idx_msb, l5.alpha_msb, l5.c565, sc, mip.width, mip.height);
-                }
-#endif
-                if (mip.width >= 32 && mip.height >= 32) s_prefer = l5;  // mips minúsculas não decidem
-            }
+            // Formato 5: layout fixo {0, 6, 4, false, false, false} (C A I, idx MSB, alpha LSB, RGB555).
+            // O auto-detect por suavidade de luminância falha em texturas com alpha 1-bit
+            // (recortes): layouts errados geram alpha mais "uniforme" e vencem.
+            ddt5::Layout l5{0, 6, 4, false, false, false};
 
             // Formato 6: blocos de 16 bytes (DXT3 / DXT5 / cor+alpha4), escolhido automaticamente.
             ddt6::Layout l6{ddt6::DXT5, true};

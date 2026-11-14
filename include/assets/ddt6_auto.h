@@ -87,14 +87,18 @@ inline Layout choose_layout(const uint8_t* data, size_t size, uint32_t w, uint32
                 if (off + 16 > size) return 1e9;
                 ddt5::Px b[16];
                 decode_block(data + off, L, b);
-                int mid = 0;
+                int alpha_min = 255, alpha_max = 0;
                 for (int y = 0; y < 4; ++y) {
                     for (int x = 0; x < 4; ++x) {
                         img[static_cast<size_t>(j * 4 + y) * W + i * 4 + x] = b[4 * y + x];
-                        mid += (b[4 * y + x].a > 8 && b[4 * y + x].a < 247);
+                        uint8_t a = b[4 * y + x].a;
+                        if (a < alpha_min) alpha_min = a;
+                        if (a > alpha_max) alpha_max = a;
                     }
                 }
-                non_uniform += (mid > 0);
+                // Penaliza blocos com alpha misturando opaco/transparente (sinal de layout errado),
+                // não blocos com alpha uniformemente semi-transparente (legítimo em alpha 4-bit).
+                if (alpha_max - alpha_min > 128) non_uniform++;
                 ++nb;
             }
         }
