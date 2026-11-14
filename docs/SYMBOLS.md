@@ -8,7 +8,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/anim/anim_script.h (56 linhas)
 
-## include/anim/animation_system.h (109 linhas)
+## include/anim/animation_system.h (110 linhas)
 
 ## include/anim/grn_animation.h (111 linhas)
 
@@ -22,7 +22,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/assets/bar_archive.h (175 linhas)
 
-## include/assets/brg_model.h (51 linhas)
+## include/assets/brg_model.h (66 linhas)
 
 ## include/assets/cube_map.h (33 linhas)
 
@@ -200,16 +200,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `BarArchive::parse_file` 294-439 (146)
 - `BarArchive::decompress_l33t` 441-469 (29)
 
-## src/assets/brg_model.cpp (371 linhas)
-- `half_to_float` 24-42 (19)
-- `read_u16` 44-48 (5)
-- `read_u32` 50-54 (5)
-- `read_f32` 56-60 (5)
-- `compute_normals` 62-90 (29)
-- `parse_brg` 94-262 (169)
-- `load_brg_model_data` 264-277 (14)
-- `load_brg_model` 279-307 (29)
-- `create_procedural_brg` 309-368 (60)
+## src/assets/brg_model.cpp (462 linhas)
+- `half_to_float` 24-30 (7)
+- `read_u16` 32-36 (5)
+- `read_u32` 38-42 (5)
+- `read_f32` 44-48 (5)
+- `compute_normals` 50-78 (29)
+- `parse_brg` 82-351 (270)
+- `load_brg_model_data` 354-367 (14)
+- `load_brg_model` 369-398 (30)
+- `create_procedural_brg` 400-459 (60)
 
 ## src/assets/cube_map.cpp (104 linhas)
 - `trim` 21-26 (6)
@@ -390,7 +390,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1477 linhas)
+## src/engine/engine_assets.cpp (1508 linhas) **GRANDE**
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -407,17 +407,17 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_skybox_faces` 726-841 (116)
 - `Engine::load_water_body_textures` 843-884 (42)
 - `Engine::load_prt_particles` 886-912 (27)
-- `Engine::load_models` 914-1012 (99)
-- `Engine::build_texture_key_index` 1014-1028 (15)
-- `Engine::log_bar_names_containing` 1030-1040 (11)
-- `Engine::load_ddt_texture` 1042-1134 (93)
-- `Engine::load_lighting` 1136-1188 (53)
-- `Engine::set_lighting` 1190-1210 (21)
-- `Engine::load_strings` 1212-1215 (4)
-- `Engine::tr` 1217-1221 (5)
-- `Engine::load_ui_strings` 1223-1342 (120)
-- `Engine::get_model_entry` 1344-1429 (86)
-- `Engine::resolve_unit_visual` 1431-1474 (44)
+- `Engine::load_models` 914-1013 (100)
+- `Engine::build_texture_key_index` 1015-1029 (15)
+- `Engine::log_bar_names_containing` 1031-1041 (11)
+- `Engine::load_ddt_texture` 1043-1135 (93)
+- `Engine::load_lighting` 1137-1189 (53)
+- `Engine::set_lighting` 1191-1211 (21)
+- `Engine::load_strings` 1213-1216 (4)
+- `Engine::tr` 1218-1222 (5)
+- `Engine::load_ui_strings` 1224-1343 (120)
+- `Engine::get_model_entry` 1345-1460 (116)
+- `Engine::resolve_unit_visual` 1462-1505 (44)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)

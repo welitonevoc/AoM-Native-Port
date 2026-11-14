@@ -22,20 +22,8 @@ namespace aom {
 namespace {
 
 inline float half_to_float(uint16_t h) {
-    uint32_t s = (h & 0x8000) << 16;
-    int32_t e = (h >> 10) & 0x1f;
-    uint32_t m = h & 0x03ff;
-    if (e == 0) {
-        if (m == 0) return (s ? -0.0f : 0.0f);
-        while (!(m & 0x0400)) { m <<= 1; e--; }
-        e++;
-        m &= ~0x0400;
-    } else if (e == 31) {
-        e = 255;
-    } else {
-        e += (127 - 15);
-    }
-    uint32_t val = s | (e << 23) | (m << 13);
+    // AoM truncated float32: upper 16 bits of IEEE 754 float32
+    uint32_t val = static_cast<uint32_t>(h) << 16;
     float f = 0.0f;
     std::memcpy(&f, &val, 4);
     return f;
@@ -108,13 +96,33 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
     size_t pos = 28; // Skip BANG header
     uint32_t mesh_index = 0;
 
+    // Check for ASET or num_meshes > 1
+    uint32_t num_meshes_hdr = read_u32(data + 16);
+    if (num_meshes_hdr > 1 || (pos + 4 <= size && std::memcmp(data + pos, "ASET", 4) == 0)) {
+        if (pos + 32 <= size && std::memcmp(data + pos, "ASET", 4) == 0) {
+            model->is_animated = true;
+            uint32_t num_frames = read_u32(data + pos + 4);
+            float anim_time = read_f32(data + pos + 12);
+            float fps = read_f32(data + pos + 24);
+            model->anim_duration = (anim_time > 0.0f) ? anim_time : 1.0f;
+            model->anim_fps = (fps > 0.0f) ? fps : 30.0f;
+            (void)num_frames;
+            pos += 32;
+        }
+    }
+
     while (pos + 4 <= size) {
         const uint8_t* tag = data + pos;
         pos += 4;
 
         if (std::memcmp(tag, "ASET", 4) == 0) {
             if (pos + 28 <= size) {
-                pos += 28; // Skip ASET animation set header
+                model->is_animated = true;
+                float anim_time = read_f32(data + pos + 8);
+                float fps = read_f32(data + pos + 20);
+                model->anim_duration = (anim_time > 0.0f) ? anim_time : 1.0f;
+                model->anim_fps = (fps > 0.0f) ? fps : 30.0f;
+                pos += 28;
             }
         } else if (std::memcmp(tag, "MESI", 4) == 0) {
             if (pos + 80 > size) break;
@@ -122,79 +130,139 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
             pos += 80;
 
             uint16_t version = read_u16(hdr + 0);
-            uint16_t vert_stride = read_u16(hdr + 2);
             uint16_t num_verts = read_u16(hdr + 4);
             uint16_t num_faces = read_u16(hdr + 6);
             uint16_t flags = read_u16(hdr + 54);
+            bool is_secondary = (flags & 0x0400) != 0;
 
-            (void)version;
-            (void)flags;
+            if (num_verts > 0) {
+                const bool is_half = (version == 22);
+                const size_t v_stride = is_half ? 6 : 12;
 
-            if (num_verts > 0 && num_faces > 0) {
-                BrgMesh mesh;
-                mesh.name = name + "_mesh_" + std::to_string(mesh_index++);
-                mesh.vertices.resize(num_verts);
-
-                // 1. Read vertex positions (AoM BRG models use 12-byte float32 x,y,z)
-                if (pos + num_verts * 12 <= size) {
+                // 1. Read vertex positions
+                std::vector<glm::vec3> positions(num_verts);
+                if (pos + num_verts * v_stride <= size) {
                     for (uint16_t v = 0; v < num_verts; ++v) {
-                        mesh.vertices[v].position.x = read_f32(data + pos + v * 12 + 0);
-                        mesh.vertices[v].position.y = read_f32(data + pos + v * 12 + 4);
-                        mesh.vertices[v].position.z = read_f32(data + pos + v * 12 + 8);
+                        if (is_half) {
+                            uint16_t hx = read_u16(data + pos + v * 6 + 0);
+                            uint16_t hy = read_u16(data + pos + v * 6 + 2);
+                            uint16_t hz = read_u16(data + pos + v * 6 + 4);
+                            positions[v] = glm::vec3(half_to_float(hx), half_to_float(hy), half_to_float(hz));
+                        } else {
+                            positions[v].x = read_f32(data + pos + v * 12 + 0);
+                            positions[v].y = read_f32(data + pos + v * 12 + 4);
+                            positions[v].z = read_f32(data + pos + v * 12 + 8);
+                        }
+                    }
+                    pos += num_verts * v_stride;
+                }
+
+                // 2. Read normals
+                std::vector<glm::vec3> normals(num_verts);
+                if (pos + num_verts * v_stride <= size) {
+                    for (uint16_t v = 0; v < num_verts; ++v) {
+                        if (is_half) {
+                            uint16_t hx = read_u16(data + pos + v * 6 + 0);
+                            uint16_t hy = read_u16(data + pos + v * 6 + 2);
+                            uint16_t hz = read_u16(data + pos + v * 6 + 4);
+                            normals[v] = glm::vec3(half_to_float(hx), half_to_float(hy), half_to_float(hz));
+                        } else {
+                            normals[v].x = read_f32(data + pos + v * 12 + 0);
+                            normals[v].y = read_f32(data + pos + v * 12 + 4);
+                            normals[v].z = read_f32(data + pos + v * 12 + 8);
+                        }
+                    }
+                    pos += num_verts * v_stride;
+                }
+
+                // Store in morph frames
+                BrgFrame frame;
+                frame.positions = positions;
+                frame.normals = normals;
+                model->morph_frames.push_back(std::move(frame));
+
+                // 3. Read UVs (only if !is_secondary and TEXCOORDSA 0x0002)
+                std::vector<glm::vec2> uvs(num_verts, glm::vec2(0.0f));
+                if (!is_secondary && (flags & 0x0002)) {
+                    const size_t uv_stride = is_half ? 4 : 8;
+                    if (pos + num_verts * uv_stride <= size) {
+                        for (uint16_t v = 0; v < num_verts; ++v) {
+                            if (is_half) {
+                                uint16_t hu = read_u16(data + pos + v * 4 + 0);
+                                uint16_t hv = read_u16(data + pos + v * 4 + 2);
+                                uvs[v] = glm::vec2(half_to_float(hu), half_to_float(hv));
+                            } else {
+                                uvs[v].x = read_f32(data + pos + v * 8 + 0);
+                                uvs[v].y = read_f32(data + pos + v * 8 + 4);
+                            }
+                        }
+                        pos += num_verts * uv_stride;
+                    }
+                }
+
+                // 4. Read face materials, indices and vert materials (only if !is_secondary and MATERIAL 0x0040)
+                std::vector<uint32_t> indices;
+                if (!is_secondary && (flags & 0x0040) && num_faces > 0) {
+                    // Skip face materials
+                    if (pos + num_faces * 2 <= size) {
+                        pos += num_faces * 2;
+                    }
+                    // Read triangle indices
+                    if (pos + num_faces * 6 <= size) {
+                        indices.resize(num_faces * 3);
+                        for (uint32_t f = 0; f < num_faces * 3; ++f) {
+                            indices[f] = read_u16(data + pos + f * 2);
+                        }
+                        pos += num_faces * 6;
+                    }
+                    // Skip vertex materials
+                    if (pos + num_verts * 2 <= size) {
+                        pos += num_verts * 2;
+                    }
+                }
+
+                // Assemble mesh if primary / submesh
+                if (!is_secondary && num_faces > 0 && !indices.empty()) {
+                    BrgMesh mesh;
+                    mesh.name = name + "_mesh_" + std::to_string(mesh_index++);
+                    mesh.is_secondary = false;
+                    mesh.hotspot = glm::vec3(read_f32(hdr + 40), read_f32(hdr + 44), read_f32(hdr + 48));
+                    mesh.center = glm::vec3(read_f32(hdr + 12), read_f32(hdr + 16), read_f32(hdr + 20));
+                    mesh.vertices.resize(num_verts);
+                    mesh.indices = std::move(indices);
+
+                    for (uint16_t v = 0; v < num_verts; ++v) {
+                        mesh.vertices[v].position = positions[v];
+                        mesh.vertices[v].normal = (glm::length(normals[v]) > 1e-4f) ? glm::normalize(normals[v]) : glm::vec3(0, 1, 0);
+                        mesh.vertices[v].texcoord = uvs[v];
                         mesh.vertices[v].color = glm::vec4(1.0f);
                     }
-                    pos += num_verts * 12;
-                } else if (pos + num_verts * 6 <= size) {
-                    for (uint16_t v = 0; v < num_verts; ++v) {
-                        uint16_t hx = read_u16(data + pos + v * 6 + 0);
-                        uint16_t hy = read_u16(data + pos + v * 6 + 2);
-                        uint16_t hz = read_u16(data + pos + v * 6 + 4);
-                        mesh.vertices[v].position = glm::vec3(
-                            half_to_float(hx), half_to_float(hy), half_to_float(hz));
-                        mesh.vertices[v].color = glm::vec4(1.0f);
+
+                    if (normals.empty() || glm::length(normals[0]) < 1e-4f) {
+                        compute_normals(mesh.vertices, mesh.indices);
                     }
-                    pos += num_verts * 6;
-                }
 
-                // 2. Read texture coordinates (UVs)
-                if (pos + num_verts * 4 <= size) {
-                    for (uint16_t v = 0; v < num_verts; ++v) {
-                        uint16_t hu = read_u16(data + pos + v * 4 + 0);
-                        uint16_t hv = read_u16(data + pos + v * 4 + 2);
-                        mesh.vertices[v].texcoord = glm::vec2(
-                            half_to_float(hu), half_to_float(hv));
+                    model->total_vertices += num_verts;
+                    model->total_faces += num_faces;
+
+                    if (!model->pending_texture_name.empty()) {
+                        mesh.texture_name = model->pending_texture_name;
                     }
-                    pos += num_verts * 4;
-                }
-
-                // 3. Skip face materials
-                if (pos + num_faces * 2 <= size) {
-                    pos += num_faces * 2;
-                }
-
-                // 4. Read face triangle indices
-                if (pos + num_faces * 6 <= size) {
-                    mesh.indices.resize(num_faces * 3);
-                    for (uint32_t f = 0; f < num_faces * 3; ++f) {
-                        mesh.indices[f] = read_u16(data + pos + f * 2);
-                    }
-                    pos += num_faces * 6;
-                }
-
-                // 5. Generate smooth normals
-                compute_normals(mesh.vertices, mesh.indices);
-
-                model->total_vertices += num_verts;
-                model->total_faces += num_faces;
-                model->meshes.push_back(std::move(mesh));
-
-                // Assign pending texture name from earlier MTRL chunk to new mesh
-                if (!model->pending_texture_name.empty() &&
-                    model->meshes.back().texture_name.empty()) {
-                    model->meshes.back().texture_name = model->pending_texture_name;
-                    // Keep pending for any additional meshes (MTRL applies to all)
+                    model->meshes.push_back(std::move(mesh));
                 }
             }
+
+            // Advance pos to next tag
+            size_t next_tag = size;
+            for (const char* next : {"MESI", "ASET", "MTRL", "ATTR"}) {
+                for (size_t s = pos; s + 4 <= size; ++s) {
+                    if (std::memcmp(data + s, next, 4) == 0) {
+                        if (s < next_tag) next_tag = s;
+                        break;
+                    }
+                }
+            }
+            pos = next_tag;
         } else if (std::memcmp(tag, "MTRL", 4) == 0) {
             size_t next_tag = size;
             for (const char* next : {"MESI", "ASET", "MTRL", "ATTR"}) {
@@ -206,33 +274,54 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
                 }
             }
 
-            // Look for ASCII texture name
+            // Structured MTRL name reading (ptasev spec: 20 bytes hdr + 48 bytes mat floats + name)
             std::string tex_name;
-            for (size_t i = pos; i + 3 < next_tag; ++i) {
-                if (data[i] >= 32 && data[i] < 127) {
-                    size_t len = 0;
-                    while (i + len < next_tag && data[i + len] >= 32 && data[i + len] < 127) {
-                        len++;
-                    }
-                    if (len >= 4) {
-                        tex_name = std::string(reinterpret_cast<const char*>(data + i), len);
-                        break;
+            if (pos + 68 <= next_tag) {
+                uint32_t name_len = read_u32(data + pos + 12);
+                if (name_len > 0 && name_len < 256 && pos + 68 + name_len <= size) {
+                    tex_name = std::string(reinterpret_cast<const char*>(data + pos + 68), name_len);
+                }
+            }
+
+            // Fallback: search printable ASCII if structured read didn't find name
+            if (tex_name.empty()) {
+                for (size_t i = pos; i + 3 < next_tag; ++i) {
+                    if (data[i] >= 32 && data[i] < 127) {
+                        size_t len = 0;
+                        while (i + len < next_tag && data[i + len] >= 32 && data[i + len] < 127) len++;
+                        if (len >= 4) {
+                            tex_name = std::string(reinterpret_cast<const char*>(data + i), len);
+                            break;
+                        }
                     }
                 }
             }
+
+            // Clean texture name: trim nulls & whitespace, lowercase, ensure .ddt
+            while (!tex_name.empty() && (tex_name.back() == '\0' || tex_name.back() == ' ' || tex_name.back() == '\r')) {
+                tex_name.pop_back();
+            }
+            while (!tex_name.empty() && (tex_name.front() == '\0' || tex_name.front() == ' ')) {
+                tex_name.erase(tex_name.begin());
+            }
+
             if (!tex_name.empty()) {
-                model->textures.push_back(tex_name);
-                // Assign to ALL existing meshes that don't have texture yet
+                std::string ddt_tex = tex_name;
+                std::transform(ddt_tex.begin(), ddt_tex.end(), ddt_tex.begin(), ::tolower);
+                if (ddt_tex.length() < 4 || ddt_tex.substr(ddt_tex.length() - 4) != ".ddt") {
+                    ddt_tex += ".ddt";
+                }
+
+                model->textures.push_back(ddt_tex);
                 bool assigned = false;
                 for (auto& mesh : model->meshes) {
                     if (mesh.texture_name.empty()) {
-                        mesh.texture_name = tex_name;
+                        mesh.texture_name = ddt_tex;
                         assigned = true;
                     }
                 }
-                // Also store for any future meshes
                 if (!assigned) {
-                    model->pending_texture_name = tex_name;
+                    model->pending_texture_name = ddt_tex;
                 }
             }
             pos = next_tag;
@@ -251,15 +340,16 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
         }
     }
 
-    LOGI("BRG: Loaded model '%s' with %zu meshes, %u vertices, %u faces",
-         name.c_str(), model->meshes.size(), model->total_vertices, model->total_faces);
+    LOGI("BRG: Loaded model '%s' with %zu meshes (%zu morph frames), %u vertices, %u faces",
+         name.c_str(), model->meshes.size(), model->morph_frames.size(), model->total_vertices, model->total_faces);
     for (size_t i = 0; i < model->meshes.size(); ++i) {
         const auto& m = model->meshes[i];
         LOGI("  Mesh[%zu]: '%s' verts=%u faces=%u texture='%s'",
-             i, m.name.c_str(), m.vertices.size(), m.indices.size() / 3, m.texture_name.c_str());
+             i, m.name.c_str(), static_cast<uint32_t>(m.vertices.size()), static_cast<uint32_t>(m.indices.size() / 3), m.texture_name.c_str());
     }
     return model;
 }
+
 
 std::unique_ptr<BrgModel> load_brg_model_data(BarArchive* archive, const std::string& name) {
     if (!archive) return nullptr;
@@ -295,6 +385,7 @@ MeshHandle load_brg_model(BarArchive* archive, const std::string& name, IRendere
     std::vector<uint32_t> all_indices;
     uint32_t v_offset = 0;
     for (const auto& sm : model->meshes) {
+        if (sm.is_secondary) continue;
         all_verts.insert(all_verts.end(), sm.vertices.begin(), sm.vertices.end());
         for (uint32_t idx : sm.indices) {
             all_indices.push_back(idx + v_offset);

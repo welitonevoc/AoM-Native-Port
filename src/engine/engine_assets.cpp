@@ -927,6 +927,7 @@ bool Engine::load_models() {
         std::vector<uint32_t> all_indices;
         uint32_t v_offset = 0;
         for (const auto& sm : model->meshes) {
+            if (sm.is_secondary) continue;
             all_verts.insert(all_verts.end(), sm.vertices.begin(), sm.vertices.end());
             for (uint32_t idx : sm.indices) {
                 all_indices.push_back(idx + v_offset);
@@ -1356,6 +1357,7 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
     std::vector<uint32_t> all_indices;
     uint32_t v_offset = 0;
     for (const auto& sm : model->meshes) {
+        if (sm.is_secondary) continue;
         all_verts.insert(all_verts.end(), sm.vertices.begin(), sm.vertices.end());
         for (uint32_t idx : sm.indices) {
             all_indices.push_back(idx + v_offset);
@@ -1405,16 +1407,45 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
     if (tex == INVALID_TEXTURE && !model->meshes.empty()) {
         const std::string& mesh_tex = model->meshes[0].texture_name;
         if (!mesh_tex.empty()) {
-            for (const std::string& cand : {
-                     mesh_tex + ".ddt",
-                     mesh_tex + " diffuse.ddt",
-                     mesh_tex + "_diffuse.ddt",
-                     mesh_tex + " map.ddt",
-                     mesh_tex + ".bti",
-                 }) {
-                tex = load_ddt_texture(cand);
-                if (tex != INVALID_TEXTURE) break;
+            tex = load_ddt_texture(mesh_tex);
+            if (tex == INVALID_TEXTURE) {
+                for (const std::string& cand : {
+                         mesh_tex + ".ddt",
+                         mesh_tex + " diffuse.ddt",
+                         mesh_tex + "_diffuse.ddt",
+                         mesh_tex + " map.ddt",
+                         mesh_tex + ".bti",
+                     }) {
+                    tex = load_ddt_texture(cand);
+                    if (tex != INVALID_TEXTURE) break;
+                }
             }
+        }
+    }
+
+    // Register animation clip if model has morph target frames
+    if (model->is_animated && !model->morph_frames.empty() && anim_system_) {
+        if (!anim_system_->find_clip(entry->filename) && !model->meshes.empty()) {
+            aom::anim::BrgAnimationClip clip;
+            clip.name = entry->filename;
+            clip.aset.num_frames = static_cast<uint32_t>(model->morph_frames.size());
+            clip.aset.duration = model->anim_duration;
+            clip.aset.fps = model->anim_fps;
+            clip.num_vertices = static_cast<uint32_t>(model->meshes[0].vertices.size());
+            clip.num_faces = static_cast<uint32_t>(model->meshes[0].indices.size() / 3);
+            clip.indices = model->meshes[0].indices;
+            clip.uvs.resize(clip.num_vertices);
+            for (size_t vi = 0; vi < clip.num_vertices; ++vi) {
+                clip.uvs[vi] = model->meshes[0].vertices[vi].texcoord;
+            }
+            for (const auto& mf : model->morph_frames) {
+                aom::anim::BrgFrame bf;
+                bf.positions = mf.positions;
+                bf.normals = mf.normals;
+                clip.frames.push_back(std::move(bf));
+            }
+            clip.texture_name = (tex != INVALID_TEXTURE) ? entry->filename : "";
+            anim_system_->add_clip(std::move(clip));
         }
     }
 

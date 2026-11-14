@@ -11,6 +11,12 @@ namespace aom {
 
 class BarArchive;
 
+/// Frame of vertex positions and normals for morph targets
+struct BrgFrame {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+};
+
 /// Extracted 3D mesh from a BRG file
 struct BrgMesh {
     std::string name;
@@ -18,6 +24,9 @@ struct BrgMesh {
     std::vector<uint32_t> indices;
     std::string texture_name;
     uint32_t material_id = 0;
+    bool is_secondary = false;
+    glm::vec3 hotspot = glm::vec3(0.0f);
+    glm::vec3 center = glm::vec3(0.0f);
 };
 
 /// Complete 3D model with one or more meshes and materials
@@ -28,6 +37,12 @@ struct BrgModel {
     std::string pending_texture_name; // MTRL texture name seen before any MESI
     uint32_t total_vertices = 0;
     uint32_t total_faces = 0;
+
+    // Animation & Morph Targets (ptasev / AoMEngineLibrary spec)
+    bool is_animated = false;
+    float anim_duration = 0.0f;
+    float anim_fps = 30.0f;
+    std::vector<BrgFrame> morph_frames;
 };
 
 /// Parse a BRG binary buffer directly

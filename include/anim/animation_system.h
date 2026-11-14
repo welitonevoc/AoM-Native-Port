@@ -95,6 +95,7 @@ public:
 
     const AnimScript* find_script(const std::string& name) const;
     const BrgAnimationClip* find_clip(const std::string& name) const;
+    void add_clip(BrgAnimationClip clip) { clips_[clip.name] = std::move(clip); }
 
     size_t script_count() const { return scripts_.size(); }
     size_t clip_count() const { return clips_.size(); }
