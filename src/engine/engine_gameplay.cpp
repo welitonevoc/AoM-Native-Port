@@ -254,14 +254,16 @@ void Engine::populate_menu_background_scene() {
     ModelEntry* murmillo_me = get_model_entry("infantry x 2 sword fighter_walka.brg");
     ModelEntry* arcus_me = get_model_entry("archer x arcus_walka.brg");
 
-    // ── 2. Edifícios Atlantes na ilha (lado esquerdo visível da tela) ────────
-    Entity m_bld1 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-3.8f, 0.95f, 0.0f), 1.0f,
+    // ── 2. Edifícios Atlantes na ilha e praia (flancos visíveis fora do pórtico) ────────
+    // Flanco esquerdo aberto (Screen X ~ 22% a 28%): platô elevado verde
+    Entity m_bld1 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-6.5f, 1.35f, 0.0f), 1.0f,
                                                    BuildingType::HOUSE, "Manor Atlante");
-    Entity m_bld2 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-4.8f, 1.15f, -2.5f), 1.0f,
-                                                   BuildingType::HOUSE, "Manor Atlante");
-    Entity b_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-5.2f, 1.20f, 1.5f), 1.0f,
+    Entity b_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(-7.2f, 1.45f, 1.5f), 1.0f,
                                                    BuildingType::BARRACKS, "Quartel Atlante");
-    Entity l_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(3.5f, 0.0f, -4.0f), 1.0f,
+    // Flanco direito aberto (Screen X ~ 68% a 74%): encosta costeira e mar
+    Entity m_bld2 = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(3.6f, 1.10f, -0.5f), 1.0f,
+                                                   BuildingType::HOUSE, "Manor Atlante");
+    Entity l_bld = gameplay_world_->place_building(Team::FRIENDLY, glm::vec3(4.2f, 0.40f, -3.5f), 1.0f,
                                                    BuildingType::TOWER, "Farol");
 
     auto mark_complete = [this](Entity bld, float scale) {
@@ -274,7 +276,7 @@ void Engine::populate_menu_background_scene() {
         }
     };
     mark_complete(m_bld1, 1.35f);
-    mark_complete(m_bld2, 1.15f);
+    mark_complete(m_bld2, 1.20f);
     mark_complete(b_bld, 1.10f);
     mark_complete(l_bld, 1.0f);
 
@@ -289,26 +291,30 @@ void Engine::populate_menu_background_scene() {
         gameplay_world_->set_building_visuals(l_bld, lighthouse_me->mesh, lighthouse_me->texture);
     }
 
-    // ── 3. Vegetação e Rochas na ilha e praia de Atlântida ───────────────────
+    // ── 3. Vegetação e Rochas em ambos os flancos visíveis ────────────────────
     if (palm_me && palm_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-2.6f, 0.65f, 1.8f), 1.2f, palm_me->texture, palm_me->mesh);
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-3.0f, 0.85f, -1.8f), 1.1f, palm_me->texture, palm_me->mesh);
-        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-2.1f, 0.35f, -0.5f), 1.0f, palm_me->texture, palm_me->mesh);
+        // Palmeiras na costa direita
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(2.5f, 0.50f, 1.5f), 1.25f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(3.8f, 0.65f, 0.5f), 1.15f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(4.5f, 0.70f, -1.5f), 1.10f, palm_me->texture, palm_me->mesh);
+        // Palmeiras no flanco esquerdo
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-5.2f, 1.25f, 1.8f), 1.20f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-6.0f, 1.35f, -1.5f), 1.10f, palm_me->texture, palm_me->mesh);
     }
     if (oak_me && oak_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-5.0f, 1.2f, -1.0f), 1.3f, oak_me->texture, oak_me->mesh);
-        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-4.5f, 1.1f, 2.5f), 1.2f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-7.5f, 1.5f, -0.8f), 1.3f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(4.8f, 0.8f, 1.8f), 1.2f, oak_me->texture, oak_me->mesh);
     }
     if (pine_me && pine_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(-5.8f, 1.3f, 0.5f), 1.4f, pine_me->texture, pine_me->mesh);
+        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(-7.8f, 1.55f, 0.5f), 1.4f, pine_me->texture, pine_me->mesh);
     }
     if (rock_me && rock_me->mesh != INVALID_MESH) {
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(-1.0f, 0.1f, 1.0f), 1.5f, rock_me->texture, rock_me->mesh);
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(0.5f, -0.2f, -1.0f), 1.8f, rock_me->texture, rock_me->mesh);
-        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(1.8f, -0.3f, 1.5f), 1.3f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(2.2f, 0.40f, 2.5f), 1.5f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(3.2f, 0.45f, -2.5f), 1.8f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(-5.0f, 1.10f, -2.2f), 1.3f, rock_me->texture, rock_me->mesh);
     }
 
-    // ── 4. Tropas Atlantes patrulhando na ilha e praia ──────────────────────
+    // ── 4. Tropas Atlantes patrulhando nos flancos visíveis ──────────────────
     UnitStats murmillo_stats;
     murmillo_stats.name = "Murmillo";
     murmillo_stats.max_hp = 140.0f;
@@ -327,14 +333,14 @@ void Engine::populate_menu_background_scene() {
     arcus_stats.attack_cooldown = 1.8f;
     arcus_stats.los = 20.0f;
 
-    // Murmillo 1 na praia
-    Entity m1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.2f, 0.40f, 1.5f), murmillo_stats);
-    // Murmillo 2 perto do Manor
-    Entity m2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.8f, 0.70f, -1.0f), murmillo_stats);
-    // Arcus 1 com arco
-    Entity a1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-2.5f, 0.55f, 0.0f), arcus_stats);
-    // Arcus 2 patrulhando
-    Entity a2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.5f, 0.90f, 1.0f), arcus_stats);
+    // Murmillo 1 na praia direita (Screen X ~ 67%)
+    Entity m1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(2.6f, 0.50f, 1.2f), murmillo_stats);
+    // Murmillo 2 no platô esquerdo perto do Manor 1 (Screen X ~ 28%)
+    Entity m2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-5.5f, 1.30f, 0.5f), murmillo_stats);
+    // Arcus 1 na praia direita (Screen X ~ 69%)
+    Entity a1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(3.2f, 0.55f, 2.0f), arcus_stats);
+    // Arcus 2 no platô esquerdo (Screen X ~ 27%)
+    Entity a2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-5.8f, 1.35f, 1.8f), arcus_stats);
 
     if (murmillo_me && murmillo_me->mesh != INVALID_MESH) {
         gameplay_world_->set_unit_visuals(m1, murmillo_me->mesh, murmillo_me->texture);
@@ -345,11 +351,11 @@ void Engine::populate_menu_background_scene() {
         gameplay_world_->set_unit_visuals(a2, arcus_me->mesh, arcus_me->texture);
     }
 
-    // Ordens de patrulha visíveis na lateral esquerda
-    gameplay_world_->order_move(m1, glm::vec3(-2.0f, 0.35f, -2.0f));
-    gameplay_world_->order_move(m2, glm::vec3(-3.2f, 0.80f, 2.0f));
-    gameplay_world_->order_move(a1, glm::vec3(-2.2f, 0.45f, 2.5f));
-    gameplay_world_->order_move(a2, glm::vec3(-2.6f, 0.60f, -1.5f));
+    // Ordens de patrulha ao longo dos flancos visíveis
+    gameplay_world_->order_move(m1, glm::vec3(3.8f, 0.60f, -1.0f));
+    gameplay_world_->order_move(m2, glm::vec3(-6.8f, 1.40f, -1.2f));
+    gameplay_world_->order_move(a1, glm::vec3(2.4f, 0.50f, -0.5f));
+    gameplay_world_->order_move(a2, glm::vec3(-5.0f, 1.20f, -0.8f));
 
     LOGI("MAIN_MENU background scene populated: %zu units, %zu buildings",
          gameplay_world_->units().size(), gameplay_world_->buildings().size());

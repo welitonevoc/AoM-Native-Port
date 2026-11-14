@@ -135,8 +135,8 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
                 mesh.name = name + "_mesh_" + std::to_string(mesh_index++);
                 mesh.vertices.resize(num_verts);
 
-                // 1. Read vertex positions
-                if (vert_stride == 12 && pos + num_verts * 12 <= size) {
+                // 1. Read vertex positions (AoM BRG models use 12-byte float32 x,y,z)
+                if (pos + num_verts * 12 <= size) {
                     for (uint16_t v = 0; v < num_verts; ++v) {
                         mesh.vertices[v].position.x = read_f32(data + pos + v * 12 + 0);
                         mesh.vertices[v].position.y = read_f32(data + pos + v * 12 + 4);

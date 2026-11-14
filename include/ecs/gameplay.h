@@ -2057,16 +2057,19 @@ private:
                 tr.velocity = glm::vec3(0.0f);
                 continue;
             }
-            const glm::vec3 delta = unit.waypoints[unit.waypoint_index] - tr.position;
-            const float distance = glm::length(delta);
-            if (distance < 0.15f) {
+            const glm::vec3& wp = unit.waypoints[unit.waypoint_index];
+            const glm::vec2 delta_xz(wp.x - tr.position.x, wp.z - tr.position.z);
+            const float distance = glm::length(delta_xz);
+            if (distance < 0.20f) {
                 ++unit.waypoint_index;
                 if (unit.waypoint_index >= unit.waypoints.size()) {
                     unit.has_move_order = false;
                     tr.velocity = glm::vec3(0.0f);
                 }
             } else {
-                tr.velocity = (delta / distance) * unit.move_speed;
+                tr.velocity = glm::vec3((delta_xz.x / distance) * unit.move_speed,
+                                        0.0f,
+                                        (delta_xz.y / distance) * unit.move_speed);
             }
         }
     }

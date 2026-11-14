@@ -352,33 +352,54 @@ void main() {
         normal = normalize(vec3(nx, 1.0, nz));
     }
 
-    // 2. Iluminação especular do sol e aproximação Fresnel
+    // 2. Iluminação do sol estilizada de AoM (sem brilho especular artificial moderno)
     vec3 V = normalize(uCameraPos - vWorldPos);
     vec3 L = normalize(-uLightDir);
     vec3 H = normalize(L + V);
 
-    float spec = pow(max(dot(normal, H), 0.0), 32.0) * 1.2;
+    float spec = pow(max(dot(normal, H), 0.0), 16.0) * 0.35;
     vec3 specColor = uLightColor * spec;
-    float fresnel = 0.20 + 0.80 * pow(clamp(1.0 - max(dot(normal, V), 0.0), 0.0, 1.0), 4.0);
+    float fresnel = 0.15 + 0.35 * pow(clamp(1.0 - max(dot(normal, V), 0.0), 0.0, 1.0), 2.5);
 
-    // 3. Cores clássicas de água de The Titans: turquesa costeiro -> azul-marinho profundo
-    vec3 shallowColor = vec3(0.18, 0.62, 0.72);
-    vec3 deepColor    = vec3(0.06, 0.22, 0.50);
+    // 3. Cores clássicas do mar Mediterrâneo de The Titans: turquesa costeiro -> azul profundo
+    vec3 shallowColor = vec3(0.12, 0.58, 0.72);
+    vec3 deepColor    = vec3(0.04, 0.28, 0.58);
     vec3 waterColor = mix(shallowColor, deepColor, vWaterDepth);
 
+    // Textura de ondulação e caustics original do AoM (water0000.ddt)
     if (uHasWaterTex != 0) {
-        float waveMod = (texture(uWaterTex, uvNorm1).r + texture(uWaterTex, uvNorm2).r) * 0.5;
-        waterColor += (waveMod - 0.5) * 0.06;
+        vec2 uvWater1 = vWorldPos.xz * 0.14 + vec2(uTime * 0.045, uTime * 0.025);
+        vec2 uvWater2 = vWorldPos.xz * 0.10 - vec2(uTime * 0.030, uTime * 0.040);
+        vec4 w1 = texture(uWaterTex, uvWater1);
+        vec4 w2 = texture(uWaterTex, uvWater2);
+        vec3 caustics = (w1.rgb + w2.rgb) * 0.5;
+        waterColor = mix(waterColor, caustics * vec3(0.5, 0.9, 1.1), 0.35);
     }
 
     vec3 skyReflection = vec3(0.45, 0.65, 0.85);
-    vec3 finalColor = mix(waterColor, skyReflection, fresnel * 0.45) + specColor;
+    vec3 finalColor = mix(waterColor, skyReflection, fresnel * 0.40) + specColor;
 
-    // 4. Espuma suave e dinâmica exclusivamente na rebentação da costa
-    float shoreFoam = smoothstep(0.12, 0.0, vWaterDepth) * (0.6 + 0.4 * sin(uTime * 3.0 + vWorldPos.z * 2.0));
-    finalColor = mix(finalColor, vec3(0.95, 0.98, 1.0), clamp(shoreFoam, 0.0, 1.0));
+    // 4. Espuma autêntica de rebentação e ondas quebrando na praia de Atlântida
+    float shoreOffset = -0.4 + vWorldPos.z * 0.12 + sin(vWorldPos.z * 0.22) * 0.9;
+    float distToCoast = vWorldPos.x - shoreOffset; // < 0 na praia, > 0 no mar
 
-    float alpha = clamp(0.72 + vWaterDepth * 0.25 + shoreFoam * 0.25, 0.0, 0.95);
+    // Trem de ondas se propagando em direção à praia
+    float wavePhase = distToCoast * 3.2 - uTime * 2.4 + sin(vWorldPos.z * 1.6) * 0.7;
+    float waveSurf = sin(wavePhase);
+
+    // Faixa costeira onde a onda quebra (entre praia e água rasa)
+    float surfZone = smoothstep(2.2, 0.1, distToCoast) * smoothstep(-0.8, -0.1, distToCoast);
+    float crestFoam = smoothstep(0.35, 0.95, waveSurf) * surfZone;
+
+    // Faixa de espuma na orla (marulhar da maré subindo e descendo na areia)
+    float washWave = sin(uTime * 1.8 + vWorldPos.z * 0.8) * 0.35;
+    float washFoam = smoothstep(0.45, 0.0, distToCoast - washWave) * smoothstep(-0.6, -0.1, distToCoast - washWave);
+
+    float totalFoam = clamp(crestFoam * 1.3 + washFoam * 0.9, 0.0, 1.0);
+    vec3 foamColor = vec3(0.96, 0.98, 1.0);
+    finalColor = mix(finalColor, foamColor, totalFoam);
+
+    float alpha = clamp(0.70 + vWaterDepth * 0.25 + totalFoam * 0.30, 0.0, 0.98);
     fragColor = vec4(finalColor, alpha);
 }
 )";

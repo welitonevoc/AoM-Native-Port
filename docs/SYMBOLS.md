@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2206 linhas) **GRANDE**
+## include/ecs/gameplay.h (2209 linhas) **GRANDE**
 
 ## include/engine/engine.h (815 linhas)
 
@@ -430,10 +430,10 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 413-415 (3)
 - `Engine::play_named_cinematic` 417-425 (9)
 
-## src/engine/engine_gameplay.cpp (366 linhas)
+## src/engine/engine_gameplay.cpp (372 linhas)
 - `Engine::start_game` 20-228 (209)
-- `Engine::populate_menu_background_scene` 230-356 (127)
-- `Engine::start_menu_background` 358-363 (6)
+- `Engine::populate_menu_background_scene` 230-362 (133)
+- `Engine::start_menu_background` 364-369 (6)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)
@@ -811,7 +811,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `CameraTrack::save_to_file` 392-398 (7)
 - `CameraTrack::save_camera_snapshot` 400-429 (30)
 
-## src/renderer/gles_renderer.cpp (2924 linhas) **GRANDE**
+## src/renderer/gles_renderer.cpp (2945 linhas) **GRANDE**
 - `main` 37-40 (4)
 - `main` 49-51 (3)
 - `main` 58-60 (3)
@@ -823,18 +823,18 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `main` 208-215 (8)
 - `main` 240-279 (40)
 - `main` 300-315 (16)
-- `main` 339-383 (45)
-- `main` 394-399 (6)
-- `hash` 417-419 (3)
-- `noise` 422-428 (7)
-- `fbm` 430-439 (10)
-- `sky_procedural` 442-469 (28)
-- `main` 471-504 (34)
-- `main` 511-514 (4)
-- `main` 529-556 (28)
-- `compile_shader` 559-576 (18)
-- `main` 2163-2183 (21)
-- `create_gles_renderer` 2919-2921 (3)
+- `main` 339-404 (66)
+- `main` 415-420 (6)
+- `hash` 438-440 (3)
+- `noise` 443-449 (7)
+- `fbm` 451-460 (10)
+- `sky_procedural` 463-490 (28)
+- `main` 492-525 (34)
+- `main` 532-535 (4)
+- `main` 550-577 (28)
+- `compile_shader` 580-597 (18)
+- `main` 2184-2204 (21)
+- `create_gles_renderer` 2940-2942 (3)
 
 ## src/tests/ai_test.cpp (84 linhas)
 - `check` 5-8 (4)
