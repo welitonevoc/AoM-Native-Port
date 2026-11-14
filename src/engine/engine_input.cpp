@@ -87,8 +87,8 @@ void Engine::handle_touch(const TouchEvent& touch) {
                 // Pan RTS camera along ground plane
                 camera_.target.x -= dx * 0.02f;
                 camera_.target.z -= dy * 0.02f;
-                camera_.target.x = std::clamp(camera_.target.x, -20.0f, 20.0f);
-                camera_.target.z = std::clamp(camera_.target.z, -20.0f, 20.0f);
+                camera_.target.x = std::clamp(camera_.target.x, -55.0f, 55.0f);
+                camera_.target.z = std::clamp(camera_.target.z, -55.0f, 55.0f);
                 last_touch_ = {touch.x, touch.y};
             }
         } else if (touch.state == TouchEvent::State::UP) {
@@ -242,7 +242,7 @@ void Engine::handle_touch(const TouchEvent& touch) {
 
 void Engine::adjust_camera_zoom(float delta) {
     if (state_ != EngineState::IN_GAME) return;
-    radius_ = std::clamp(radius_ - delta, 8.0f, 60.0f);
+    radius_ = std::clamp(radius_ - delta, 15.0f, 85.0f);
 }
 
 } // namespace aom

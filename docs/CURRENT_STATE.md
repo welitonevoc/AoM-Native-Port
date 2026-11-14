@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141620 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141640 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -16,15 +16,14 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 
 ## Correções Aplicadas nesta Versão (Escala de Terreno & Câmera RTS)
 - ✅ **Expansão do Terreno para Proporção Canônica AoM (`src/engine/engine_terrain.cpp`)**:
-  - `kTerrainTileSize` alterado de `1.0f` para `2.0f`.
-  - O mapa heightmap de 64×64 passa de 64m para 128×128 metros de área jogável.
+  - `kTerrainTileSize` alterado de `1.0f` para `2.0f` (mapa de 128×128m).
   - Grade de navegação sincronizada com `kTerrainTileSize = 2.0f`.
-  - Log atualizado: `Generated terrain from height-map: 64x64, 4096 verts, 23814 indices (step=2.0, world=128x128)`.
 - ✅ **Calibração de Câmera RTS Isométrica (`engine_campaign.cpp` & `engine_input.cpp`)**:
-  - `radius_` inicial ajustado de `14.0f` (colado nas tropas) para `28.0f`.
-  - `pitch_` inicial ajustado de `0.35f` (~20° plano) para `0.85f` (~50° isométrico clássico AoM).
-  - Limites de zoom estendidos para `[8.0f, 60.0f]`.
+  - `radius_` inicial ajustado para `65.0f` (visão geral RTS equilibrada).
+  - `pitch_` inicial em `0.85f` (~50° isométrico clássico AoM).
+  - Clamp de pan do alvo da câmera expandido para `[-55.0f, 55.0f]` (cobre o terreno de 128m).
+  - Limites de zoom estendidos para `[15.0f, 85.0f]`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141620 gerado e assinado em `/sdcard/aom-native-v1.0.11141620.apk`.
-2. Validar o enquadramento do mapa e proporção TC/tropas/terreno.
+1. ✅ APK v1.0.11141640 gerado e assinado em `/sdcard/aom-native-v1.0.11141640.apk`.
+2. Validar jogabilidade em campo com a nova câmera e pan expandido.

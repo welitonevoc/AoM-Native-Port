@@ -88,7 +88,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
          scenario->filename.c_str());
     set_state(EngineState::IN_GAME);
 
-    radius_ = 28.0f;
+    radius_ = 65.0f;
     yaw_ = 0.0f;
     pitch_ = 0.85f;
     camera_.up = glm::vec3(0.0f, 1.0f, 0.0f);
