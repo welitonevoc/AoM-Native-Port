@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141710 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141743 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -11,17 +11,17 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ `glDepthMask(GL_TRUE)` garantido no `begin_frame` antes de `glClear`.
 - ✅ Terreno 128×128m (`kTerrainTileSize = 2.0f`) e Câmera RTS calibrada (`radius_ = 65.0f`, `pitch_ = 0.85f`).
 - ✅ Orientação Suave / Heading Lerp (`ecs.h`) e suporte a clips Granny 2 / GRN (`grn_animation.cpp`).
-- ✅ Renderização Dinâmica de Unidades com Morphing Ativo (`gameplay.h`).
+- ✅ Menu de Campanha Autêntico em Duas Colunas com Mapas Regionais e Seletor de Dificuldade (`campaign_select_system.cpp`).
 
-## Correções Aplicadas nesta Versão (Menu de Campanha Autêntico em Duas Colunas)
-- ✅ **Menu de Seleção em Duas Colunas (`campaign_select_system.cpp` & `.h`)**:
-  - Coluna esquerda: Lista de missões paginada (7 por tela) com navegação `[ < Anterior ]`, `[ Próximo > ]` e destaque dourado no cenário selecionado.
-  - Coluna direita: Cartão detalhado da missão contendo número e título, mapa regional 2D autêntico (`campmap_atlantis7.ddt`, `campmap_greece7.ddt`, `campmap_egypt7.ddt`, `campmap_norselands3.ddt`), sinopse/briefing do cenário, seletor de 4 níveis de dificuldade (Fácil, Moderado, Difícil, Titã) e botão proeminente `[ ▶ INICIAR MISSÃO ]`.
-- ✅ **Segurança de Execução da UI (`src/ui/ui.cpp`)**:
-  - Callback de botões armazena ponteiro de função local antes de restaurar cor do botão, prevenindo use-after-free quando o clique reconstrói ou limpa a UI.
-- ✅ **API de Textura (`include/engine/engine.h`)**:
-  - `load_ddt_texture` tornado público no `Engine` para permitir carregamento dinâmico de mapas da campanha e ícones de interface.
+## Correções Aplicadas nesta Versão (Texturização MTRL de BRGs & Terreno Acima do Mar)
+- ✅ **Resolução Autêntica de Texturas do BRG (`brg_model.cpp` & `engine_assets.cpp`)**:
+  - `parse_brg` e `get_model_entry` agora consultam primeiro as texturas embutidas nos chunks `MTRL` do `.brg`.
+  - Priorização automática do corpo/fachada principal sobre atlas de anexos (`is_attachment`), atribuindo texturas canônicas (`building g age0.ddt`, `infantry g hoplite standard.ddt`, `scenario g arkantos man map.ddt`) em vez de `building attachments.ddt`.
+  - Remoção de buscas inválidas por sufixos de animação (`_idlea.ddt`, `_attacka.ddt`), eliminando falhas de arquivo no log.
+- ✅ **Elevação do Terreno e Splatting de Costa (`engine_terrain.cpp` & `gles_renderer.cpp`)**:
+  - Relevo de cenários `.scn` normalizado a partir de $h \ge 0$, mantendo a terra firme acima do plano de água ($y = -0.4f$) e evitando que o mar cubra o mapa.
+  - `shoreFactor` no fragment shader restrito à faixa de costa imediata ($y \approx water\_level$), impedindo sobreposição de textura de margem no topo de montanhas.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141710 gerado e assinado em `/sdcard/aom-native-v1.0.11141710.apk`.
-2. Validar transições de mapa e início de missão a partir da nova interface de seleção.
+1. ✅ APK v1.0.11141743 gerado e assinado em `/sdcard/aom-native-v1.0.11141743.apk`.
+2. Validar visibilidade e texturização dos modelos e terreno no gameplay da campanha.

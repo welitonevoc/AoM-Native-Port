@@ -313,14 +313,19 @@ std::unique_ptr<BrgModel> parse_brg(const uint8_t* data, size_t size, const std:
                 }
 
                 model->textures.push_back(ddt_tex);
-                bool assigned = false;
+                auto is_attachment = [](const std::string& s) {
+                    for (const char* kw : {"attachment", "attach", "prop", "fence", "helmet", "spear", "sword", "shield", "bow", "arrow"}) {
+                        if (s.find(kw) != std::string::npos) return true;
+                    }
+                    return false;
+                };
+
                 for (auto& mesh : model->meshes) {
-                    if (mesh.texture_name.empty()) {
+                    if (mesh.texture_name.empty() || (!is_attachment(ddt_tex) && is_attachment(mesh.texture_name))) {
                         mesh.texture_name = ddt_tex;
-                        assigned = true;
                     }
                 }
-                if (!assigned) {
+                if (model->pending_texture_name.empty() || (!is_attachment(ddt_tex) && is_attachment(model->pending_texture_name))) {
                     model->pending_texture_name = ddt_tex;
                 }
             }

@@ -1373,58 +1373,65 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
     if (mesh == INVALID_MESH) return nullptr;
 
     TextureHandle tex = INVALID_TEXTURE;
-    std::string base = entry->filename;
-    if (ends_with(to_lower(base), ".brg")) {
-        base = base.substr(0, base.size() - 4);
-    }
-    std::string clean_base = base;
-    size_t last_slash = clean_base.find_last_of("/\\");
-    if (last_slash != std::string::npos) clean_base = clean_base.substr(last_slash + 1);
-
-    std::vector<std::string> candidates = {
-        base + ".ddt",
-        base + " diffuse.ddt",
-        base + "_diffuse.ddt",
-        base + " map.ddt",
-        clean_base + ".ddt",
-        clean_base + " diffuse.ddt",
-        clean_base + " map.ddt"
+    auto is_attach_tex = [](const std::string& s) {
+        for (const char* kw : {"attachment", "attach", "prop", "fence", "helmet", "spear", "sword", "shield", "bow", "arrow"}) {
+            if (s.find(kw) != std::string::npos) return true;
+        }
+        return false;
     };
-    for (const char* suf : {"_walka", "_idlea", "_attacka", "_attackb", "_deatha", "_flaila", "_boreda"}) {
-        size_t pos = clean_base.rfind(suf);
-        if (pos != std::string::npos) {
-            std::string root = clean_base.substr(0, pos);
-            candidates.push_back(root + " bronze.ddt");
-            candidates.push_back(root + " copper.ddt");
-            candidates.push_back(root + " standard.ddt");
-            candidates.push_back(root + " map.ddt");
-            candidates.push_back(root + ".ddt");
-            candidates.push_back(root + " diffuse.ddt");
-            candidates.push_back(root + "_diffuse.ddt");
+
+    // 1. Prioridade máxima: texturas embutidas no próprio arquivo .brg (seção MTRL)
+    // Tenta primeiro a textura associada à malha principal
+    if (!model->meshes.empty() && !model->meshes[0].texture_name.empty()) {
+        tex = load_ddt_texture(model->meshes[0].texture_name);
+    }
+    // Se não carregou, tenta texturas do modelo que não sejam anexos/adereços
+    if (tex == INVALID_TEXTURE) {
+        for (const auto& mtex : model->textures) {
+            if (!is_attach_tex(mtex)) {
+                tex = load_ddt_texture(mtex);
+                if (tex != INVALID_TEXTURE) break;
+            }
+        }
+    }
+    // Fallback para qualquer textura declarada no .brg
+    if (tex == INVALID_TEXTURE) {
+        for (const auto& mtex : model->textures) {
+            tex = load_ddt_texture(mtex);
+            if (tex != INVALID_TEXTURE) break;
         }
     }
 
-    for (const auto& cand : candidates) {
-        tex = load_ddt_texture(cand);
-        if (tex != INVALID_TEXTURE) break;
-    }
+    // 2. Se o .brg não especificou textura ou ela não foi encontrada no textures.bar,
+    // deriva o nome base removendo sufixos de animação (_idlea, _walka, etc.)
+    if (tex == INVALID_TEXTURE) {
+        std::string base = entry->filename;
+        if (ends_with(to_lower(base), ".brg")) {
+            base = base.substr(0, base.size() - 4);
+        }
+        std::string clean_base = base;
+        size_t last_slash = clean_base.find_last_of("/\\");
+        if (last_slash != std::string::npos) clean_base = clean_base.substr(last_slash + 1);
 
-    if (tex == INVALID_TEXTURE && !model->meshes.empty()) {
-        const std::string& mesh_tex = model->meshes[0].texture_name;
-        if (!mesh_tex.empty()) {
-            tex = load_ddt_texture(mesh_tex);
-            if (tex == INVALID_TEXTURE) {
-                for (const std::string& cand : {
-                         mesh_tex + ".ddt",
-                         mesh_tex + " diffuse.ddt",
-                         mesh_tex + "_diffuse.ddt",
-                         mesh_tex + " map.ddt",
-                         mesh_tex + ".bti",
-                     }) {
-                    tex = load_ddt_texture(cand);
-                    if (tex != INVALID_TEXTURE) break;
-                }
+        std::string root = clean_base;
+        for (const char* suf : {"_walka", "_walkb", "_idlea", "_idleb", "_attacka", "_attackb", "_deatha", "_flaila", "_boreda"}) {
+            size_t pos = root.rfind(suf);
+            if (pos != std::string::npos) {
+                root = root.substr(0, pos);
+                break;
             }
+        }
+
+        std::vector<std::string> candidates = {
+            root + " standard.ddt",
+            root + " map.ddt",
+            root + ".ddt",
+            root + " diffuse.ddt",
+            root + "_diffuse.ddt"
+        };
+        for (const auto& cand : candidates) {
+            tex = load_ddt_texture(cand);
+            if (tex != INVALID_TEXTURE) break;
         }
     }
 

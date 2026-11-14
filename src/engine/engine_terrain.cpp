@@ -553,8 +553,7 @@ void Engine::generate_terrain_from_heightmap(const std::vector<float>& heightmap
     constexpr float kTargetAmplitude = 3.0f;
     if (h_max > h_min) {
         const float factor = kTargetAmplitude / (h_max - h_min);
-        const float mid = (h_max + h_min) * 0.5f;
-        for (float& h : heights) h = (h - mid) * factor;
+        for (float& h : heights) h = (h - h_min) * factor;
     } else {
         std::fill(heights.begin(), heights.end(), 0.0f);
     }

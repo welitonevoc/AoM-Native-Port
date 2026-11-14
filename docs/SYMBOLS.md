@@ -206,16 +206,16 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `BarArchive::parse_file` 294-439 (146)
 - `BarArchive::decompress_l33t` 441-469 (29)
 
-## src/assets/brg_model.cpp (462 linhas)
+## src/assets/brg_model.cpp (467 linhas)
 - `half_to_float` 24-30 (7)
 - `read_u16` 32-36 (5)
 - `read_u32` 38-42 (5)
 - `read_f32` 44-48 (5)
 - `compute_normals` 50-78 (29)
-- `parse_brg` 82-351 (270)
-- `load_brg_model_data` 354-367 (14)
-- `load_brg_model` 369-398 (30)
-- `create_procedural_brg` 400-459 (60)
+- `parse_brg` 82-356 (275)
+- `load_brg_model_data` 359-372 (14)
+- `load_brg_model` 374-403 (30)
+- `create_procedural_brg` 405-464 (60)
 
 ## src/assets/cube_map.cpp (104 linhas)
 - `trim` 21-26 (6)
@@ -396,7 +396,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::next_model` 870-870 (1)
 - `Engine::prev_model` 871-871 (1)
 
-## src/engine/engine_assets.cpp (1525 linhas) **GRANDE**
+## src/engine/engine_assets.cpp (1532 linhas) **GRANDE**
 - `create_procedural_grass` 42-61 (20)
 - `create_procedural_cliff` 63-83 (21)
 - `create_procedural_water_normal` 85-102 (18)
@@ -422,8 +422,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::load_strings` 1215-1218 (4)
 - `Engine::tr` 1220-1224 (5)
 - `Engine::load_ui_strings` 1226-1345 (120)
-- `Engine::get_model_entry` 1347-1477 (131)
-- `Engine::resolve_unit_visual` 1479-1522 (44)
+- `Engine::get_model_entry` 1347-1484 (138)
+- `Engine::resolve_unit_visual` 1486-1529 (44)
 
 ## src/engine/engine_campaign.cpp (449 linhas)
 - `Engine::try_start_cinematic_queue` 20-65 (46)
@@ -611,15 +611,15 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 ## src/engine/engine_states.cpp (554 linhas)
 - `Engine::set_state` 10-551 (542)
 
-## src/engine/engine_terrain.cpp (675 linhas)
+## src/engine/engine_terrain.cpp (674 linhas)
 - `Engine::set_water_color_from_body` 13-28 (16)
 - `Engine::spawn_water_body_clusters` 30-117 (88)
 - `Engine::create_skybox_mesh` 119-175 (57)
 - `Engine::add_skybox_quad` 177-193 (17)
 - `Engine::generate_terrain` 195-299 (105)
 - `Engine::load_scenario_heightmap` 302-535 (234)
-- `Engine::generate_terrain_from_heightmap` 537-621 (85)
-- `Engine::generate_skydome` 623-672 (50)
+- `Engine::generate_terrain_from_heightmap` 537-620 (84)
+- `Engine::generate_skydome` 622-671 (50)
 
 ## src/engine/ui_from_xmb.cpp (67 linhas)
 - `Engine::generate_ui_from_xmb` 19-64 (46)

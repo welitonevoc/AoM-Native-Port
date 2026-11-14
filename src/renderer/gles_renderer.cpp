@@ -232,10 +232,10 @@ void main() {
     vec4 baseColor = (uHasBaseTex != 0) ? texture(uBaseTex, vTex) : vec4(0.35, 0.58, 0.25, 1.0);
     vec4 cliffColor = (uHasBlendTex != 0) ? texture(uBlendTex, vTex * 2.5) : vec4(0.48, 0.44, 0.40, 1.0);
 
-    // Water bank textures: near water level (y <= -0.35) use bank, slightly above use outer_bank.
+    // Water bank textures: ativas apenas próximo do nível da água, desaparecendo em terra firme
     float water_level = -0.40f;
-    float bankZone = smoothstep(water_level, water_level + 0.6f, vWorldPos.y);
-    float outerZone = smoothstep(water_level + 0.6f, water_level + 1.4f, vWorldPos.y);
+    float shoreFactor = 1.0 - smoothstep(water_level - 0.2f, water_level + 0.8f, vWorldPos.y);
+    float outerShoreFactor = (1.0 - smoothstep(water_level + 0.4f, water_level + 1.4f, vWorldPos.y)) * (1.0 - shoreFactor);
 
     vec4 bankColor = vec4(0.0);
     if (uHasBankTex != 0) {
@@ -249,10 +249,10 @@ void main() {
     // Camadas: base -> outer_bank (transicao) -> bank (agua) -> cliff (encosta)
     vec4 mixedTex = baseColor;
     if (uHasOuterBankTex != 0) {
-        mixedTex = mix(mixedTex, outerBankColor, outerZone * (1.0 - blendFactor));
+        mixedTex = mix(mixedTex, outerBankColor, outerShoreFactor * (1.0 - blendFactor));
     }
     if (uHasBankTex != 0) {
-        mixedTex = mix(mixedTex, bankColor, bankZone * (1.0 - blendFactor));
+        mixedTex = mix(mixedTex, bankColor, shoreFactor * (1.0 - blendFactor));
     }
     mixedTex = mix(mixedTex, cliffColor, blendFactor);
 
