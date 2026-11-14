@@ -111,7 +111,7 @@ inline Layout choose_layout(const uint8_t* data, size_t size, uint32_t w, uint32
                 for (int c = 0; c < 2; ++c) {
                     Layout L{o.pc, o.pi, o.pa, im != 0, am != 0, c != 0};
                     const double s = score_window(data, size, bx, by, i0, j0, n, m, L);
-                    if (s < best_s - 0.5) { best_s = s; best = L; }   // margem p/ preferir o padrão
+                    if (s < best_s - 2.0) { best_s = s; best = L; }   // margem p/ preferir o padrão
                 }
     if (best_score_out) *best_score_out = best_s;
     return best;

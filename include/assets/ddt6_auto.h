@@ -135,7 +135,7 @@ inline Layout choose_layout(const uint8_t* data, size_t size, uint32_t w, uint32
         for (int c = 0; c < 2; ++c) {
             Layout L{Mode(mo), c != 0};
             const double s = score(L);
-            if (s < best_s - 0.5) {
+            if (s < best_s - 2.0) {
                 best_s = s;
                 best = L;
             }
