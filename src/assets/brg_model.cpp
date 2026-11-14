@@ -291,10 +291,19 @@ MeshHandle load_brg_model(BarArchive* archive, const std::string& name, IRendere
         return INVALID_MESH;
     }
 
-    const auto& m = model->meshes[0];
+    std::vector<Vertex> all_verts;
+    std::vector<uint32_t> all_indices;
+    uint32_t v_offset = 0;
+    for (const auto& sm : model->meshes) {
+        all_verts.insert(all_verts.end(), sm.vertices.begin(), sm.vertices.end());
+        for (uint32_t idx : sm.indices) {
+            all_indices.push_back(idx + v_offset);
+        }
+        v_offset += static_cast<uint32_t>(sm.vertices.size());
+    }
     return renderer->create_mesh(
-        m.vertices.data(), static_cast<uint32_t>(m.vertices.size()),
-        m.indices.data(), static_cast<uint32_t>(m.indices.size()));
+        all_verts.data(), static_cast<uint32_t>(all_verts.size()),
+        all_indices.data(), static_cast<uint32_t>(all_indices.size()));
 }
 
 std::unique_ptr<BrgModel> create_procedural_brg() {
