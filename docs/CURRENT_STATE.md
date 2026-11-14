@@ -1,17 +1,19 @@
-# CURRENT_STATE — baseado na versão 1.0.11140131 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11140156 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
 - ✅ Decoder DDT Formato 3 (PALETTE 4-bit Alpha DecodeBt8As4444): linha a linha, 4 pixels por grupo de 6 bytes com inversão vertical e paleta RGB444. Logo Titans, pórtico e botões renderizam 100% opacos e na orientação correta.
 - ✅ Mapeamento UV de Botões (`ui_layout.cpp`): inversão de V nos botões e ButtonSets; jade e molduras renderizam perfeitamente.
 - ✅ Localização PT-BR dos Menus (`engine_assets.cpp`): IDs oficiais (`19825`..`23603`) traduzidos para Português (Aprender a Jogar, Campanha, Jogador Único, Multijogador, Opções, Mais, Sair, etc.).
+- ✅ Centralização Exata de Textos de Botões (`ui.cpp` & `gles_renderer.cpp`): `measure_ui_text` com suporte a caracteres acentuados PT-BR.
+- ✅ Orientação da Costa e Mar 3D (`engine_terrain.cpp` & `engine_states.cpp`): Ilha/platô elevado no lado esquerdo da tela (`wx < shore_x`), mar aberto à direita. Câmera isométrica frontal ajustada.
 
 ## Correções aplicadas nesta iteração (14/11/2026)
-- ✅ **Centralização Exata de Textos de Botões (`ui.cpp` & `gles_renderer.cpp`)**: Implementado `measure_ui_text` em `IRenderer` e `GLESRenderer`. A largura dos botões agora usa métricas reais de glifos ao invés de estimativa por tamanho de bytes.
-- ✅ **Suporte UTF-8 com Acentuação PT-BR (`gles_renderer.cpp`)**: Decodificador UTF-8 para Latin-1 supplement (ç, ã, õ, é, ú, etc.) mapeando caracteres acentuados para glifos ASCII sem descartar letras nem truncar palavras.
-- ✅ **Orientação da Costa e Mar 3D (`engine_terrain.cpp` & `engine_states.cpp`)**: Revertida inversão lateral. A ilha com platô verde elevado fica no lado esquerdo da tela (`wx < shore_x`), e o mar azul profundo no lado direito e horizonte. Câmera isométrica frontal ajustada (`yaw=0.08`, `pitch=0.35`, `target=(-1.0, 0.5, 0.0)`).
-- ✅ **Edifícios Completos e Visibilidade do Solar/Manor (`engine_gameplay.cpp`)**: `b.complete = true` e `b.progress = 1.0f` ativados em todos os edifícios do menu (remove andaimes amarelos). Solar (Manor) dimensionado para escala 1.35x e posicionado no platô esquerdo com palmeiras e tropas Atlantes em patrulha visível.
+- ✅ **Decodificação de Alpha DDT Formato 5 (`ddt5_auto.h` & `ddt_texture.cpp`)**: Corrigida a máscara de 1-bit alpha (`am`) de 5bpp. O bit 1 representa cutout/transparência; revertido para `((am >> bit) & 1) ? 0 : 255` e forçado `alpha = 255` em texturas diffuse padrão (`usage == 1`). Telhados de edifícios (Solar/Manor), corpos de tropas e copas de palmeiras agora são 100% sólidos.
+- ✅ **Shaders de Água Autênticos (`gles_renderer.cpp`)**: Removido padrão artificial de círculos/bolinhas brancas (`waveCrest`). Declarado e amostrado `uNormalMap` (`waterbump.ddt` / `waterbump0000.ddt`) com coordenadas UV duplas em movimento. Adicionados reflexão especular do sol, gradiente costeiro turquesa -> marinho e atenuação Fresnel.
+- ✅ **Transparência de Folhagem e Two-Sided Meshes (`gles_renderer.cpp`)**: Adicionado `if (baseColor.a < 0.25) discard;` em `kMeshFragmentSrc`. Desativado backface culling (`glDisable(GL_CULL_FACE)`) para garantir visibilidade bidirecional de folhas de árvores e acessórios 3D.
+- ✅ **Carregamento Direto de Texturas do BAR (`engine_assets.cpp`)**: Texturas de terreno e água agora usam caminhos reais de `textures.bar` via `load_ddt_texture`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11140131 gerado e assinado em `/sdcard/aom-native-v1.0.11140131.apk`.
-2. Validar no dispositivo o alinhamento central dos botões e a cena do Solar com a praia e o mar.
+1. ✅ APK v1.0.11140156 gerado e assinado em `/sdcard/aom-native-v1.0.11140156.apk`.
+2. Validar no dispositivo o mar fluido, o telhado do Solar/Manor e a folhagem das árvores.

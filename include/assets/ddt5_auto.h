@@ -48,7 +48,7 @@ inline void decode_block(const uint8_t* blk, const Layout& L, Px out[16]) {
             const int sh = L.idx_msb ? 2 * (3 - x) : 2 * x;
             Px p = pal[(row >> sh) & 3];
             const int bit = L.alpha_msb ? 15 - (4 * y + x) : 4 * y + x;
-            p.a = ((am >> bit) & 1) ? 255 : 0;
+            p.a = ((am >> bit) & 1) ? 0 : 255;
             out[4 * y + x] = p;
         }
     }

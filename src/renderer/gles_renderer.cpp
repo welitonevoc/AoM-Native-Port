@@ -184,6 +184,7 @@ void main() {
     vec3 lighting = uAmbient + uLightColor * diff;
 
     vec4 baseColor = (uHasTex != 0) ? texture(uTex, vTex) : vColor;
+    if (baseColor.a < 0.25) discard;
     fragColor = vec4(baseColor.rgb * lighting, baseColor.a);
 }
 )";
@@ -306,9 +307,9 @@ void main() {
     vTex = aTex;
     vColor = aColor;
 
-    // Gradiente de profundidade costeiro dinâmico da ilha (costa noroeste rasa -> mar aberto sudeste fundo)
-    float coastDist = (aPos.x + aPos.z) * 0.7071;
-    vWaterDepth = clamp((coastDist + 2.0) / 16.0, 0.0, 1.0);
+    // Gradiente de profundidade costeiro da ilha (costa oeste x < -0.4 rasa -> mar aberto leste x > -0.4 fundo)
+    float coastDist = aPos.x - (-0.4);
+    vWaterDepth = clamp((coastDist + 1.0) / 7.0, 0.0, 1.0);
 
     gl_Position = uViewProj * worldPos;
 }
@@ -322,6 +323,8 @@ in vec2 vTex;
 in vec4 vColor;
 in float vWaterDepth;
 
+uniform sampler2D uNormalMap;
+uniform int uHasNormalMap;
 uniform sampler2D uWaterTex;
 uniform int uHasWaterTex;
 uniform vec3 uCameraPos;
@@ -334,40 +337,48 @@ uniform float uWaterLevel;
 out vec4 fragColor;
 
 void main() {
-    // 1. Coordenadas UV duplas para fluxo de ondas
-    vec2 uv1 = vWorldPos.xz * 0.06 + vec2(uTime * 0.02, uTime * 0.015);
-    vec2 uv2 = vWorldPos.xz * 0.08 - vec2(uTime * 0.015, uTime * 0.022);
+    // 1. Amostragem de normal map com coordenadas UV duplas em movimento (ondas)
+    vec2 uvNorm1 = vWorldPos.xz * 0.08 + vec2(uTime * 0.03, uTime * 0.02);
+    vec2 uvNorm2 = vWorldPos.xz * 0.12 - vec2(uTime * 0.02, uTime * 0.035);
 
-    float wave1 = 0.5, wave2 = 0.5;
-    if (uHasWaterTex != 0) {
-        wave1 = texture(uWaterTex, uv1).r;
-        wave2 = texture(uWaterTex, uv2).r;
+    vec3 normal = vec3(0.0, 1.0, 0.0);
+    if (uHasNormalMap != 0) {
+        vec3 n1 = texture(uNormalMap, uvNorm1).rgb * 2.0 - 1.0;
+        vec3 n2 = texture(uNormalMap, uvNorm2).rgb * 2.0 - 1.0;
+        normal = normalize(vec3(n1.x + n2.x, 2.0, n1.y + n2.y));
+    } else {
+        float nx = sin(vWorldPos.x * 2.0 + uTime * 2.0) * 0.1;
+        float nz = cos(vWorldPos.z * 2.0 + uTime * 1.5) * 0.1;
+        normal = normalize(vec3(nx, 1.0, nz));
     }
-    float surface = (wave1 + wave2) * 0.5;
 
-    // 2. Cores da água de The Titans: turquesa costeiro para azul-marinho profundo
-    vec3 deepColor    = vec3(0.12, 0.32, 0.56);
-    vec3 shallowColor = vec3(0.26, 0.60, 0.72);
+    // 2. Iluminação especular do sol e aproximação Fresnel
+    vec3 V = normalize(uCameraPos - vWorldPos);
+    vec3 L = normalize(-uLightDir);
+    vec3 H = normalize(L + V);
 
-    float waterDepth = vWaterDepth;
-    vec3 waterColor = mix(shallowColor, deepColor, waterDepth);
-    waterColor += (surface - 0.5) * 0.08;
+    float spec = pow(max(dot(normal, H), 0.0), 32.0) * 1.2;
+    vec3 specColor = uLightColor * spec;
+    float fresnel = 0.20 + 0.80 * pow(clamp(1.0 - max(dot(normal, V), 0.0), 0.0, 1.0), 4.0);
 
-    // 3. Faixas dinâmicas de espuma branca quebrando na rebentação da praia
-    float shoreZone = 1.0 - smoothstep(0.0, 0.60, waterDepth);
-    float foamWave  = sin(waterDepth * 22.0 - uTime * 3.2 + surface * 3.0);
-    float foamShore = smoothstep(0.50, 0.85, foamWave) * shoreZone;
+    // 3. Cores clássicas de água de The Titans: turquesa costeiro -> azul-marinho profundo
+    vec3 shallowColor = vec3(0.18, 0.62, 0.72);
+    vec3 deepColor    = vec3(0.06, 0.22, 0.50);
+    vec3 waterColor = mix(shallowColor, deepColor, vWaterDepth);
 
-    // Cristas de espuma nas ondas em mar aberto alinhadas com a costa
-    float waveCrest = smoothstep(0.75, 0.98, sin((vWorldPos.x + vWorldPos.z) * 0.5 + uTime * 2.2) * cos((vWorldPos.x - vWorldPos.z) * 0.4 - uTime * 1.5));
-    float foamMask = clamp(foamShore * 1.3 + waveCrest * 0.35, 0.0, 1.0);
+    if (uHasWaterTex != 0) {
+        float waveMod = (texture(uWaterTex, uvNorm1).r + texture(uWaterTex, uvNorm2).r) * 0.5;
+        waterColor += (waveMod - 0.5) * 0.06;
+    }
 
-    // Composição com espuma branca pura brilhante
-    vec3 finalColor = mix(waterColor, vec3(0.94, 0.97, 1.0), foamMask);
+    vec3 skyReflection = vec3(0.45, 0.65, 0.85);
+    vec3 finalColor = mix(waterColor, skyReflection, fresnel * 0.45) + specColor;
 
-    // Alpha suave
-    float alpha = clamp(0.60 + waterDepth * 0.35 + foamMask * 0.25, 0.0, 0.96);
+    // 4. Espuma suave e dinâmica exclusivamente na rebentação da costa
+    float shoreFoam = smoothstep(0.12, 0.0, vWaterDepth) * (0.6 + 0.4 * sin(uTime * 3.0 + vWorldPos.z * 2.0));
+    finalColor = mix(finalColor, vec3(0.95, 0.98, 1.0), clamp(shoreFoam, 0.0, 1.0));
 
+    float alpha = clamp(0.72 + vWaterDepth * 0.25 + shoreFoam * 0.25, 0.0, 0.95);
     fragColor = vec4(finalColor, alpha);
 }
 )";
@@ -1114,8 +1125,7 @@ public:
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glDisable(GL_CULL_FACE);
 
         glUseProgram(mesh_program_);
 
@@ -1162,8 +1172,7 @@ public:
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glDisable(GL_CULL_FACE);
 
         glUseProgram(skinned_mesh_program_);
 

@@ -590,9 +590,10 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
                             for (uint32_t y = 0; y < 4; ++y)
                                 for (uint32_t x = 0; x < 4; ++x) {
                                     const ddt5::Px& p = px[4 * y + x];
+                                    uint8_t alpha = (usage == 1 || alpha_bits == 0) ? 255 : p.a;
                                     store_pixel(output, mip.width, mip.height,
                                                 bx * 4 + x, by * 4 + y,
-                                                Rgba{p.r, p.g, p.b, p.a});
+                                                Rgba{p.r, p.g, p.b, alpha});
                                 }
                             break;
                         }

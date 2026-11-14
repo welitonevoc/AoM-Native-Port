@@ -617,37 +617,26 @@ bool Engine::load_textures() {
 
     if (textures_bar_ && textures_bar_->file_count() > 0) {
         if (terrain_texture_ == INVALID_TEXTURE) {
-            std::vector<uint8_t> data = textures_bar_->extract("terrain/grassa.ddt");
-            if (data.empty()) data = textures_bar_->extract("terrain/dirta.ddt");
-            if (!data.empty()) {
-                auto ddt = DdtLoader::load(data);
-                if (ddt) {
-                    terrain_texture_ = renderer_->create_texture(*ddt);
-                    LOGI("Loaded terrain base texture from BAR (handle %u)", terrain_texture_);
-                }
+            terrain_texture_ = load_ddt_texture("grassa.ddt");
+            if (terrain_texture_ == INVALID_TEXTURE) terrain_texture_ = load_ddt_texture("dirta.ddt");
+            if (terrain_texture_ != INVALID_TEXTURE) {
+                LOGI("Loaded terrain base texture from BAR (handle %u)", terrain_texture_);
             }
         }
 
         if (terrain_blend_tex_ == INVALID_TEXTURE) {
-            std::vector<uint8_t> data = textures_bar_->extract("terrain/cliffgreeka.ddt");
-            if (data.empty()) data = textures_bar_->extract("terrain/cliffa.ddt");
-            if (!data.empty()) {
-                auto ddt = DdtLoader::load(data);
-                if (ddt) {
-                    terrain_blend_tex_ = renderer_->create_texture(*ddt);
-                    LOGI("Loaded terrain blend/cliff texture from BAR (handle %u)", terrain_blend_tex_);
-                }
+            terrain_blend_tex_ = load_ddt_texture("cliffgreeka.ddt");
+            if (terrain_blend_tex_ == INVALID_TEXTURE) terrain_blend_tex_ = load_ddt_texture("cliffa.ddt");
+            if (terrain_blend_tex_ != INVALID_TEXTURE) {
+                LOGI("Loaded terrain blend/cliff texture from BAR (handle %u)", terrain_blend_tex_);
             }
         }
 
         if (water_normal_tex_ == INVALID_TEXTURE) {
-            std::vector<uint8_t> data = textures_bar_->extract("terrain/waterbump.ddt");
-            if (!data.empty()) {
-                auto ddt = DdtLoader::load(data);
-                if (ddt) {
-                    water_normal_tex_ = renderer_->create_texture(*ddt);
-                    LOGI("Loaded water normal map from BAR (handle %u)", water_normal_tex_);
-                }
+            water_normal_tex_ = load_ddt_texture("waterbump.ddt");
+            if (water_normal_tex_ == INVALID_TEXTURE) water_normal_tex_ = load_ddt_texture("waterbump0000.ddt");
+            if (water_normal_tex_ != INVALID_TEXTURE) {
+                LOGI("Loaded water normal map from BAR (handle %u)", water_normal_tex_);
             }
         }
     }
@@ -667,23 +656,14 @@ bool Engine::load_textures() {
 
     if (water_tex_ == INVALID_TEXTURE && textures_bar_) {
         for (const char* candidate : {
-                 "water/water1.ddt",
-                 "water/water2.ddt",
-                 "water/water3.ddt",
-                 "water/water.ddt",
-                 "terrain/water1.ddt",
-                 "terrain/water2.ddt",
-                 "terrain/water.ddt",
+                 "water0000.ddt",
                  "water.ddt",
+                 "water1.ddt",
              }) {
-            std::vector<uint8_t> data = textures_bar_->extract(candidate);
-            if (!data.empty()) {
-                auto ddt = DdtLoader::load(data);
-                if (ddt) {
-                    water_tex_ = renderer_->create_texture(*ddt);
-                    LOGI("Loaded water texture from BAR: '%s' (handle %u)", candidate, water_tex_);
-                    break;
-                }
+            water_tex_ = load_ddt_texture(candidate);
+            if (water_tex_ != INVALID_TEXTURE) {
+                LOGI("Loaded water texture from BAR: '%s' (handle %u)", candidate, water_tex_);
+                break;
             }
         }
         if (water_tex_ == INVALID_TEXTURE) {
