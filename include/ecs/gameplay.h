@@ -1818,7 +1818,11 @@ public:
             glm::vec3 scale = transform.scale;
             const bool sel = selections_.count(entity) && selections_.at(entity).selected;
             if (sel) scale *= 1.15f;
-            if (b_it != building_components_.end()) scale *= 0.8f;
+            if (b_it != building_components_.end()) {
+                scale *= 2.5f;
+            } else if (unit) {
+                scale *= 2.0f;
+            }
             model = glm::scale(model, scale);
             MeshHandle entity_mesh = mesh;
             TextureHandle entity_texture = texture;

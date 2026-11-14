@@ -185,8 +185,9 @@ void main() {
     lighting = max(lighting, vec3(0.35));
 
     vec4 baseColor = (uHasTex != 0) ? texture(uTex, vTex) : vColor;
-    if (baseColor.a < 0.25) discard;
-    fragColor = vec4(baseColor.rgb * lighting, baseColor.a);
+    if (baseColor.a < 0.01) discard;
+    float outAlpha = (uHasTex != 0) ? max(baseColor.a, 0.90) : baseColor.a;
+    fragColor = vec4(baseColor.rgb * lighting, outAlpha);
 }
 )";
 
@@ -1143,7 +1144,16 @@ public:
         auto it = meshes_.find(mesh);
         if (it == meshes_.end() || !mesh_program_) return;
 
-        (void)blend;
+        if (blend == BlendMode::OPAQUE) {
+            glDisable(GL_BLEND);
+            glDepthMask(GL_TRUE);
+        } else if (blend == BlendMode::ALPHA_BLEND) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        } else if (blend == BlendMode::ADDITIVE) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        }
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -1190,7 +1200,16 @@ public:
         auto it = meshes_.find(mesh);
         if (it == meshes_.end() || !skinned_mesh_program_) return;
 
-        (void)blend;
+        if (blend == BlendMode::OPAQUE) {
+            glDisable(GL_BLEND);
+            glDepthMask(GL_TRUE);
+        } else if (blend == BlendMode::ALPHA_BLEND) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        } else if (blend == BlendMode::ADDITIVE) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        }
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);

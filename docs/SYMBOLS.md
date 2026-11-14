@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2226 linhas) **GRANDE**
+## include/ecs/gameplay.h (2230 linhas) **GRANDE**
 
 ## include/engine/engine.h (818 linhas)
 
@@ -814,7 +814,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `CameraTrack::save_to_file` 392-398 (7)
 - `CameraTrack::save_camera_snapshot` 400-429 (30)
 
-## src/renderer/gles_renderer.cpp (2946 linhas) **GRANDE**
+## src/renderer/gles_renderer.cpp (2965 linhas) **GRANDE**
 - `main` 37-40 (4)
 - `main` 49-51 (3)
 - `main` 58-60 (3)
@@ -822,22 +822,22 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `main` 84-107 (24)
 - `main` 117-120 (4)
 - `main` 141-162 (22)
-- `main` 180-190 (11)
-- `main` 209-216 (8)
-- `main` 241-280 (40)
-- `main` 301-316 (16)
-- `main` 340-405 (66)
-- `main` 416-421 (6)
-- `hash` 439-441 (3)
-- `noise` 444-450 (7)
-- `fbm` 452-461 (10)
-- `sky_procedural` 464-491 (28)
-- `main` 493-526 (34)
-- `main` 533-536 (4)
-- `main` 551-578 (28)
-- `compile_shader` 581-598 (18)
-- `main` 2185-2205 (21)
-- `create_gles_renderer` 2941-2943 (3)
+- `main` 180-191 (12)
+- `main` 210-217 (8)
+- `main` 242-281 (40)
+- `main` 302-317 (16)
+- `main` 341-406 (66)
+- `main` 417-422 (6)
+- `hash` 440-442 (3)
+- `noise` 445-451 (7)
+- `fbm` 453-462 (10)
+- `sky_procedural` 465-492 (28)
+- `main` 494-527 (34)
+- `main` 534-537 (4)
+- `main` 552-579 (28)
+- `compile_shader` 582-599 (18)
+- `main` 2204-2224 (21)
+- `create_gles_renderer` 2960-2962 (3)
 
 ## src/tests/ai_test.cpp (84 linhas)
 - `check` 5-8 (4)
