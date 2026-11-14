@@ -210,19 +210,22 @@ void Engine::generate_terrain() {
     const float HALF = SIZE * 0.5f;
 
     auto calc_elevation = [](float wx, float wz) -> float {
-        // Encosta costeira de Atlântida: terra firme a noroeste (-X, -Z), descendo em praia diagonal até o mar a sudeste (+X, +Z)
-        float shore_axis = (wx + wz) * 0.7071f;
-        float bay_curve = std::sin((wx - wz) * 0.18f) * 1.8f;
-        float dist_to_shore = shore_axis - bay_curve;
-        // Terra firme (noroeste): platô com colinas e elevação
-        float land_height = 0.9f + std::sin(wx * 0.25f) * std::cos(wz * 0.25f) * 0.5f;
-        if (wx + wz < -6.0f) {
-            land_height += 1.2f + std::sin((wx + wz) * 0.2f) * 0.6f;
+        // Encosta costeira de Atlântida:
+        // Lado ESQUERDO da tela (wx < shore_x): Ilha verde elevada com platô para o Solar e tropas
+        // Lado DIREITO da tela (wx > shore_x): Mar azul profundo estendendo-se até o horizonte
+        float shore_x = -0.4f + wz * 0.12f + std::sin(wz * 0.22f) * 0.9f;
+        float dist = wx - shore_x; // < 0 terra firme, > 0 mar
+
+        // Terra firme (oeste/esquerda): platô verde elevado
+        float land_height = 0.85f + std::sin(wx * 0.2f) * 0.25f;
+        if (dist < -2.0f) {
+            land_height += std::min(std::abs(dist + 2.0f) * 0.18f, 1.2f);
         }
-        // Mar profundo (sudeste)
-        float sea_height = -2.5f + std::sin(wx * 0.1f + wz * 0.1f) * 0.2f;
-        // Transição suave pela praia (-1.5 a +2.5 unidades da margem diagonal)
-        float t = std::clamp((dist_to_shore + 1.2f) / 3.8f, 0.0f, 1.0f);
+        // Mar profundo (leste/direita): leito marinho abaixo da linha d'água
+        float sea_height = -2.2f + std::sin(wx * 0.15f + wz * 0.15f) * 0.2f;
+
+        // Transição de praia suave entre -1.5 (areia alta) e +2.0 (água rasa)
+        float t = std::clamp((dist + 1.5f) / 3.5f, 0.0f, 1.0f);
         return glm::mix(land_height, sea_height, t);
     };
 

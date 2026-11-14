@@ -177,9 +177,7 @@ void UIManager::render() {
         // Standard Button Text Label
         if (!btn.label.empty()) {
             float text_y = btn.pos.y + (btn.size.y - btn.text_size) * 0.5f;
-            // Approximate character width for centering
-            float approx_char_w = btn.text_size * 0.55f;
-            float text_width = btn.label.size() * approx_char_w;
+            float text_width = renderer_->measure_ui_text(btn.label, btn.text_size);
             float text_x = btn.pos.x + (btn.size.x - text_width) * 0.5f;
             if (btn.icon != INVALID_TEXTURE) {
                 text_x = btn.pos.x + btn.size.y * 0.4f + 16.0f;

@@ -76,13 +76,13 @@ void Engine::set_state(EngineState new_state) {
             }
 
             // Nível do mar ajustado para a praia de Atlântida (evita inundar o terreno e as tropas)
-            water_plane_ = glm::vec4(0.0f, 1.0f, 0.0f, 0.5f);
+            water_plane_ = glm::vec4(0.0f, 1.0f, 0.0f, 0.35f);
 
             // ── 4. Configurar câmera isométrica autêntica estilo The Titans ────────
-            radius_ = 16.0f;
-            yaw_ = -2.88f;  // ~ -165 graus (visão noroeste com mar sudeste à direita)
-            pitch_ = 0.38f; // ~ 22 graus
-            camera_.target = glm::vec3(-2.0f, 0.4f, -0.5f);
+            radius_ = 15.0f;
+            yaw_ = 0.08f;   // Visão frontal-isométrica com ilha à esquerda e mar à direita
+            pitch_ = 0.35f; // ~ 20 graus de elevação
+            camera_.target = glm::vec3(-1.0f, 0.5f, 0.0f);
             
             // ── 5. Povoar cena 3D de fundo com elementos do The Titans ─────────────
             if (gameplay_world_) {

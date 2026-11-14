@@ -1516,6 +1516,12 @@ public:
         return (it != building_components_.end()) ? &it->second : nullptr;
     }
 
+    /// Acesso mutável ao componente de transformação.
+    TransformComponent* transform_mutable(Entity id) {
+        auto it = ecs_world_.transforms_mut().find(id);
+        return (it != ecs_world_.transforms_mut().end()) ? &it->second : nullptr;
+    }
+
     /// Acesso mutável ao componente de saúde (usado pelos testes).
     HealthComponent* health_component_mutable(Entity id) {
         auto it = ecs_world_.healths_mut().find(id);

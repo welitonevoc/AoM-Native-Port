@@ -315,6 +315,9 @@ public:
     virtual void draw_ui_text(const std::string& text, const glm::vec2& pos,
                                float size, uint32_t color = 0xFFFFFFFF) = 0;
 
+    /// Measure UI text width in pixels
+    virtual float measure_ui_text(const std::string& text, float size) = 0;
+
     /// End UI rendering pass
     virtual void end_ui() = 0;
 

@@ -1880,6 +1880,40 @@ public:
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
+    static char decode_utf8_char(const std::string& text, size_t& i) {
+        unsigned char c = static_cast<unsigned char>(text[i]);
+        if (c < 0x80) {
+            return static_cast<char>(c);
+        }
+        if (c == 0xC3 && i + 1 < text.size()) {
+            unsigned char c2 = static_cast<unsigned char>(text[++i]);
+            uint32_t cp = 0xC0 | (c2 & 0x3F);
+            if (cp >= 0xC0 && cp <= 0xC5) return 'A';
+            if (cp == 0xC7) return 'C';
+            if (cp >= 0xC8 && cp <= 0xCB) return 'E';
+            if (cp >= 0xCC && cp <= 0xCF) return 'I';
+            if (cp >= 0xD2 && cp <= 0xD6) return 'O';
+            if (cp >= 0xD9 && cp <= 0xDC) return 'U';
+            if (cp >= 0xE0 && cp <= 0xE5) return 'a';
+            if (cp == 0xE7) return 'c';
+            if (cp >= 0xE8 && cp <= 0xEB) return 'e';
+            if (cp >= 0xEC && cp <= 0xEF) return 'i';
+            if (cp >= 0xF2 && cp <= 0xF6) return 'o';
+            if (cp >= 0xF9 && cp <= 0xFC) return 'u';
+            return '?';
+        } else if ((c & 0xE0) == 0xC0 && i + 1 < text.size()) {
+            i++;
+            return '?';
+        } else if ((c & 0xF0) == 0xE0 && i + 2 < text.size()) {
+            i += 2;
+            return '?';
+        } else if ((c & 0xF8) == 0xF0 && i + 3 < text.size()) {
+            i += 3;
+            return '?';
+        }
+        return '?';
+    }
+
     void draw_ui_text(const std::string& text, const glm::vec2& pos, float size, uint32_t color) override {
         if (text.empty()) return;
         if (!font_atlas_loaded_) {
@@ -1905,7 +1939,8 @@ public:
         float cur_y = pos.y + target_size;
         const float start_x = cur_x;
 
-        for (char c : text) {
+        for (size_t i = 0; i < text.size(); ++i) {
+            char c = decode_utf8_char(text, i);
             if (c == '\n') {
                 cur_x = start_x;
                 cur_y += line_h;
@@ -1937,6 +1972,36 @@ public:
         glBindTexture(GL_TEXTURE_2D, 0);
         glUseProgram(0);
     }
+
+    float measure_ui_text(const std::string& text, float size) override {
+        if (text.empty()) return 0.0f;
+        if (!font_atlas_loaded_) {
+            if (!load_font_atlas()) return text.size() * size * 0.55f;
+        }
+        const float target_size = (size > 0.0f) ? size : 20.0f;
+        const float font_scale = target_size / 28.0f;
+        float width = 0.0f;
+        float max_width = 0.0f;
+
+        for (size_t i = 0; i < text.size(); ++i) {
+            char c = decode_utf8_char(text, i);
+            if (c == '\n') {
+                if (width > max_width) max_width = width;
+                width = 0.0f;
+                continue;
+            }
+            unsigned char uc = static_cast<unsigned char>(c);
+            if (uc >= 32 && uc <= 126) {
+                float dummy_x = 0.0f;
+                float dummy_y = 0.0f;
+                stbtt_aligned_quad q;
+                stbtt_GetBakedQuad(baked_chars_, 512, 512, uc - 32, &dummy_x, &dummy_y, &q, 1);
+                width += dummy_x * font_scale;
+            }
+        }
+        return (width > max_width) ? width : max_width;
+    }
+
     void end_ui() override {}
     void draw_debug_line(const glm::vec3& from, const glm::vec3& to, uint32_t color) override {
         if (!line_program_ || line_vao_ == 0) return;

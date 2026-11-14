@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (174 linhas)
 
-## include/ecs/gameplay.h (2200 linhas) **GRANDE**
+## include/ecs/gameplay.h (2206 linhas) **GRANDE**
 
 ## include/engine/engine.h (815 linhas)
 
@@ -84,7 +84,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/renderer/camera_track.h (179 linhas)
 
-## include/renderer/renderer.h (386 linhas)
+## include/renderer/renderer.h (389 linhas)
 
 ## include/ui/button_set.h (64 linhas)
 
@@ -430,10 +430,10 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 413-415 (3)
 - `Engine::play_named_cinematic` 417-425 (9)
 
-## src/engine/engine_gameplay.cpp (352 linhas)
+## src/engine/engine_gameplay.cpp (366 linhas)
 - `Engine::start_game` 20-228 (209)
-- `Engine::populate_menu_background_scene` 230-342 (113)
-- `Engine::start_menu_background` 344-349 (6)
+- `Engine::populate_menu_background_scene` 230-356 (127)
+- `Engine::start_menu_background` 358-363 (6)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)
@@ -602,15 +602,15 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 ## src/engine/engine_states.cpp (554 linhas)
 - `Engine::set_state` 10-551 (542)
 
-## src/engine/engine_terrain.cpp (671 linhas)
+## src/engine/engine_terrain.cpp (674 linhas)
 - `Engine::set_water_color_from_body` 13-28 (16)
 - `Engine::spawn_water_body_clusters` 30-117 (88)
 - `Engine::create_skybox_mesh` 119-175 (57)
 - `Engine::add_skybox_quad` 177-193 (17)
-- `Engine::generate_terrain` 195-296 (102)
-- `Engine::load_scenario_heightmap` 299-531 (233)
-- `Engine::generate_terrain_from_heightmap` 533-617 (85)
-- `Engine::generate_skydome` 619-668 (50)
+- `Engine::generate_terrain` 195-299 (105)
+- `Engine::load_scenario_heightmap` 302-534 (233)
+- `Engine::generate_terrain_from_heightmap` 536-620 (85)
+- `Engine::generate_skydome` 622-671 (50)
 
 ## src/engine/ui_from_xmb.cpp (67 linhas)
 - `Engine::generate_ui_from_xmb` 19-64 (46)
@@ -811,7 +811,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `CameraTrack::save_to_file` 392-398 (7)
 - `CameraTrack::save_camera_snapshot` 400-429 (30)
 
-## src/renderer/gles_renderer.cpp (2850 linhas) **GRANDE**
+## src/renderer/gles_renderer.cpp (2915 linhas) **GRANDE**
 - `main` 37-40 (4)
 - `main` 49-51 (3)
 - `main` 58-60 (3)
@@ -833,8 +833,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `main` 500-503 (4)
 - `main` 518-545 (28)
 - `compile_shader` 548-565 (18)
-- `main` 2089-2109 (21)
-- `create_gles_renderer` 2845-2847 (3)
+- `main` 2154-2174 (21)
+- `create_gles_renderer` 2910-2912 (3)
 
 ## src/tests/ai_test.cpp (84 linhas)
 - `check` 5-8 (4)
@@ -1045,25 +1045,25 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `MenuSystem::update_current_menu_state` 235-242 (8)
 - `MenuSystem::process_menu_actions` 244-245 (2)
 
-## src/ui/ui.cpp (462 linhas)
+## src/ui/ui.cpp (460 linhas)
 - `UIManager::initialize` 19-25 (7)
 - `UIManager::shutdown` 27-31 (5)
 - `UIManager::clear` 33-41 (9)
 - `UIManager::update` 43-52 (10)
-- `UIManager::render` 54-209 (156)
-- `UIManager::handle_touch` 211-278 (68)
-- `UIManager::set_group_visible` 280-296 (17)
-- `UIManager::on_touch_event` 298-300 (3)
-- `UIManager::add_animation` 302-315 (14)
-- `UIManager::add_button` 317-338 (22)
-- `UIManager::add_button` 340-346 (7)
-- `UIManager::add_button` 348-374 (27)
-- `UIManager::add_slider` 376-393 (18)
-- `UIManager::add_checkbox` 395-412 (18)
-- `strip_string_ids` 417-425 (9)
-- `UIManager::add_label` 427-438 (12)
-- `UIManager::add_background_quad` 440-454 (15)
-- `UIManager::hit_test` 456-459 (4)
+- `UIManager::render` 54-207 (154)
+- `UIManager::handle_touch` 209-276 (68)
+- `UIManager::set_group_visible` 278-294 (17)
+- `UIManager::on_touch_event` 296-298 (3)
+- `UIManager::add_animation` 300-313 (14)
+- `UIManager::add_button` 315-336 (22)
+- `UIManager::add_button` 338-344 (7)
+- `UIManager::add_button` 346-372 (27)
+- `UIManager::add_slider` 374-391 (18)
+- `UIManager::add_checkbox` 393-410 (18)
+- `strip_string_ids` 415-423 (9)
+- `UIManager::add_label` 425-436 (12)
+- `UIManager::add_background_quad` 438-452 (15)
+- `UIManager::hit_test` 454-457 (4)
 
 ## src/ui/ui_layout.cpp (744 linhas)
 - `to_lower` 24-29 (6)
