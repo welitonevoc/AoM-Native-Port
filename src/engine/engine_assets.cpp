@@ -1408,4 +1408,67 @@ ModelEntry* Engine::get_model_entry(const std::string& name) {
     return &entry_cache;
 }
 
+ModelEntry* Engine::resolve_unit_visual(const std::string& unit_name) {
+    if (!models_bar_ || !models_bar_->is_open()) return nullptr;
+
+    std::string low = unit_name;
+    std::transform(low.begin(), low.end(), low.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+
+    std::vector<std::string> candidates;
+
+    if (low.find("villager") != std::string::npos || low.find("worker") != std::string::npos || low.find("citizen") != std::string::npos) {
+        if (low.find("norse") != std::string::npos || low.find("gatherer") != std::string::npos) {
+            candidates = {"villager n male_idlea.brg", "villager n gatherer_idlea.brg", "villager n male_attackb.brg"};
+        } else if (low.find("egyptian") != std::string::npos) {
+            candidates = {"villager e male_idlea.brg", "villager e female_minea.brg"};
+        } else if (low.find("atlantean") != std::string::npos) {
+            candidates = {"villager x citizen_idlea.brg", "villager x citizen_walka.brg"};
+        } else {
+            // Greek default
+            candidates = {"villager g greek_idlea.brg", "villager g male_idlea.brg", "villager g female_minea.brg", "villager g male_walka.brg"};
+        }
+    } else if (low.find("hoplite") != std::string::npos) {
+        candidates = {"infantry g hoplite_idlea.brg", "infantry g hoplite_attacka.brg", "infantry g hoplite_walka.brg"};
+    } else if (low.find("toxotes") != std::string::npos || low.find("archer") != std::string::npos) {
+        candidates = {"archer g toxotes_idlea.brg", "toxotes_idlea.brg", "archer g toxotes_attacka.brg"};
+    } else if (low.find("minotaur") != std::string::npos) {
+        candidates = {"special g minotaur_idlea.brg", "g minotaur_idlea.brg", "g minotaur_walka.brg"};
+    } else if (low.find("murmillo") != std::string::npos) {
+        candidates = {"infantry x 2 sword fighter_idlea.brg", "infantry x 2 sword fighter_walka.brg"};
+    } else if (low.find("arcus") != std::string::npos) {
+        candidates = {"archer x arcus_idlea.brg", "archer x arcus_walka.brg"};
+    } else if (low.find("hippikon") != std::string::npos || low.find("cavalry") != std::string::npos) {
+        candidates = {"cavalry g hippikon_idlea.brg", "cavalry g hippikon_flaila.brg"};
+    }
+
+    // 1. Mapeia tipo -> BRG preferido (idlea > walka > outros)
+    for (const auto& c : candidates) {
+        if (ModelEntry* me = get_model_entry(c)) {
+            LOGI("resolve_unit_visual('%s') -> '%s' mesh=%u tex=%u",
+                 unit_name.c_str(), c.c_str(), me->mesh, me->texture);
+            return me;
+        }
+    }
+
+    // 2. Busca fuzzy no models.bar
+    if (const BarEntry* entry = models_bar_->find(unit_name)) {
+        if (ModelEntry* me = get_model_entry(entry->filename)) {
+            LOGI("resolve_unit_visual('%s') [fuzzy] -> '%s' mesh=%u tex=%u",
+                 unit_name.c_str(), entry->filename.c_str(), me->mesh, me->texture);
+            return me;
+        }
+    }
+
+    // 3. Fallback genérico para hoplite
+    if (ModelEntry* me = get_model_entry("infantry g hoplite_attacka.brg")) {
+        LOGI("resolve_unit_visual('%s') [fallback] -> 'infantry g hoplite_attacka.brg' mesh=%u tex=%u",
+             unit_name.c_str(), me->mesh, me->texture);
+        return me;
+    }
+
+    LOGW("resolve_unit_visual('%s') -> nenhum modelo encontrado", unit_name.c_str());
+    return nullptr;
+}
+
 } // namespace aom

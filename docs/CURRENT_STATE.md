@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141030 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141035 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -9,12 +9,13 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Seleção AoM (`gameplay.h`): Anel circular verde/vermelho no chão e waypoints apenas na unidade selecionada.
 
 ## Correções aplicadas nesta iteração (14/11/2026)
-- ✅ **Resolução e Vinculação de Visuais de Unidades/Edifícios (`gameplay.h`, `engine.h`, `engine_gameplay.cpp`, `engine_campaign.cpp`)**:
-  - Implementado `on_unit_spawned` e `on_building_placed` em `GameplayWorld`, disparados em todo spawn/construção.
-  - Criado `resolve_unit_visual` e `resolve_building_visual` no `Engine`, mapeando tipos (Hoplite, Toxotes, Villager Greek/Norse/Egyptian, Murmillo, Arcus, Minotaur, Town Center, Barracks, Manor, House) diretamente para seus arquivos `.brg` e `.ddt` autênticos dos BARs.
-  - Corrigido `start_game()` e `start_generic_mission()` para associar malhas e texturas BRG às unidades e edifícios em vez de cair em meshes nulas ou placeholders de 32 vértices com linhas de depuração.
-  - Em `render_animated`, evitada sobreposição de mesh placeholder se a unidade já possuir modelo específico atribuído.
+- ✅ **Mapeamento e Aplicação de Visuais (`resolve_unit_visual` + `apply_unit_visual`)**:
+  - `resolve_unit_visual(unit_name)` em `engine_assets.cpp`: Mapeia tipo → candidatos preferidos (`idlea` > `walka` > outros), fallback fuzzy no `models.bar` e fallback genérico para Hoplite.
+  - `apply_unit_visual(entity, name)` em `engine_gameplay.cpp`: Chama `set_unit_visuals(mesh, tex)` e anexa clip de animação padrão à entidade.
+  - `start_generic_mission` em `engine_campaign.cpp`: Chama `apply_unit_visual` explicitamente após cada `spawn_unit` e `spawn_worker`.
+  - `on_unit_spawned` em `gameplay.h`: Encaminha todo spawn dinâmico para `apply_unit_visual`.
+  - `render_animated` em `gameplay.h`: Não sobrepõe malha placeholder de 32 vértices se a unidade já tiver modelo próprio atribuído.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141030 gerado e assinado em `/sdcard/aom-native-v1.0.11141030.apk`.
-2. Validar no dispositivo as malhas 3D de soldados, aldeões e centros de cidade renderizando no gameplay.
+1. ✅ APK v1.0.11141035 gerado e assinado em `/sdcard/aom-native-v1.0.11141035.apk`.
+2. Validar no logcat: `resolve_unit_visual(...)` e `apply_unit_visual entity=...`.

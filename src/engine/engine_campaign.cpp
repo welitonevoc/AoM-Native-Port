@@ -102,7 +102,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
     gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
-        resolve_unit_visual(e, type);
+        apply_unit_visual(e, type);
     };
     gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
         resolve_building_visual(e, type, name);
@@ -341,7 +341,7 @@ void Engine::start_generic_mission(const std::string& scenario_filename, bool me
     if (!menu_background_mode) {
         if (gameplay_world_) {
             gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
-                resolve_unit_visual(e, type);
+                apply_unit_visual(e, type);
             };
             gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
                 resolve_building_visual(e, type, name);
@@ -359,19 +359,26 @@ void Engine::start_generic_mission(const std::string& scenario_filename, bool me
         hoplite_stats.attack_damage = 12.0f;
         hoplite_stats.attack_range = 2.2f;
 
-        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 0.0f), hoplite_stats);
-        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, 1.0f), hoplite_stats);
-        gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, -1.0f), hoplite_stats);
+        Entity h1 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-3.0f, 0.0f, 0.0f), hoplite_stats);
+        Entity h2 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, 1.0f), hoplite_stats);
+        Entity h3 = gameplay_world_->spawn_unit(Team::FRIENDLY, glm::vec3(-1.5f, 0.0f, -1.0f), hoplite_stats);
+        apply_unit_visual(h1, "Hoplite");
+        apply_unit_visual(h2, "Hoplite");
+        apply_unit_visual(h3, "Hoplite");
 
         // Worker friendly
-        gameplay_world_->spawn_worker(glm::vec3(-4.0f, 0.0f, 1.5f));
+        Entity w1 = gameplay_world_->spawn_worker(glm::vec3(-4.0f, 0.0f, 1.5f));
+        apply_unit_visual(w1, "Villager Greek");
 
         // Unidades enemy iniciais
         UnitStats enemy_hoplite = hoplite_stats;
         enemy_hoplite.name = "Enemy Hoplite";
-        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(3.0f, 0.0f, 0.0f), enemy_hoplite);
-        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, 1.0f), enemy_hoplite);
-        gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, -1.0f), enemy_hoplite);
+        Entity eh1 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(3.0f, 0.0f, 0.0f), enemy_hoplite);
+        Entity eh2 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, 1.0f), enemy_hoplite);
+        Entity eh3 = gameplay_world_->spawn_unit(Team::ENEMY, glm::vec3(1.5f, 0.0f, -1.0f), enemy_hoplite);
+        apply_unit_visual(eh1, "Hoplite");
+        apply_unit_visual(eh2, "Hoplite");
+        apply_unit_visual(eh3, "Hoplite");
 
         // Nós de recursos
         gameplay_world_->add_resource_node(ResourceType::FOOD, glm::vec3(-4.0f, 0.0f, 3.5f), 1200);

@@ -58,7 +58,7 @@ void Engine::start_game() {
     gameplay_world_->set_anim_renderer(renderer_.get());
     gameplay_world_->set_unit_transform_manager(&game_data_.unit_transforms());
     gameplay_world_->on_unit_spawned = [this](Entity e, const std::string& type) {
-        resolve_unit_visual(e, type);
+        apply_unit_visual(e, type);
     };
     gameplay_world_->on_building_placed = [this](Entity e, BuildingType type, const std::string& name) {
         resolve_building_visual(e, type, name);
@@ -370,45 +370,21 @@ void Engine::start_menu_background() {
     menu_bg_tex_ = INVALID_TEXTURE;
 }
 
-void Engine::resolve_unit_visual(Entity unit, const std::string& type_name) {
+void Engine::apply_unit_visual(Entity entity, const std::string& name) {
     if (!gameplay_world_) return;
-    std::string name_lower = type_name;
-    std::transform(name_lower.begin(), name_lower.end(), name_lower.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
 
-    const char* brg = nullptr;
-    if (name_lower.find("villager") != std::string::npos || name_lower.find("worker") != std::string::npos) {
-        if (name_lower.find("norse") != std::string::npos || name_lower.find("gatherer") != std::string::npos) {
-            brg = "villager n male_attackb.brg";
-        } else if (name_lower.find("egyptian") != std::string::npos) {
-            brg = "villager e female_minea.brg";
-        } else {
-            brg = "villager g female_minea.brg";
-        }
-    } else if (name_lower.find("hoplite") != std::string::npos) {
-        brg = "infantry g hoplite_attacka.brg";
-    } else if (name_lower.find("toxotes") != std::string::npos || name_lower.find("archer") != std::string::npos) {
-        brg = "toxotes_idlea.brg";
-    } else if (name_lower.find("minotaur") != std::string::npos) {
-        brg = "g minotaur_idlea.brg";
-    } else if (name_lower.find("murmillo") != std::string::npos) {
-        brg = "infantry x 2 sword fighter_walka.brg";
-    } else if (name_lower.find("arcus") != std::string::npos) {
-        brg = "archer x arcus_walka.brg";
-    } else if (name_lower.find("hippikon") != std::string::npos || name_lower.find("cavalry") != std::string::npos) {
-        brg = "cavalry g hippikon_flaila.brg";
-    } else {
-        brg = "infantry g hoplite_attacka.brg";
+    ModelEntry* me = resolve_unit_visual(name);
+    if (me && me->mesh != INVALID_MESH) {
+        gameplay_world_->set_unit_visuals(entity, me->mesh, me->texture);
+        LOGI("apply_unit_visual entity=%u '%s' mesh=%u tex=%u",
+             entity, name.c_str(), me->mesh, me->texture);
     }
 
-    if (brg) {
-        if (auto* me = get_model_entry(brg)) {
-            if (me->mesh != INVALID_MESH) {
-                gameplay_world_->set_unit_visuals(unit, me->mesh, me->texture);
-                LOGI("resolve_unit_visual: entity=%u '%s' -> brg='%s', mesh=%u, tex=%u",
-                     unit, type_name.c_str(), brg, me->mesh, me->texture);
-            }
-        }
+    const aom::anim::BrgAnimationClip* clip = nullptr;
+    TextureHandle clip_tex = INVALID_TEXTURE;
+    select_animation_clip(clip, clip_tex);
+    if (clip && clip->is_valid()) {
+        gameplay_world_->attach_animation(entity, clip, clip_tex, renderer_.get());
     }
 }
 

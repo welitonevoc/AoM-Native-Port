@@ -354,7 +354,8 @@ public:
     /// Recupera um modelo BRG carregado no cache por nome (ex: "hoplite.brg").
     /// Retorna nullptr se o modelo ainda não foi carregado.
     [[nodiscard]] ModelEntry* get_model_entry(const std::string& name);
-    void resolve_unit_visual(Entity unit, const std::string& type_name);
+    [[nodiscard]] ModelEntry* resolve_unit_visual(const std::string& unit_name);
+    void apply_unit_visual(Entity entity, const std::string& name);
     void resolve_building_visual(Entity building, BuildingType type, const std::string& type_name);
     [[nodiscard]] const XmbElement* game_config() const { return game_config_root_.get(); }
     [[nodiscard]] bool archives_loaded() const { return archives_loaded_; }
