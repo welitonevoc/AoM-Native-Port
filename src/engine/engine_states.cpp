@@ -145,10 +145,17 @@ void Engine::set_state(EngineState new_state) {
         case EngineState::UI_OPTIONS_VIDEO:
         case EngineState::UI_OPTIONS_GAMEPLAY:
         case EngineState::UI_OPTIONS_NETWORK:
-        case EngineState::UI_OPTIONS_CONTROLS:
-            LOGI("Entered state: OPTIONS / Tab %d", (int)state_);
+        case EngineState::UI_OPTIONS_CONTROLS: {
+            int tab_idx = 0;
+            const char* tab_name = "AUDIO";
+            if (state_ == EngineState::UI_OPTIONS_VIDEO) { tab_idx = 1; tab_name = "VIDEO"; }
+            else if (state_ == EngineState::UI_OPTIONS_GAMEPLAY) { tab_idx = 2; tab_name = "GAMEPLAY"; }
+            else if (state_ == EngineState::UI_OPTIONS_NETWORK) { tab_idx = 3; tab_name = "NETWORK"; }
+            else if (state_ == EngineState::UI_OPTIONS_CONTROLS) { tab_idx = 4; tab_name = "CONTROLS"; }
+            LOGI("Entered state: OPTIONS / Tab %d (%s)", tab_idx, tab_name);
             create_options_menu();
             break;
+        }
         case EngineState::CREDITS:
             LOGI("Entered state: CREDITS");
             create_credits_menu();

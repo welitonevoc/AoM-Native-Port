@@ -579,11 +579,11 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::network_leave_session` 390-392 (3)
 - `Engine::network_update` 394-396 (3)
 
-## src/engine/engine_options_menu.cpp (406 linhas)
+## src/engine/engine_options_menu.cpp (366 linhas)
 - `Engine::open_options` 12-14 (3)
-- `Engine::create_options_menu` 17-363 (347)
-- `Engine::load_options` 365-385 (21)
-- `Engine::save_options` 387-402 (16)
+- `Engine::create_options_menu` 17-320 (304)
+- `Engine::load_options` 322-344 (23)
+- `Engine::save_options` 346-363 (18)
 
 ## src/engine/engine_particles.cpp (126 linhas)
 - `Engine::spawn_particle` 9-25 (17)
@@ -608,8 +608,8 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::open_save_game_menu` 255-293 (39)
 - `Engine::save_game_slot` 295-305 (11)
 
-## src/engine/engine_states.cpp (554 linhas)
-- `Engine::set_state` 10-551 (542)
+## src/engine/engine_states.cpp (561 linhas)
+- `Engine::set_state` 10-558 (549)
 
 ## src/engine/engine_terrain.cpp (674 linhas)
 - `Engine::set_water_color_from_body` 13-28 (16)

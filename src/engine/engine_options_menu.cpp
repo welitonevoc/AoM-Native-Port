@@ -48,13 +48,13 @@ void Engine::create_options_menu() {
     ui_->add_background_quad({vw * 0.95f - 2.0f, vh * 0.05f}, {2.0f, vh * 0.9f}, INVALID_TEXTURE, 0xFFFFD000);
 
     // Título
-    ui_->add_label("CONFIGURACOES", {vw * 0.5f - 160.0f * sx, vh * 0.08f * sy}, 28.0f * sy, 0xFFFFD000);
+    ui_->add_label("CONFIGURACOES", {vw * 0.5f - 140.0f * sx, vh * 0.08f}, 28.0f * sy, 0xFFFFD000);
 
     // ── Importação dos dados originais do jogo (Android SAF) ────────────────
-    const float import_w = 280.0f * sx;
-    const float import_h = 40.0f * sy;
-    const float import_x = vw - import_w - 24.0f * sx;
-    const float import_y = vh * 0.08f * sy;
+    const float import_w = std::min(280.0f * sx, vw * 0.28f);
+    const float import_h = 36.0f * sy;
+    const float import_x = vw * 0.95f - import_w - 10.0f * sx;
+    const float import_y = vh * 0.07f;
 
     ui_->add_button({import_x, import_y}, {import_w, import_h},
                     "IMPORTAR DADOS DO JOGO",
@@ -71,19 +71,24 @@ void Engine::create_options_menu() {
                        {import_x, import_y + import_h + 26.0f * sy}, 10.0f * sy, 0xFFCCCCCC);
     }
 
+    // ── Dimensionamento de layout seguro (confinado à tela) ──
+    const float back_w = std::min(360.0f * sx, vw * 0.35f);
+    const float back_h = 44.0f * sy;
+    const float back_x = (vw - back_w) * 0.5f;
+    const float back_y = vh * 0.95f - back_h - 10.0f * sy;
+
     // ── Sistema de Abas (Tabs) ──
-    const float tab_w = 140.0f * sx;
-    const float tab_h = 36.0f * sy;
     const size_t tab_count = sizeof(kOptionsTabs) / sizeof(kOptionsTabs[0]);
+    const float tab_w = std::min(130.0f * sx, (vw * 0.80f) / tab_count - 4.0f * sx);
+    const float tab_h = 36.0f * sy;
     const float tabs_start_x = vw * 0.5f - (tab_count * tab_w + 4.0f * sx * (tab_count - 1)) * 0.5f;
-    const float tabs_y = vh * 0.18f * sy;
+    const float tabs_y = vh * 0.15f;
 
     for (size_t i = 0; i < tab_count; ++i) {
         const TabDef& tab = kOptionsTabs[i];
         float tx = tabs_start_x + i * (tab_w + 4.0f * sx);
 
         bool is_active = (state_ == tab.state);
-        // Se estamos no estado base OPTIONS (não em nenhuma aba), a aba AUDIO está ativa
         if (i == 0 && state_ == EngineState::OPTIONS) is_active = true;
 
         uint32_t bg_color = is_active ? 0xFF332211 : 0xFF1A1208;
@@ -98,18 +103,18 @@ void Engine::create_options_menu() {
         );
         if (btn) {
             btn->text_color = text_color;
-            btn->text_size = 16.0f * sy;
+            btn->text_size = 15.0f * sy;
             if (is_active) {
                 ui_->add_background_quad({tx, tabs_y + tab_h - 2.0f}, {tab_w, 2.0f}, INVALID_TEXTURE, 0xFFFFD000);
             }
         }
     }
 
-    // Área de conteúdo
-    const float content_x = vw * 0.1f;
-    const float content_y = tabs_y + tab_h + 20.0f * sy;
-    const float content_w = vw * 0.8f;
-    const float content_h = vh * 0.7f;
+    // Área de conteúdo contida estritamente acima do botão VOLTAR
+    const float content_x = vw * 0.10f;
+    const float content_y = tabs_y + tab_h + 10.0f * sy;
+    const float content_w = vw * 0.80f;
+    const float content_h = back_y - content_y - 12.0f * sy;
 
     // Fundo da área de conteúdo
     ui_->add_background_quad({content_x, content_y}, {content_w, content_h}, INVALID_TEXTURE, 0xFF0A0806);
@@ -122,244 +127,196 @@ void Engine::create_options_menu() {
     else if (state_ == EngineState::UI_OPTIONS_GAMEPLAY) tab_index = 2;
     else if (state_ == EngineState::UI_OPTIONS_NETWORK) tab_index = 3;
     else if (state_ == EngineState::UI_OPTIONS_CONTROLS) tab_index = 4;
-    else if (state_ == EngineState::OPTIONS) tab_index = 0;  // default: AUDIO
+    else if (state_ == EngineState::OPTIONS) tab_index = 0;
+
+    const float col_w = std::min(content_w * 0.70f, 600.0f * sx);
+    const float x = content_x + (content_w - col_w) * 0.5f;
+    const float ctrl_h = 42.0f * sy;
+    const float gap = 12.0f * sy;
+    float cy = content_y + 18.0f * sy;
 
     // ── Aba: AUDIO ──
     if (tab_index == 0) {
-        float cy = content_y + 20.0f * sy;
-        const float ctrl_h = 40.0f * sy;
-        const float gap = 12.0f * sy;
-        const float col_w = content_w * 0.9f;
-        const float x = content_x + content_w * 0.05f;
+        char buf[64];
+        int master_pct = static_cast<int>(std::round(master_volume_ * 100.0f));
+        std::snprintf(buf, sizeof(buf), "Volume Geral: %d%%", master_pct);
+        auto* b_master = ui_->add_button({x, cy}, {col_w, ctrl_h}, buf, [this]() {
+            int pct = static_cast<int>(std::round(master_volume_ * 100.0f));
+            pct = (pct >= 100) ? 0 : (pct + 10);
+            master_volume_ = pct / 100.0f;
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_master) { b_master->text_color = 0xFFFFD000; b_master->text_size = 17.0f * sy; }
+        cy += ctrl_h + gap;
 
-        ui_->add_label("VOLUME", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
+        int music_pct = static_cast<int>(std::round(music_volume_ * 100.0f));
+        std::snprintf(buf, sizeof(buf), "Volume da Musica: %d%%", music_pct);
+        auto* b_music = ui_->add_button({x, cy}, {col_w, ctrl_h}, buf, [this]() {
+            int pct = static_cast<int>(std::round(music_volume_ * 100.0f));
+            pct = (pct >= 100) ? 0 : (pct + 10);
+            music_volume_ = pct / 100.0f;
+            if (audio_) audio_->set_music_volume(music_volume_);
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_music) { b_music->text_color = 0xFFFFD000; b_music->text_size = 17.0f * sy; }
+        cy += ctrl_h + gap;
 
-        ui_->add_slider({x, cy}, {col_w, 40.0f * sy}, "Volume Geral", master_volume_,
-                        [this](float val) { master_volume_ = val; save_options(); });
-        cy += 40.0f * sy + gap;
+        int sfx_pct = static_cast<int>(std::round(sfx_volume_ * 100.0f));
+        std::snprintf(buf, sizeof(buf), "Volume dos Efeitos: %d%%", sfx_pct);
+        auto* b_sfx = ui_->add_button({x, cy}, {col_w, ctrl_h}, buf, [this]() {
+            int pct = static_cast<int>(std::round(sfx_volume_ * 100.0f));
+            pct = (pct >= 100) ? 0 : (pct + 10);
+            sfx_volume_ = pct / 100.0f;
+            if (audio_) audio_->set_sfx_volume(sfx_volume_);
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_sfx) { b_sfx->text_color = 0xFFFFD000; b_sfx->text_size = 17.0f * sy; }
+        cy += ctrl_h + gap;
 
-        ui_->add_slider({x, cy}, {col_w, 40.0f * sy}, "Volume da Musica", music_volume_,
-                        [this](float val) {
-                            music_volume_ = val;
-                            if (audio_) audio_->set_music_volume(val);
-                            save_options();
-                        });
-        cy += 40.0f * sy + gap;
+        std::string mus_label = music_enabled_ ? "Musica: LIGADA" : "Musica: DESLIGADA";
+        auto* b_mus_toggle = ui_->add_button({x, cy}, {col_w, ctrl_h}, mus_label, [this]() {
+            music_enabled_ = !music_enabled_;
+            if (audio_) audio_->set_music_enabled(music_enabled_);
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_mus_toggle) {
+            b_mus_toggle->text_color = music_enabled_ ? 0xFF88FF88 : 0xFFFF8888;
+            b_mus_toggle->text_size = 17.0f * sy;
+        }
+        cy += ctrl_h + gap;
 
-        ui_->add_slider({x, cy}, {col_w, 40.0f * sy}, "Volume dos Efeitos", sfx_volume_,
-                        [this](float val) {
-                            sfx_volume_ = val;
-                            if (audio_) audio_->set_sfx_volume(val);
-                            save_options();
-                        });
-        cy += 40.0f * sy + gap;
+        std::string sfx_label = sfx_enabled_ ? "Efeitos Sonoros: LIGADOS" : "Efeitos Sonoros: DESLIGADOS";
+        auto* b_sfx_toggle = ui_->add_button({x, cy}, {col_w, ctrl_h}, sfx_label, [this]() {
+            sfx_enabled_ = !sfx_enabled_;
+            if (audio_) audio_->set_sfx_enabled(sfx_enabled_);
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_sfx_toggle) {
+            b_sfx_toggle->text_color = sfx_enabled_ ? 0xFF88FF88 : 0xFFFF8888;
+            b_sfx_toggle->text_size = 17.0f * sy;
+        }
+        cy += ctrl_h + gap;
 
-        ui_->add_label("OPCOES DE AUDIO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Musica Ativada", music_enabled_,
-                          [this](bool val) {
-                              music_enabled_ = val;
-                              if (audio_) audio_->set_music_enabled(val);
-                              save_options();
-                          });
-        cy += 32.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Efeitos Sonoros Ativados", sfx_enabled_,
-                          [this](bool val) {
-                              sfx_enabled_ = val;
-                              if (audio_) audio_->set_sfx_enabled(val);
-                              save_options();
-                          });
-        cy += 32.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Voz das Unidades", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Som Ambiente", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-
-        ui_->add_slider({x, cy}, {col_w, 40.0f * sy}, "Qualidade de Som", 0.75f, [](float) {});
-        cy += 40.0f * sy + gap;
+        auto* b_save = ui_->add_button({x, cy}, {col_w, ctrl_h}, "SALVAR CONFIGURACOES", [this]() {
+            save_options();
+        }, 0xFF332211, 0xFF553311);
+        if (b_save) { b_save->text_color = 0xFFFFD000; b_save->text_size = 17.0f * sy; }
     }
     // ── Aba: VIDEO ──
     else if (tab_index == 1) {
-        float cy = content_y + 20.0f * sy;
-        const float ctrl_h = 40.0f * sy;
-        const float gap = 12.0f * sy;
-        const float col_w = content_w * 0.9f;
-        const float x = content_x + content_w * 0.05f;
-
-        ui_->add_label("QUALIDADE GRAFICA", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Qualidade Geral", graphics_quality_ / 2.0f,
-                        [this](float val) { graphics_quality_ = static_cast<int>(val * 2.0f); save_options(); });
+        const char* q_str = (graphics_quality_ > 1.4f) ? "Alta" : (graphics_quality_ > 0.6f ? "Media" : "Baixa");
+        char q_buf[64];
+        std::snprintf(q_buf, sizeof(q_buf), "Qualidade Grafica: %s", q_str);
+        auto* b_q = ui_->add_button({x, cy}, {col_w, ctrl_h}, q_buf, [this]() {
+            if (graphics_quality_ < 0.6f) graphics_quality_ = 1.0f;
+            else if (graphics_quality_ < 1.4f) graphics_quality_ = 2.0f;
+            else graphics_quality_ = 0.0f;
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_q) { b_q->text_color = 0xFFFFD000; b_q->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_label("RESOLUCAO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
+        std::string fps_label = show_fps_ ? "Exibir FPS: LIGADO" : "Exibir FPS: DESLIGADO";
+        auto* b_fps = ui_->add_button({x, cy}, {col_w, ctrl_h}, fps_label, [this]() {
+            show_fps_ = !show_fps_;
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_fps) {
+            b_fps->text_color = show_fps_ ? 0xFF88FF88 : 0xFFFF8888;
+            b_fps->text_size = 17.0f * sy;
+        }
+        cy += ctrl_h + gap;
 
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "1920x1080", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "1280x720", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "960x540", []() {});
+        auto* b_res = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Resolucao: Nativa da Tela", []() {}, 0xFF221810, 0xFF443020);
+        if (b_res) { b_res->text_color = 0xFFCCCCCC; b_res->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_label("OPCOES AVANCADAS", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "VSync", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Filtragem Trilinear", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Compressao de Texturas", false, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Sombras", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Reflexos na Agua", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Particulas", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Exibir FPS", show_fps_,
-                          [this](bool val) { show_fps_ = val; save_options(); });
-        cy += 32.0f * sy + gap;
-
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Brilho", 0.5f, [](float) {});
-        cy += ctrl_h + gap;
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Contraste", 0.5f, [](float) {});
-        cy += ctrl_h + gap;
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Gamma", 1.0f, [](float) {});
-        cy += ctrl_h + gap;
+        auto* b_save = ui_->add_button({x, cy}, {col_w, ctrl_h}, "SALVAR CONFIGURACOES", [this]() {
+            save_options();
+        }, 0xFF332211, 0xFF553311);
+        if (b_save) { b_save->text_color = 0xFFFFD000; b_save->text_size = 17.0f * sy; }
     }
     // ── Aba: GAMEPLAY ──
     else if (tab_index == 2) {
-        float cy = content_y + 20.0f * sy;
-        const float ctrl_h = 40.0f * sy;
-        const float gap = 12.0f * sy;
-        const float col_w = content_w * 0.9f;
-        const float x = content_x + content_w * 0.05f;
-
-        ui_->add_label("DIFICULDADE", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Facil", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Normal", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Dificil", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Titanic", []() {});
+        auto* b_dif = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Dificuldade: Normal", []() {}, 0xFF221810, 0xFF443020);
+        if (b_dif) { b_dif->text_color = 0xFFFFD000; b_dif->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_label("OPCOES DE JOGO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Dicas de Jogo", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Confirmar Exclusao", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Auto-Save", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Marcadores de Unidade", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Marcadores de Construcao", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Velocidade do Jogo", 1.0f, [](float) {});
+        auto* b_tips = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Dicas de Jogo: Ativadas", []() {}, 0xFF221810, 0xFF443020);
+        if (b_tips) { b_tips->text_color = 0xFFCCCCCC; b_tips->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_label("MULTIPLAYER", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
+        auto* b_spd = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Velocidade do Jogo: Normal (1.0x)", []() {}, 0xFF221810, 0xFF443020);
+        if (b_spd) { b_spd->text_color = 0xFFCCCCCC; b_spd->text_size = 17.0f * sy; }
+        cy += ctrl_h + gap;
 
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Permitir Observadores", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Chat Ativado", true, [](bool) {});
-        cy += 32.0f * sy + gap;
+        auto* b_save = ui_->add_button({x, cy}, {col_w, ctrl_h}, "SALVAR CONFIGURACOES", [this]() {
+            save_options();
+        }, 0xFF332211, 0xFF553311);
+        if (b_save) { b_save->text_color = 0xFFFFD000; b_save->text_size = 17.0f * sy; }
     }
     // ── Aba: NETWORK ──
     else if (tab_index == 3) {
-        float cy = content_y + 20.0f * sy;
-        const float ctrl_h = 40.0f * sy;
-        const float gap = 12.0f * sy;
-        const float col_w = content_w * 0.9f;
-        const float x = content_x + content_w * 0.05f;
-
-        ui_->add_label("CONEXAO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "UPnP Ativado", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Porta", 2300.0f, [](float) {});
+        auto* b_upnp = ui_->add_button({x, cy}, {col_w, ctrl_h}, "UPnP: Ativado", []() {}, 0xFF221810, 0xFF443020);
+        if (b_upnp) { b_upnp->text_color = 0xFFCCCCCC; b_upnp->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_label("MULTIPLAYER LAN", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Criar Sala", [this]() { open_multiplayer(); });
+        auto* b_port = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Porta Padrao: 2300", []() {}, 0xFF221810, 0xFF443020);
+        if (b_port) { b_port->text_color = 0xFFCCCCCC; b_port->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Entrar na Sala", [this]() { open_multiplayer(); });
-        cy += ctrl_h + gap;
-
-        ui_->add_label("SERVIDOR DEDICADO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Configurar Servidor", []() {});
-        cy += ctrl_h + gap;
+        auto* b_mp = ui_->add_button({x, cy}, {col_w, ctrl_h}, "Abrir Multiplayer LAN", [this]() { open_multiplayer(); }, 0xFF332211, 0xFF553311);
+        if (b_mp) { b_mp->text_color = 0xFFFFD000; b_mp->text_size = 17.0f * sy; }
     }
     // ── Aba: CONTROLS ──
     else if (tab_index == 4) {
-        float cy = content_y + 20.0f * sy;
-        const float ctrl_h = 40.0f * sy;
-        const float gap = 12.0f * sy;
-        const float col_w = content_w * 0.9f;
-        const float x = content_x + content_w * 0.05f;
-
-        ui_->add_label("TECLADO E MOUSE", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Inverter Eixo Y do Mouse", false, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Sensibilidade do Mouse", 1.0f, [](float) {});
-        cy += ctrl_h + gap;
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Velocidade de Scroll", 1.0f, [](float) {});
+        std::string joy_label = enable_virtual_joystick_ ? "Joystick Virtual: ATIVADO" : "Joystick Virtual: DESATIVADO";
+        auto* b_joy = ui_->add_button({x, cy}, {col_w, ctrl_h}, joy_label, [this]() {
+            enable_virtual_joystick_ = !enable_virtual_joystick_;
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_joy) {
+            b_joy->text_color = enable_virtual_joystick_ ? 0xFF88FF88 : 0xFFFF8888;
+            b_joy->text_size = 17.0f * sy;
+        }
         cy += ctrl_h + gap;
 
-        ui_->add_label("JOYSTICK / TOUCH", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Joystick Virtual", enable_virtual_joystick_,
-                          [this](bool val) { enable_virtual_joystick_ = val; save_options(); });
-        cy += 32.0f * sy + gap;
-
-        ui_->add_slider({x, cy}, {col_w, ctrl_h}, "Sensibilidade Touch", touch_sensitivity_,
-                        [this](float val) { touch_sensitivity_ = val; save_options(); });
+        char sens_buf[64];
+        std::snprintf(sens_buf, sizeof(sens_buf), "Sensibilidade Touch: %.1fx", touch_sensitivity_);
+        auto* b_sens = ui_->add_button({x, cy}, {col_w, ctrl_h}, sens_buf, [this]() {
+            if (touch_sensitivity_ < 0.9f) touch_sensitivity_ = 1.0f;
+            else if (touch_sensitivity_ < 1.4f) touch_sensitivity_ = 1.5f;
+            else touch_sensitivity_ = 0.5f;
+            save_options();
+            create_options_menu();
+        }, 0xFF221810, 0xFF443020);
+        if (b_sens) { b_sens->text_color = 0xFFFFD000; b_sens->text_size = 17.0f * sy; }
         cy += ctrl_h + gap;
 
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Botao Direito = Comando", true, [](bool) {});
-        cy += 32.0f * sy + gap;
-        ui_->add_checkbox({x, cy}, {col_w, 32.0f * sy}, "Toque Duplo = Correr", false, [](bool) {});
-        cy += 32.0f * sy + gap;
-
-        ui_->add_label("ATALHOS DE TECLADO", {x, cy}, 24.0f * sy, 0xFFFFD000);
-        cy += 24.0f * sy + gap;
-
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Configurar Atalhos", []() {});
-        cy += ctrl_h + gap;
-        ui_->add_button({x, cy}, {col_w, ctrl_h}, "Restaurar Padrao", []() {});
-        cy += ctrl_h + gap;
+        auto* b_save = ui_->add_button({x, cy}, {col_w, ctrl_h}, "SALVAR CONFIGURACOES", [this]() {
+            save_options();
+        }, 0xFF332211, 0xFF553311);
+        if (b_save) { b_save->text_color = 0xFFFFD000; b_save->text_size = 17.0f * sy; }
     }
 
-    // Botão Voltar
-    float back_w = 200.0f * sx;
-    float back_h = 44.0f * sy;
-    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.88f}, {back_w, back_h}, "VOLTAR",
-                   [this]() {
-                       return_to_main_menu();
-                   });
+    // ── Botão VOLTAR (destacado com borda dourada e hitbox acessível) ──
+    ui_->add_background_quad({back_x - 2.0f, back_y - 2.0f}, {back_w + 4.0f, back_h + 4.0f}, INVALID_TEXTURE, 0xFFFFD000);
+    auto* back_btn = ui_->add_button({back_x, back_y}, {back_w, back_h}, "VOLTAR",
+                                    [this]() {
+                                        return_to_main_menu();
+                                    }, 0xFF332211, 0xFF553311);
+    if (back_btn) {
+        back_btn->text_color = 0xFFFFD000;
+        back_btn->text_size = 18.0f * sy;
+    }
 }
 
 void Engine::load_options() {
@@ -376,10 +333,12 @@ void Engine::load_options() {
         if (key == "master_volume") master_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "music_volume") music_volume_ = std::clamp(val, 0.0f, 1.0f);
         else if (key == "sfx_volume") sfx_volume_ = std::clamp(val, 0.0f, 1.0f);
-        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 1.0f);
+        else if (key == "graphics_quality") graphics_quality_ = std::clamp(val, 0.0f, 2.0f);
         else if (key == "show_fps") show_fps_ = (val > 0.5f);
         else if (key == "music_enabled") music_enabled_ = (val > 0.5f);
         else if (key == "sfx_enabled") sfx_enabled_ = (val > 0.5f);
+        else if (key == "enable_virtual_joystick") enable_virtual_joystick_ = (val > 0.5f);
+        else if (key == "touch_sensitivity") touch_sensitivity_ = std::clamp(val, 0.1f, 3.0f);
     }
     LOGI("Loaded options: master=%.2f, music=%.2f, sfx=%.2f", master_volume_, music_volume_, sfx_volume_);
 }
@@ -399,7 +358,8 @@ void Engine::save_options() {
     out << "show_fps " << (show_fps_ ? 1.0f : 0.0f) << "\n";
     out << "music_enabled " << (music_enabled_ ? 1.0f : 0.0f) << "\n";
     out << "sfx_enabled " << (sfx_enabled_ ? 1.0f : 0.0f) << "\n";
+    out << "enable_virtual_joystick " << (enable_virtual_joystick_ ? 1.0f : 0.0f) << "\n";
+    out << "touch_sensitivity " << touch_sensitivity_ << "\n";
 }
-
 
 } // namespace aom
