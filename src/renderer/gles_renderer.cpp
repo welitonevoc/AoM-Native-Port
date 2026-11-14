@@ -184,10 +184,8 @@ void main() {
     vec3 lighting = uAmbient + uLightColor * diff;
     lighting = max(lighting, vec3(0.35));
 
-    vec4 baseColor = (uHasTex != 0) ? texture(uTex, vTex) : vColor;
-    if (baseColor.a < 0.01) discard;
-    float outAlpha = (uHasTex != 0) ? max(baseColor.a, 0.90) : baseColor.a;
-    fragColor = vec4(baseColor.rgb * lighting, outAlpha);
+    vec4 baseColor = (uHasTex != 0) ? texture(uTex, vTex) : vec4(1.0, 0.0, 1.0, 1.0);
+    fragColor = vec4(baseColor.rgb * lighting, 1.0);
 }
 )";
 
@@ -839,6 +837,7 @@ public:
             }
         }
 
+        glDepthMask(GL_TRUE);
         glClearColor(0.02f, 0.02f, 0.02f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -1143,6 +1142,13 @@ public:
                    BlendMode blend) override {
         auto it = meshes_.find(mesh);
         if (it == meshes_.end() || !mesh_program_) return;
+
+        static int mesh_dbg_counter = 0;
+        if ((++mesh_dbg_counter % 180) == 1) {
+            LOGI("[DRAW_MESH] mesh=%u indices=%d tex=%u blend=%d",
+                 static_cast<unsigned>(mesh), it->second.index_count,
+                 static_cast<unsigned>(texture), static_cast<int>(blend));
+        }
 
         if (blend == BlendMode::OPAQUE) {
             glDisable(GL_BLEND);

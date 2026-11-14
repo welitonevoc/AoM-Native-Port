@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141547 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141556 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -10,16 +10,18 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Mapeamento Exaustivo dos BARs (`src/engine/generated_unit_visuals.inc`): 50+ classes mapeadas.
 - ✅ Pipeline BRG → glTF → GLES (`brg_to_gltf.py`, bfloat16, morph targets).
 - ✅ Offset MTRL (`pos + 64`) e candidatos de textura (`bronze.ddt`, `copper.ddt`, etc.).
-- ✅ Tratamento de Alpha Shader (`discard < 0.01`, `outAlpha >= 0.90`) e estados de `BlendMode`.
+- ✅ Diagnósticos `[RENDER]` (~3s) e `[BRGBOUNDS]` em execução.
 
-## Diagnósticos Ativos nesta Versão (`render_diag.patch`)
-- ✅ **Log `[RENDER]` a cada ~3s (`include/ecs/gameplay.h`)**:
-  - Contagem precisa de `entidades`, `culled` (frustum/distância), `sem_malha` e `desenhadas`.
-  - Reporta `pos`, `scale`, `mesh`, `tex` da 1ª entidade, e coordenadas da `cam` e `alvo`.
-- ✅ **Log `[BRGBOUNDS]` no carregamento (`src/engine/engine_assets.cpp`)**:
-  - Reporta contagem de vértices e caixa envolvente (`min`, `max`, `tamanho`) das malhas BRG sob demanda.
+## Correções Aplicadas nesta Versão (GLES Pipeline & Depth Clear)
+- ✅ **Garantia de Limpeza do Depth Buffer (`src/renderer/gles_renderer.cpp`)**:
+  - `glDepthMask(GL_TRUE)` forçado imediatamente antes de `glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)` no `begin_frame` (evita falha silenciosa de `glClear(GL_DEPTH_BUFFER_BIT)` quando passadas 2D/UI anteriores deixam `glDepthMask(GL_FALSE)`).
+- ✅ **Shader de Malha 3D sem Discard e com Fallback Sólido (`src/renderer/gles_renderer.cpp`)**:
+  - Removido `discard` prematuro (evita sumiço de malhas cujas texturas possuem canal alpha zerado ou não-preenchido).
+  - Malhas sem textura (`uHasTex == 0`) usam cor magenta sólida `(1.0, 0.0, 1.0, 1.0)` como diagnóstico visual imediato.
+  - Saída do fragmento forçada com alpha `1.0` opaco.
+- ✅ **Log de Draw Call (`src/renderer/gles_renderer.cpp`)**:
+  - `[DRAW_MESH]` periódico reportando `mesh`, contagem de índices, `tex` e `blend`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141547 gerado e assinado em `/sdcard/aom-native-v1.0.11141547.apk`.
-2. Rodar campanha e coletar saída logcat com `[RENDER]` e `[BRGBOUNDS]`.
-3. Prosseguir com decodificação do DDT formato 3 (paleta com 4-bit alpha) via referências PNG em `tests/reference/`.
+1. ✅ APK v1.0.11141556 gerado e assinado em `/sdcard/aom-native-v1.0.11141556.apk`.
+2. Rodar e verificar se os modelos aparecem texturizados (ou magenta se sem textura) e checar os logs `[RENDER]`, `[BRGBOUNDS]` e `[DRAW_MESH]`.
