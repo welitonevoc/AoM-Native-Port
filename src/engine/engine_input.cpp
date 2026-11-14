@@ -241,6 +241,7 @@ void Engine::handle_touch(const TouchEvent& touch) {
 }
 
 void Engine::adjust_camera_zoom(float delta) {
+    if (state_ != EngineState::IN_GAME) return;
     radius_ = std::clamp(radius_ - delta, 3.0f, 40.0f);
 }
 

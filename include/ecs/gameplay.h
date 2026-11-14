@@ -198,6 +198,8 @@ struct UnitComponent : Component {
     std::vector<glm::vec3> waypoints;
     size_t waypoint_index = 0;
     float los = 14.0f;
+    MeshHandle mesh = INVALID_MESH;
+    TextureHandle texture = INVALID_TEXTURE;
 };
 
 struct SelectionComponent : Component { bool selected = false; };
@@ -214,6 +216,8 @@ struct BuildingComponent : Component {
     std::string training_unit = "";
     std::queue<std::string> train_queue;
     float los = 16.0f;
+    MeshHandle mesh = INVALID_MESH;
+    TextureHandle texture = INVALID_TEXTURE;
 };
 
 struct ResourcePool {
@@ -243,6 +247,7 @@ struct SceneryObject {
     glm::vec3 position{0.0f};   ///< Posição no mundo
     float scale = 1.0f;         ///< Escala do objeto
     TextureHandle texture = INVALID_TEXTURE;  ///< Textura do objeto (carregada do textures.bar)
+    MeshHandle mesh = INVALID_MESH;           ///< Malha 3D do objeto (.brg)
 };
 
 struct MinimapBlip {
@@ -742,12 +747,14 @@ public:
     }
 
     Entity spawn_scenery_object(const std::string& name, const glm::vec3& position,
-                                 float scale = 1.0f, TextureHandle texture = INVALID_TEXTURE) {
+                                 float scale = 1.0f, TextureHandle texture = INVALID_TEXTURE,
+                                 MeshHandle mesh = INVALID_MESH) {
         SceneryObject so;
         so.name = name;
         so.position = position;
         so.scale = scale;
         so.texture = texture;
+        so.mesh = mesh;
         scenery_objects_.push_back(std::move(so));
         // Cria uma entidade ECS leve para o objeto (transform apenas, sem unidade/edifício)
         Entity id = ecs_world_.create_entity();
@@ -755,6 +762,22 @@ public:
         tr.position = position;
         tr.scale = glm::vec3(scale);
         return id;
+    }
+
+    void set_unit_visuals(Entity unit, MeshHandle mesh, TextureHandle texture = INVALID_TEXTURE) {
+        auto it = units_.find(unit);
+        if (it != units_.end()) {
+            it->second.mesh = mesh;
+            it->second.texture = texture;
+        }
+    }
+
+    void set_building_visuals(Entity building, MeshHandle mesh, TextureHandle texture = INVALID_TEXTURE) {
+        auto it = building_components_.find(building);
+        if (it != building_components_.end()) {
+            it->second.mesh = mesh;
+            it->second.texture = texture;
+        }
     }
 
     /// Injeta o gerenciador de transformacoes de unidade (carregado do unittransform.xmb).
@@ -1782,9 +1805,19 @@ public:
             model = glm::scale(model, scale);
             MeshHandle entity_mesh = mesh;
             TextureHandle entity_texture = texture;
-            if (unit && unit->unit_type_name == "Hoplite" && hoplite_mesh != INVALID_MESH) {
-                entity_mesh = hoplite_mesh;
-                entity_texture = hoplite_texture;
+            if (b_it != building_components_.end()) {
+                if (b_it->second.mesh != INVALID_MESH) {
+                    entity_mesh = b_it->second.mesh;
+                    entity_texture = (b_it->second.texture != INVALID_TEXTURE) ? b_it->second.texture : texture;
+                }
+            } else if (unit) {
+                if (unit->mesh != INVALID_MESH) {
+                    entity_mesh = unit->mesh;
+                    entity_texture = (unit->texture != INVALID_TEXTURE) ? unit->texture : texture;
+                } else if (unit->unit_type_name == "Hoplite" && hoplite_mesh != INVALID_MESH) {
+                    entity_mesh = hoplite_mesh;
+                    entity_texture = hoplite_texture;
+                }
             }
             if (entity_mesh == INVALID_MESH) continue;
             renderer->draw_mesh(entity_mesh, model, entity_texture, BlendMode::OPAQUE);
@@ -1879,10 +1912,12 @@ public:
 
         // ── Scenery objects (rochas, árvores na beira da água, etc.) ──────────
         for (const auto& so : scenery_objects_) {
-            if (so.texture == INVALID_TEXTURE) continue;
+            MeshHandle m = (so.mesh != INVALID_MESH) ? so.mesh : mesh;
+            if (m == INVALID_MESH) continue;
             glm::mat4 model = glm::translate(glm::mat4(1.0f), so.position);
             model = glm::scale(model, glm::vec3(so.scale));
-            renderer->draw_mesh(mesh, model, so.texture, BlendMode::OPAQUE);
+            TextureHandle t = (so.texture != INVALID_TEXTURE) ? so.texture : texture;
+            renderer->draw_mesh(m, model, t, BlendMode::OPAQUE);
         }
     }
 private:

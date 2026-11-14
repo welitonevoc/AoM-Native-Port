@@ -1,44 +1,31 @@
-# CURRENT_STATE — baseado no commit c75aced (13/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11132108 (13/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
-- ✅ Logger em arquivo no shared storage (`/sdcard/AoM/log.txt`) integrado em `engine_internal.h` e `native_activity.cpp`. Desativado vídeo com glitch no fundo de `MAIN_MENU` (`engine_gameplay.cpp`).
-- ✅ BRG parser & assets: chunk `MTRL` atribui textura a TODOS os meshes (`brg_model.cpp`) e fallback `textflare -> cursors/cursor_flare.ddt` em `load_models()` (`engine_assets.cpp`).
+- ✅ Logger em arquivo no shared storage (`/sdcard/AoM/log.txt` e `/sdcard/log.txt`) integrado. Desativado vídeo com glitch no fundo de `MAIN_MENU`.
+- ✅ BRG parser & assets: chunk `MTRL` atribui textura a TODOS os meshes (`brg_model.cpp`) e fallback `textflare -> cursors/cursor_flare.ddt` em `load_models()`.
 - ✅ `engine.h` sem as duplicatas antigas (enum e métodos de menu).
-- ✅ Resolvedor tolerante de nomes de textura (`texture_key`, logs `[TEX]`) em `load_ddt_texture`.
-- ✅ DDT formatos 5 e 6: decodificação com escolha automática de layout (`ddt5_auto.h` e `ddt6_auto.h`).
-- ✅ Toque: `interactive` + percurso reverso dos botões; `color == 0` não vira mais branco opaco.
-- ✅ `recreate_renderer()` chama `invalidate_gpu_handles()`: zera todos os handles de GPU (UI, malhas, terreno, água) evitando colisão de texturas.
-- ✅ `ui_layout.cpp`: lê `stateentry`, `hidden`, `statebutton`, `z`, `texturecoords` (UV atlas) e comandos nativos AoM (`gadgetReal`, `modeEnter`, `exit`); remove o prefixo `$$id$$` do texto.
-- ✅ `MyNativeActivity.java`: copia todos os archives base e expansão (`textures2.bar`, `data2.bar`, `models2.bar`, `scenarios2.bar`, `sounds2.bar`, `anim2.bar`, `godpowers2.bar`).
-- ✅ DDT formato 3 (PALETTE): corrigido layout RGB444 (12-bit) e validação de alpha a4 (`ddt_texture.cpp`). Texturas `ui_pregame` priorizam PNGs limpos de `titans_menu_parts/` fatiados com transparência alfa autêntica (`engine_menus.cpp`).
+- ✅ Resolvedor tolerante de nomes de textura (`texture_key`, logs `[TEX]`) e heurística `* map.ddt` para clips de animação.
+- ✅ DDT formato 3 (PALETTE): corrigido layout 16-bit RGB565/RGB555 (`ddt_texture.cpp`) eliminando artefatos esverdeados e faixas.
+- ✅ Submenus XMB Dinâmicos: botões herdam `group_tag = parent_tag`; `set_group_visible` alterna grupos do pórtico (`LearnSubMenu`, `CampaignSubMenu`...).
+- ✅ Menu de Opções Restaurado: removido interceptador `uisoundsetdlg.xmb` que quebrava as opções após carregar o `data.bar`; suportadas abas AUDIO, VIDEO, GAMEPLAY, CONTROLS sobre o fundo 3D sem overlay de PNG estático.
+- ✅ Cenário 3D & Praia do Menu: relevo com praia costeira e areia dourada na beira-mar; câmera cinematográfica de The Titans (`radius=18`, `pitch=0.35`, `yaw=0.45`); zoom bloqueado fora do jogo.
+- ✅ Modelos BRG On-Demand: `get_model_entry` carrega qualquer modelo sob demanda de `models.bar`/`models2.bar` com resolução automática de texturas (`.ddt`, `map.ddt`).
+- ✅ Entidades e Cenário Autênticos no Menu: Manors e Quartel Atlantes com malhas reais, palmeiras, carvalhos, rochas e tropas Murmillo e Arcus patrulhando na praia.
 - ✅ LightingManager e arquivos `.lgt`: 11 presets de iluminação solar/ambiente integrados ao motor e empacotados no APK.
 - ✅ Cenários `.scn`/`.scx`: suporte unificado e resolução flexível de caminhos no `scenarios.bar`/`scenarios2.bar` e disco.
-- ✅ `ButtonSetManager` e `buttonsets.xmb`: decodificação e aplicação de texturas e UVs para botões (`buttonLong`, `checkBtn`, etc.) e empacotamento no APK.
-- ✅ Modularização concluída (Blocos 1 a 10):
-  - `src/engine/engine_assets.cpp` (1.096 linhas, 24 métodos de assets/texturas).
-  - `src/engine/engine_multiplayer.cpp` (367 linhas de MP integradas e desduplicadas).
-  - `src/engine/engine_options_menu.cpp` (opções/configuração de menus integradas).
-  - `src/engine/engine_input.cpp` (238 linhas, `handle_touch` e `adjust_camera_zoom`).
-  - `src/engine/engine_particles.cpp` (117 linhas, 7 métodos de spawn/update/render particles).
-  - `src/engine/engine_save_load.cpp` (296 linhas, 12 métodos de save/load/slots).
-  - `src/engine/engine_terrain.cpp` (606 linhas, 8 métodos de terreno, heightmap, água, skydome/skybox).
-  - `src/engine/engine_campaign.cpp` (388 linhas, 10 métodos de campanha, missões e playback de cinemáticas).
-  - `src/engine/engine_hud.cpp` (422 linhas, 4 métodos de HUD in-game e transformação de unidades).
-  - `src/engine/engine_menus.cpp` (1.564 linhas, 104 métodos de menus procedurais e telas de UI).
-  - `src/engine/engine_states.cpp` (533 linhas, máquina de estados do motor `set_state`).
-  - `src/engine/engine_gameplay.cpp` (436 linhas, partida RTS `start_game`, entidades iniciais e background 3D).
-  - `src/engine/engine.cpp` reduzido de 7.307 para 840 linhas (apenas Core: init/update/render/lifecycle). 100% dos testes e libaom_native passando.
+- ✅ `ButtonSetManager` e `buttonsets.xmb`: decodificação e aplicação de texturas e UVs para botões e empacotamento no APK.
+- ✅ Modularização concluída (Blocos 1 a 10): `src/engine/engine.cpp` reduzido de 7.307 para 840 linhas (apenas Core). 100% dos testes e libaom_native passando.
 
 ## Em aberto / Resolvidos
-1. ✅ **Decodificação DDT Formato 3**: Índices contínuos + buffer alpha 4-bit (sem row-interleave falso) corrigem as scanlines e restauram silhueta do pórtico e botões (`ddt_texture.cpp`).
-2. ✅ **Botões Autênticos XMB**: `gd.bg_texture` e `state_backgrounds` sobrepõem textura padrão, aplicando textura autêntica `ui\ui pregame button` com coordenadas UV (`ui_layout.cpp`).
-3. ✅ **Submenus XMB Dinâmicos**: `gadgetReal` e `gadgetUnReal` despacham alternância nativa de visibilidade de submenus (Learn, Campaign, SinglePlayer, More) em `UIManager` (`ui_layout.cpp`, `ui.cpp`).
-4. ✅ **Cenário 3D com Tropas Atlantes e Floresta**: `gameplay_world_` instanciado no `MAIN_MENU` executa `populate_menu_background_scene()`, renderizando tropas, árvores e casas na praia.
-5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes (A/B estático × animado) pendente.
+1. ✅ **Zoom do Menu**: Bloqueado em `adjust_camera_zoom` fora do modo `IN_GAME`.
+2. ✅ **Câmera do Menu**: Enquadramento cinematográfico raso voltado para a praia de Atlântida.
+3. ✅ **Praia e Linha Costeira**: Formação de praia de areia descendo até o mar e leito marinho com ondas.
+4. ✅ **Tropas, Casas e Árvores do Menu**: Modelos reais Atlantes (Manors, Quartel, Palmeiras, Murmillos, Arcus) renderizados com malhas e texturas corretas.
+5. ❓ **Unidades quebradas em pedaços** (BRG): clip/malha divergentes, só `meshes[0]`. Fase 0 de testes pendente.
 
 ## Próximos passos (ordem)
-1. ✅ Menu autêntico com pórtico de mármore, botões autênticos e navegação XMB no APK v1.0.11132017.
-2. Validar transição suave dos submenus ao clicar nos botões do pórtico.
+1. ✅ APK v1.0.11132108 gerado em `/sdcard/aom-native-v1.0.11132108.apk`.
+2. Validar visual da praia, tropas e casas no menu em dispositivo real.
 3. Validar unidades BRG e animações esqueléticas (Fase 0 A/B).
 

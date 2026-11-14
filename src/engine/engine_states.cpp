@@ -75,11 +75,14 @@ void Engine::set_state(EngineState new_state) {
                 generate_skydome();
             }
 
-            // ── 4. Configurar câmera isométrica estilo The Titans ──────────────────
-            radius_ = 32.0f;
-            yaw_ = -0.35f;
-            pitch_ = 0.65f;
-            camera_.target = glm::vec3(-4.0f, 0.5f, -2.0f);
+            // Nível do mar ajustado para a praia de Atlântida (evita inundar o terreno e as tropas)
+            water_plane_ = glm::vec4(0.0f, 1.0f, 0.0f, 0.5f);
+
+            // ── 4. Configurar câmera isométrica autêntica estilo The Titans ────────
+            radius_ = 18.0f;
+            yaw_ = 0.45f;
+            pitch_ = 0.35f;
+            camera_.target = glm::vec3(-1.0f, 0.5f, 0.0f);
             
             // ── 5. Povoar cena 3D de fundo com elementos do The Titans ─────────────
             if (gameplay_world_) {
@@ -138,7 +141,12 @@ void Engine::set_state(EngineState new_state) {
             break;
         }
         case EngineState::OPTIONS:
-            LOGI("Entered state: OPTIONS");
+        case EngineState::UI_OPTIONS_AUDIO:
+        case EngineState::UI_OPTIONS_VIDEO:
+        case EngineState::UI_OPTIONS_GAMEPLAY:
+        case EngineState::UI_OPTIONS_NETWORK:
+        case EngineState::UI_OPTIONS_CONTROLS:
+            LOGI("Entered state: OPTIONS / Tab %d", (int)state_);
             create_options_menu();
             break;
         case EngineState::CREDITS:

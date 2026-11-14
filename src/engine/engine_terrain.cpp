@@ -210,14 +210,20 @@ void Engine::generate_terrain() {
     const float HALF = SIZE * 0.5f;
 
     auto calc_elevation = [](float wx, float wz) -> float {
-        // Base rolling terrain
-        float hills = std::sin(wx * 0.16f) * std::cos(wz * 0.16f) * 0.75f;
-        // Central river valley dipping below water level (-0.4f)
-        float river_dist = std::abs(wz - std::sin(wx * 0.14f) * 3.5f);
-        float river = (river_dist < 5.0f) ? ((river_dist - 5.0f) * 0.18f) : 0.0f;
-        // Elevated cliff/plateau on corner
-        float cliff = (wx > 6.0f && wz < -4.0f) ? (std::sin((wx - 6.0f) * 0.28f) * 2.2f) : 0.0f;
-        return hills + river + cliff;
+        // Encosta costeira de Atlântida: terra firme a oeste (-X), descendo em praia suave até o mar a leste (+X)
+        float bay_curve = std::sin(wz * 0.15f) * 2.0f;
+        float dist_to_shore = (wx - bay_curve);
+        // Terra firme (oeste): platô suave com colinas onduladas
+        float land_height = 0.8f + std::sin(wx * 0.2f) * std::cos(wz * 0.2f) * 0.4f;
+        // Penhasco na extremidade norte/oeste
+        if (wx < -6.0f && wz < -2.0f) {
+            land_height += std::sin((wx + 6.0f) * 0.25f) * 1.4f;
+        }
+        // Mar profundo (leste)
+        float sea_height = -2.2f + std::sin(wx * 0.1f + wz * 0.1f) * 0.2f;
+        // Transição suave pela praia (-1.5 a +2.0 unidades da margem)
+        float t = std::clamp((dist_to_shore + 1.0f) / 3.5f, 0.0f, 1.0f);
+        return glm::mix(land_height, sea_height, t);
     };
 
     std::vector<TerrainVertex> verts;
@@ -243,11 +249,26 @@ void Engine::generate_terrain() {
             float alpha = std::clamp(1.0f - slope * 2.8f, 0.0f, 1.0f);
             float tint = 0.92f + std::sin(wx * 0.4f + wz * 0.4f) * 0.08f;
 
+            // Na faixa da praia (-0.8f a +0.2f em relação ao mar), aplica tom de areia dourada
+            glm::vec4 vert_color;
+            if (wy < -0.7f) {
+                // Leito marinho
+                vert_color = glm::vec4(0.65f * tint, 0.70f * tint, 0.60f * tint, alpha);
+            } else if (wy <= 0.25f) {
+                // Praia de areia dourada
+                float sand_t = (wy - (-0.7f)) / 0.95f;
+                glm::vec3 sand_color = glm::mix(glm::vec3(0.92f, 0.85f, 0.65f), glm::vec3(0.85f, 0.88f, 0.60f), sand_t);
+                vert_color = glm::vec4(sand_color * tint, alpha);
+            } else {
+                // Gramado verde costeiro
+                vert_color = glm::vec4(tint * 0.85f, tint * 1.05f, tint * 0.80f, alpha);
+            }
+
             TerrainVertex v;
             v.position = glm::vec3(wx, wy, wz);
             v.normal = normal;
             v.texcoord = glm::vec2(static_cast<float>(x) / GRID * 8.0f, static_cast<float>(z) / GRID * 8.0f);
-            v.color = glm::vec4(tint, tint, tint, alpha);
+            v.color = vert_color;
             verts.push_back(v);
         }
     }

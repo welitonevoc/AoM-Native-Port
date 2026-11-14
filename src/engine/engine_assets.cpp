@@ -1071,6 +1071,41 @@ TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
                      material_name.c_str(), k->second.c_str());
             }
         }
+
+        // Heurística map.ddt: modelos BRG pedem textura do frame/animação (_attacka, etc.),
+        // mas no BAR ela está unificada em '<base> map.ddt' ou '<base>.ddt'.
+        if (data.empty()) {
+            std::string stem = material_name;
+            const size_t slash = stem.find_last_of("\\/");
+            if (slash != std::string::npos) stem.erase(0, slash + 1);
+            const size_t dot = stem.rfind('.');
+            if (dot != std::string::npos) stem.erase(dot);
+
+            const char* anim_suffixes[] = {
+                "_attack", "_idle", "_walk", "_run", "_death", "_flail", "_bored", "_decay",
+                "_corpse", "_work", "_gather", "_build", "_heal", "_convert", "_defend"
+            };
+            for (const char* suf : anim_suffixes) {
+                size_t p = stem.rfind(suf);
+                if (p != std::string::npos) {
+                    stem = stem.substr(0, p);
+                    break;
+                }
+            }
+
+            auto try_k = texture_key_index_.find(texture_key(stem + " map"));
+            if (try_k == texture_key_index_.end()) {
+                try_k = texture_key_index_.find(texture_key(stem));
+            }
+            if (try_k != texture_key_index_.end()) {
+                data = textures_bar_->extract(try_k->second);
+                if (!data.empty()) {
+                    resolved = try_k->second;
+                    LOGI("[TEX] Heurística map.ddt: '%s' -> '%s'",
+                         material_name.c_str(), resolved.c_str());
+                }
+            }
+        }
     }
 
     if (data.empty()) {
@@ -1089,6 +1124,12 @@ TextureHandle Engine::load_ddt_texture(const std::string& material_name) {
     if (!ddt) { LOGW("[TEX] '%s' (%s): DdtLoader::load falhou", material_name.c_str(), resolved.c_str()); return INVALID_TEXTURE; }
     auto rgba = ddt->decode_rgba(0);
     if (rgba.empty()) { LOGW("[TEX] '%s' (%s): decode_rgba vazio (formato %d)", material_name.c_str(), resolved.c_str(), int(ddt->format)); return INVALID_TEXTURE; }
+
+    if (material_name.find("ui") != std::string::npos || material_name.find("button") != std::string::npos) {
+        LOGI("[UI-DDT] '%s' (%s): %ux%u fmt=%d abits=%u -> GL_RGBA",
+             material_name.c_str(), resolved.c_str(), ddt->width, ddt->height,
+             int(ddt->format), ddt->alpha_bits);
+    }
 
     TextureHandle handle = renderer_->create_texture(
         ddt->width, ddt->height, rgba.data());
@@ -1233,7 +1274,79 @@ void Engine::load_ui_strings() {
 
 ModelEntry* Engine::get_model_entry(const std::string& name) {
     auto it = model_cache_.find(name);
-    return (it != model_cache_.end()) ? &it->second : nullptr;
+    if (it != model_cache_.end()) return &it->second;
+    if (!renderer_ || !models_bar_ || !models_bar_->is_open()) return nullptr;
+
+    const BarEntry* entry = models_bar_->find(name);
+    if (!entry) return nullptr;
+
+    auto model = load_brg_model_data(models_bar_.get(), entry->filename);
+    if (!model || model->meshes.empty()) return nullptr;
+
+    const auto& m = model->meshes[0];
+    MeshHandle mesh = renderer_->create_mesh(
+        m.vertices.data(), static_cast<uint32_t>(m.vertices.size()),
+        m.indices.data(), static_cast<uint32_t>(m.indices.size()));
+    if (mesh == INVALID_MESH) return nullptr;
+
+    TextureHandle tex = INVALID_TEXTURE;
+    std::string base = entry->filename;
+    if (ends_with(to_lower(base), ".brg")) {
+        base = base.substr(0, base.size() - 4);
+    }
+    std::string clean_base = base;
+    size_t last_slash = clean_base.find_last_of("/\\");
+    if (last_slash != std::string::npos) clean_base = clean_base.substr(last_slash + 1);
+
+    std::vector<std::string> candidates = {
+        base + ".ddt",
+        base + " diffuse.ddt",
+        base + "_diffuse.ddt",
+        base + " map.ddt",
+        clean_base + ".ddt",
+        clean_base + " diffuse.ddt",
+        clean_base + " map.ddt"
+    };
+    for (const char* suf : {"_walka", "_idlea", "_attacka", "_attackb", "_deatha", "_flaila", "_boreda"}) {
+        size_t pos = clean_base.rfind(suf);
+        if (pos != std::string::npos) {
+            std::string root = clean_base.substr(0, pos);
+            candidates.push_back(root + ".ddt");
+            candidates.push_back(root + " map.ddt");
+            candidates.push_back(root + " diffuse.ddt");
+            candidates.push_back(root + "_diffuse.ddt");
+        }
+    }
+
+    for (const auto& cand : candidates) {
+        tex = load_ddt_texture(cand);
+        if (tex != INVALID_TEXTURE) break;
+    }
+
+    if (tex == INVALID_TEXTURE && !model->meshes.empty()) {
+        const std::string& mesh_tex = model->meshes[0].texture_name;
+        if (!mesh_tex.empty()) {
+            for (const std::string& cand : {
+                     mesh_tex + ".ddt",
+                     mesh_tex + " diffuse.ddt",
+                     mesh_tex + "_diffuse.ddt",
+                     mesh_tex + " map.ddt",
+                     mesh_tex + ".bti",
+                 }) {
+                tex = load_ddt_texture(cand);
+                if (tex != INVALID_TEXTURE) break;
+            }
+        }
+    }
+
+    ModelEntry& entry_cache = model_cache_[entry->filename];
+    entry_cache.mesh = mesh;
+    entry_cache.texture = tex;
+    model_cache_models_[entry->filename] = std::move(model);
+    entry_cache.model = model_cache_models_[entry->filename].get();
+    LOGI("get_model_entry on-demand loaded '%s' -> mesh=%u, tex=%u",
+         entry->filename.c_str(), mesh, tex);
+    return &entry_cache;
 }
 
 } // namespace aom
