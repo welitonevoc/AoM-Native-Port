@@ -430,46 +430,54 @@ std::vector<uint8_t> DdtTexture::decode_rgba(uint32_t mip_level) const {
             }
 
             const size_t num_colors = palette.size() / 2;
-            const size_t blocks = static_cast<size_t>((mip.width + 3) / 4) * ((mip.height + 3) / 4);
+            const size_t chunks_per_row = (static_cast<size_t>(mip.width) + 3) / 4;
+            const size_t required_bytes = chunks_per_row * mip.height * 6;
 
-            // Formato 3 com alpha 4-bit (UI e botões de mármore):
-            // Armazenado em blocos 4x4 de 24 bytes (16B índices + 8B alpha 4-bit).
-            // Texturas com altura múltipla de 64 usam campos verticais intercalados
-            // de 64px cada (de-interleaving vertical). Ex: 256x256 = 4 campos.
-            // Leitura column-major (bx exterior, by interior) com deposição de-interleaved.
-            if (alpha_bits == 4 && mip.data.size() >= blocks * 24) {
-                const uint32_t bx_count = (mip.width + 3) / 4;
-                const uint32_t by_count = (mip.height + 3) / 4;
-                const uint32_t fields = (mip.height >= 64 && mip.height % 64 == 0)
-                    ? mip.height / 64 : 1;
-                LOGI("[DDT3-DIAG] %ux%u alpha4 blocks=%zu (bx=%u, by=%u, fields=%u, data_sz=%zu, num_c=%zu, pal_offsets: 0=%u, 1=%u, a1=%u, a4=%u)",
-                     mip.width, mip.height, blocks, bx_count, by_count, fields, mip.data.size(), num_colors,
+            // Formato 3 com alpha 4-bit (DecodeBt8As4444):
+            // Armazenado linha a linha em grupos de 4 pixels (6 bytes: uint16 alpha + 4 uint8 indices).
+            // A paleta de 16-bit contém B4G4R4 nos 12 bits inferiores;
+            // os 4 nibbles de alpha combinam-se com a paleta para formar pixels RGBA4444.
+            if (alpha_bits == 4 && mip.data.size() >= required_bytes) {
+                LOGI("[DDT3-DIAG] %ux%u alpha4 DecodeBt8As4444 (data_sz=%zu, num_c=%zu, pal_offsets: 0=%u, 1=%u, a1=%u, a4=%u)",
+                     mip.width, mip.height, mip.data.size(), num_colors,
                      palette_offset_0, palette_offset_1, palette_offset_alpha1, palette_offset_alpha4);
-                size_t block_idx = 0;
-                for (uint32_t bx = 0; bx < bx_count; ++bx) {
-                    for (uint32_t by = 0; by < by_count; ++by) {
-                        const uint8_t* blk = mip.data.data() + block_idx * 24;
-                        block_idx++;
-                        const uint8_t* indices = blk;
-                        const uint8_t* alpha = blk + 16;
-                        for (uint32_t py = 0; py < 4; ++py) {
-                            for (uint32_t px = 0; px < 4; ++px) {
-                                const uint32_t gx = bx * 4 + px;
-                                const uint32_t dr = by * 4 + py;
-                                const uint32_t field = dr / 64;
-                                const uint32_t row_in_field = dr % 64;
-                                const uint32_t gy = row_in_field * fields + field;
-                                if (gx >= mip.width || gy >= mip.height) continue;
-                                const uint32_t p = py * 4 + px;
-                                size_t idx = indices[p];
-                                if (idx >= num_colors) idx = 0;
-                                const uint16_t val = read_u16(palette.data() + idx * 2);
-                                const uint8_t ab = alpha[p >> 1];
-                                const uint8_t a4 = (p & 1) ? (ab & 0x0F) : ((ab >> 4) & 0x0F);
-                                const size_t out_p = (gy * mip.width + gx) * 4;
-                                expand_444(val, output[out_p + 0], output[out_p + 1], output[out_p + 2]);
-                                output[out_p + 3] = a4 * 17;
-                            }
+                const uint8_t* in = mip.data.data();
+                for (uint32_t y = 0; y < mip.height; ++y) {
+                    for (uint32_t x = 0; x < mip.width; x += 4) {
+                        const uint16_t alpha = read_u16(in);
+                        in += 2;
+                        const uint8_t indices[4] = { in[0], in[1], in[2], in[3] };
+                        in += 4;
+
+                        // Mapeamento dos nibbles de alpha conforme DecodeBt8As4444:
+                        // Pixel 0: nibble alto do byte 0 ((alpha >> 4) & 0x0F)
+                        // Pixel 1: nibble baixo do byte 0 (alpha & 0x0F)
+                        // Pixel 2: nibble alto do byte 1 ((alpha >> 12) & 0x0F)
+                        // Pixel 3: nibble baixo do byte 1 ((alpha >> 8) & 0x0F)
+                        const uint8_t a_nibbles[4] = {
+                            static_cast<uint8_t>((alpha >> 4) & 0x0F),
+                            static_cast<uint8_t>(alpha & 0x0F),
+                            static_cast<uint8_t>((alpha >> 12) & 0x0F),
+                            static_cast<uint8_t>((alpha >> 8) & 0x0F)
+                        };
+
+                        for (uint32_t p = 0; p < 4; ++p) {
+                            if (x + p >= mip.width) continue;
+                            size_t idx = indices[p];
+                            if (idx >= num_colors) idx = 0;
+                            const uint16_t val = read_u16(palette.data() + idx * 2);
+
+                            // B4G4R4 nos 12 bits inferiores
+                            const uint8_t r = static_cast<uint8_t>(((val >> 8) & 0x0F) * 17);
+                            const uint8_t g = static_cast<uint8_t>(((val >> 4) & 0x0F) * 17);
+                            const uint8_t b = static_cast<uint8_t>((val & 0x0F) * 17);
+                            const uint8_t a = static_cast<uint8_t>(a_nibbles[p] * 17);
+
+                            const size_t out_p = (static_cast<size_t>(y) * mip.width + (x + p)) * 4;
+                            output[out_p + 0] = r;
+                            output[out_p + 1] = g;
+                            output[out_p + 2] = b;
+                            output[out_p + 3] = a;
                         }
                     }
                 }
