@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141609 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11141620 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -12,12 +12,19 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Offset MTRL (`pos + 64`) e candidatos de textura (`bronze.ddt`, `copper.ddt`, etc.).
 - ✅ `glDepthMask(GL_TRUE)` garantido no `begin_frame` antes de `glClear`.
 - ✅ Vértices e `kMeshVertexSrc` corrigidos sem skinning indevido (malhas 3D renderizando normalmente).
+- ✅ Escala 1:1 dos modelos BRG mantida de fábrica.
 
-## Correções Aplicadas nesta Versão (Escala Canônica 1:1)
-- ✅ **Remoção de Multiplicadores Paliativos (`include/ecs/gameplay.h`)**:
-  - Removidos `scale *= 2.0f` (unidades) e `scale *= 2.5f` (edifícios).
-  - Como o `[BRGBOUNDS]` confirmou que as malhas BRG originais possuem dimensões exatas de fábrica em metros (ex.: Hoplita com 1,75 m, Centro da Cidade com 10,5 m), a cena agora renderiza com escala 1:1 autêntica do jogo.
+## Correções Aplicadas nesta Versão (Escala de Terreno & Câmera RTS)
+- ✅ **Expansão do Terreno para Proporção Canônica AoM (`src/engine/engine_terrain.cpp`)**:
+  - `kTerrainTileSize` alterado de `1.0f` para `2.0f`.
+  - O mapa heightmap de 64×64 passa de 64m para 128×128 metros de área jogável.
+  - Grade de navegação sincronizada com `kTerrainTileSize = 2.0f`.
+  - Log atualizado: `Generated terrain from height-map: 64x64, 4096 verts, 23814 indices (step=2.0, world=128x128)`.
+- ✅ **Calibração de Câmera RTS Isométrica (`engine_campaign.cpp` & `engine_input.cpp`)**:
+  - `radius_` inicial ajustado de `14.0f` (colado nas tropas) para `28.0f`.
+  - `pitch_` inicial ajustado de `0.35f` (~20° plano) para `0.85f` (~50° isométrico clássico AoM).
+  - Limites de zoom estendidos para `[8.0f, 60.0f]`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141609 gerado e assinado em `/sdcard/aom-native-v1.0.11141609.apk`.
-2. Validar proporções das unidades, construções e recursos no mapa.
+1. ✅ APK v1.0.11141620 gerado e assinado em `/sdcard/aom-native-v1.0.11141620.apk`.
+2. Validar o enquadramento do mapa e proporção TC/tropas/terreno.

@@ -521,13 +521,14 @@ bool Engine::load_scenario_heightmap(const std::string& scenario_path) {
          *std::min_element(heightmap_data_.begin(), heightmap_data_.end()),
          *std::max_element(heightmap_data_.begin(), heightmap_data_.end()));
 
+    const float kTerrainTileSize = 2.0f;
     // Gerar malha de terreno a partir do height-map
-    generate_terrain_from_heightmap(heightmap_data_, heightmap_width_, heightmap_height_, 1.0f);
+    generate_terrain_from_heightmap(heightmap_data_, heightmap_width_, heightmap_height_, kTerrainTileSize);
 
     // Atualizar NavigationGrid com base no height-map (encostas íngremes = intransponíveis)
     if (gameplay_world_) {
         gameplay_world_->rebuild_navigation_from_heightmap(
-            heightmap_data_, heightmap_width_, heightmap_height_, 1.0f);
+            heightmap_data_, heightmap_width_, heightmap_height_, kTerrainTileSize);
     }
 
     return true;
@@ -615,8 +616,8 @@ void Engine::generate_terrain_from_heightmap(const std::vector<float>& heightmap
 
     terrain_mesh_ = renderer_->create_terrain_mesh(verts.data(), static_cast<uint32_t>(verts.size()),
                                                    indices.data(), static_cast<uint32_t>(indices.size()));
-    LOGI("Generated terrain from height-map: %dx%d, %zu verts, %zu indices",
-         width, height, verts.size(), indices.size());
+    LOGI("Generated terrain from height-map: %dx%d, %zu verts, %zu indices (step=%.1f, world=%.0fx%.0f)",
+         width, height, verts.size(), indices.size(), STEP, width * STEP, height * STEP);
 }
 
 void Engine::generate_skydome() {
