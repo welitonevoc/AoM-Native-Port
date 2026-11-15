@@ -1,9 +1,21 @@
+# Project Configuration — AoM Native Port
+# Stage advanced: Polish → Release (via /gate-check)
 # CCGS project configuration — single source of truth for project settings.
 # See .claude/docs/effects-map.md for full schema.
 
 schema_version: 1
 
+project:
+  stage: Release
+  version: 0.1.0
+  cert_tier: none
+  workflow: minimal
+  qa_level: minimal
+  review_mode: solo
+
 framework:
+  name: Claude Code Game Studio
+  skill: gate-check
   version: 1.2.0
   last_upgraded: 2026-10-19
 

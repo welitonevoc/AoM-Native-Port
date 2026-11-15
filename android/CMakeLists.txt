@@ -12,6 +12,18 @@ add_library(aom_native SHARED
     ../src/assets/xmb_parser.cpp
     ../src/audio/opensl_engine.cpp
     ../src/engine/engine.cpp
+    ../src/engine/engine_assets.cpp
+    ../src/engine/engine_campaign.cpp
+    ../src/engine/engine_gameplay.cpp
+    ../src/engine/engine_hud.cpp
+    ../src/engine/engine_input.cpp
+    ../src/engine/engine_menus.cpp
+    ../src/engine/engine_multiplayer.cpp
+    ../src/engine/engine_options_menu.cpp
+    ../src/engine/engine_particles.cpp
+    ../src/engine/engine_save_load.cpp
+    ../src/engine/engine_states.cpp
+    ../src/engine/engine_terrain.cpp
     ../src/engine/ui_from_xmb.cpp
     ../src/renderer/gles_renderer.cpp
     ../src/ui/ui.cpp

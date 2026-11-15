@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_low_detail_background>
+  <detail_level>low</detail_level>
+  <shadows>false</shadows>
+  <particles>false</particles>
+  <buttons>
+    <button label="Apply" action="apply_settings"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_low_detail_background>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_start_game>
+  <map>Random Map</map>
+  <players>2</max_players>
+  <difficulty>Normal</difficulty>
+  <buttons>
+    <button label="Iniciar" action="start_game"/>
+    <button label="Voltar" action="return_to_menu"/>
+  </buttons>
+</ui_start_game>

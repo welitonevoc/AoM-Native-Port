@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_load_game>
+  <saved_games>
+    <save name="Save Game 1" date="2026-11-01"/>
+    <save name="Save Game 2" date="2026-10-15"/>
+  </saved_games>
+  <buttons>
+    <button label="Load" action="load_game"/>
+    <button label="Delete" action="delete_save"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_load_game>

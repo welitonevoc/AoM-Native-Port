@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_game_palettes>
+  <palettes>
+    <palette name="Default"/>
+    <palette name="Dark Mode"/>
+    <palette name="High Contrast"/>
+  </palettes>
+  <buttons>
+    <button label="Apply" action="apply_palette"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_game_palettes>

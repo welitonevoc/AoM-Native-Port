@@ -14,10 +14,15 @@ Assets gerados:
 """
 
 import os
+import shutil
 import struct
 import sys
+import time
 import zlib
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from progress_monitor import ProgressMonitor
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT / "assets"
@@ -30,8 +35,18 @@ CANDIDATE_DIRS = [
     ROOT / "build-m2",
 ]
 
+# Diretório alternativo dentro do próprio APK (build-apk/assets)
+APK_ASSETS_DIR = ROOT / "build-apk" / "assets"
+
 
 def find_aom_paths():
+    # Primeiro, tenta carregar de assets dentro do APK (build-apk/assets)
+    if APK_ASSETS_DIR.exists():
+        bar_candidate = APK_ASSETS_DIR / "textures" / "textures.bar"
+        if bar_candidate.is_file():
+            return bar_candidate, APK_ASSETS_DIR
+
+    # Se não estiver dentro do APK, tente os locais externos
     for base in CANDIDATE_DIRS:
         bar_candidates = [
             base / "textures" / "textures.bar",
@@ -223,6 +238,43 @@ def create_greek_stone_button(stone_img, w=280, h=44, state="normal"):
     return btn
 
 
+def copy_bar_files():
+    """Cópia todos os arquivos .bar dos diretórios de origem para a estrutura do APK"""
+    print("[*] Copiando todos os arquivos .bar para compilação...")
+    
+    # Define todos os diretórios de origem para busca
+    source_dirs = [
+        *CANDIDATE_DIRS,
+        ROOT / "assets_bar",
+    ]
+    
+    copied_count = 0
+    for source_base in source_dirs:
+        if not source_base.exists():
+            continue
+            
+        # Encontra todos os arquivos .bar recursivamente
+        for bar_file in source_base.rglob("*.bar"):
+            if bar_file.is_file():
+                # Calcula o caminho de destino correspondente na estrutura do APK
+                rel_path = bar_file.relative_to(source_base)
+                dest_path = ROOT / "build-apk" / "assets" / rel_path.parent / bar_file.name
+                
+                # Cria o diretório de destino
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Copia o arquivo .bar
+                import shutil
+                shutil.copy2(bar_file, dest_path)
+                copied_count += 1
+                print(f"[OK] Copiado: {bar_file} -> {dest_path}")
+    
+    if copied_count > 0:
+        print(f"[OK] Total de arquivos .bar copiados: {copied_count}")
+    else:
+        print("[!] Nenhum arquivo .bar encontrado para copiar")
+
+
 def main():
     try:
         from PIL import Image
@@ -238,8 +290,22 @@ def main():
         sys.exit(1)
 
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Primeiro, copia todos os arquivos .bar para compilação
+    copy_bar_files()
+
+    # Monitor de progresso por etapa da importação
+    stages = [
+        "Carregando BAR e catalogando entradas",
+        "Extraindo textura de mármore grego",
+        "Gerando botões de mármore grego (normal/clicked/rollover)",
+        "Convertendo BMPs originais (splash/loading/menu)",
+        "Salvando assets finais em assets/",
+    ]
+    pm = ProgressMonitor(total=len(stages), label="Importação de assets AoM")
 
     # 1. Carregar textura de mármore grego genuína (greek button background.ddt)
+    pm.update(0, force=True)
     stone_img = None
     if bar_path and bar_path.is_file():
         print(f"[*] Abrindo BAR: {bar_path}")
@@ -262,6 +328,8 @@ def main():
     if stone_img:
         stone_img.save(ASSETS_DIR / "greek_button_bg.png")
 
+    pm.increment()
+
     # 2. Gerar os botões de mármore grego chanfrados com ouro autênticos
     print("[*] Gerando botões de mármore grego com friso dourado AoM...")
     btn_norm = create_greek_stone_button(stone_img, 280, 44, "normal")
@@ -272,6 +340,8 @@ def main():
     btn_click.save(ASSETS_DIR / "button_clicked.png")
     btn_roll.save(ASSETS_DIR / "button_rollover.png")
     print(f"[OK] Botões autênticos gerados: button_main.png ({btn_norm.size})")
+
+    pm.increment()
 
     # 3. Converter BMPs originais em alta resolução (loading1024.bmp e splash.bmp)
     loading_bmp = None
@@ -288,6 +358,8 @@ def main():
                 splash_bmp = cand
                 break
 
+    pm.increment()
+
     # 4. Salvar splash.png
     splash_out = ASSETS_DIR / "splash.png"
     if splash_bmp and splash_bmp.is_file():
@@ -295,7 +367,7 @@ def main():
         img.save(splash_out)
         print(f"[OK] Splash original convertido: {splash_bmp} -> {splash_out} ({img.size})")
 
-    # 5. Salvar loading.png
+    # 5. Salvar loading.png e main_menu.png
     loading_out = ASSETS_DIR / "loading.png"
     menu_out = ASSETS_DIR / "main_menu.png"
     if loading_bmp and loading_bmp.is_file():
@@ -306,9 +378,14 @@ def main():
             img.save(menu_out)
             print(f"[OK] Menu principal salvo -> {menu_out}")
         else:
-            print(f"[OK] Menu principal The Titans preservado -> {menu_out}")
+            print(f"[OK] Menu principal preservado -> {menu_out}")
 
-    print("\n=== Todos os assets do Menu Original AoM foram extraídos e gerados com perfeição! ===")
+    pm.increment()
+
+    # Finalizar
+    pm.increment()
+    pm.close(message="\n=== Todos os assets do Menu Original AoM foram extraídos e gerados com perfeição! ===")
+
     for fname in ["main_menu.png", "loading.png", "splash.png", "button_main.png", "button_clicked.png", "font.ttf"]:
         p = ASSETS_DIR / fname
         if p.is_file():

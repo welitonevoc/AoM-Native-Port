@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_launch_screen>
+  <title>Loading...</title>
+  <logo>logo.png</logo>
+  <tips>
+    <tip>Use o mouse para selecionar unidades</tip>
+    <tip>Clique com o botão direito para atacar</tip>
+  </tips>
+</ui_launch_screen>

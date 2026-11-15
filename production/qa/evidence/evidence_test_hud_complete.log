@@ -1,0 +1,28 @@
+========================================
+ P5.1 — HUD Completo Test Suite
+========================================
+
+--- Testing Population Counter (HUD) ---
+PASS: Initial population is 0
+PASS: Population cap > 0 (base + TCs + houses)
+PASS: Spawned friendly villager
+PASS: Population increased after spawning unit
+Pop: 1/10
+
+--- Testing Minimap Blips ---
+PASS: Minimap blips have valid resource colors (or no blips)
+Minimap has 0 blips (no resource nodes in default world)
+
+--- Testing Command Panel Buttons (HUD) ---
+PASS: HOUSE building type exists
+PASS: BARRACKS building type exists
+PASS: TOWER building type exists
+PASS: TOWN_CENTER building type exists
+
+--- Testing Production Queue Progress ---
+PASS: Empty selection has 0 queue count
+PASS: Empty selection has 0 progress
+
+========================================
+ ALL HUD TESTS PASSED! (100%)
+========================================

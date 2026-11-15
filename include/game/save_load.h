@@ -51,11 +51,23 @@ struct SavedBuilding {
     std::vector<std::string> train_queue;  ///< fila de unidades a treinar
 };
 
+/// Progresso de uma campanha (qual missao foi concluida, desbloqueios)
+struct CampaignProgress {
+    std::string campaign_name;           ///< "Fall of the Trident" ou "The New Atlantis"
+    size_t      completed_scenarios = 0; ///< Numero de missoes concluidas (proximo indice jogavel)
+    int         last_difficulty = 1;     ///< Dificuldade da ultima jogada (0=Facil..3=Tita)
+};
+
 struct SaveGameData {
     uint32_t magic             = kSaveMagic;
     uint32_t version           = kSaveFormatVersion;
     float    game_time_seconds = 0.0f;
     int      map_seed          = 42;
+
+    // Condicao e resultado de vitoria (skirmish)
+    uint8_t  victory_condition = 0;   ///< VictoryCondition (0=CONQUEST,1=SUDDEN_DEATH)
+    uint8_t  victory_result    = 0;   ///< VictoryResult (0=NONE,1=WIN,2=LOSE)
+    float    victory_timer     = 0.0f;///< segundos desde o desfecho
 
     // Recursos por time (friendly=0, enemy=1)
     int food[2]  = {};
@@ -63,17 +75,22 @@ struct SaveGameData {
     int gold[2]  = {};
     int favor[2] = {};
 
+    // Progresso de campanhas (base + expansao)
+    std::vector<CampaignProgress> campaign_progress;
+
     // Entidades do mundo (gravadas em disco desde a v1 e agora restauradas)
     std::vector<SavedUnit>     units;
     std::vector<SavedBuilding> buildings;
 };
 
 /// Serializa o estado do jogo para um arquivo binario.
+/// Cria o diretorio de destino se ele ainda nao existir.
 /// Retorna true em caso de sucesso.
 bool save_game_state(const std::string& path,
                      const GameplayWorld& world,
                      float game_time_seconds,
-                     int map_seed = 42);
+                     int map_seed = 42,
+                     const std::vector<CampaignProgress>& campaign_progress = {});
 
 /// Desserializa o estado do jogo a partir de um arquivo binario.
 /// Retorna true e preenche 'out' em caso de sucesso.

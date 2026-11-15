@@ -1,0 +1,33 @@
+========================================
+ P5.3 — Victory Conditions Test Suite
+========================================
+
+--- Testing Victory Result Enum ---
+PASS: VictoryResult::NONE == 0
+PASS: VictoryResult::WIN == 1
+PASS: VictoryResult::LOSE == 2
+PASS: VictoryCondition::CONQUEST == 0
+PASS: VictoryCondition::SUDDEN_DEATH == 1
+Victory enum values correct
+
+--- Testing Conquest: All Enemies Defeated ---
+PASS: Spawned friendly Town Center
+PASS: Conquest: WIN when no enemy TCs
+
+--- Testing Conquest: Enemy Still Alive ---
+PASS: Spawned friendly Town Center
+PASS: Spawned enemy Town Center
+PASS: Conquest: NONE while both TCs alive
+
+--- Testing Sudden Death: Enemy TC Destroyed ---
+PASS: Spawned friendly Town Center
+PASS: Spawned enemy TC
+PASS: Sudden Death: WIN when enemy TC destroyed
+
+--- Testing Sudden Death: Own TC Destroyed (Defeat) ---
+PASS: Spawned own Town Center
+PASS: Sudden Death: LOSE when own TC destroyed
+
+========================================
+ ALL VICTORY CONDITION TESTS PASSED! (100%)
+========================================

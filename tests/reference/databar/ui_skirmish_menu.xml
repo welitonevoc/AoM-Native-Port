@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_skirmish_menu>
+  <map>Random Map</map>
+  <players>4</max_players>
+  <difficulty>Medium</difficulty>
+  <buttons>
+    <button label="Start" action="start_skirmish"/>
+    <button label="Back" action="return_to_main_menu"/>
+  </buttons>
+</ui_skirmish_menu>

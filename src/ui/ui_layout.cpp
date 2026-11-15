@@ -1,15 +1,17 @@
 #include "ui/ui_layout.h"
+#include "ui/button_set.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
 #include <sstream>
-#include <android/log.h>
+#include <set>
+#include "engine/logger.h"
 
 #define LOG_TAG "AoM_UILayout"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 namespace aom {
 
@@ -26,6 +28,21 @@ std::string to_lower(std::string_view s) {
     return out;
 }
 
+/// Remove todos os blocos iniciais no formato $$<número>$$ do texto do XMB.
+/// Ex: $$19825$$$$19825$$Learn To Play -> Learn To Play
+/// Colapsa espaços à esquerda (o XMB usa espaços para alinhar texto dentro dos $$ID$$).
+static std::string strip_string_ids(std::string s) {
+    while (s.size() >= 4 && s[0] == '$' && s[1] == '$') {
+        size_t end = s.find("$$", 2);
+        if (end == std::string::npos) break;
+        s.erase(0, end + 2);
+    }
+    size_t p = s.find_first_not_of(" \t\r\n");
+    if (p == std::string::npos) return "";
+    size_t q = s.find_last_not_of(" \t\r\n");
+    return s.substr(p, q - p + 1);
+}
+
 /// Faz split de uma string por espaços, retornando floats
 std::vector<float> parse_floats(const std::string& str) {
     std::vector<float> out;
@@ -35,6 +52,19 @@ std::vector<float> parse_floats(const std::string& str) {
         out.push_back(v);
     }
     return out;
+}
+
+/// Remove espaços em branco e quebras de linha do início e fim da string
+std::string trim(const std::string& s) {
+    size_t start = 0;
+    while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+        ++start;
+    }
+    size_t end = s.size();
+    while (end > start && std::isspace(static_cast<unsigned char>(s[end - 1]))) {
+        --end;
+    }
+    return s.substr(start, end - start);
 }
 
 } // anonymous namespace
@@ -77,10 +107,22 @@ uint32_t UILayoutManager::parse_color_rgba(const std::string& color_str, uint8_t
     uint8_t r = static_cast<uint8_t>(std::clamp(c.x, 0.0f, 255.0f));
     uint8_t g = static_cast<uint8_t>(std::clamp(c.y, 0.0f, 255.0f));
     uint8_t b = static_cast<uint8_t>(std::clamp(c.z, 0.0f, 255.0f));
-    return (static_cast<uint32_t>(r) << 24) |
-           (static_cast<uint32_t>(g) << 16) |
-           (static_cast<uint32_t>(b) << 8) |
-           static_cast<uint32_t>(alpha);
+    // Formato ARGB (igual ao restante do engine, ex: gles_renderer.cpp draw_ui_quad)
+    return (static_cast<uint32_t>(alpha) << 24) |
+           (static_cast<uint32_t>(r) << 16) |
+           (static_cast<uint32_t>(g) << 8) |
+           static_cast<uint32_t>(b);
+}
+
+uint32_t UILayoutManager::parse_color_rgba(const glm::vec3& color, uint8_t alpha) {
+    uint8_t r = static_cast<uint8_t>(std::clamp(color.x, 0.0f, 255.0f));
+    uint8_t g = static_cast<uint8_t>(std::clamp(color.y, 0.0f, 255.0f));
+    uint8_t b = static_cast<uint8_t>(std::clamp(color.z, 0.0f, 255.0f));
+    // Formato ARGB (igual ao restante do engine, ex: gles_renderer.cpp draw_ui_quad)
+    return (static_cast<uint32_t>(alpha) << 24) |
+           (static_cast<uint32_t>(r) << 16) |
+           (static_cast<uint32_t>(g) << 8) |
+           static_cast<uint32_t>(b);
 }
 
 UILayoutResult UILayoutManager::load_layout(BarArchive& bar, const std::string& xmb_name) {
@@ -153,9 +195,13 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     out.type = elem->get_attribute("type");
     if (out.type.empty()) out.type = "gadget";
 
+    LOGI("[parse] <%s type='%s'>", out.name.c_str(), out.type.c_str());
+
     // size1024 -> rect em pixels (formato AoM: left top right bottom)
     if (elem->has_attribute("size1024")) {
-        auto rect = convert_size1024(elem->get_attribute("size1024"), screen_w, screen_h);
+        std::string sz = elem->get_attribute("size1024");
+        LOGI("[parse]   size1024 raw='%s'", sz.c_str());
+        auto rect = convert_size1024(sz, screen_w, screen_h);
         out.rect.x = rect.x;
         out.rect.y = rect.y;
         out.rect.w = rect.z;
@@ -165,12 +211,85 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     // Texto
     out.text = elem->text;
 
-    // Cores
+    // Cores (atributos do nó pai)
     if (elem->has_attribute("textcolor")) {
         out.text_color = parse_color(elem->get_attribute("textcolor"));
     }
     if (elem->has_attribute("backgroundcolor")) {
         out.bg_color = parse_color(elem->get_attribute("backgroundcolor"));
+        out.bg_color_set = true;
+    }
+
+    // ── Leitura de Elementos Filhos ──
+    // O XMB do AoM guarda propriedades em nós filhos (<text>, <textcolor>,
+    // <background>, <backgroundcolor>, <size1024>), não apenas em atributos.
+    // Log do texto direto do elemento (entre as tags de abertura/fechamento).
+    std::string elem_text = trim(elem->text);
+    if (!elem_text.empty()) {
+        LOGI("[XMB] Gadget '%s' tipo='%s' texto_direto='%s'",
+             out.name.c_str(), out.type.c_str(), elem_text.c_str());
+    }
+    for (const auto& child : elem->children) {
+        if (!child) continue;
+
+        std::string child_text = trim(child->text);
+
+        LOGI("[XMB] Gadget '%s' tem filho <%s> text='%s'",
+             out.name.c_str(), child->name.c_str(), child_text.c_str());
+
+        if (child->name == "text") {
+            out.text = child_text;
+        } else if (child->name == "textcolor") {
+            out.text_color = parse_color(child_text);
+            out.extra_attrs["textcolor"] = child_text;
+        } else if (child->name == "backgroundcolor") {
+            out.bg_color = parse_color(child_text);
+            out.extra_attrs["backgroundcolor"] = child_text;
+            out.bg_color_set = true;
+        } else if (child->name == "background") {
+            out.bg_texture = child_text;
+        } else if (child->name == "stateentry") {
+            // stateentry background="ui\ui pregame button"
+            // Captura todos os estados [0]=normal, 1=clicked, 2=rollover, 3=glow
+            std::string bg = child->get_attribute("background");
+            out.state_backgrounds.push_back(bg);
+            if (out.state_backgrounds.size() == 1 && !bg.empty()) {
+                out.bg_texture = bg;  // estado normal = fundo padrão do botão
+                LOGI("[XMB] Gadget '%s' stateentry background='%s' (estado normal)",
+                     out.name.c_str(), bg.c_str());
+            }
+        } else if (child->name == "command") {
+            out.command = child_text;
+        } else if (child->name == "size1024") {
+            auto rect = convert_size1024(child_text, screen_w, screen_h);
+            out.rect.x = rect.x;
+            out.rect.y = rect.y;
+            out.rect.w = rect.z;
+            out.rect.h = rect.w;
+        }
+    }
+
+    // Se o texto ainda estiver vazio, tenta atributo (fallback)
+    if (out.text.empty()) {
+        out.text = elem->get_attribute("text");
+    }
+
+    // texturecoords -> uv_min / uv_max (formato AoM: u0 v0 u1 v1)
+    if (elem->has_attribute("texturecoords")) {
+        auto coords = parse_floats(elem->get_attribute("texturecoords"));
+        if (coords.size() >= 4) {
+            out.texture_coords = glm::vec4(coords[0], coords[1], coords[2], coords[3]);
+            out.has_texture_coords = true;
+        }
+    }
+
+    // z-order
+    if (elem->has_attribute("z")) {
+        try {
+            out.z = std::stoi(elem->get_attribute("z"));
+        } catch (...) {
+            out.z = 0;
+        }
     }
 
     // Fonte
@@ -183,8 +302,10 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
         }
     }
 
-    // Textura de fundo
-    out.bg_texture = elem->get_attribute("background");
+    // Textura de fundo: só usa o atributo se o filho <background> não já definiu
+    if (out.bg_texture.empty()) {
+        out.bg_texture = elem->get_attribute("background");
+    }
 
     // Flags
     out.has_bevel = elem->has_attribute("bevel");
@@ -192,23 +313,44 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
     out.title_bar = elem->get_attribute("titlebar");
     out.hidden = elem->has_attribute("hidden");
 
-    // has_background: true se o gadget tem background/textura definida no XMB
-    // (usado para saber se devemos renderizar painel de fundo)
+    // has_background: true se há background (atributo ou filho) ou cor de fundo
     out.has_background = elem->has_attribute("background") ||
                          elem->has_attribute("backgroundcolor") ||
-                         elem->has_attribute("bevel");
+                         elem->has_attribute("bevel") ||
+                         !out.bg_texture.empty() ||
+                         (elem->has_attribute("backgroundcolor"));
 
     // Ação do botão (ex: "start_game", "open_options", "open_credits", "quit_app")
     out.action = elem->get_attribute("action");
+
+    // Comando nativo do AoM via atributo se não veio como filho <command>
+    if (out.command.empty() && elem->has_attribute("command")) {
+        out.command = elem->get_attribute("command");
+    }
 
     // Outros atributos (armazena para referência)
     for (const auto& attr : elem->attributes) {
         out.extra_attrs[attr.name] = attr.value;
     }
 
-    // Gadgets filhos (hierarquia)
+    // ── LOG [GADGET]: diagnóstico para identificar o gadget azul/retângulo ──
+    LOGI("[GADGET] name='%s' type='%s' rect=(%.0f,%.0f,%.0f,%.0f) bg_set=%d bg=(%.0f,%.0f,%.0f) tex='%s' text='%s' n_children=%zu",
+         out.name.c_str(), out.type.c_str(),
+         out.rect.x, out.rect.y, out.rect.w, out.rect.h,
+         out.bg_color_set,
+         out.bg_color.x, out.bg_color.y, out.bg_color.z,
+         out.bg_texture.c_str(),
+         out.text.empty() ? "-" : out.text.c_str(),
+         out.children.size());
+
+    // Gadgets filhos (hierarquia) — pula nós que são apenas propriedades
+    // (não são gadgets visuais: texto, cor, bg, tamanho, estados do botão e comando de ação)
+    static const std::set<std::string> kPropNodes = {"text", "textcolor",
+                                                     "background", "backgroundcolor",
+                                                     "size1024", "stateentry", "command"};
     for (const auto& child : elem->children) {
         if (!child) continue;
+        if (kPropNodes.count(child->name)) continue;
         UIGadgetDef child_def;
         parse_gadget(child.get(), screen_w, screen_h, child_def);
         out.children.push_back(std::move(child_def));
@@ -217,7 +359,9 @@ void UILayoutManager::parse_gadget(const XmbElement* elem, int screen_w, int scr
 
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                            int screen_w, int screen_h,
-                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks) {
+                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
+                           TextureResolverFn texture_resolver,
+                           const ButtonSetManager* button_sets) {
     if (!ui) return 0;
 
     size_t created = 0;
@@ -227,53 +371,79 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     // Estes são gadgets tipo "gadget" com has_background=true
     // Devem ser renderizados PRIMEIRO (z-order inferior)
     // ============================================================
-    std::function<void(const UIGadgetDef&, float, float)> apply_backgrounds =
-        [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
-            if (gd.hidden) return;
+    const float scale = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
+    const float offset_center_x = std::max(0.0f, (static_cast<float>(screen_w) - UILayoutManager::kRefWidth * scale) * 0.5f);
 
-            float x = offset_x + gd.rect.x;
-            float y = offset_y + gd.rect.y;
-            float w = gd.rect.w;
-            float h = gd.rect.h;
+    std::function<void(const UIGadgetDef&, const std::string&, bool)> apply_backgrounds =
+        [&](const UIGadgetDef& gd, const std::string& parent_tag, bool parent_hidden) {
+            bool is_hidden = parent_hidden || gd.hidden;
+            std::string current_tag = gd.name.empty() ? parent_tag : gd.name;
 
-            float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
-            float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
-            x = gd.rect.x * sx;
-            y = gd.rect.y * sy;
-            w = gd.rect.w * sx;
-            h = gd.rect.h * sy;
+            // size1024 no AoM é coordenada absoluta de tela em base 1024x768
+            float x = offset_center_x + gd.rect.x * scale;
+            float y = gd.rect.y * scale;
+            float w = gd.rect.w * scale;
+            float h = gd.rect.h * scale;
 
             // Background panels: type="gadget" COM has_background=true
-            // Criamos como botão NÃO interativo (callback vazio), cor transparente
-            // para servir apenas como painel visual de fundo
+            // Criamos como elemento NÃO interativo - apenas painel visual de fundo
             if (gd.type == "gadget" && gd.has_background) {
-                uint32_t color = 0x00000000; // Totalmente transparente - usa textura do XMB se houver
-                if (!gd.extra_attrs.empty() && gd.extra_attrs.count("bgcolor")) {
-                    color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("bgcolor"), 200);
-                } else if (!gd.extra_attrs.empty() && gd.extra_attrs.count("backgroundcolor")) {
-                    color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("backgroundcolor"), 200);
+                // Tenta resolver a textura primeiro se houver
+                TextureHandle tex_handle = INVALID_TEXTURE;
+                if (!gd.bg_texture.empty() && texture_resolver) {
+                    ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                    tex_handle = rt.handle;
+                    if (tex_handle != INVALID_TEXTURE) {
+                        LOGI("UI Layout: background textura '%s' resolvida (handle=%u)",
+                             gd.bg_texture.c_str(), rt.handle);
+                    } else {
+                        LOGW("UI Layout: background textura não encontrada: %s", gd.bg_texture.c_str());
+                    }
                 }
 
-                // Callback vazio = não interativo
-                std::function<void()> empty_callback = []() {};
+                // SÓ desenha painel de fundo se:
+                // a) Teve textura resolvida com sucesso, OU
+                // b) Não tem textura, mas tem cor explícita definida no XMB que não seja azul/preto placeholder
+                uint32_t panel_color = 0x00000000;
+                if (tex_handle != INVALID_TEXTURE) {
+                    panel_color = 0xFFFFFFFF; // Opaco para exibir textura
+                } else if (gd.bg_texture.empty() && gd.bg_color_set) {
+                    if (gd.bg_color != glm::vec3(0, 0, 255) && gd.bg_color != glm::vec3(0, 0, 0)) {
+                        panel_color = UILayoutManager::parse_color_rgba(gd.bg_color);
+                    }
+                }
 
-                auto* btn = ui->add_button(
-                    {x, y}, {w, h},
-                    empty_callback,
-                    color,
-                    0x00000000); // pressed color também transparente
-                if (btn) {
-                    btn->label = ""; // Sem texto
-                    btn->text_size = 0;
-                    // IMPORTANTE: background panels não usam texturas padrão de botão
-                    // O UIManager deve renderizar apenas a cor/quad
-                    ++created;
+                // Se não tem textura nem cor válida, NÃO cria o quad (permanece transparente)
+                if (panel_color != 0x00000000 || tex_handle != INVALID_TEXTURE) {
+                    auto* btn = ui->add_button(
+                        {x, y}, {w, h},
+                        []() {}, // callback vazio (não interativo)
+                        panel_color,
+                        0x00000000  // pressed color também transparente
+                    );
+                    if (btn) {
+                        btn->interactive = false; // painel de fundo não recebe toque
+                        btn->visible = !is_hidden;
+                        btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                        btn->group_tag = parent_tag;
+                        btn->label = "";
+                        btn->text_size = 0;
+                        btn->normal_tex = tex_handle;
+                        btn->pressed_tex = tex_handle;
+                        btn->current_color = panel_color;
+                        if (gd.has_texture_coords) {
+                            btn->has_uv = true;
+                            btn->uv_min = glm::vec2(gd.texture_coords.x, 1.0f - gd.texture_coords.w);
+                            btn->uv_max = glm::vec2(gd.texture_coords.z, 1.0f - gd.texture_coords.y);
+                        }
+                        ++created;
+                    }
                 }
             }
 
-            // Recursão para filhos (backgrounds aninhados)
+            // Recursão para filhos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_backgrounds(child, x, y);
+                apply_backgrounds(child, current_tag, is_hidden);
             }
         };
 
@@ -281,69 +451,505 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
     // PASS 2: Criar elementos interativos (botões, textos, sliders)
     // Renderizados DEPOIS dos backgrounds (z-order superior)
     // ============================================================
-    std::function<void(const UIGadgetDef&, float, float)> apply_interactive =
-        [&](const UIGadgetDef& gd, float offset_x, float offset_y) {
-            if (gd.hidden) return;
+    std::function<void(const UIGadgetDef&, const std::string&, bool)> apply_interactive =
+        [&](const UIGadgetDef& gd, const std::string& parent_tag, bool parent_hidden) {
+            bool is_hidden = parent_hidden || gd.hidden;
+            std::string current_tag = gd.name.empty() ? parent_tag : gd.name;
 
-            float x = offset_x + gd.rect.x;
-            float y = offset_y + gd.rect.y;
-            float w = gd.rect.w;
-            float h = gd.rect.h;
+            // size1024 no AoM é coordenada absoluta de tela em base 1024x768
+            float x = offset_center_x + gd.rect.x * scale;
+            float y = gd.rect.y * scale;
+            float w = gd.rect.w * scale;
+            float h = gd.rect.h * scale;
 
-            float sx = static_cast<float>(screen_w) / UILayoutManager::kRefWidth;
-            float sy = static_cast<float>(screen_h) / UILayoutManager::kRefHeight;
-            x = gd.rect.x * sx;
-            y = gd.rect.y * sy;
-            w = gd.rect.w * sx;
-            h = gd.rect.h * sy;
+            float scaled_text_size = std::max(14.0f, gd.text_size * scale);
 
-            float scaled_text_size = std::max(14.0f, gd.text_size * sy);
+            // Botões interativos (type="button" ou "statebutton", case-insensitive)
+            const std::string type_lower = to_lower(gd.type);
+            if (type_lower == "button" || type_lower == "statebutton") {
+                float btn_w = w;
+                float btn_h = h;
+                float btn_x = x;
+                float btn_y = y;
 
-            // Botões interativos (type="button" ou "statebutton")
-            if (gd.type == "button" || gd.type == "statebutton") {
-                uint32_t color = UILayoutManager::parse_color_rgba("", 255);
-                if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
-                    color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                // Resolver texto: suporta formato $$ID$$ para strings localizadas
+                std::string resolved_text = gd.text;
+                if (!resolved_text.empty() && resolved_text.size() >= 4 &&
+                    resolved_text.substr(0, 2) == "$$" && resolved_text.substr(resolved_text.size() - 2) == "$$") {
+                    std::string id = resolved_text.substr(2, resolved_text.size() - 4);
                 }
 
-                std::function<void()> btn_callback = [gd]() {
-                    LOGI("[UI Layout] Botão pressionado: %s", gd.name.c_str());
-                };
-                if (!gd.action.empty()) {
-                    auto it = action_callbacks.find(gd.action);
-                    if (it != action_callbacks.end()) {
-                        btn_callback = it->second;
+                uint32_t fill_color = 0xFFFFFFFF;
+                if (!gd.bg_texture.empty()) {
+                    fill_color = 0xFFFFFFFF; // textura: branco (tint)
+                } else if (gd.bg_color_set) {
+                    if (gd.bg_color == glm::vec3(0, 0, 255) || gd.bg_color == glm::vec3(0, 0, 0)) {
+                        fill_color = 0xAA221105; // Pedra escura AoM (translucida)
+                    } else {
+                        fill_color = UILayoutManager::parse_color_rgba(gd.bg_color);
                     }
+                } else if (gd.extra_attrs.count("backgroundcolor")) {
+                    fill_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("backgroundcolor"));
+                } else {
+                    fill_color = 0xAA221105; // Pedra escura AoM (translucida)
                 }
+
+                uint32_t text_color = 0xFFFFD000; // ouro AoM (#FFD000)
+                if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                    text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                    text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                }
+
+                std::function<void()> btn_callback = [ui, action_callbacks, cmd = gd.command, name = gd.name]() {
+                    LOGI("[UI Layout] Executando comando para '%s': %s", name.c_str(), cmd.c_str());
+
+                    // 1. Processar alternância nativa de submenus (gadgetReal / gadgetUnReal)
+                    auto parse_gadget_names = [](const std::string& s, const std::string& prefix) -> std::vector<std::string> {
+                        std::vector<std::string> res;
+                        size_t p = 0;
+                        while ((p = s.find(prefix, p)) != std::string::npos) {
+                            size_t start = p + prefix.size();
+                            size_t end = s.find(')', start);
+                            if (end != std::string::npos) {
+                                std::string a = s.substr(start, end - start);
+                                while (!a.empty() && (a.front() == '"' || a.front() == ' ' || a.front() == '\t')) a.erase(a.begin());
+                                while (!a.empty() && (a.back() == '"' || a.back() == ' ' || a.back() == '\t')) a.pop_back();
+                                if (!a.empty()) res.push_back(a);
+                                p = end + 1;
+                            } else break;
+                        }
+                        return res;
+                    };
+
+                    if (ui) {
+                        for (const auto& t : parse_gadget_names(cmd, "gadgetReal(")) {
+                            LOGI("[UI Layout] gadgetReal -> %s", t.c_str());
+                            ui->set_group_visible(t, true);
+                        }
+                        for (const auto& t : parse_gadget_names(cmd, "gadgetUnReal(")) {
+                            LOGI("[UI Layout] gadgetUnReal -> %s", t.c_str());
+                            ui->set_group_visible(t, false);
+                        }
+                    }
+
+                    // 2. Comandos de jogo e transições
+                    if (cmd.find("exit(") != std::string::npos || cmd.find("quit") != std::string::npos) {
+                        auto a = action_callbacks.find("quit_app");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("modeEnter(\"SinglePlayerSetup\")") != std::string::npos ||
+                               cmd.find("startRandomGame") != std::string::npos) {
+                        auto a = action_callbacks.find("start_game");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("campaignStart") != std::string::npos ||
+                               cmd.find("modeEnter(\"Campaign\")") != std::string::npos) {
+                        auto a = action_callbacks.find("open_campaign");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("subModeEnter(\"PreGame\",\"Options\")") != std::string::npos ||
+                               cmd.find("open_options") != std::string::npos) {
+                        auto a = action_callbacks.find("open_options");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("uiOpenSavedGameBrowser") != std::string::npos) {
+                        auto a = action_callbacks.find("uiOpenSavedGameBrowser");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("uiOpenRecordGameBrowser") != std::string::npos) {
+                        auto a = action_callbacks.find("uiOpenSavedGameBrowser");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("doMPSetup") != std::string::npos) {
+                        auto a = action_callbacks.find("open_multiplayer");
+                        if (a != action_callbacks.end()) a->second();
+                    } else if (cmd.find("gadgetReal(\"MainMenuOptions\")") != std::string::npos) {
+                        auto a = action_callbacks.find("return_to_main_menu");
+                        if (a != action_callbacks.end()) a->second();
+                    }
+                    // 3. Fallback: lookup by button name (gd.name) for custom XMB layouts
+                    else {
+                        auto a = action_callbacks.find(name);
+                        if (a != action_callbacks.end()) {
+                            LOGI("[UI Layout] Executando callback custom para button '%s'", name.c_str());
+                            a->second();
+                        } else {
+                            LOGW("[UI Layout] Nenhum callback para button '%s' (cmd='%s')", name.c_str(), cmd.c_str());
+                        }
+                    }
+                };
+
+                LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s' hidden=%d",
+                     gd.text.c_str(), (int)x, (int)y, (int)w, (int)h, fill_color, text_color,
+                     gd.bg_texture.c_str(), (int)is_hidden);
 
                 auto* btn = ui->add_button(
-                    {x, y}, {w, h},
+                    {btn_x, btn_y}, {btn_w, btn_h},
                     btn_callback,
-                    color,
+                    fill_color,
                     0xFFCCCCCC);
                 if (btn) {
-                    btn->label = gd.text;
-                    btn->text_color = color;
+                    btn->visible = !is_hidden;
+                    btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                    btn->group_tag = parent_tag;
+                    if (gd.has_texture_coords) {
+                        btn->has_uv = true;
+                        btn->uv_min = glm::vec2(gd.texture_coords.x, 1.0f - gd.texture_coords.w);
+                        btn->uv_max = glm::vec2(gd.texture_coords.z, 1.0f - gd.texture_coords.y);
+                    }
+                    btn->label = gd.text; // Mantém ID e fallback para resolução via ui->resolve_text
+                    btn->text_color = text_color;   // texto ouro, NÃO cinza
                     btn->text_size = scaled_text_size;
-                    // Texturas padrão (button_main_tex_, button_clicked_tex_) aplicadas automaticamente
+                    // 1) Resolver texturas a partir de ButtonSet (usebuttonset ou padrão do AoM)
+                    std::string btn_set_name;
+                    if (gd.extra_attrs.count("usebuttonset")) {
+                        btn_set_name = gd.extra_attrs.at("usebuttonset");
+                    } else if (button_sets && gd.bg_texture.empty() && !gd.has_texture_coords) {
+                        if (button_sets->has_set("buttonLong")) {
+                            btn_set_name = "buttonLong";
+                        }
+                    }
+
+                    if (button_sets && !btn_set_name.empty() && texture_resolver) {
+                        const auto* bs = button_sets->get_set(btn_set_name);
+                        if (bs) {
+                            if (!bs->normal_tex.empty()) {
+                                ResolvedTexture rt = texture_resolver(bs->normal_tex);
+                                if (rt.handle != INVALID_TEXTURE) {
+                                    btn->normal_tex = rt.handle;
+                                    btn->tex_width = rt.width;
+                                    btn->tex_height = rt.height;
+                                }
+                            }
+                            if (!bs->depressed_tex.empty()) {
+                                ResolvedTexture rt = texture_resolver(bs->depressed_tex);
+                                if (rt.handle != INVALID_TEXTURE) {
+                                    btn->pressed_tex = rt.handle;
+                                } else {
+                                    btn->pressed_tex = btn->normal_tex;
+                                }
+                            } else {
+                                btn->pressed_tex = btn->normal_tex;
+                            }
+                            if (bs->has_texture_coords && !btn->has_uv) {
+                                btn->has_uv = true;
+                                btn->uv_min = glm::vec2(bs->texture_coords.x, 1.0f - bs->texture_coords.w);
+                                btn->uv_max = glm::vec2(bs->texture_coords.z, 1.0f - bs->texture_coords.y);
+                            }
+                            if (btn->tex_width > 0 && btn->tex_height > 0) {
+                                float bw = static_cast<float>(btn->tex_width) * 0.10f;
+                                float bh = static_cast<float>(btn->tex_height) * 0.10f;
+                                btn->border_left = btn->border_right = std::max(8.0f, bw);
+                                btn->border_top = btn->border_bottom = std::max(8.0f, bh);
+                            }
+                        }
+                    }
+
+                    // 2) Se tem gd.bg_texture (ou veio de stateentry), resolver textura autêntica do BAR
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            btn->normal_tex = rt.handle;
+                            btn->pressed_tex = rt.handle;
+                            btn->tex_width = rt.width;
+                            btn->tex_height = rt.height;
+
+                            // Se houver estado clicado explícito nos state_backgrounds[1]
+                            if (gd.state_backgrounds.size() > 1 && !gd.state_backgrounds[1].empty()) {
+                                ResolvedTexture rt_clk = texture_resolver(gd.state_backgrounds[1]);
+                                if (rt_clk.handle != INVALID_TEXTURE) {
+                                    btn->pressed_tex = rt_clk.handle;
+                                }
+                            }
+                            // Rollover state (state_backgrounds[2])
+                            if (gd.state_backgrounds.size() > 2 && !gd.state_backgrounds[2].empty()) {
+                                ResolvedTexture rt_roll = texture_resolver(gd.state_backgrounds[2]);
+                                if (rt_roll.handle != INVALID_TEXTURE) {
+                                    btn->rollover_tex = rt_roll.handle;
+                                }
+                            }
+                            // Glow state (state_backgrounds[3])
+                            if (gd.state_backgrounds.size() > 3 && !gd.state_backgrounds[3].empty()) {
+                                ResolvedTexture rt_glow = texture_resolver(gd.state_backgrounds[3]);
+                                if (rt_glow.handle != INVALID_TEXTURE) {
+                                    btn->glow_tex = rt_glow.handle;
+                                }
+                            }
+
+                            if (!btn->has_uv) {
+                                // Definir borders de 9-slice apenas se não tiver UV direta
+                                float bw = static_cast<float>(rt.width) * 0.10f;
+                                float bh = static_cast<float>(rt.height) * 0.10f;
+                                if (bw < 8.0f) bw = 8.0f;
+                                if (bh < 8.0f) bh = 8.0f;
+                                btn->border_left = bw;
+                                btn->border_right = bw;
+                                btn->border_top = bh;
+                                btn->border_bottom = bh;
+                            } else {
+                                btn->border_left = btn->border_right = 0.0f;
+                                btn->border_top = btn->border_bottom = 0.0f;
+                            }
+                        } else {
+                            // ← FALLBACK defensivo: textura falhou, NÃO deixa retângulo branco
+                            // Usa pedra escura AoM com texto ouro para que o botão seja perfeitamente legível
+                            btn->normal_color = 0xAA221105;
+                            btn->pressed_color = 0xAA332211;
+                            btn->current_color = btn->normal_color;
+                            btn->text_color = 0xFFFFD000;
+                            btn->normal_tex = INVALID_TEXTURE;
+                            btn->pressed_tex = INVALID_TEXTURE;
+                            LOGW("UI Layout: textura nao encontrada: %s", gd.bg_texture.c_str());
+                        }
+                    }
                     ++created;
                 }
             }
             // Textos
             else if (gd.type == "textBox" || gd.type == "textField") {
-                uint32_t color = UILayoutManager::parse_color_rgba("", 255);
-                if (!gd.text.empty() || gd.extra_attrs.count("textcolor")) {
-                    color = UILayoutManager::parse_color_rgba(
-                        gd.extra_attrs.count("textcolor")
-                            ? gd.extra_attrs.at("textcolor")
-                            : "");
+                // Pular textos de diálogos ocultos
+                if (!gd.hidden) {
+                    uint32_t color = UILayoutManager::parse_color_rgba("", 255);
+                    if (!gd.text.empty() || gd.extra_attrs.count("textcolor")) {
+                        color = UILayoutManager::parse_color_rgba(
+                            gd.extra_attrs.count("textcolor")
+                                ? gd.extra_attrs.at("textcolor")
+                                : "");
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+
+                    // Resolver texto: suporta formato $$ID$$
+                    std::string resolved_text = gd.text;
+                    if (!resolved_text.empty() && resolved_text.size() >= 4 &&
+                        resolved_text.substr(0, 2) == "$$" && resolved_text.substr(resolved_text.size() - 2) == "$$") {
+                        // ID será resolvido pelo Engine via tr()
+                    }
+
+                    auto* lbl = ui->add_label(resolved_text, {x, y}, scaled_text_size, color);
+                    if (lbl) {
+                        lbl->visible = !is_hidden;
+                        lbl->tag = gd.name.empty() ? parent_tag : gd.name;
+                        lbl->group_tag = parent_tag;
+                    }
+                    ++created;
                 }
-                ui->add_label(gd.text, {x, y}, scaled_text_size, color);
+            }
+            // EditBox (XMB editBox) - campo de texto editável
+            else if (gd.type == "editBox") {
+                // O editBox é renderizado como um button com label editável
+                // O texto será editado via teclado virtual/Android IME
+                auto* btn = ui->add_button({x, y}, {w, h}, gd.text, []() {}, 0xFF221810, 0xFF443020);
+                if (btn) {
+                    btn->visible = !is_hidden;
+                    btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                    btn->group_tag = parent_tag;
+                    btn->text_size = scaled_text_size;
+                    btn->normal_color = 0xFF221810;
+                    btn->pressed_color = 0xFF443020;
+                    btn->current_color = btn->normal_color;
+                    // Textura de fundo do text box (usar bg_texture do parent ou do próprio)
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            btn->normal_tex = rt.handle;
+                            btn->pressed_tex = rt.handle;
+                        }
+                    }
+                    // Cor do texto
+                    uint32_t eb_text_color = 0xFFFFFFFF;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        eb_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        eb_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    btn->text_color = eb_text_color;
+                    // Campos editBox
+                    btn->is_edit_box = true;
+                    btn->placeholder = "";  // poderia vir do XMB se houver attr
+                    btn->max_length = 256;
+                    // O callback onTextInput será definido pelo Engine após criação
+                }
                 ++created;
             }
             // Sliders
             else if (gd.type == "slider") {
-                ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
+                auto* s = ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
+                if (s) {
+                    s->visible = !is_hidden;
+                    s->tag = gd.name.empty() ? parent_tag : gd.name;
+                    s->group_tag = parent_tag;
+                }
+                ++created;
+            }
+            // ScrollList / Dropdown (XMB scrollList)
+            else if (gd.type == "scrollList") {
+                // Extrair itens dos filhos (gd.children é vector<UIGadgetDef>, não ponteiros)
+                std::vector<std::string> items;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        items.push_back(child.text);
+                    }
+                }
+                int initial = 0;
+                if (gd.extra_attrs.count("selected")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("selected")); } catch (...) {}
+                }
+                auto* sl = ui->add_scroll_list({x, y}, {w, h}, items, initial, [](int) {});
+                if (sl) {
+                    sl->visible = !is_hidden;
+                    sl->tag = gd.name.empty() ? parent_tag : gd.name;
+                    sl->group_tag = parent_tag;
+                    sl->text_size = scaled_text_size;
+                    // Background texture do XMB
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            sl->bg_tex = rt.handle;
+                            sl->tex_width = rt.width;
+                            sl->tex_height = rt.height;
+                        }
+                    }
+                    // Top/Bottom cap textures
+                    if (gd.extra_attrs.count("topcapart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("topcapart"));
+                        if (rt.handle != INVALID_TEXTURE) sl->top_cap_tex = rt.handle;
+                    }
+                    if (gd.extra_attrs.count("bottomcapart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("bottomcapart"));
+                        if (rt.handle != INVALID_TEXTURE) sl->bottom_cap_tex = rt.handle;
+                    }
+                    // Cor do texto (mesma lógica dos botões)
+                    uint32_t sl_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        sl_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        sl_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    sl->text_color = sl_text_color;
+                }
+                ++created;
+            }
+            // RadioSet (XMB radioset)
+            else if (gd.type == "radioset") {
+                std::vector<std::string> options;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        options.push_back(child.text);
+                    }
+                }
+                int initial = 0;
+                if (gd.extra_attrs.count("radiosetdefaultbuttonindex")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("radiosetdefaultbuttonindex")); } catch (...) {}
+                }
+                auto* rs = ui->add_radio_set({x, y}, {w, h}, options, initial, [](int) {});
+                if (rs) {
+                    rs->visible = !is_hidden;
+                    rs->tag = gd.name.empty() ? parent_tag : gd.name;
+                    rs->group_tag = parent_tag;
+                    rs->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t rs_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        rs_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        rs_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    rs->text_color = rs_text_color;
+                    // Checked/Unchecked textures do XMB
+                    if (gd.extra_attrs.count("radiocheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("radiocheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) rs->checked_tex = rt.handle;
+                    }
+                    if (gd.extra_attrs.count("radiouncheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("radiouncheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) rs->unchecked_tex = rt.handle;
+                    }
+                }
+                ++created;
+            }
+            // CheckButton (XMB checkButton)
+            else if (gd.type == "checkButton") {
+                bool initial = false;
+                if (gd.extra_attrs.count("checked")) {
+                    initial = (gd.extra_attrs.at("checked") == "1" || gd.extra_attrs.at("checked") == "true");
+                }
+                auto* cb = ui->add_checkbox({x, y}, {w, h}, gd.text, initial, [](bool) {});
+                if (cb) {
+                    cb->visible = !is_hidden;
+                    cb->tag = gd.name.empty() ? parent_tag : gd.name;
+                    cb->group_tag = parent_tag;
+                    cb->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t cb_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        cb_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        cb_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    cb->text_color = cb_text_color;
+                    // Checked/Unchecked/Rollover textures
+                    if (gd.extra_attrs.count("checkcheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkcheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->pressed_tex = rt.handle; // Reuse pressed_tex for checked state
+                        }
+                    }
+                    if (gd.extra_attrs.count("checkuncheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkuncheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->normal_tex = rt.handle;
+                        }
+                    }
+                    if (gd.extra_attrs.count("checkhighlightart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkhighlightart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->icon = rt.handle; // Reuse icon for rollover
+                        }
+                    }
+                }
+                ++created;
+            }
+            // List (XMB list) - lista de itens selecionáveis
+            else if (gd.type == "list") {
+                // Extrair itens dos filhos
+                std::vector<std::string> items;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        items.push_back(child.text);
+                    }
+                }
+                int initial = -1;
+                if (gd.extra_attrs.count("selected")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("selected")); } catch (...) {}
+                }
+                auto* lst = ui->add_list({x, y}, {w, h}, items, initial, [](int) {});
+                if (lst) {
+                    lst->visible = !is_hidden;
+                    lst->tag = gd.name.empty() ? parent_tag : gd.name;
+                    lst->group_tag = parent_tag;
+                    lst->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t lst_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        lst_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        lst_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    lst->text_color = lst_text_color;
+                    // Background texture
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            lst->bg_tex = rt.handle;
+                        }
+                    }
+                    // Selection highlight texture (from child gadget bg)
+                    for (const auto& child : gd.children) {
+                        if (!child.bg_texture.empty() && texture_resolver) {
+                            ResolvedTexture rt = texture_resolver(child.bg_texture);
+                            if (rt.handle != INVALID_TEXTURE) {
+                                lst->sel_tex = rt.handle;
+                            }
+                            break; // Use first child's bg as selection texture
+                        }
+                    }
+                }
                 ++created;
             }
             // Containers lógicos invisíveis (gadget sem background) - apenas posiciona filhos
@@ -351,18 +957,18 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                 // Não cria elemento visual, apenas passa offset para filhos
             }
 
-            // Recursão para filhos interativos
+            // Recursão para filhos interativos (size1024 é absoluto em base 1024x768)
             for (const auto& child : gd.children) {
-                apply_interactive(child, x, y);
+                apply_interactive(child, current_tag, is_hidden);
             }
         };
 
     // Executa as duas passagens em ordem
     for (const auto& root_gadget : layout.root_gadgets) {
-        apply_backgrounds(root_gadget, 0.0f, 0.0f);
+        apply_backgrounds(root_gadget, "", false);
     }
     for (const auto& root_gadget : layout.root_gadgets) {
-        apply_interactive(root_gadget, 0.0f, 0.0f);
+        apply_interactive(root_gadget, "", false);
     }
 
     LOGI("Layout '%s' aplicado ao UI: %zu elementos criados (backgrounds + interativos)",

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_friends_dialogs>
+  <friends>
+    <friend name="Jogador1" status="Online"/>
+    <friend name="Jogador2" status="Offline"/>
+  </friends>
+  <buttons>
+    <button label="Add Friend" action="add_friend"/>
+    <button label="Back" action="return_to_menu"/>
+  </buttons>
+</ui_friends_dialogs>

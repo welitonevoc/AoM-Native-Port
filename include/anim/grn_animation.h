@@ -51,6 +51,11 @@ struct GrnAnimation {
     std::vector<GrnBone> bones;
     std::vector<GrnTrack> tracks;   ///< Um track por osso animado
 
+    /// Verifica se a animação é válida (tem ossos e duração)
+    bool is_valid() const {
+        return num_bones > 0 && duration > 0.0f && !bones.empty();
+    }
+
     /// Busca o índice do osso pelo nome
     int32_t find_bone(const std::string& name) const {
         for (uint32_t i = 0; i < bones.size(); ++i) {

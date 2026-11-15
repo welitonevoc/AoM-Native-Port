@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_quick_design_3>
+  <theme_blue>
+    <color>#0066CC</color>
+    <accent>#FFD700</accent>
+  </theme_blue>
+  <buttons>
+    <button label="Aplicar" action="apply_quick_design_3"/>
+    <button label="Cancelar" action="cancel_design_2"/>
+  </buttons>
+</ui_quick_design_2>

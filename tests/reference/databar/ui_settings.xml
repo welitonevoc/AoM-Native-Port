@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings_menu>
+  <tabs>
+    <tab name="Graphics"/>
+    <tab name="Audio"/>
+    <tab name="Controls"/>
+    <tab name="Controls"/>
+  </tabs>
+  <current_tab>Graphics</current_tab>
+  <settings>
+    <setting name="Resolution" value="1920x1080"/>
+    <setting name="Texture Quality" value="High"/>
+    <option name="VSync" value="true"/>
+  </settings>
+  <buttons>
+    <button label="Apply Changes" action="apply_settings"/>
+    <button label="Reset to Defaults" action="reset_settings"/>
+    <button label="Back to Menu" action="return_to_main_menu"/>
+  </buttons>
+</settings_menu>

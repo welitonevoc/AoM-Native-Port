@@ -18,6 +18,8 @@
 
 namespace aom {
 
+class ButtonSetManager;
+
 /// Coordenadas de um gadget em tela (já convertidas de size1024 para pixels)
 struct UIGadgetRect {
     float x = 0.0f;
@@ -37,12 +39,18 @@ struct UIGadgetDef {
     float text_size = 18.0f;    ///< Tamanho da fonte
     std::string text_font;      ///< Nome da fonte
     glm::vec3 bg_color{160, 160, 160};  ///< Cor de fundo (RGB 0-255)
+    bool bg_color_set = false;          ///< Se backgroundcolor foi definida no XMB
     std::string bg_texture;     ///< Caminho da textura de fundo (ex: "ui\ui_light_gray")
+    std::vector<std::string> state_backgrounds;  ///< Texturas de <stateentry> [0]=normal,1=clicked,2=rollover,3=glow
     bool has_bevel = false;
     bool close_button = false;
     std::string title_bar;
     bool hidden = false;        ///< Se true, gadget e filhos não são renderizados
     bool has_background = false;///< Se true, gadget possui background/textura definido no XMB
+    glm::vec4 texture_coords{0.0f, 0.0f, 1.0f, 1.0f}; ///< UVs [u0, v0, u1, v1]
+    bool has_texture_coords = false;
+    std::string command;        ///< Comando nativo AoM (<command> ou atributo)
+    int z = 0;                  ///< Z-order do gadget
     std::vector<UIGadgetDef> children;  ///< Gadgets aninhados
     std::unordered_map<std::string, std::string> extra_attrs; ///< Outros atributos
 };
@@ -71,8 +79,15 @@ public:
     UILayoutResult load_layout_from_data(const std::string& layout_name,
                                           const std::vector<uint8_t>& data);
 
-    /// Retorna um layout carregado por nome
+    /// Retorna um layout carregado por nome (const)
     [[nodiscard]] const UILayoutResult* get_layout(const std::string& name) const {
+        auto it = layouts_.find(name);
+        if (it != layouts_.end()) return &it->second;
+        return nullptr;
+    }
+
+    /// Retorna um layout carregado por nome (non-const, para modificar antes de aplicar)
+    [[nodiscard]] UILayoutResult* get_layout_mut(const std::string& name) {
         auto it = layouts_.find(name);
         if (it != layouts_.end()) return &it->second;
         return nullptr;
@@ -89,6 +104,10 @@ public:
     [[nodiscard]] static uint32_t parse_color_rgba(const std::string& color_str,
                                                     uint8_t alpha = 255);
 
+    /// Converte uma cor glm::vec3 (RGB 0-255) para uint32_t ARGB (0xAARRGGBB)
+    [[nodiscard]] static uint32_t parse_color_rgba(const glm::vec3& color,
+                                                    uint8_t alpha = 255);
+
 private:
     void parse_gadget(const XmbElement* elem, int screen_w, int screen_h,
                        UIGadgetDef& out);
@@ -101,15 +120,29 @@ public:
     static constexpr int kRefHeight = 768;
 };
 
+/// Resultado da resolução de uma textura (handle + dimensões)
+struct ResolvedTexture {
+    TextureHandle handle = INVALID_TEXTURE;
+    uint32_t width = 0;
+    uint32_t height = 0;
+};
+
+/// Função que resolve um caminho de textura (ex: "ui\\ui_light_gray")
+/// para um TextureHandle e suas dimensões em pixels.
+using TextureResolverFn = std::function<ResolvedTexture(const std::string&)>;
+
 /// Aplica um layout carregado ao UIManager, criando botões e labels
 /// @param layout  Resultado do carregamento do layout
 /// @param ui      UIManager destino
 /// @param screen_w  Largura da tela em pixels
 /// @param screen_h  Altura da tela em pixels
 /// @param action_callbacks  Mapa de nome da ação -> callback (ex: "start_game" -> lambda)
+/// @param texture_resolver  Função opcional para resolver bg_texture → TextureHandle + dimensões
 /// @return Número de elementos criados
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                            int screen_w, int screen_h,
-                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks);
+                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks,
+                           TextureResolverFn texture_resolver = nullptr,
+                           const ButtonSetManager* button_sets = nullptr);
 
 } // namespace aom

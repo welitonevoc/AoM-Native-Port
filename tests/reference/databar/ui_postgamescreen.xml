@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<post_game_screen>
+  <result>Victory</result>
+  <score>1500</score>
+  <buttons>
+    <button label="Menu Principal" action="return_to_main_menu"/>
+    <button label="Reiniciar" action="restart_game"/>
+  </buttons>
+</post_game_screen>

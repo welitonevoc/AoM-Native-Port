@@ -14,10 +14,14 @@
  */
 
 #include <cstdint>
+#include <cmath>
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 #include <memory>
 #include <utility>
+#include <string>
+#include <queue>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "renderer/renderer.h"
@@ -50,6 +54,8 @@ struct RenderableComponent : public Component {
     aom::TextureHandle texture = aom::INVALID_TEXTURE;
 };
 
+
+
 /** Base class for systems */
 class System {
 public:
@@ -66,6 +72,14 @@ public:
         for (auto& kv : transforms_) {
             TransformComponent& tr = kv.second;
             tr.position += tr.velocity * dt;
+            const float spd_sq = tr.velocity.x * tr.velocity.x + tr.velocity.z * tr.velocity.z;
+            if (spd_sq > 0.001f) {
+                const float target_yaw = glm::degrees(std::atan2(tr.velocity.x, tr.velocity.z));
+                float diff = target_yaw - tr.rotation.y;
+                while (diff < -180.0f) diff += 360.0f;
+                while (diff > 180.0f) diff -= 360.0f;
+                tr.rotation.y += diff * std::min(1.0f, dt * 10.0f);
+            }
         }
     }
 private:

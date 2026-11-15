@@ -14,12 +14,27 @@ set(AOM_SOURCES
     src/assets/xmb_parser.cpp
     src/audio/opensl_engine.cpp
     src/aom/campaign_select_system.cpp
+    src/aom/protox_parser.cpp
     src/engine/engine.cpp
+    src/engine/engine_assets.cpp
+    src/engine/engine_campaign.cpp
+    src/engine/engine_gameplay.cpp
+    src/engine/engine_hud.cpp
+    src/engine/engine_input.cpp
+    src/engine/engine_menus.cpp
+    src/engine/engine_multiplayer.cpp
+    src/engine/engine_options_menu.cpp
+    src/engine/engine_particles.cpp
+    src/engine/engine_save_load.cpp
+    src/engine/engine_states.cpp
+    src/engine/engine_terrain.cpp
     src/engine/ui_from_xmb.cpp
     src/renderer/gles_renderer.cpp
     src/renderer/camera_track.cpp
     src/ui/ui.cpp
     src/ui/ui_layout.cpp
+    src/ui/button_set.cpp
+    src/ui/menu_system.cpp
     src/ai/ai_system.cpp
     src/video/video_player.cpp
     src/video/media_decoder.cpp
@@ -121,6 +136,7 @@ add_executable(gameplay_test
     src/assets/xmb_parser.cpp
     src/assets/bar_archive.cpp
     src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
     src/game/save_load.cpp
     src/game/victory.cpp
     src/assets/cube_map.cpp
@@ -144,6 +160,9 @@ target_include_directories(ui_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(ui_test PRIVATE
+    log
 )
 
 add_executable(test_camera_track
@@ -176,7 +195,9 @@ add_executable(test_ai_system
     src/tests/test_ai_system.cpp
     src/ai/ai_system.cpp
     src/assets/xmb_parser.cpp
+    src/assets/bar_archive.cpp
     src/anim/animation_system.cpp
+    src/anim/grn_animation.cpp
 )
 target_include_directories(test_ai_system PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -210,6 +231,7 @@ add_executable(test_data_docs
     src/campaign/campaign.cpp
     src/data/game_data.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
@@ -368,6 +390,7 @@ add_executable(test_bar_overlay
     src/assets/xmb_parser.cpp
     src/data/game_data.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
@@ -389,6 +412,7 @@ add_executable(test_water_bodies
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/sound_def.cpp
     src/anim/animation_system.cpp
@@ -408,6 +432,7 @@ target_link_libraries(test_water_bodies PRIVATE
 add_executable(test_ui_layout
     src/tests/test_ui_layout.cpp
     src/ui/ui_layout.cpp
+    src/ui/button_set.cpp
     src/ui/ui.cpp
     src/assets/bar_archive.cpp
     src/assets/xmb_parser.cpp
@@ -429,6 +454,7 @@ add_executable(test_data_integration
     src/data/water_bodies.cpp
     src/data/unit_transform.cpp
     src/data/proto_unit.cpp
+    src/aom/protox_parser.cpp
     src/data/major_god.cpp
     src/data/sound_def.cpp
     src/assets/bar_archive.cpp
@@ -448,6 +474,7 @@ add_executable(test_ddt_reference
     src/tests/test_ddt_reference.cpp
     src/assets/bar_archive.cpp
     src/assets/ddt_texture.cpp
+    third_party/stb_image.c
 )
 target_include_directories(test_ddt_reference PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -455,6 +482,19 @@ target_include_directories(test_ddt_reference PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
 )
 target_link_libraries(test_ddt_reference PRIVATE
+    ${SYSTEM_Z_LIB}
+    log
+)
+
+add_executable(test_perf
+    src/tests/test_perf.cpp
+)
+target_include_directories(test_perf PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm
+)
+target_link_libraries(test_perf PRIVATE
     ${SYSTEM_Z_LIB}
     log
 )

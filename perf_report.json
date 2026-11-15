@@ -1,0 +1,9 @@
+{
+  "avg_fps": 1838.48,
+  "min_fps": 367.273,
+  "max_fps": 2111.76,
+  "p99_fps": 928.041,
+  "avg_frame_ms": 0.543927,
+  "memory_growth_kb": 304,
+  "pass": true
+}

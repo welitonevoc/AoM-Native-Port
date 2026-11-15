@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_game_settings_dialog>
+  <settings>
+    <option name="Difficulty" value="Normal"/>
+    <option name="Map Size" value="Large"/>
+  </settings>
+  <buttons>
+    <button label="Apply" action="apply_settings"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_game_settings_dialog>

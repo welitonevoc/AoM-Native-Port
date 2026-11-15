@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defeat_screen>
+  <message>Você foi derrotado!</message>
+  <buttons>
+    <button label="Tentar Novamente" action="restart_game"/>
+    <button label="Menu Principal" action="return_to_main_menu"/>
+  </buttons>
+</defeat_screen>

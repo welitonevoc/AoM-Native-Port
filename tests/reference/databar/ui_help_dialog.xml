@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_help_dialog>
+  <title>Help</title>
+  <text>Help content goes here.</text>
+  <buttons>
+    <button label="Close" action="close"/>
+  </buttons>
+</ui_help_dialog>

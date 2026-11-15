@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objectives_dialog>
+  <title>Objetivos</title>
+  <objectives>
+    <item id="obj1" text="Construa um Town Center" completed="false"/>
+    <item id="obj2" text="Treine 5 aldeões" completed="false"/>
+  </objectives>
+</objectives_dialog>

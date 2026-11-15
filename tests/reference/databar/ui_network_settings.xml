@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network_settings>
+  <settings>
+    <option name="Enable NAT Traversal" value="true"/>
+    <option name="Port Forwarding" value="Enabled"/>
+    <option name="Connection Timeout" value="30s"/>
+  </settings>
+  <buttons>
+    <button label="Test Connection" action="test_connection"/>
+    <button label="Save Settings" action="apply_settings"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</mp_settings>

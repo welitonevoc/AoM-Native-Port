@@ -24,10 +24,12 @@
 #include <thread>
 #include <vector>
 
+#include "../../engine/engine_internal.h"
+#undef LOG_TAG
 #define LOG_TAG "AoM-Native"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) AOM_LOGI(LOG_TAG, __VA_ARGS__)
+#define LOGW(...) AOM_LOGW(LOG_TAG, __VA_ARGS__)
+#define LOGE(...) AOM_LOGE(LOG_TAG, __VA_ARGS__)
 
 namespace {
 
@@ -65,11 +67,11 @@ double get_time() {
 /// estrutura plana (data.bar), usada por instalações antigas.
 bool contains_game_data(const std::filesystem::path& dir) {
     std::error_code ec;
-    return std::filesystem::is_regular_file(dir / "data" / "data.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "textures" / "textures.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "data.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "textures.bar", ec) ||
-           std::filesystem::is_regular_file(dir / "models" / "models.bar", ec);
+    const bool has_data = std::filesystem::is_regular_file(dir / "data" / "data.bar", ec) ||
+                          std::filesystem::is_regular_file(dir / "data.bar", ec);
+    const bool has_textures = std::filesystem::is_regular_file(dir / "textures" / "textures.bar", ec) ||
+                              std::filesystem::is_regular_file(dir / "textures.bar", ec);
+    return has_data && has_textures;
 }
 
 /// Resolve a pasta real dos dados. Além da própria pasta candidata, aceita um
@@ -108,7 +110,9 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* stat
     AInputEvent* event = nullptr;
     while (AInputQueue_getEvent(queue, &event) >= 0) {
         bool handled = false;
-        if (engine && AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+        int32_t event_type = AInputEvent_getType(event);
+        
+        if (engine && event_type == AINPUT_EVENT_TYPE_MOTION) {
             const int32_t action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
             const size_t pointer_count = AMotionEvent_getPointerCount(event);
             aom::TouchEvent::State state_enum;
@@ -149,6 +153,70 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* stat
                 engine->handle_touch({AMotionEvent_getX(event, 0),
                                       AMotionEvent_getY(event, 0), state_enum});
                 handled = true;
+            }
+        } else if (engine && event_type == AINPUT_EVENT_TYPE_KEY) {
+            // Hardware keyboard input handling
+            int32_t action = AKeyEvent_getAction(event);
+            int32_t key_code = AKeyEvent_getKeyCode(event);
+            int32_t meta_state = AKeyEvent_getMetaState(event);
+            
+            if (action == AKEY_EVENT_ACTION_DOWN) {
+                // Handle printable characters and backspace
+                // For simplicity, we'll handle basic ASCII keys
+                // In a full implementation, we'd use AKeyEvent_getUnicodeChar() (API 29+)
+                if (key_code >= AKEYCODE_A && key_code <= AKEYCODE_Z) {
+                    char c = 'a' + (key_code - AKEYCODE_A);
+                    // Shift for uppercase
+                    if (meta_state & AMETA_SHIFT_ON) c = toupper(c);
+                    engine->handle_text_input(std::string(1, c));
+                    handled = true;
+                } else if (key_code >= AKEYCODE_0 && key_code <= AKEYCODE_9) {
+                    char c = '0' + (key_code - AKEYCODE_0);
+                    engine->handle_text_input(std::string(1, c));
+                    handled = true;
+                } else if (key_code == AKEYCODE_SPACE) {
+                    engine->handle_text_input(" ");
+                    handled = true;
+                } else if (key_code == AKEYCODE_DEL) {
+                    engine->handle_text_backspace();
+                    handled = true;
+                } else if (key_code == AKEYCODE_ENTER || key_code == AKEYCODE_NUMPAD_ENTER) {
+                    // Enter could submit the form or add newline
+                    handled = true;
+                } else if (key_code == AKEYCODE_MINUS) {
+                    engine->handle_text_input("-");
+                    handled = true;
+                } else if (key_code == AKEYCODE_EQUALS) {
+                    engine->handle_text_input("=");
+                    handled = true;
+                } else if (key_code == AKEYCODE_COMMA) {
+                    engine->handle_text_input(",");
+                    handled = true;
+                } else if (key_code == AKEYCODE_PERIOD) {
+                    engine->handle_text_input(".");
+                    handled = true;
+                } else if (key_code == AKEYCODE_SLASH) {
+                    engine->handle_text_input("/");
+                    handled = true;
+                } else if (key_code == AKEYCODE_SEMICOLON) {
+                    engine->handle_text_input(";");
+                    handled = true;
+                } else if (key_code == AKEYCODE_APOSTROPHE) {
+                    engine->handle_text_input("'");
+                    handled = true;
+                } else if (key_code == AKEYCODE_GRAVE) {
+                    engine->handle_text_input("`");
+                    handled = true;
+                } else if (key_code == AKEYCODE_LEFT_BRACKET) {
+                    engine->handle_text_input("[");
+                    handled = true;
+                } else if (key_code == AKEYCODE_RIGHT_BRACKET) {
+                    engine->handle_text_input("]");
+                    handled = true;
+                } else if (key_code == AKEYCODE_BACKSLASH) {
+                    engine->handle_text_input("\\");
+                    handled = true;
+                }
             }
         }
         AInputQueue_finishEvent(queue, event, handled ? 1 : 0);
@@ -313,6 +381,12 @@ void on_native_window_created(ANativeActivity* activity, ANativeWindow* window) 
     LOGI("onNativeWindowCreated: %dx%d",
          ANativeWindow_getWidth(window), ANativeWindow_getHeight(window));
 
+    // Adquire o native window para que o framework Android não o destrua
+    // enquanto a engine estiver usando. Sem isso, o ANativeWindow pode ser
+    // liberado a qualquer momento, causando crash no eglCreateWindowSurface
+    // (pthread_mutex_lock on destroyed mutex no driver Mali).
+    ANativeWindow_acquire(window);
+
     auto* state = static_cast<AppState*>(activity->instance);
     {
         std::lock_guard<std::mutex> lock(state->mutex);
@@ -322,14 +396,18 @@ void on_native_window_created(ANativeActivity* activity, ANativeWindow* window) 
     state->cond.notify_all();
 }
 
-void on_native_window_destroyed(ANativeActivity* activity, ANativeWindow*) {
+void on_native_window_destroyed(ANativeActivity* activity, ANativeWindow* window) {
     LOGI("onNativeWindowDestroyed");
     auto* state = static_cast<AppState*>(activity->instance);
     {
         std::lock_guard<std::mutex> lock(state->mutex);
-        state->window = nullptr;
-        state->has_window = false;
+        if (state->window == window) {
+            state->window = nullptr;
+            state->has_window = false;
+        }
     }
+    // Libera a referência adquirida em on_native_window_created.
+    ANativeWindow_release(window);
 }
 
 void on_native_window_resized(ANativeActivity* activity, ANativeWindow* window) {
@@ -396,6 +474,10 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
         candidates.push_back(internal + "/AoM");
         candidates.push_back(internal);
     }
+    // Instalações completas do jogo (com todos os .bar: textures, models, scenarios, etc.) têm prioridade máxima.
+    candidates.emplace_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology");
+    candidates.emplace_back("/sdcard/Download/Games/PC/Age of Mythology/Age of Mythology");
+    candidates.emplace_back("/storage/emulated/0/Android/data/com.aom.nativeport/files/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM");
     candidates.emplace_back("/sdcard/Documents/AoM");
     candidates.emplace_back("/storage/emulated/0/Download/AoM");
@@ -403,8 +485,6 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
     candidates.emplace_back("/storage/emulated/0/AoM");
     candidates.emplace_back("/sdcard/AoM");
     candidates.emplace_back("/storage/emulated/0/Documents/AoM-Native-Port/data");
-    candidates.emplace_back("/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology");
-    candidates.emplace_back("/sdcard/Download/Games/PC/Age of Mythology/Age of Mythology");
     candidates.emplace_back("/storage/emulated/0/Download/Age of Mythology");
     candidates.emplace_back("/sdcard/Download/Age of Mythology");
 
@@ -432,3 +512,46 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
 
     state->game_thread = std::thread(game_loop, state);
 }
+
+// ============================================================
+// JNI Native Keyboard Support
+// ============================================================
+
+static aom::Engine* g_engine_instance = nullptr;
+
+extern "C" {
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextInput(JNIEnv* env, jobject thiz, jstring text) {
+    if (!g_engine_instance || !text) return;
+    const char* str = env->GetStringUTFChars(text, nullptr);
+    if (str) {
+        g_engine_instance->handle_text_input(str);
+        env->ReleaseStringUTFChars(text, str);
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextBackspace(JNIEnv* env, jobject thiz) {
+    if (g_engine_instance) {
+        g_engine_instance->handle_text_backspace();
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextEnter(JNIEnv* env, jobject thiz) {
+    if (g_engine_instance) {
+        // Enter key - could submit form or hide keyboard
+        g_engine_instance->handle_text_enter();
+    }
+}
+
+} // extern "C"
+
+namespace aom {
+
+void aom_set_engine_instance(Engine* engine) {
+    g_engine_instance = engine;
+}
+
+} // namespace aom

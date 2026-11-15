@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_quick_design_2>
+  <theme_dark>
+    <color>#2C3E50</color>
+    <accent>#3498DB</accent>
+  </theme_dark>
+  <buttons>
+    <button label="Aplicar" action="apply_quick_design"/>
+    <button label="Cancelar" action="cancel_design"/>
+  </buttons>
+</ui_quick_design_2>

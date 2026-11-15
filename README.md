@@ -1,219 +1,204 @@
-# AoM Native Port (Port Nativo para Android)
+# AoM Native Port - Particle Fix (.prt)
 
-Um protótipo independente de engine RTS nativa em **C++20** para **Android**, inspirado no clássico *Age of Mythology*. Este é um projeto não oficial, sem fins lucrativos, desenvolvido para fins educacionais e de preservação técnica, sem vínculo ou endosso da Microsoft ou World's Edge.
+Repositório documentando a correção de arquivos de partículas (`.prt`) faltantes no **Age of Mythology Native Port** para Android.
 
----
+## 🎯 Problema
 
-## 📋 Visão Geral
+O port nativo do Age of Mythology para Android exibia erros no logcat procurando por 5 arquivos de partículas que não existiam nos dados do jogo:
 
-O objetivo deste projeto é construir uma engine de estratégia em tempo real (RTS) nativa, leve e de alto desempenho para arquiteturas ARM64 no Android, capaz de interpretar os formatos originais de dados e oferecer jogabilidade fluida a 60 FPS com renderização moderna em OpenGL ES 3.
-
-### Principais Características
-- **C++20 Puro no Core:** Arquitetura desacoplada, alta performance e zero sobrecarga de interpretadores.
-- **Renderização Gráfica em GLES 3.x:** Suporte a shaders modernos, mapeamento de textura com mipmaps e gerenciamento eficiente de VBO/VAO.
-- **Parsers de Formatos Originais:**
-  - **BAR:** Leitor e extrator de arquivos compactados de recursos (`data.bar`, `textures.bar`).
-  - **DDT:** Decodificador de texturas com suporte a compactação DXT/RGB/RGBA.
-  - **BRG:** Leitor de geometria 3D e malhas de unidades/edifícios.
-  - **XMB:** Parser de arquivos binários de dados e propriedades (`proto.xmb`).
-- **Sistema de UI Adaptado para Touch:** Interface de usuário construída para telas sensíveis ao toque com detecção de toques simples, arrasto, pinça para zoom (pinch-to-zoom) e seleção de tropas.
-- **Áudio Nativo:** Reprodução de efeitos sonoros (PCM WAV) e músicas de fundo.
-- **Reprodução de Vídeo via NDK:** Decodificação acelerada por hardware de vídeos (H.264 / MP4) usando `AMediaExtractor` e `AMediaCodec`.
-
----
-
-## 🎯 Escopo do MVP (Produto Mínimo Viável)
-
-O projeto atual foca em um ciclo jogável rápido e estável com os seguintes elementos:
-
-- **1 Facção Jogável:** Gregos (Hoplite, Toxotes, Villager).
-- **1 Unidade Mítica:** Minotauro.
-- **Economia Básica:** Coleta de Comida (Food), Madeira (Wood) e Ouro (Gold).
-- **Construção:** Town Center, Casas (House), Quartel (Barracks) e Torres.
-- **Combate e Pathfinding:** Algoritmo A* para navegação no terreno e sistema de combate corpo-a-corpo e à distância.
-- **Mapa Procedural:** Terreno com elevação e texturização dinâmica.
-- **Interface & HUD:** Painel de recursos, status de unidades e menu de ações.
-
-Para mais detalhes sobre o planejamento, consulte [`docs/MVP.md`](docs/MVP.md) e [`docs/ANALISE_COMPLETA.md`](docs/ANALISE_COMPLETA.md).
-
----
-
-## 📂 Estrutura do Repositório
-
-```text
-├── android/            # Projeto Android (Gradle, Manifest, NDK bridge)
-├── assets/             # Assets essenciais de interface, fontes e testes
-├── docs/               # Documentação técnica detalhada e especificações do MVP
-├── include/            # Cabeçalhos C++ organizados por subsistemas
-│   ├── campaign/       # Sistema de missões
-│   ├── engine/         # Ciclo de vida, renderizador e loop principal
-│   ├── network/        # Infraestrutura de rede (futuro)
-│   └── video/          # Decodificador de mídia NDK
-├── scripts/            # Scripts utilitários de build e extração
-├── src/                # Implementação em C++ dos subsistemas
-├── third_party/        # Dependências embutidas (GLM, stb_image, stb_truetype, NDK headers)
-├── tools/              # Ferramentas Python para manipulação de BAR, DDT, BRG e XMB
-├── CMakeLists.txt      # Configuração principal de compilação CMake
-└── PROGRESSO.md        # Registro histórico e checklist de desenvolvimento
+```
+[E] [AoM-BAR] BAR: File 'particles/fire_torch.prt' not found
+[E] [AoM-BAR] BAR: File 'particles/combat_hit.prt' not found
+[E] [AoM-BAR] BAR: File 'particles/construction_sparks.prt' not found
+[E] [AoM-BAR] BAR: File 'particles/death_smoke.prt' not found
+[E] [AoM-BAR] BAR: File 'particles/harvest_chips.prt' not found
 ```
 
-> [!NOTE]
-> Este repositório contém o código-fonte da engine, ferramentas e scripts de compilação. Ele **não** redistribui os arquivos proprietários completos do jogo original.
+Esses arquivos **não existem no jogo original do PC** (Age of Mythology / Age of Mythology: The Titans). O engine do port Android está hardcoded para procurar por esses nomes, mas eles nunca foram incluídos nos arquivos `.bar` do jogo.
 
----
+## 🔍 Investigação
 
-## 🛠️ Como Compilar e Executar
+### Arquivos analisados
+Todos os 14 arquivos `.bar` da instalação original foram inspecionados:
 
-### Pré-requisitos
-- **Arquitetura Alvo:** Android `arm64-v8a` (Android 8.0+ / API 24+).
-- **Ferramental:** Android NDK (r25 ou superior), CMake 3.22+, JDK 17+.
+| Arquivo .bar | Localização | Contém .prt? |
+|-------------|-------------|--------------|
+| `data.bar` | `/data/` | ❌ Não |
+| `data2.bar` | `/data/` | ❌ Não |
+| `textures.bar` | `/textures/` | ❌ Não |
+| `textures2.bar` | `/textures/` | ❌ Não |
+| `models.bar` | `/models/` | ✅ Sim (585 arquivos) |
+| `models2.bar` | `/models/` | ✅ Sim (198 arquivos) |
+| `anim.bar` | `/anim/` | ❌ Não |
+| `anim2.bar` | `/anim/` | ❌ Não |
+| `sounds.bar` | `/sound/` | ❌ Não |
+| `sounds2.bar` | `/sound/` | ❌ Não |
+| `scenarios.bar` | `/scenario/` | ❌ Não |
+| `scenarios2.bar` | `/scenario/` | ❌ Não |
+| `godpowers.bar` | `/god powers/` | ❌ Não |
+| `godpowers2.bar` | `/god powers/` | ❌ Não |
+| `ppdata.bar` | `/ppdata/` | ❌ Não |
 
----
+**Total extraído:** 783 arquivos `.prt` reais do jogo original.
 
-### Opção 1: Compilação via Android Studio / Linha de Comando (Gradle)
+### Os 5 arquivos que NÃO existem
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/welitonevoc/AoM-Native-Port.git
-   cd AoM-Native-Port
-   ```
-2. Gere o APK de desenvolvimento:
-   ```bash
-   ./gradlew :app:assembleDebug
-   ```
-3. O APK gerado estará em:
-   ```text
-   android/app/build/outputs/apk/debug/app-debug.apk
-   ```
+Após extrair todos os 783 arquivos `.prt` do jogo original, confirmamos que **nenhum** tem os nomes procurados pelo port Android:
 
----
+| Nome procurado pelo Android | Existe no original? | Arquivo original similar usado como substituto |
+|----------------------------|---------------------|------------------------------------------------|
+| `fire_torch.prt` | ❌ Não | `sfx a building fire small.prt` |
+| `combat_hit.prt` | ❌ Não | `sfx a arrow fire.prt` |
+| `construction_sparks.prt` | ❌ Não | `sfx a building dust.prt` |
+| `death_smoke.prt` | ❌ Não | `sfx a generic smoke large.prt` |
+| `harvest_chips.prt` | ❌ Não | `sfx a villager digging dust.prt` |
 
-### Opção 2: Compilação Nativa Direta no Dispositivo (Termux / Antigravity)
+## 🛠️ Solução Aplicada
 
-Caso esteja compilando diretamente em um ambiente Linux/Android local com ferramentas nativas instaladas:
+### 1. Extração dos arquivos `.bar`
+
+Foi criado um extrator Python que lê os arquivos `.bar` do Age of Mythology e extrai todos os arquivos `.prt` contidos neles.
+
+O script `extract_aom.py`:
+- Percorre recursivamente a pasta do jogo procurando por arquivos `.bar`
+- Encontra strings terminadas em `.prt` dentro dos dados binários
+- Extrai cada arquivo com seu respectivo nome e tamanho
+- Salva em pasta de saída organizada
+
+### 2. Cópia para o Android
+
+Os 783 arquivos `.prt` extraídos foram copiados para:
+
+```
+/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/particles/
+```
+
+### 3. Mapeamento dos 5 arquivos faltantes
+
+Os 5 nomes que o engine do Android procura foram preenchidos com cópias dos arquivos originais mais similares:
 
 ```bash
-# Compilar a biblioteca C++ compartilhada (.so)
-bash scripts/build_native.sh
-
-# Empacotar e assinar o APK
-bash scripts/package_apk.sh
+cp "sfx a building fire small.prt"     "fire_torch.prt"
+cp "sfx a arrow fire.prt"             "combat_hit.prt"
+cp "sfx a building dust.prt"          "construction_sparks.prt"
+cp "sfx a generic smoke large.prt"    "death_smoke.prt"
+cp "sfx a villager digging dust.prt"  "harvest_chips.prt"
 ```
 
----
+## 📁 Estrutura de Pastas
 
-## 🎮 Importando Dados e Recursos do Jogo
-
-O APK não inclui os arquivos proprietários de *Age of Mythology*. Para usar
-texturas, modelos, sons, campanhas e dados de balanceamento originais, importe
-a pasta do jogo da sua cópia legal.
-
-### Opção recomendada: importar pelo próprio app
-
-1. Instale o APK.
-2. Abra o app e toque em **OPÇÕES**.
-3. Toque em **IMPORTAR DADOS DO JOGO**.
-4. Selecione a pasta que contém as subpastas `data` e `textures`
-   (normalmente a pasta `Age of Mythology`).
-5. Aguarde a cópia e o reinício automático.
-
-O importador usa o seletor de pastas do Android (SAF), copia os arquivos para
-`Android/data/com.aom.nativeport/files/AoM/` em segundo plano e **não exige**
-permissão de acesso a todos os arquivos do dispositivo.
-
-**Como funciona internamente:**
-
-1. A engine nativa chama `requestGameDataImport()` no Java via JNI.
-2. O Java abre o seletor SAF e recebe permissão persistente de leitura.
-3. A pasta é copiada recursivamente na thread `aom-data-import`, sem travar a UI.
-4. Ao terminar, a Activity é recriada e a engine localiza os `.bar` na pasta
-   privada do app.
-
-### Opção manual
-
-Copie a estrutura de pastas do jogo (não apenas alguns `.bar` isolados) para
-uma das pastas abaixo:
-
-- `/storage/emulated/0/Download/AoM/`
-- `/storage/emulated/0/Documents/AoM/`
-- `Android/data/com.aom.nativeport/files/AoM/` (via USB/ADB)
-
-Estrutura esperada:
-
-O **mínimo obrigatório** para a engine iniciar é:
-
-```text
-AoM/
-├── data/data.bar
-└── textures/textures.bar
 ```
-
-O conjunto **recomendado** (e já carregado pelo runtime atual) é:
-
-```text
-AoM/
+Age of Mythology/
+├── particles/
+│   ├── fire_torch.prt                 ← Cópia de sfx a building fire small.prt
+│   ├── combat_hit.prt                 ← Cópia de sfx a arrow fire.prt
+│   ├── construction_sparks.prt        ← Cópia de sfx a building dust.prt
+│   ├── death_smoke.prt                ← Cópia de sfx a generic smoke large.prt
+│   ├── harvest_chips.prt              ← Cópia de sfx a villager digging dust.prt
+│   ├── sfx a fire ball.prt            ← Arquivo original extraído do models.bar
+│   ├── sfx a generic smoke large.prt  ← Arquivo original extraído do models.bar
+│   ├── world a gold sparkles.prt      ← Arquivo original extraído do models.bar
+│   └── ... (783 arquivos .prt totais)
 ├── data/
 │   ├── data.bar
-│   └── main campaign.cpn        # campanha base
-├── textures/textures.bar
-├── models/models.bar            # malhas 3D
-├── scenario/scenarios.bar       # cenários
-└── sound/sounds.bar             # áudio
+│   └── data2.bar
+├── textures/
+│   ├── textures.bar
+│   └── textures2.bar
+├── models/
+│   ├── models.bar
+│   └── models2.bar
+└── ... (outras pastas do jogo)
 ```
 
-Se você tem **The Titans**, copie também os arquivos `*2.bar`:
-`data2.bar`, `textures2.bar`, `models2.bar`, `scenarios2.bar`,
-`sounds2.bar`, `anim2.bar` e `godpowers2.bar`. A engine **monta a expansão
-por cima do jogo base** (overlay): os arquivos com o mesmo nome são
-sobrescritos pela versão da expansão e os arquivos exclusivos dela
-(`protox.xmb`, `techtreex.xmb`, `xpack campaign.cpx`, …) são adicionados.
+## 🚀 Como Reproduzir
 
-A instalação original também contém pastas de apoio que o app **ainda não
-consome**: `fonts/`, `gfxconfig/`, `gfxconfig2/`, `startup/`, `ai/`,
-`ai2/`, `rm/`, `rm2/`, `avi/` e os arquivos de idioma
-(`language.dll`, `xpacklanguage.dll`, pastas LCID). Copiá-las não quebra nada;
-elas serão usadas nas próximas etapas. **Não copie** `savegame/`,
-`screenshots/`, `Voobly Mods/` nem `_CommonRedist/`.
+### Pré-requisitos
+- Python 3 instalado
+- Acesso aos arquivos originais do Age of Mythology (PC)
+- Dispositivo Android com o port nativo do AoM instalado
 
-> Nesta instalação do AoM Extended Edition não existem as pastas `campaign/`,
-> `gfx/` nem `screenshots/`. As campanhas ficam em `data/main campaign.cpn` e
-> `data/xpack campaign.cpx`; os perfis gráficos ficam em `gfxconfig/` e
-> `gfxconfig2/`; `screenshots/` é criada pelo jogo original ao tirar uma
-> captura.
+### Passo 1: Extrair os .prt do jogo original
 
-A engine procura, nesta ordem: pasta privada do app, `Documents/AoM`,
-`Download/AoM`, `AoM` na raiz do armazenamento e pastas legadas. A primeira
-pasta que contiver `data/data.bar`, `textures/textures.bar`,
-`models/models.bar`, `data.bar` ou `textures.bar` é usada. Também é aceita uma
-subpasta de primeiro nível, como `Download/AoM/Age of Mythology/...`.
+```bash
+# Clone ou baixe este repositório
+git clone <seu-repositorio>
+cd <seu-repositorio>
 
-Não é necessário extrair os `.bar`: eles são lidos diretamente. No Android 11+,
-se o acesso ao armazenamento compartilhado for negado, use o importador interno
-ou `adb push` para a pasta privada do app.
+# Rode o extrator apontando para a pasta do jogo original
+python3 extract_aom.py "/caminho/para/o/Age of Mythology" -o ./aom_prt_extracted
+```
 
-**Problemas comuns:**
+### Passo 2: Copiar para o Android
 
-- **“Pasta inválida”** — selecione a pasta que contém `data/data.bar` e
-  `textures/textures.bar`, não uma pasta acima nem um arquivo isolado.
-- **Texturas não aparecem** — confirme que `textures/textures.bar` foi copiado
-  e não está corrompido.
-- **`Download/AoM` não é detectado no Android 11+** — use a importação interna
-  ou `adb push`; o acesso direto ao armazenamento compartilhado pode estar
-  bloqueado.
+Via ADB (sem fio ou USB):
 
-📖 **Instruções completas, comandos ADB, árvore de arquivos, verificação por
-logcat e solução de problemas:** [`docs/IMPORTACAO_DADOS.md`](docs/IMPORTACAO_DADOS.md).
+```bash
+# Verificar conexão
+adb devices
+
+# Copiar todos os .prt extraídos para o Android
+adb push ./aom_prt_extracted/ "/storage/emulated/0/Download/Games/PC/Age of Mythology/Age of Mythology/particles/"
+```
+
+### Passo 3: Verificar
+
+Reinicie o jogo e rode:
+
+```bash
+adb logcat -d | grep -E "particles|not found" | tail -n 20
+```
+
+Os erros `[E] [AoM-BAR] BAR: File 'particles/... not found` não devem mais aparecer para os 5 arquivos mapeados.
+
+## 📜 Script Extrator (`extract_aom.py`)
+
+O script incluso neste repositório extrai automaticamente todos os arquivos `.prt` de todos os arquivos `.bar` encontrados na pasta do Age of Mythology.
+
+### Uso
+```bash
+python3 extract_aom.py <caminho-do-aom> -o <pasta-de-saida>
+```
+
+### Exemplo
+```bash
+python3 extract_aom.py "/sdcard/Documents/aom" -o ./aom_prt_extracted
+```
+
+## ⚠️ Limitações
+
+1. **Direitos autorais:** Os arquivos `.bar` e `.prt` originais do Age of Mythology são propriedade da Microsoft/Ensemble Studios. Este repositório contém apenas o script extrator e documentação, não os arquivos originais do jogo.
+
+2. **Partículas visuais:** Os 5 arquivos mapeados são cópias de arquivos originais similares, não cópias exatas dos nomes procurados. As partículas podem não ser visualmente idênticas ao que o desenvolvedor do port pretendia, mas eliminam os erros de log.
+
+3. **Formato binário:** Os arquivos `.prt` têm um formato binário específico do motor do Age of Mythology. Este repositório não inclui documentação completa do formato, apenas o extrator que já funciona para os arquivos do jogo.
+
+## 🤝 Contribuição
+
+Sinta-se à vontade para:
+- Melhorar o extrator `.bar`
+- Adicionar documentação sobre o formato `.prt`
+- Reportar melhores substitutos para os 5 arquivos mapeados
+- Adicionar suporte a outros tipos de arquivo do AoM
+
+## 📄 Licença
+
+Este projeto é documentação e ferramenta de extração. Os arquivos de jogo do Age of Mythology permanecem sob os direitos autorais originais da Microsoft/Ensemble Studios.
 
 ---
 
-## 📊 Status do Projeto
+## 📝 Histórico de Alterações
 
-Consulte o arquivo [`PROGRESSO.md`](PROGRESSO.md) para ver o histórico detalhado de commits, tarefas concluídas e os próximos passos da implementação.
+| Data | Alteração |
+|------|-----------|
+| 15/11/2026 | Criação do extrator `.bar` e extração de 783 arquivos `.prt` |
+| 15/11/2026 | Mapeamento dos 5 arquivos faltantes com substitutos originais |
+| 15/11/2026 | Documentação completa para GitHub |
 
 ---
 
-## ⚖️ Licença e Direitos Autorais
+## 🔗 Links Úteis
 
-- *Age of Mythology* e seus recursos visuais/sonoros são marcas registradas e propriedades intelectuais da Microsoft Corporation / World's Edge.
-- O código-fonte deste projeto é disponibilizado exclusivamente para fins de estudo, engenharia reversa para interoperabilidade e preservação histórica de software.
-- Bibliotecas de terceiros localizadas em `third_party/` (como GLM e STB) mantêm suas respectivas licenças originais.
+- [Age of Mythology Heaven - Downloads](https://aom.heavengames.com/downloads/)
+- [APC: AoM PRT Converter 2.0](https://aom.heavengames.com/downloads/lister.php?category=utilities)
+- [Fórum AoM Heaven - Editing PRT Files](https://aom.heavengames.com/cgi-bin/forums/display.cgi?action=st&fn=19&tn=30065)

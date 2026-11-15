@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_quick_design>
+  <title>Design Rápido</title>
+  <options>
+    <option label="Tema Claro" action="set_light_theme"/>
+    <option label="Tema Escuro" action="set_dark_theme"/>
+  </options>
+  <buttons>
+    <button label="Aplicar" action="apply_ui_design"/>
+    <button label="Voltar" action="return_to_menu"/>
+  </buttons>
+</ui_quick_design>

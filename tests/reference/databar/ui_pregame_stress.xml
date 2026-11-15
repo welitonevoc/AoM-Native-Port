@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_pregame_stress>
+  <test_type>Stress Test</test_type>
+  <settings>
+    <players>8</max_players>
+    <map_size>Large</map_size>
+    <game_duration>30min</game_duration>
+  </settings>
+  <buttons>
+    <button label="Iniciar Teste" action="start_stress_test"/>
+    <button label="Voltar" action="return_to_menu"/>
+  </buttons>
+</ui_pregame_stress>

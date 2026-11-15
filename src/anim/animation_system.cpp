@@ -6,6 +6,15 @@
 #include <algorithm>
 #include <iostream>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  "AoM-AnimSystem", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "AoM-AnimSystem", __VA_ARGS__)
+#else
+#define LOGI(...) std::printf(__VA_ARGS__)
+#define LOGE(...) std::fprintf(stderr, __VA_ARGS__)
+#endif
+
 namespace aom {
 namespace anim {
 
@@ -433,6 +442,13 @@ bool AnimationSystem::parse_brg_clip(const uint8_t* data, size_t size, const std
             }
             pos = next_tag;
         }
+    }
+
+    LOGI("BRG Clip: '%s' frames=%u verts=%u faces=%u duration=%.2fs fps=%.1f",
+         name.c_str(), out_clip.aset.num_frames, out_clip.num_vertices,
+         out_clip.num_faces, out_clip.aset.duration, out_clip.aset.fps);
+    for (const auto& frame : out_clip.frames) {
+        LOGI("  Frame: verts=%zu normals=%zu", frame.positions.size(), frame.normals.size());
     }
 
     return out_clip.is_valid();

@@ -1,4 +1,5 @@
 #include "game/save_load.h"
+#include <filesystem>
 #include <fstream>
 #include <cstring>
 #include <utility>
@@ -83,6 +84,13 @@ struct SaveBuilding {
     uint32_t train_queue_count;   // numero de unidades na fila de treinamento
 };
 
+/// Progresso de campanha serializado
+struct SaveCampaignProgress {
+    char     campaign_name[64];
+    uint32_t completed_scenarios;
+    int32_t  last_difficulty;
+};
+
 struct SaveHeader {
     uint32_t magic;
     uint32_t version;
@@ -92,6 +100,12 @@ struct SaveHeader {
     int32_t  wood[2];
     int32_t  gold[2];
     int32_t  favor[2];
+    // —— Condicao e resultado de vitoria (v2) ——
+    uint32_t victory_condition;
+    uint32_t victory_result;
+    float    victory_timer;
+    // —— Campaign progress (v2) ——
+    uint32_t campaign_progress_count;
     uint32_t unit_count;
     uint32_t building_count;
 };
@@ -100,8 +114,25 @@ struct SaveHeader {
 bool save_game_state(const std::string& path,
                      const GameplayWorld& world,
                      float game_time_seconds,
-                     int map_seed)
+                     int map_seed,
+                     const std::vector<CampaignProgress>& campaign_progress)
 {
+    // Garante que o diretorio de destino exista. Sem isso, um caminho como
+    // "saves/slot1.dat" falha silenciosamente no ofstream quando a pasta
+    // "saves" ainda nao foi criada (comum em saves de usuario no Android).
+    {
+        const std::filesystem::path parent = std::filesystem::path(path).parent_path();
+        if (!parent.empty()) {
+            std::error_code ec;
+            std::filesystem::create_directories(parent, ec);
+            if (ec) {
+                LOGE("save_game_state: falha ao criar o diretorio '%s': %s",
+                     parent.string().c_str(), ec.message().c_str());
+                return false;
+            }
+        }
+    }
+
     std::ofstream out(path, std::ios::binary | std::ios::trunc);
     if (!out) {
         LOGE("save_game_state: falha ao abrir '%s' para gravacao", path.c_str());
@@ -195,19 +226,41 @@ bool save_game_state(const std::string& path,
     const auto& pool_f = world.resource_pool(Team::FRIENDLY);
     const auto& pool_e = world.resource_pool(Team::ENEMY);
 
+    // Preparar progresso de campanhas para serializacao
+    std::vector<SaveCampaignProgress> save_campaign_progress;
+    save_campaign_progress.reserve(campaign_progress.size());
+    for (const auto& cp : campaign_progress) {
+        SaveCampaignProgress scp{};
+        std::strncpy(scp.campaign_name, cp.campaign_name.c_str(), sizeof(scp.campaign_name) - 1);
+        scp.completed_scenarios = static_cast<uint32_t>(cp.completed_scenarios);
+        scp.last_difficulty = cp.last_difficulty;
+        save_campaign_progress.push_back(scp);
+    }
+
     SaveHeader hdr{};
-    hdr.magic          = kSaveMagic;
-    hdr.version        = kSaveFormatVersion;
-    hdr.game_time      = game_time_seconds;
-    hdr.map_seed       = map_seed;
-    hdr.food[0]        = pool_f.food;   hdr.food[1]  = pool_e.food;
-    hdr.wood[0]        = pool_f.wood;   hdr.wood[1]  = pool_e.wood;
-    hdr.gold[0]        = pool_f.gold;   hdr.gold[1]  = pool_e.gold;
-    hdr.favor[0]       = pool_f.favor;  hdr.favor[1] = pool_e.favor;
-    hdr.unit_count     = static_cast<uint32_t>(save_units.size());
-    hdr.building_count = static_cast<uint32_t>(save_bldgs.size());
+    hdr.magic                      = kSaveMagic;
+    hdr.version                    = kSaveFormatVersion;
+    hdr.game_time                  = game_time_seconds;
+    hdr.map_seed                   = map_seed;
+    hdr.food[0]                    = pool_f.food;   hdr.food[1]  = pool_e.food;
+    hdr.wood[0]                    = pool_f.wood;   hdr.wood[1]  = pool_e.wood;
+    hdr.gold[0]                    = pool_f.gold;   hdr.gold[1]  = pool_e.gold;
+    hdr.favor[0]                   = pool_f.favor;  hdr.favor[1] = pool_e.favor;
+    // Condicao/resultado de vitoria
+    hdr.victory_condition          = static_cast<uint32_t>(world.victory_condition());
+    hdr.victory_result             = static_cast<uint32_t>(world.victory_result());
+    hdr.victory_timer              = world.victory_timer();
+    // Campaign progress
+    hdr.campaign_progress_count    = static_cast<uint32_t>(save_campaign_progress.size());
+    hdr.unit_count                 = static_cast<uint32_t>(save_units.size());
+    hdr.building_count             = static_cast<uint32_t>(save_bldgs.size());
 
     out.write(reinterpret_cast<const char*>(&hdr), sizeof(hdr));
+    // Escrever progresso de campanhas
+    if (!save_campaign_progress.empty()) {
+        out.write(reinterpret_cast<const char*>(save_campaign_progress.data()),
+                  save_campaign_progress.size() * sizeof(SaveCampaignProgress));
+    }
     if (!save_units.empty()) {
         out.write(reinterpret_cast<const char*>(save_units.data()), save_units.size() * sizeof(SaveUnit));
     }
@@ -256,10 +309,33 @@ bool load_game_state(const std::string& path, SaveGameData& out) {
     out.version           = hdr.version;
     out.game_time_seconds = hdr.game_time;
     out.map_seed          = hdr.map_seed;
+    out.victory_condition = static_cast<uint8_t>(hdr.victory_condition);
+    out.victory_result    = static_cast<uint8_t>(hdr.victory_result);
+    out.victory_timer     = hdr.victory_timer;
     out.food[0]  = hdr.food[0];   out.food[1]  = hdr.food[1];
     out.wood[0]  = hdr.wood[0];   out.wood[1]  = hdr.wood[1];
     out.gold[0]  = hdr.gold[0];   out.gold[1]  = hdr.gold[1];
     out.favor[0] = hdr.favor[0];  out.favor[1] = hdr.favor[1];
+
+    // ── Campaign Progress ───────────────────────────────────────────────────
+    out.campaign_progress.clear();
+    if (hdr.campaign_progress_count > 0 && hdr.campaign_progress_count <= 10) {
+        std::vector<SaveCampaignProgress> raw_cp(hdr.campaign_progress_count);
+        in.read(reinterpret_cast<char*>(raw_cp.data()),
+                raw_cp.size() * sizeof(SaveCampaignProgress));
+        if (!in) {
+            LOGE("load_game_state: falha ao ler secao de campaign progress");
+            return false;
+        }
+        out.campaign_progress.reserve(raw_cp.size());
+        for (const SaveCampaignProgress& scp : raw_cp) {
+            CampaignProgress cp;
+            cp.campaign_name = fixed_string(scp.campaign_name, sizeof(scp.campaign_name));
+            cp.completed_scenarios = scp.completed_scenarios;
+            cp.last_difficulty = scp.last_difficulty;
+            out.campaign_progress.push_back(std::move(cp));
+        }
+    }
 
     // ── Seções de entidades ────────────────────────────────────────────────
     constexpr uint32_t kMaxEntities = 100000;

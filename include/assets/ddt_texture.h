@@ -40,6 +40,7 @@ namespace aom {
 enum class DdtFormat : uint8_t {
     UNKNOWN      = 0,
     BGRA8888     = 1,  ///< 32-bit BGRA, uncompressed
+    RGB888       = 2,  ///< 32-bit RGB888, uncompressed
     PALETTE      = 3,  ///< 8-bit palette indices
     DXT1         = 4,  ///< BC1 compressed (no alpha or 1-bit alpha)
     AOM_5BPP     = 5,  ///< AoM custom 5 bpp format (RGB555 + 1-bit alpha)
@@ -66,6 +67,11 @@ struct DdtTexture {
     uint32_t mipmap_count = 0;
     std::vector<DdtMipmap> mipmaps;
     std::vector<uint8_t> palette;  ///< RGBA palette table for PALETTE format (format 3)
+    uint32_t num_colors = 0;          ///< Número de cores na paleta (formato 3)
+    uint32_t palette_offset_0 = 0;    ///< Offset da tabela de cores (formato 3)
+    uint32_t palette_offset_1 = 0;    ///< Segundo offset de paleta (formato 3)
+    uint32_t palette_offset_alpha1 = 0;///< Offset alpha 1-bit (formato 3)
+    uint32_t palette_offset_alpha4 = 0;///< Offset alpha 4-bit (formato 3)
 
     /// Convert the texture to RGBA8888 format (for use with OpenGL ES)
     /// @param mip_level Mipmap level to decode (0 = full res)

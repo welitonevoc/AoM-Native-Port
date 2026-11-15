@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <optional>
 
@@ -20,7 +21,10 @@
 #include "data/proto_unit.h"
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
+#include "ui/button_set.h"
+#include "ui/menu_system.h"
 #include "audio/audio.h"
+#include "data/sound_def.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
 #include "aom/campaign_select_system.h"
@@ -30,6 +34,7 @@
 #include "campaign/campaign_mission.h"
 #include "game/save_load.h"
 #include "game/victory.h"
+#include "graphics/lighting.h"
 #include "game/god_powers.h"
 #include "assets/cube_map.h"
 
@@ -129,6 +134,12 @@ enum class EngineState {
     UI_OBJECTIVES,
     UI_OBJECTIVES_DIALOG,
     UI_OPTIONS_MENU,
+    /// Abas do menu de opções (aom-recover)
+    UI_OPTIONS_AUDIO,
+    UI_OPTIONS_VIDEO,
+    UI_OPTIONS_GAMEPLAY,
+    UI_OPTIONS_NETWORK,
+    UI_OPTIONS_CONTROLS,
     UI_OTHER_SETTINGS,
     UI_PLAYER_LOGIN,
     UI_PLAYER_STATUS_DIALOG,
@@ -169,7 +180,8 @@ enum class PlacementMode {
     NONE,
     HOUSE,
     BARRACKS,
-    TOWER
+    TOWER,
+    TOWN_CENTER
 };
 
 struct ActionBtn {
@@ -212,6 +224,9 @@ public:
 
     void handle_touch(const TouchEvent& touch);
     void adjust_camera_zoom(float delta);
+    void handle_text_input(const std::string& text);  // Android IME text input
+    void handle_text_backspace();  // Android IME backspace
+    void handle_text_enter();  // Android IME enter/done
 
     void set_state(EngineState new_state);
 
@@ -230,7 +245,7 @@ public:
     /// Inicia uma missão genérica (sem script específico) usando apenas o
     /// terrain do .scn e entidades básicas. Fallback para cenários sem
     /// CampaignMissionManager dedicado.
-    void start_generic_mission(const std::string& scenario_filename);
+    void start_generic_mission(const std::string& scenario_filename, bool menu_background_mode = false);
 
     /// Carrega (de forma limitada) os clips de animacao BRG de `models.bar`.
     ///
@@ -240,12 +255,25 @@ public:
     /// milissegundos, e o resultado e reaproveitado nas partidas seguintes.
     bool load_animation_clips(size_t max_clips = 8);
 
+    /// Carrega (de forma limitada) as animacoes esqueletais .grn de `anim.bar`.
+    bool load_grn_clips(size_t max_clips = 8);
+
     /// Escolhe um clip ja carregado e resolve a textura correspondente.
     bool select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
                                TextureHandle& texture) const;
     void create_campaign_menu();
     /// Abre a tela de selecao de cenario da campanha (lista de missoes).
     void create_campaign_selection_menu();
+    
+    // Campanha: helpers para uicampaign.xmb e uicampaignsetup.xmb
+    void populate_campaign_scenario_list(CampaignManager* mgr);
+    void update_campaign_preview(const CampaignScenario* scn, bool is_expansion);
+    void start_selected_campaign_scenario();
+    void update_campaign_setup_selection(const std::pair<const CampaignScenario*, bool>& sel);
+    std::string get_campaign_map_texture(const std::string& filename, bool expansion) const;
+    std::string get_campaign_briefing(const std::string& filename, const std::string& title) const;
+    void start_campaign_scenario(const std::pair<const CampaignScenario*, bool>& sel);
+    
     void save_game(const std::string& path = "");
     void load_game(const std::string& path = "");
 
@@ -253,12 +281,22 @@ public:
     void restore_saved_entities(const SaveGameData& data);
     void open_options();
     void open_credits();
+    std::string tr(const std::string& key) const;
     void open_multiplayer();
     void return_to_main_menu();
     void quit_app();
 
+    // --- Multiplayer network operations (aom-recover) ---
+    void network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port, bool is_public = true);
+    void network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name);
+    void network_leave_session();
+    void network_update(float dt);
+
     bool recreate_renderer(void* native_window);
     void release_renderer();
+    /// Zera TODOS os handles de GPU (texturas/malhas). Chamar quando o contexto GL é destruído/recriado:
+    /// handles são nomes GL crus e, num contexto novo, os mesmos números passam a designar outras texturas.
+    void invalidate_gpu_handles();
 
     [[nodiscard]] EngineState state() const { return state_; }
     void set_callbacks(const EngineCallbacks& callbacks) { callbacks_ = callbacks; }
@@ -274,6 +312,16 @@ public:
     [[nodiscard]] BarArchive* model_archive() { return models_bar_.get(); }
     [[nodiscard]] BarArchive* scenario_archive() { return scenarios_bar_.get(); }
     [[nodiscard]] BarArchive* sound_archive() { return sound_bar_.get(); }
+
+    /// Carrega textura .ddt pelo nome do material ou arquivo.
+    TextureHandle load_ddt_texture(const std::string& material_name);
+
+    /// P5.5: Toca um som de unidade usando o SoundDefManager (sound banks do sounds.bar).
+    /// Retorna true se um som foi disparado via sound bank.
+    bool play_sound_bank(const std::string& unit_type_name, const std::string& sound_type,
+                         const glm::vec3& world_pos, bool worker = false,
+                         const std::string& damage_type = "");
+
     [[nodiscard]] BarArchive* animation_archive() { return anim_bar_.get(); }
     [[nodiscard]] BarArchive* godpower_archive() { return godpowers_bar_.get(); }
     [[nodiscard]] CampaignManager* campaign_manager() { return campaign_mgr_.get(); }
@@ -306,6 +354,10 @@ public:
     /// Retorna o gerenciador de layouts para inspeção.
     [[nodiscard]] UILayoutManager& ui_layout_manager() { return ui_layout_manager_; }
 
+    /// Retorna o gerenciador de conjuntos de botões (buttonsets).
+    [[nodiscard]] const ButtonSetManager& button_set_manager() const { return button_set_manager_; }
+    [[nodiscard]] ButtonSetManager& button_set_manager() { return button_set_manager_; }
+
     /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
     /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
     [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name);
@@ -318,11 +370,15 @@ public:
     /// Recupera um modelo BRG carregado no cache por nome (ex: "hoplite.brg").
     /// Retorna nullptr se o modelo ainda não foi carregado.
     [[nodiscard]] ModelEntry* get_model_entry(const std::string& name);
+    [[nodiscard]] ModelEntry* resolve_unit_visual(const std::string& unit_name);
+    void apply_unit_visual(Entity entity, const std::string& name);
+    void resolve_building_visual(Entity building, BuildingType type, const std::string& type_name);
     [[nodiscard]] const XmbElement* game_config() const { return game_config_root_.get(); }
     [[nodiscard]] bool archives_loaded() const { return archives_loaded_; }
 
     /// Read asset binary content from APK assets or fallback filesystem
     std::vector<uint8_t> read_asset(const std::string& name);
+    TextureHandle load_png_asset(const std::string& name, int* out_w = nullptr, int* out_h = nullptr);
 
     // 3D Interactive Particle System
     void spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size = 0.15f);
@@ -332,9 +388,14 @@ public:
     void spawn_death_smoke(const glm::vec3& pos, int count = 12);
     void update_particles(float dt);
     void render_particles();
-    size_t particle_count() const { return particles_.size(); }
+    size_t particle_count() const {
+        size_t c = 0;
+        for (const auto& p : particles_) if (p.active) ++c;
+        return c;
+    }
 
     struct Particle {
+        bool active = false;
         glm::vec3 pos{0.0f};
         glm::vec3 vel{0.0f};
         float life = 0.0f;
@@ -350,13 +411,26 @@ private:
     bool load_archives(const std::string& data_path);
     bool load_textures();
     bool load_models();
-    TextureHandle load_ddt_texture(const std::string& material_name);
     bool load_game_config();
     bool load_lighting(const std::string& path);
+    bool set_lighting(const std::string& name);
     bool load_strings(const std::string& path);
-    std::string tr(const std::string& key) const;
+
+    /// P5.6: Carrega strings da UI para a tabela de localização (base PT-BR).
+    void load_ui_strings();
+
+    /// P5.6: Tenta carregar uimain.xmb para o menu principal (com fallback procedural).
+    void create_main_menu_from_xmb();
+
+    /// P5.6: Fallback procedural para o menu principal (hard-coded, se XMB falhar).
+    void create_main_menu_fallback();
+
+    /// P5.6: Tenta carregar commandpanel.xmb para o painel de comandos in-game.
+    /// Retorna true se o XMB foi carregado com sucesso; false -> usa fallback procedural.
+    bool create_command_panel_from_xmb();
 
     void create_main_menu();          ///< uipregamenew — menu pregame The Titans
+    void populate_menu_background_scene();  ///< Popula cena 3D do MAIN_MENU com elementos do The Titans
 
     void create_ai_prompt_menu();
     void create_alternates_dialog_menu();
@@ -465,6 +539,12 @@ private:
     void create_load_game_menu();
     void create_multiplayer_menu();
     void create_multiplayer_lan_menu();
+    void show_host_game_dialog();
+    void show_room_invite_dialog(const std::string& inviter_name);
+    void show_room_join_request_dialog(const std::string& requester_name);
+    void show_room_error_dialog(const std::string& error_message);
+    void show_session_connect_dialog();
+    void hide_session_connect_dialog();
     void create_multiplayer_lobby_menu();
     void create_cinematics_menu();
     void create_history_menu();
@@ -489,13 +569,24 @@ private:
     void save_options();
     std::string save_game_path() const;
 
+    // --- Saved Game Browser ---
+    void open_saved_game_browser();
+    void load_selected_save();
+    void delete_selected_save();
+    void refresh_saved_game_list();
+    std::vector<std::string> list_saved_games() const;
+    void open_save_game_menu();
+    void save_game_slot(const std::string& slot_name);
+
     EngineState state_ = EngineState::UNINITIALIZED;
+    int selected_save_index_ = -1;
     EngineConfig config_;
     EngineCallbacks callbacks_;
 
     void* asset_manager_ = nullptr;
     void* native_activity_ = nullptr;
     bool archives_loaded_ = false;
+    bool resources_loaded_ = false;   ///< Recursos de jogo (modelos, partículas, etc.) já carregados — evita recarregar a cada volta ao MAIN_MENU
 
     // Archives base do jogo; cada um pode ter a expansão The Titans
     // montada por cima (data2.bar, textures2.bar, models2.bar, ...).
@@ -512,14 +603,30 @@ private:
     std::unique_ptr<CampaignMissionManager> mission_mgr_;
     GodPowerSystem god_powers_;
 
+    /// Gerenciador de sound banks (soundsets.xml + *_snds.xml de sounds.bar)
+    SoundDefManager sound_def_mgr_;
+
     std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<UIManager> ui_;
+    std::unique_ptr<MenuSystem> menu_system_;
     std::unique_ptr<AudioEngine> audio_;
 
     /// Gerenciador de layouts de UI do data.bar (XMB: uitechtree.xml, uitributedlg.xml, etc.)
     UILayoutManager ui_layout_manager_;
 
+    /// Gerenciador de buttonsets do data.bar / assets (buttonsets.xmb)
+    ButtonSetManager button_set_manager_;
+
     std::unordered_map<std::string, aom::TextureHandle> texture_cache_;
+    /// Dimensões (largura x altura) de cada textura carregada (para 9-slice)
+    std::unordered_map<std::string, glm::ivec2> texture_dimensions_;
+    // Índice tolerante de nomes de textura (chave = só [a-z0-9] do nome-base).
+    // Resolve "ui\\ui pregame button" <-> "ui_pregame_button.ddt" e variações de pasta/caixa.
+    std::unordered_map<std::string, std::string> texture_key_index_;
+    bool texture_key_index_built_ = false;
+    std::unordered_set<std::string> texture_miss_logged_;
+    void build_texture_key_index();
+    void log_bar_names_containing(const std::string& needle, size_t max_lines = 40) const;
     std::unordered_map<std::string, std::string> strings_;
 
     // Core Authentic AoM UI Textures
@@ -528,6 +635,7 @@ private:
     TextureHandle main_menu_tex_ = INVALID_TEXTURE;
     TextureHandle button_main_tex_ = INVALID_TEXTURE;
     TextureHandle button_clicked_tex_ = INVALID_TEXTURE;
+
     TextureHandle minimap_tex_ = INVALID_TEXTURE;
     glm::vec4 minimap_rect_{0.0f}; // x, y, width, height
 
@@ -544,6 +652,7 @@ private:
     /// —— Skybox completo (P3.2) ——
     TextureHandle skybox_faces_[6] = {INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE,
                                       INVALID_TEXTURE, INVALID_TEXTURE, INVALID_TEXTURE};
+    TextureHandle skybox_cubemap_ = INVALID_TEXTURE;  // GL_TEXTURE_CUBE_MAP
     MeshHandle skybox_mesh_ = INVALID_MESH;
     bool load_skybox_faces(const std::string& cub_name);
 
@@ -567,7 +676,9 @@ private:
     TextureHandle terrain_bank_tex_ = INVALID_TEXTURE;      ///< Textura da beira interna (waterbodies.xmb bank)
     TextureHandle terrain_outer_bank_tex_ = INVALID_TEXTURE;///< Textura da beira externa (waterbodies.xmb outer_bank)
     TextureHandle water_normal_tex_ = INVALID_TEXTURE;
+    TextureHandle water_tex_ = INVALID_TEXTURE;         ///< Textura de água (water_*.ddt do textures.bar)
     glm::vec4 water_plane_{0.0f, 1.0f, 0.0f, 0.4f}; ///< Plane equation Ax+By+Cz+D = 0, y = -0.4f
+    float terrain_height_ = -0.4f;                      ///< Altura do terreno sob a água (para depth/foam)
     glm::vec3 water_color_{0, 50, 170};             ///< Cor da água do waterbodies.xmb (RGB 0-255)
     int heightmap_width_ = 0;
     int heightmap_height_ = 0;
@@ -578,6 +689,14 @@ private:
     std::unique_ptr<aom::anim::AnimationSystem> anim_system_;
     std::vector<std::string> anim_clip_names_; ///< Nomes dos .brg já interpretados
     bool anim_clips_ready_ = false;            ///< Clips já carregados (reaproveitados)
+    std::unordered_map<std::string, std::unique_ptr<aom::anim::GrnAnimation>> grn_clips_; ///< Nomes dos .grn já interpretados
+
+    /// Retorna um clip .grn previamente carregado por nome (ou nullptr).
+    [[nodiscard]] const aom::anim::GrnAnimation* find_grn_clip(const std::string& name) const {
+        auto it = grn_clips_.find(name);
+        return (it != grn_clips_.end()) ? it->second.get() : nullptr;
+    }
+
     std::unique_ptr<aom::video::VideoPlayer> video_player_;
     std::unique_ptr<aom::video::MediaDecoder> media_decoder_;
 
@@ -587,6 +706,15 @@ private:
     bool cinematic_new_frame_      = false; ///< flag: novo frame disponível para upload
     uint32_t cinematic_tex_w_ = 0;          ///< dimensões atuais da textura do frame
     uint32_t cinematic_tex_h_ = 0;
+
+    // Menu background video (menu background video playing behind the menu)
+    std::unique_ptr<aom::video::MediaDecoder> menu_bg_;
+    TextureHandle menu_bg_tex_ = INVALID_TEXTURE;
+    uint32_t menu_bg_w_ = 0;
+    uint32_t menu_bg_h_ = 0;
+    bool menu_bg_restart_ = false;
+
+    void start_menu_background(); ///< Abre e inicia a decodificação do vídeo de fundo do menu
 
     // Playlist de abertura fiel ao original (playlist.aom: AOM LOGO → introcg)
     std::vector<std::string> cinematic_queue_;
@@ -605,6 +733,7 @@ private:
     std::vector<Particle> particles_;
     Camera camera_;
     DirectionalLight dir_light_;
+    LightingManager lighting_mgr_;
 
     /// —— P3.5: Sistema de partículas baseado em .prt ——
     std::unique_ptr<aom::PrtParticleSystem> prt_particles_;
@@ -643,6 +772,10 @@ private:
     bool show_fps_ = true;
     float graphics_quality_ = 1.0f;
 
+    // Virtual joystick / touch options (aom-recover)
+    bool enable_virtual_joystick_ = true;
+    float touch_sensitivity_ = 1.0f;
+
     // RTS Construction & Training Placement
     PlacementMode placement_mode_ = PlacementMode::NONE;
     glm::vec3 placement_world_pos_{0.0f};
@@ -663,6 +796,21 @@ private:
     int mp_ip_last_octet_ = 100;
     int mp_ip_subnet_ = 1;
 
+    // Pending Room Invite / Join Request (for dialog callbacks)
+    struct PendingRoomInvite {
+        std::string inviter_name;
+        std::string inviter_ip;
+        uint16_t inviter_port = 2300;
+        bool valid = false;
+    } pending_room_invite_;
+
+    struct PendingRoomJoinRequest {
+        std::string requester_name;
+        std::string requester_ip;
+        uint16_t requester_port = 2300;
+        bool valid = false;
+    } pending_room_join_request_;
+
     // God Picker state (after campaign)
     std::string god_picker_civilization_ = "Grego";
     std::string god_picker_minor_god_ = "Zeus";
@@ -681,8 +829,12 @@ private:
     UIButton* hud_action_btn2_ = nullptr;
     UIButton* hud_action_btn3_ = nullptr;
     UIButton* hud_action_btn4_ = nullptr;
+    // Tooltip dinamico exibido abaixo dos botoes de comando (custo/descricao).
+    UILabel* hud_tooltip_ = nullptr;
     glm::vec2 touch_down_pos_{0.0f, 0.0f};
     Entity last_selected_entity_ = 0;
+    /// P5.6: true se o painel de comandos foi carregado de commandpanel.xmb
+    bool command_panel_from_xmb_ = false;
 
     // Campaign & Mission HUD references
     UILabel* hud_obj_title_ = nullptr;

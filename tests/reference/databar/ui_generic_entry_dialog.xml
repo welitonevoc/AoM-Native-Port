@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_generic_entry_dialog>
+  <label>Enter Name</label>
+  <input type="text" placeholder="Enter text"/>
+  <buttons>
+    <button label="OK" action="submit"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_generic_entry_dialog>

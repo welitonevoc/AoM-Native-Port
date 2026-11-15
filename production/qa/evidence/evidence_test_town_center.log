@@ -1,0 +1,25 @@
+========================================
+ P5.2 — Town Center Test Suite
+========================================
+
+--- Testing Town Center Building ---
+PASS: TOWN_CENTER building type exists
+PASS: Spawned Town Center building
+PASS: Town Center increases population cap (+15 each)
+Pop cap before: 10, after TC: 25
+
+--- Testing Town Center Resource Drop-off ---
+PASS: TC spawned for drop-off test
+PASS: Nearest TC to (0,0,0) is the spawned TC
+PASS: Spawned worker for drop-off test
+
+--- Testing TC Count for Population Cap ---
+PASS: TC1 spawned
+PASS: TC2 spawned
+PASS: Population cap increased with more TCs
+PASS: Each TC adds +15 population cap
+Cap 0 TC: 10, Cap 2 TC: 40
+
+========================================
+ ALL TOWN CENTER TESTS PASSED! (100%)
+========================================

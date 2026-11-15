@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_host_game_dialog>
+  <settings>
+    <map_name>Random Map</map_name>
+    <max_players>8</max_players>
+  </settings>
+  <buttons>
+    <button label="Host" action="host_game"/>
+    <button label="Cancel" action="cancel"/>
+  </buttons>
+</ui_host_game_dialog>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui_pregame_new>
+  <menu>
+    <option label="Novo Jogo" action="start_new_game"/>
+    <option label="Carregar Partida" action="load_game"/>
+    <button label="Voltar" action="return_to_main_menu"/>
+  </options>
+</ui_pregame_new>

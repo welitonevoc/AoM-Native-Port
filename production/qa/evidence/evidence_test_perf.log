@@ -1,0 +1,31 @@
+=== P4.G4 Performance & Memory Validation (Real Game Systems) ===
+
+=== RESULTADO P4.G4 (60s simulado, 3600 frames) ===
+Tempo real decorrido: 0.149486s
+Entidades ECS: 2000 | Pool de partículas: 2000
+
+FPS:
+  Médio:  33272.3
+  Mínimo: 6642.84
+  Máximo: 83333.3
+  P99:    21666.6
+
+Frame Time (ms):
+  Médio:  0.0300551
+  Mínimo: 0.012
+  Máximo: 0.150538
+  P99:    0.046154
+
+Memória:
+  Inicial: 4684 KB
+  Final:   5348 KB
+  Pico:    5284 KB
+  Crescimento: 664 KB
+
+=== CRITÉRIOS P4.G4 ===
+✅ FPS médio >= 55: 33272.3
+✅ FPS mínimo >= 30: 6642.84
+✅ P99 FPS >= 30: 21666.6
+✅ Crescimento mem < 50MB: 664 KB
+
+=== PASS ===

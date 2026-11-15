@@ -60,8 +60,43 @@ public class MyNativeActivity extends android.app.NativeActivity {
         System.loadLibrary("aom_native");
     }
 
-
     private static final String TAG = "AoM-Activity";
+
+    // Native keyboard support
+    private android.view.inputmethod.InputMethodManager imm_;
+    private android.view.View decorView_;
+
+    // JNI methods called from native code
+    public void showSoftKeyboard() {
+        runOnUiThread(() -> {
+            Log.i(TAG, "showSoftKeyboard requested");
+            if (imm_ == null) {
+                imm_ = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            }
+            if (decorView_ == null) {
+                decorView_ = getWindow().getDecorView();
+            }
+            if (imm_ != null && decorView_ != null) {
+                // Request focus on the decor view to show keyboard
+                decorView_.requestFocus();
+                imm_.showSoftInput(decorView_, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+    }
+
+    public void hideSoftKeyboard() {
+        runOnUiThread(() -> {
+            Log.i(TAG, "hideSoftKeyboard requested");
+            if (imm_ != null && decorView_ != null) {
+                imm_.hideSoftInputFromWindow(decorView_.getWindowToken(), 0);
+            }
+        });
+    }
+
+    // Native callbacks (for future use with InputConnection)
+    private native void nativeOnTextInput(String text);
+    private native void nativeOnTextBackspace();
+    private native void nativeOnTextEnter();
 
     private static final int REQUEST_STORAGE = 1001;
 
@@ -122,11 +157,7 @@ public class MyNativeActivity extends android.app.NativeActivity {
      * por SAF funciona sem essa permissão.
      */
     private void requestStorageAccessIfNeeded() {
-        if (hasStoragePermission() || hasImportedGameData()) return;
-
-        SharedPreferences preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-        if (preferences.getBoolean("storage_prompted", false)) return;
-        preferences.edit().putBoolean("storage_prompted", true).apply();
+        if (hasStoragePermission()) return;
 
         if (android.os.Build.VERSION.SDK_INT >= 30) {
             try {
@@ -139,11 +170,10 @@ public class MyNativeActivity extends android.app.NativeActivity {
                     startActivity(intent);
                 } catch (Exception ignored) {}
             }
-        } else {
-            requestPermissions(
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_STORAGE);
         }
+        requestPermissions(
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_STORAGE);
     }
 
 
@@ -279,45 +309,54 @@ public class MyNativeActivity extends android.app.NativeActivity {
 
 
         File aomDir = new File(externalDir, "AoM");
-
         File texturesDir = new File(aomDir, "textures");
-
         File dataDir = new File(aomDir, "data");
-
         File aviDir = new File(aomDir, "avi");
+        File modelsDir = new File(aomDir, "models");
+        File scenarioDir = new File(aomDir, "scenario");
+        File soundDir = new File(aomDir, "sound");
+        File animDir = new File(aomDir, "anim");
+        File godpowersDir = new File(aomDir, "godpowers");
 
-        if (!texturesDir.mkdirs() && !texturesDir.isDirectory()) {
-
-            Log.e(TAG, "Cannot create texture directory: " + texturesDir);
-
+        File[] dirs = {texturesDir, dataDir, aviDir, modelsDir, scenarioDir, soundDir, animDir, godpowersDir};
+        for (File d : dirs) {
+            if (!d.mkdirs() && !d.isDirectory()) {
+                Log.e(TAG, "Cannot create directory: " + d);
+            }
         }
-
-        if (!dataDir.mkdirs() && !dataDir.isDirectory()) {
-
-            Log.e(TAG, "Cannot create data directory: " + dataDir);
-
-        }
-
-        if (!aviDir.mkdirs() && !aviDir.isDirectory()) {
-
-            Log.e(TAG, "Cannot create cinematic directory: " + aviDir);
-
-        }
-
-
 
         AssetManager assets = getAssets();
-
+        // Texturas (Base + The Titans)
         copyAsset(assets, "textures/textures.bar", new File(texturesDir, "textures.bar"), true);
+        copyAsset(assets, "textures/textures2.bar", new File(texturesDir, "textures2.bar"), true);
 
+        // Dados do jogo (Base + The Titans)
         copyAsset(assets, "data/data.bar", new File(dataDir, "data.bar"), true);
+        copyAsset(assets, "data/data2.bar", new File(dataDir, "data2.bar"), true);
+
+        // Modelos 3D (Base + The Titans)
+        copyAsset(assets, "models/models.bar", new File(modelsDir, "models.bar"), true);
+        copyAsset(assets, "models/models2.bar", new File(modelsDir, "models2.bar"), true);
+
+        // Cenários e campanhas
+        copyAsset(assets, "scenario/scenarios.bar", new File(scenarioDir, "scenarios.bar"), true);
+        copyAsset(assets, "scenario/scenarios2.bar", new File(scenarioDir, "scenarios2.bar"), true);
+
+        // Sons e efeitos de áudio
+        copyAsset(assets, "sound/sounds.bar", new File(soundDir, "sounds.bar"), true);
+        copyAsset(assets, "sound/sounds2.bar", new File(soundDir, "sounds2.bar"), true);
+
+        // Animações
+        copyAsset(assets, "anim/anim.bar", new File(animDir, "anim.bar"), true);
+        copyAsset(assets, "anim/anim2.bar", new File(animDir, "anim2.bar"), true);
+
+        // Poderes divinos
+        copyAsset(assets, "godpowers/godpowers.bar", new File(godpowersDir, "godpowers.bar"), true);
+        copyAsset(assets, "godpowers/godpowers2.bar", new File(godpowersDir, "godpowers2.bar"), true);
 
         for (String videoName : ALL_KNOWN_VIDEOS) {
-
             copyAsset(assets, "avi/" + videoName, new File(aviDir, videoName), true);
-
         }
-
     }
 
 
