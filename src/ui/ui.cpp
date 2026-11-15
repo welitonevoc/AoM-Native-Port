@@ -34,6 +34,9 @@ void UIManager::clear() {
     buttons_.clear();
     labels_.clear();
     animations_.clear();
+    scroll_lists_.clear();
+    radio_sets_.clear();
+    lists_.clear();
     // Limpar teclado virtual também
     virtual_keyboard_.visible = false;
     virtual_keyboard_.target_edit_box = nullptr;
@@ -547,6 +550,24 @@ void UIManager::set_group_visible(const std::string& tag, bool visible) {
             ++count;
         }
     }
+    for (auto& sl : scroll_lists_) {
+        if (sl.tag == tag || sl.group_tag == tag) {
+            sl.visible = visible;
+            ++count;
+        }
+    }
+    for (auto& rs : radio_sets_) {
+        if (rs.tag == tag || rs.group_tag == tag) {
+            rs.visible = visible;
+            ++count;
+        }
+    }
+    for (auto& lst : lists_) {
+        if (lst.tag == tag || lst.group_tag == tag) {
+            lst.visible = visible;
+            ++count;
+        }
+    }
     LOGI("[GADGET] set_group_visible('%s', visible=%d) afetou %zu elementos",
          tag.c_str(), (int)visible, count);
 }
@@ -620,7 +641,8 @@ bool UIManager::handle_virtual_keyboard_touch(const TouchEvent& ev) {
     
     // Check if touch is within keyboard area
     if (ev.x < vk_x || ev.x > vk_x + vk_w || ev.y < vk_y || ev.y > vk_y + vk_h) {
-        return false; // Touch outside keyboard - let it fall through
+        hide_virtual_keyboard();
+        return false; // Touch outside keyboard - hide keyboard and let touch fall through
     }
     
     // Keyboard layout dimensions

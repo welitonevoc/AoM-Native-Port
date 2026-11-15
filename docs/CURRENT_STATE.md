@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11151142 (15/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11151517 (15/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -22,6 +22,15 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ **engine_menus.cpp**: Tipos de widget corretos por XMB (scrollList/radioset em uicampaign, textField dropdown em uicampaignsetup)
 - ✅ **engine_multiplayer.cpp**: texture_resolver corrigido (png_name computado localmente, sem std::filesystem)
 - ✅ APK v1.0.11151142 gerado em `/sdcard/aom-native-v1.0.11151142.apk`.
+
+## Correções de Multiplayer LAN (sessão 15/11/2026 — fix "caixa marrom congelada")
+- ✅ **ui.cpp**: `UIManager::clear()` agora limpa `scroll_lists_`, `radio_sets_` e `lists_` (lista de jogos LAN "MPLanIP-LanGamesList" ficava viva e congelada ao trocar de tela; `hit_test_list` bloqueava toques na área)
+- ✅ **ui.cpp**: `set_group_visible()` também atualiza `scroll_lists_`, `radio_sets_` e `lists_` por `tag`/`group_tag`
+- ✅ **ui.cpp**: toque fora do teclado virtual chama `hide_virtual_keyboard()` (teclado não ficava mais preso na tela)
+- ✅ **ui.h**: `resolve_text()` traduz `$$ID$$` também dentro de itens de scroll_lists/radio_sets/lists
+- ✅ **engine_gameplay.cpp + gameplay.h**: unidades spawnadas em jogo recebem mesh/textura via `spawn_unit(..., mesh, texture)`; `attach_animation` stub morto removido (animações morph/GRN voltaram)
+- ✅ **engine_gameplay.cpp**: mapa in-game com palmeiras/carvalhos/pinheiros/rochas (`world e/g/n ...`) além do menu
+- ✅ APK v1.0.11151517 gerado em `/sdcard/aom-native-v1.0.11151517.apk`.
 
 ## Correções de Menus de Campanha (sessão 15/11/2026)
 - ✅ **campaign_select_system.cpp**: nomes de dificuldade corrigidos → Easy/Moderate/Hard/Titan (era Facil/Moderado/Dificil/Tita)

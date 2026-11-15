@@ -348,6 +348,15 @@ public:
         for (auto& lbl : labels_) {
             resolve_one(lbl.text);
         }
+        for (auto& sl : scroll_lists_) {
+            for (auto& item : sl.items) resolve_one(item);
+        }
+        for (auto& rs : radio_sets_) {
+            for (auto& opt : rs.options) resolve_one(opt);
+        }
+        for (auto& lst : lists_) {
+            for (auto& item : lst.items) resolve_one(item);
+        }
     }
 
 private:
