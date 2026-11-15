@@ -19,6 +19,14 @@
 
 namespace aom {
 
+/// Technology data from techtree.xmb / techtreex.xmb
+struct TechData {
+    std::string name;
+    int dbid = 0;
+    int display_name_id = 0;
+    float research_points = 0.0f;
+};
+
 /// Central manager and database for all Age of Mythology game rules and entities.
 /// Loads data from data.bar (base game) and data2.bar (The Titans expansion)
 /// via BarArchive mounts (overlay semantics: last mount wins).
@@ -106,9 +114,10 @@ private:
     /// Helper: carrega um XMB do archive, se existir. Retorna false se não existir (não é erro).
     template <typename LoaderFn>
     bool load_xmb(const char* filename, LoaderFn loader) {
-        const BarEntry* entry = bar_.find(filename);
+        if (!bar_) return false;
+        const BarEntry* entry = bar_->find(filename);
         if (!entry) return false;
-        const std::vector<uint8_t> bytes = bar_.extract(*entry);
+        const std::vector<uint8_t> bytes = bar_->extract(*entry);
         if (bytes.empty()) return false;
         auto root = XmbParser::parse(bytes);
         if (!root) return false;
@@ -124,6 +133,7 @@ private:
     WaterBodyManager water_bodies_;        ///< waterbodies.xmb
     UnitTransformManager unit_transforms_; ///< unittransform.xmb
     SoundDefManager sounds_;               ///< soundsets.xml + *_snds.xml
+    std::vector<TechData> techs_;          ///< techtree.xmb + techtreex.xmb
 };
 
 } // namespace aom

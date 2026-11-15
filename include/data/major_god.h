@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include "assets/xmb_parser.h"
 
 namespace aom {
 

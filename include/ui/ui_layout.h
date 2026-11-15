@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <functional>
 #include <glm/glm.hpp>
 #include "assets/xmb_parser.h"
 #include "assets/bar_archive.h"
@@ -31,6 +32,7 @@ struct UIGadgetDef {
     std::string type;           ///< gadget, textBox, textField, slider, button, dropdown, etc.
     UIGadgetRect rect;          ///< Posição e tamanho em pixels
     std::string text;           ///< Conteúdo de texto
+    std::string action;         ///< Nome da ação (ex: "start_game", "open_options", "open_credits")
     glm::vec3 text_color{0, 0, 0};      ///< Cor do texto (RGB 0-255)
     float text_size = 18.0f;    ///< Tamanho da fonte
     std::string text_font;      ///< Nome da fonte
@@ -39,6 +41,8 @@ struct UIGadgetDef {
     bool has_bevel = false;
     bool close_button = false;
     std::string title_bar;
+    bool hidden = false;        ///< Se true, gadget e filhos não são renderizados
+    bool has_background = false;///< Se true, gadget possui background/textura definido no XMB
     std::vector<UIGadgetDef> children;  ///< Gadgets aninhados
     std::unordered_map<std::string, std::string> extra_attrs; ///< Outros atributos
 };
@@ -91,6 +95,7 @@ private:
 
     std::unordered_map<std::string, UILayoutResult> layouts_;
 
+public:
     // Resolução de referência do AoM (tamanho base para size1024)
     static constexpr int kRefWidth = 1024;
     static constexpr int kRefHeight = 768;
@@ -101,8 +106,10 @@ private:
 /// @param ui      UIManager destino
 /// @param screen_w  Largura da tela em pixels
 /// @param screen_h  Altura da tela em pixels
+/// @param action_callbacks  Mapa de nome da ação -> callback (ex: "start_game" -> lambda)
 /// @return Número de elementos criados
 size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
-                           int screen_w, int screen_h);
+                           int screen_w, int screen_h,
+                           const std::unordered_map<std::string, std::function<void()>>& action_callbacks);
 
 } // namespace aom

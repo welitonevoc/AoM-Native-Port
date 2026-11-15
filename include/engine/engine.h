@@ -7,11 +7,17 @@
 #include <functional>
 #include <unordered_map>
 #include <utility>
+#include <optional>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderer/renderer.h"
 #include "assets/xmb_parser.h"
 #include "assets/brg_model.h"
 #include "data/game_data.h"
+#include "data/unit_transform.h"
+#include "data/proto_unit.h"
 #include "ui/ui.h"
 #include "ui/ui_layout.h"
 #include "audio/audio.h"
@@ -30,6 +36,7 @@
 namespace aom {
 
 class BarArchive;
+class PrtParticleSystem;
 
 struct EngineConfig {
     std::string data_path;
@@ -172,6 +179,13 @@ struct ActionBtn {
     std::function<void()> action;
 };
 
+struct ModelEntry {
+    MeshHandle mesh = INVALID_MESH;
+    TextureHandle texture = INVALID_TEXTURE;
+    BrgModel* model = nullptr;
+    const ProtoUnitData* unit_stats = nullptr;  ///< Estatísticas do proto.xmb (se houver match por nome)
+};
+
 struct EngineCallbacks {
     std::function<void()> on_initialized;
     std::function<void(float progress, const std::string& stage)> on_loading_progress;
@@ -230,6 +244,8 @@ public:
     bool select_animation_clip(const aom::anim::BrgAnimationClip*& clip,
                                TextureHandle& texture) const;
     void create_campaign_menu();
+    /// Abre a tela de selecao de cenario da campanha (lista de missoes).
+    void create_campaign_selection_menu();
     void save_game(const std::string& path = "");
     void load_game(const std::string& path = "");
 
@@ -292,25 +308,16 @@ public:
 
     /// Transforma uma unidade existente em outro tipo (ex: "Wall Long" -> "Gate"),
     /// usando as regras do unittransform.xmb. Delegado ao GameplayWorld.
-    [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name) {
-        if (gameplay_world_) return gameplay_world_->transform_unit(from_entity, target_name);
-        return INVALID_ENTITY;
-    }
+    [[nodiscard]] Entity transform_unit(Entity from_entity, const std::string& target_name);
 
     /// Retorna as transformacoes disponiveis para uma entidade (do unittransform.xmb).
-    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const {
-        if (gameplay_world_) return gameplay_world_->available_transforms(entity);
-        return {};
-    }
+    [[nodiscard]] std::vector<UnitTransform> available_transforms(Entity entity) const;
     [[nodiscard]] MeshHandle model_mesh() const { return model_mesh_; }
     [[nodiscard]] TextureHandle model_texture() const { return model_texture_; }
 
     /// Recupera um modelo BRG carregado no cache por nome (ex: "hoplite.brg").
     /// Retorna nullptr se o modelo ainda não foi carregado.
-    [[nodiscard]] ModelEntry* get_model_entry(const std::string& name) {
-        auto it = model_cache_.find(name);
-        return (it != model_cache_.end()) ? &it->second : nullptr;
-    }
+    [[nodiscard]] ModelEntry* get_model_entry(const std::string& name);
     [[nodiscard]] const XmbElement* game_config() const { return game_config_root_.get(); }
     [[nodiscard]] bool archives_loaded() const { return archives_loaded_; }
 
@@ -358,7 +365,6 @@ private:
     void create_army_edit_menu();
     void create_autopatcher_dialog_menu();
     void create_camera_editor_menu();
-    void create_campaign_menu();
     void create_campaign_editor_menu();
     void create_campaign_nloanding_menu();
     void create_campaign_setup_menu();
@@ -391,6 +397,13 @@ private:
     void create_ingame_msg_dialog_menu();
     void create_launch_screen_menu();
     void create_layout_menu();
+
+    void create_skybox_mesh();
+    void add_skybox_quad(std::vector<Vertex>& verts, std::vector<uint32_t>& indices,
+                         const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2,
+                         const glm::vec3& p3, const glm::vec3& normal,
+                         const glm::vec2& t0, const glm::vec2& t1,
+                         const glm::vec2& t2, const glm::vec2& t3);
     void create_low_detail_background_menu();
     void create_main_alt_menu();
     void create_map_picker_menu();
@@ -455,7 +468,6 @@ private:
     void create_multiplayer_lobby_menu();
     void create_cinematics_menu();
     void create_history_menu();
-    void create_editor_menu();
     void create_menu_screen(
         const std::string& title,
         const std::string& subtitle,
@@ -467,7 +479,6 @@ private:
     void play_credits_cinematic();
     void play_titans_credits_cinematic();
     void play_named_cinematic(const char* method_name);
-    void create_options_menu();
     bool generate_ui_from_xmb();
     void create_credits_menu();
     void create_in_game_hud();
@@ -620,12 +631,6 @@ private:
     GameDataManager game_data_;
 
     // Cache de modelos BRG carregados
-    struct ModelEntry {
-        MeshHandle mesh = INVALID_MESH;
-        TextureHandle texture = INVALID_TEXTURE;
-        BrgModel* model = nullptr;
-        const ProtoUnitData* unit_stats = nullptr;  ///< Estatísticas do proto.xmb (se houver match por nome)
-    };
     std::unordered_map<std::string, ModelEntry> model_cache_;
     std::unordered_map<std::string, std::unique_ptr<BrgModel>> model_cache_models_;
 

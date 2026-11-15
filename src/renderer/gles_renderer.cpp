@@ -994,7 +994,8 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void draw_water(const glm::vec4& water_plane, TextureHandle normal_map, float time) override {
+    void draw_water(const glm::vec4& water_plane, TextureHandle normal_map, float time,
+                    const glm::vec3& water_color = glm::vec3(0, 50, 170)) override {
         if (!water_program_) return;
         if (water_vao_ == 0) create_water_grid();
 

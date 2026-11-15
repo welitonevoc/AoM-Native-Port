@@ -3,6 +3,7 @@
 #include "ecs/ecs.h"
 #include "assets/xmb_parser.h"
 #include "anim/animation_system.h"
+#include "data/unit_transform.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -758,8 +759,8 @@ public:
         Entity new_id = spawn_unit(team, position, stats);
 
         // Aplica HP proporcional
-        auto new_h_it = ecs_world_.healths().find(new_id);
-        if (new_h_it != ecs_world_.healths().end()) {
+        auto new_h_it = ecs_world_.healths_mut().find(new_id);
+        if (new_h_it != ecs_world_.healths_mut().end()) {
             new_h_it->second.current_hp = static_cast<int>(new_h_it->second.max_hp * hp_ratio);
             if (new_h_it->second.current_hp <= 0) new_h_it->second.current_hp = 1;
         }
@@ -1315,6 +1316,13 @@ public:
         auto it = building_components_.find(id);
         return (it != building_components_.end()) ? &it->second : nullptr;
     }
+
+    /// Acesso mutável ao componente de saúde (usado pelos testes).
+    HealthComponent* health_component_mutable(Entity id) {
+        auto it = ecs_world_.healths_mut().find(id);
+        return (it != ecs_world_.healths_mut().end()) ? &it->second : nullptr;
+    }
+
     const FogOfWar& fog_of_war() const { return fog_of_war_; }
 
     /// Acesso publico ao pathfinder da NavigationGrid (usado pelo save/load

@@ -158,8 +158,8 @@ int main() {
         TEST_ASSERT(std::abs(hoplite->max_hitpoints - 115.0f) < 0.01f, "Hoplite Max HP is exactly 115.0");
         TEST_ASSERT(std::abs(hoplite->los - 16.0f) < 0.01f, "Hoplite LOS is exactly 16.0");
         TEST_ASSERT(std::abs(hoplite->max_velocity - 4.2f) < 0.01f, "Hoplite velocity is exactly 4.2");
-        TEST_ASSERT(std::abs(hoplite->cost_food - 60.0f) < 0.01f, "Hoplite cost Food is exactly 60.0");
-        TEST_ASSERT(std::abs(hoplite->cost_gold - 35.0f) < 0.01f, "Hoplite cost Gold is exactly 35.0");
+        TEST_ASSERT(std::abs(hoplite->cost.food - 60.0f) < 0.01f, "Hoplite cost Food is exactly 60.0");
+        TEST_ASSERT(std::abs(hoplite->cost.gold - 35.0f) < 0.01f, "Hoplite cost Gold is exactly 35.0");
     }
 
     // Verify Toxotes
@@ -168,8 +168,8 @@ int main() {
     if (toxotes) {
         TEST_ASSERT(std::abs(toxotes->max_hitpoints - 60.0f) < 0.01f, "Toxotes Max HP is exactly 60.0");
         TEST_ASSERT(std::abs(toxotes->los - 19.0f) < 0.01f, "Toxotes LOS is exactly 19.0");
-        TEST_ASSERT(std::abs(toxotes->cost_wood - 55.0f) < 0.01f, "Toxotes cost Wood is exactly 55.0");
-        TEST_ASSERT(std::abs(toxotes->cost_gold - 35.0f) < 0.01f, "Toxotes cost Gold is exactly 35.0");
+        TEST_ASSERT(std::abs(toxotes->cost.wood - 55.0f) < 0.01f, "Toxotes cost Wood is exactly 55.0");
+        TEST_ASSERT(std::abs(toxotes->cost.gold - 35.0f) < 0.01f, "Toxotes cost Gold is exactly 35.0");
     }
 
     // Verify Minotaur
@@ -177,8 +177,8 @@ int main() {
     TEST_ASSERT(minotaur != nullptr, "Found 'Minotaur' myth unit in proto database");
     if (minotaur) {
         TEST_ASSERT(std::abs(minotaur->max_hitpoints - 300.0f) < 0.01f, "Minotaur Max HP is exactly 300.0");
-        TEST_ASSERT(std::abs(minotaur->cost_food - 200.0f) < 0.01f, "Minotaur cost Food is exactly 200.0");
-        TEST_ASSERT(std::abs(minotaur->cost_favor - 16.0f) < 0.01f, "Minotaur cost Favor is exactly 16.0");
+        TEST_ASSERT(std::abs(minotaur->cost.food - 200.0f) < 0.01f, "Minotaur cost Food is exactly 200.0");
+        TEST_ASSERT(std::abs(minotaur->cost.favor - 16.0f) < 0.01f, "Minotaur cost Favor is exactly 16.0");
     }
 
     // Verify Major Gods

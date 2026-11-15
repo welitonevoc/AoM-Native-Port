@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
         aom::UnitStats wall_stats;
         wall_stats.name = "Wall Long";
         wall_stats.max_hp = 400.0f;
-        Entity wall_id = world.spawn_unit(aom::Team::FRIENDLY, spawn_pos, wall_stats);
+        aom::Entity wall_id = world.spawn_unit(aom::Team::FRIENDLY, spawn_pos, wall_stats);
 
         // Verifica transformacoes disponiveis
         auto transforms = world.available_transforms(wall_id);
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 
         // Executa a transformacao Wall Long -> Gate
         if (utm_loaded && has_wall_to_gate) {
-            Entity gate_id = world.transform_unit(wall_id, "Gate");
+            aom::Entity gate_id = world.transform_unit(wall_id, "Gate");
             if (gate_id != aom::INVALID_ENTITY) ++passed;
             else { ++failed; std::printf("[-] transform_unit Wall Long->Gate retornou invalido\n"); }
 

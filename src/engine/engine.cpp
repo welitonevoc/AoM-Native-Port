@@ -8,12 +8,15 @@
 #include "ecs/gameplay.h"
 #include "ai/ai_system.h"
 #include "anim/animation_system.h"
+#include "anim/prt_particle.h"
 #include "video/video_player.h"
 #include "video/media_decoder.h"
 #include "renderer/camera_track.h"
 #include "network/network_manager.h"
+#include "data/proto_unit.h"
 #include "game/save_load.h"
 #include "game/victory.h"
+#include "game/scenario_trigger.h"
 #include "assets/cube_map.h"
 #include "aom/campaign_select_system.h"
 
@@ -360,6 +363,10 @@ void Engine::set_state(EngineState new_state) {
     state_timer_ = 0.0f;
     cinematic_skip_requested_ = false;
 
+    // Limpeza total de UI em TODA transição de estado
+    // Evita elementos residuais de menus anteriores ("camadas fantasmas")
+    clear_ui();
+
     switch (new_state) {
         case EngineState::CINEMATIC:
             LOGI("Entered state: CINEMATIC");
@@ -380,7 +387,7 @@ void Engine::set_state(EngineState new_state) {
             clear_ui();
             loading_progress_ = 0.0f;
             break;
-        case EngineState::MAIN_MENU:
+        case EngineState::MAIN_MENU: {
             LOGI("Entered state: MAIN_MENU (uipregamenew)");
             if (audio_) {
                 audio_->play_music("menu_music.mp3", true);
@@ -420,7 +427,8 @@ void Engine::set_state(EngineState new_state) {
                 }
             }
             break;
-        case EngineState::UI_OPTIONS:
+        }
+        case EngineState::OPTIONS:
             LOGI("Entered state: OPTIONS");
             create_options_menu();
             break;
@@ -1248,6 +1256,8 @@ void Engine::create_options_menu() {
                        [this]() { return_to_main_menu(); });
     }
 
+}
+
 // ── uifile_manager ──
 void Engine::create_file_manager_menu() {
     clear_ui();
@@ -1346,11 +1356,11 @@ void Engine::create_god_picker_menu() {
         std::string civ_name = civilizations[i];
         // Highlight selected civilization
         uint32_t color = (god_picker_civilization_ == civ_name) ? 0xAA184818 : 0xAA2A1808;
-        ui_->add_button({col1_x, y}, {col_w, btn_h}, civ_name, [this, i]() {
+        ui_->add_button({col1_x, y}, {col_w, btn_h}, civ_name, [this, i, civ_name]() {
             god_picker_civilization_ = civ_name;
             // Set minor god to first associated god for this civilization
             int start = civ_god_start[i];
-            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(start));
+            god_picker_minor_god_ = aom::net::major_god_to_string(static_cast<aom::net::MajorGod>(start));
             create_god_picker_menu(); // Recreate to show updated info and god list
         }, color, 0xAA553311);
         y += btn_h + gap;
@@ -1385,7 +1395,7 @@ void Engine::create_god_picker_menu() {
         bool associated = (i >= start && i < start + count);
 
         ui_->add_button({col2_x, y}, {col_w, btn_h}, god_name, [this, i]() {
-            god_picker_minor_god_ = net::major_god_to_string(static_cast<MajorGod>(i));
+            god_picker_minor_god_ = aom::net::major_god_to_string(static_cast<aom::net::MajorGod>(i));
             create_god_picker_menu(); // Recreate to show updated selection
         }, color, 0xAA553311);
         y += btn_h + gap;
@@ -2391,7 +2401,7 @@ void Engine::start_game() {
                               std::chrono::steady_clock::now() - setup_start)
                               .count();
     LOGI("start_game: %zu units spawned, Town Centers established, anim clips=%zu (setup: %lld ms)",
-         spawn_positions.size(), anim_system_->clip_count(), static_cast<long long>(setup_ms));
+         spawns.size(), anim_system_->clip_count(), static_cast<long long>(setup_ms));
 }
 
 void Engine::spawn_particle(const glm::vec3& pos, const glm::vec3& vel, float life, uint32_t color, float size) {
@@ -4137,76 +4147,6 @@ void Engine::create_random_map_menu() {
     start_game();
 }
 
-void Engine::create_campaign_menu() {
-    clear_ui();
-    const float vw = static_cast<float>(config_.window_width);
-    const float vh = static_cast<float>(config_.window_height);
-
-    // Header
-    const Campaign* camp = campaign_mgr_ ? campaign_mgr_->current_campaign() : nullptr;
-    std::string camp_name = camp ? camp->name : "Campanha";
-    ui_->add_label("CAMPANHA: " + camp_name, {vw * 0.5f - 240.0f, vh * 0.05f}, 26.0f, 0xFFFFD700);
-    ui_->add_label("Total de " + std::to_string(campaign_mgr_ ? campaign_mgr_->scenario_count() : 0) +
-                   " cenarios",
-                   {vw * 0.5f - 160.0f, vh * 0.09f}, 14.0f, 0xFFCCCCCC);
-
-    // Lista dinamica de cenarios jogáveis (pula cutscenes/unlisted)
-    const float box_w = vw * 0.90f;
-    const float box_x = (vw - box_w) * 0.5f;
-    const float box_y = vh * 0.13f;
-    const float row_h = 42.0f;
-    const float max_rows = 10.0f;  // numero de linhas visíveis antes de rolagem (simplificado)
-
-    float y = box_y;
-    int shown = 0;
-    std::vector<const CampaignScenario*> playable;
-    if (camp) {
-        for (size_t i = 0; i < camp->scenarios.size(); ++i) {
-            const auto* sc = &camp->scenarios[i];
-            if (sc->unlisted) continue;
-            // Considera jogável se tem filename .scn ou .scx (não cinemática pura)
-            if (sc->filename.empty()) continue;
-            playable.push_back(sc);
-        }
-    }
-
-    for (size_t i = 0; i < playable.size() && shown < static_cast<size_t>(max_rows); ++i, ++shown) {
-        const auto* sc = playable[i];
-        std::string label = sc->display_name.empty() ? ("Cenario " + std::to_string(i + 1))
-                                                      : sc->display_name;
-        std::string file_info = sc->filename;
-        // Trunca nome do arquivo para caber na linha
-        if (file_info.size() > 38) file_info = file_info.substr(0, 35) + "...";
-
-        ui_->add_label(label + "  |  " + file_info,
-                       {box_x + 20.0f, y}, 15.0f, 0xFFFFFFFF);
-
-        // Botão "JOGAR" para cada cenário
-        float btn_w = 120.0f, btn_h = 30.0f;
-        float btn_x = box_x + box_w - btn_w - 20.0f;
-        ui_->add_button({btn_x, y - 6.0f}, {btn_w, btn_h}, "JOGAR",
-                        [this, sc]() { start_campaign_mission(sc); },
-                        0xDD2A5A1A, 0xEE408525);
-
-        y += row_h;
-    }
-
-    if (playable.size() > max_rows) {
-        ui_->add_label("... e mais " + std::to_string(playable.size() - max_rows) +
-                       " cenario(ns)",
-                       {box_x + 20.0f, y}, 12.0f, 0xFF888888);
-        y += row_h;
-    }
-
-    // Buttons fixos no rodapé
-    const float btn_w = 200.0f;
-    const float btn_h = 44.0f;
-    const float btn_y = vh * 0.88f;
-
-    ui_->add_button({(vw - btn_w) * 0.5f, btn_y}, {btn_w, btn_h}, "VOLTAR",
-                    [this]() { return_to_main_menu(); }, 0xAA221105, 0xAA44220A);
-}
-
 // ── Layouts de UI do data.bar (Passo 4) ──────────────────────────────────
 
 bool Engine::load_ui_layout(const std::string& xmb_name) {
@@ -4239,8 +4179,25 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
+    // Mapa de ações do AoM para callbacks do Engine
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"start_game", [this]() { start_game(); }},
+        {"open_campaign", [this]() { create_campaign_selection_menu(); }},
+        {"open_campaign_selection", [this]() { create_campaign_selection_menu(); }},
+        {"open_single_player", [this]() { create_campaign_menu(); }},
+        {"open_multiplayer", [this]() { open_multiplayer(); }},
+        {"open_options", [this]() { open_options(); }},
+        {"open_credits", [this]() { open_credits(); }},
+        {"open_more", [this]() { open_credits(); }},
+        {"quit_app", [this]() { quit_app(); }},
+        {"exit", [this]() { quit_app(); }},
+        {"return_to_main_menu", [this]() { return_to_main_menu(); }},
+        {"back", [this]() { return_to_main_menu(); }},
+    };
+
     size_t created = apply_layout_to_ui(*layout, ui_.get(),
-                                         static_cast<int>(vw), static_cast<int>(vh));
+                                         static_cast<int>(vw), static_cast<int>(vh),
+                                         action_callbacks);
 
     LOGI("show_ui_layout: '%s' exibido (%zu elementos)", layout_name.c_str(), created);
     return created;
@@ -4366,7 +4323,7 @@ void Engine::start_campaign_mission(const CampaignScenario* scenario) {
             audio_->play_sfx(cue);
         }
     };
-    mission_mgr_->on_mission_completed = [this](MissionResult res) {
+    mission_mgr_->on_mission_completed = [this, scenario](MissionResult res) {
         if (res == MissionResult::VICTORY) {
             LOGI("Campaign Mission '%s' COMPLETED with VICTORY!", scenario->display_name.c_str());
         } else if (res == MissionResult::DEFEAT) {
@@ -4917,10 +4874,6 @@ void Engine::create_cinematics_menu() {
 
 void Engine::create_history_menu() {
     open_credits();
-}
-
-void Engine::create_editor_menu() {
-    start_game();
 }
 
 void Engine::create_menu_screen(
@@ -5815,6 +5768,21 @@ void Engine::update_in_game_hud(float dt) {
             }
         }
     }
+}
+
+Entity Engine::transform_unit(Entity from_entity, const std::string& target_name) {
+    if (gameplay_world_) return gameplay_world_->transform_unit(from_entity, target_name);
+    return INVALID_ENTITY;
+}
+
+std::vector<UnitTransform> Engine::available_transforms(Entity entity) const {
+    if (gameplay_world_) return gameplay_world_->available_transforms(entity);
+    return {};
+}
+
+ModelEntry* Engine::get_model_entry(const std::string& name) {
+    auto it = model_cache_.find(name);
+    return (it != model_cache_.end()) ? &it->second : nullptr;
 }
 
 } // namespace aom

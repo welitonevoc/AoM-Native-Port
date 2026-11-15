@@ -235,14 +235,14 @@ int main() {
         const aom::Entity target   = combat_world.spawn_unit(aom::Team::ENEMY,   {1.0f, 0.0f, 0.0f});
 
         auto* atk = combat_world.unit_component_mutable(attacker);
-        auto* tgt = combat_world.unit_component_mutable(target);
-        if (atk && tgt) {
+        auto* tgt_health = combat_world.health_component_mutable(target);
+        if (atk && tgt_health) {
             atk->attack_damage = 50.0f;
             atk->attack_range = 2.0f;
             atk->attack_cooldown = 0.1f;
             atk->attack_target = target;
-            tgt->max_hp = 100;
-            tgt->current_hp = 100;
+            tgt_health->max_hp = 100;
+            tgt_health->current_hp = 100;
         }
 
         bool target_died = false;
