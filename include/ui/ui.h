@@ -69,6 +69,12 @@ struct UIButton {
 
     // Hover/rollover state (for stateButton rollover/glow)
     bool is_hovered = false;
+
+    // EditBox fields (XMB editBox)
+    bool is_edit_box = false;
+    std::string placeholder;          // Texto placeholder quando vazio
+    std::function<void(const std::string&)> onTextInput;  // Callback quando texto digitado
+    size_t max_length = 256;          // Comprimento máximo do texto
 };
 
 struct UILabel {
@@ -129,6 +135,40 @@ struct UIRadioSet {
     bool visible = true;
     std::string tag;
     std::string group_tag;
+};
+
+/// List widget (XMB list) - lista de itens selecionáveis (ex: lista de jogos LAN)
+struct UIList {
+    glm::vec2 pos;
+    glm::vec2 size;
+    std::vector<std::string> items;          // Itens da lista
+    std::vector<uint32_t> item_colors;       // Cor por item
+    int selected_index = -1;                 // Item selecionado (-1 = nenhum)
+    float item_height = 24.0f;               // Altura de cada item
+    TextureHandle bg_tex = INVALID_TEXTURE;  // Textura de fundo
+    TextureHandle sel_tex = INVALID_TEXTURE; // Textura de seleção (highlight)
+    uint32_t text_color = 0xFFFFD000;
+    float text_size = 16.0f;
+    std::function<void(int)> onSelectionChange;  // Callback com novo índice
+    bool visible = true;
+    std::string tag;
+    std::string group_tag;
+};
+
+/// Virtual Keyboard (on-screen) para entrada de texto em editBox
+struct UIVirtualKeyboard {
+    enum Layout { LAYOUT_ALPHA, LAYOUT_NUMERIC, LAYOUT_SYMBOLS };
+    glm::vec2 pos;
+    glm::vec2 size;
+    Layout layout = LAYOUT_ALPHA;
+    bool shift = false;
+    bool visible = false;
+    UIButton* target_edit_box = nullptr;  // EditBox que está recebendo input
+    std::function<void(const std::string&)> onKeyPress;  // Callback: caractere pressionado
+    std::function<void()> onBackspace;     // Callback: backspace
+    std::function<void()> onEnter;         // Callback: enter/fechar
+    std::function<void()> onLayoutChange;  // Callback: trocar layout
+    std::string tag;
 };
 
 class UIManager {
@@ -221,17 +261,43 @@ public:
                               int initial_selection,
                               const std::function<void(int)>& onSelectionChange);
 
+    /** Add a list widget (XMB list) */
+    UIList* add_list(const glm::vec2& pos,
+                     const glm::vec2& size,
+                     const std::vector<std::string>& items,
+                     int initial_selection,
+                     const std::function<void(int)>& onSelectionChange);
+
     void set_group_visible(const std::string& tag, bool visible);
+
+    // EditBox IME focus callback
+    using EditBoxFocusCallback = std::function<void(UIButton*, bool)>;  // btn, focused
+    void set_edit_box_focus_callback(EditBoxFocusCallback cb) { on_edit_box_focus_ = std::move(cb); }
+
+    // Virtual Keyboard (on-screen)
+    UIVirtualKeyboard* get_virtual_keyboard() { return &virtual_keyboard_; }
+    void show_virtual_keyboard(UIButton* target);
+    void hide_virtual_keyboard();
+    bool handle_virtual_keyboard_touch(const TouchEvent& ev);
+    void render_virtual_keyboard();
 
     [[nodiscard]] const std::vector<UIButton>& buttons() const { return buttons_; }
     [[nodiscard]] const std::vector<UILabel>& labels() const { return labels_; }
     [[nodiscard]] const std::vector<UIAnimation>& animations() const { return animations_; }
     [[nodiscard]] const std::vector<UIScrollList>& scroll_lists() const { return scroll_lists_; }
     [[nodiscard]] const std::vector<UIRadioSet>& radio_sets() const { return radio_sets_; }
+    [[nodiscard]] const std::vector<UIList>& lists() const { return lists_; }
     std::vector<UIButton>& buttons_mut() { return buttons_; }
     std::vector<UILabel>& labels_mut() { return labels_; }
     std::vector<UIScrollList>& scroll_lists_mut() { return scroll_lists_; }
     std::vector<UIRadioSet>& radio_sets_mut() { return radio_sets_; }
+    std::vector<UIList>& lists_mut() { return lists_; }
+
+    // Find widgets by tag (for XMB callback value reading)
+    UIButton* find_button_by_tag(const std::string& tag);
+    UIScrollList* find_scroll_list_by_tag(const std::string& tag);
+    UIRadioSet* find_radio_set_by_tag(const std::string& tag);
+    UIList* find_list_by_tag(const std::string& tag);
 
     // Resolve textos no formato $$ID$$texto_fallback (ex: $$19825$$Learn To Play).
     // Extrai o ID entre os primeiros $$ e o segundo $$, tenta traduzir, senão mostra o fallback.
@@ -298,10 +364,15 @@ private:
     std::vector<UIAnimation> animations_;
     std::vector<UIScrollList> scroll_lists_;
     std::vector<UIRadioSet> radio_sets_;
+    std::vector<UIList> lists_;
+
+    EditBoxFocusCallback on_edit_box_focus_;
+    UIVirtualKeyboard virtual_keyboard_;
 
     static bool hit_test(const UIButton& btn, float x, float y);
     static bool hit_test_scroll_list(const UIScrollList& sl, float x, float y);
     static bool hit_test_radio_set(const UIRadioSet& rs, float x, float y);
+    static bool hit_test_list(const UIList& lst, float x, float y);
 };
 
 } // namespace aom

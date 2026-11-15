@@ -79,8 +79,15 @@ public:
     UILayoutResult load_layout_from_data(const std::string& layout_name,
                                           const std::vector<uint8_t>& data);
 
-    /// Retorna um layout carregado por nome
+    /// Retorna um layout carregado por nome (const)
     [[nodiscard]] const UILayoutResult* get_layout(const std::string& name) const {
+        auto it = layouts_.find(name);
+        if (it != layouts_.end()) return &it->second;
+        return nullptr;
+    }
+
+    /// Retorna um layout carregado por nome (non-const, para modificar antes de aplicar)
+    [[nodiscard]] UILayoutResult* get_layout_mut(const std::string& name) {
         auto it = layouts_.find(name);
         if (it != layouts_.end()) return &it->second;
         return nullptr;

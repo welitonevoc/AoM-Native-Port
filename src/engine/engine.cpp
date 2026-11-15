@@ -86,6 +86,40 @@ bool Engine::initialize(const EngineConfig& config, void* native_window) {
         LOGE("UI initialization failed - continuing without UI overlay");
     } else {
         if (audio_) ui_->set_audio_engine(audio_.get());
+        // Register engine instance for JNI callbacks
+        aom_set_engine_instance(this);
+        // EditBox IME focus callback - shows native Android keyboard
+        ui_->set_edit_box_focus_callback([this](aom::UIButton* btn, bool focused) {
+            if (focused && native_activity_) {
+                LOGI("EditBox focused: tag='%s', showing native keyboard", btn->tag.c_str());
+                // Call Java showSoftKeyboard via JNI
+                ANativeActivity* activity = static_cast<ANativeActivity*>(native_activity_);
+                JavaVM* vm = activity->vm;
+                JNIEnv* env = nullptr;
+                if (vm->AttachCurrentThread(&env, nullptr) == JNI_OK) {
+                    jclass clazz = env->GetObjectClass(activity->clazz);
+                    jmethodID method = env->GetMethodID(clazz, "showSoftKeyboard", "()V");
+                    if (method) {
+                        env->CallVoidMethod(activity->clazz, method);
+                    }
+                    vm->DetachCurrentThread();
+                }
+            } else if (!focused && native_activity_) {
+                LOGI("EditBox unfocused: tag='%s', hiding native keyboard", btn->tag.c_str());
+                // Call Java hideSoftKeyboard via JNI
+                ANativeActivity* activity = static_cast<ANativeActivity*>(native_activity_);
+                JavaVM* vm = activity->vm;
+                JNIEnv* env = nullptr;
+                if (vm->AttachCurrentThread(&env, nullptr) == JNI_OK) {
+                    jclass clazz = env->GetObjectClass(activity->clazz);
+                    jmethodID method = env->GetMethodID(clazz, "hideSoftKeyboard", "()V");
+                    if (method) {
+                        env->CallVoidMethod(activity->clazz, method);
+                    }
+                    vm->DetachCurrentThread();
+                }
+            }
+        });
     }
     
     // Initialize Menu System
@@ -571,7 +605,10 @@ void Engine::render() {
         }
 
         // 5. Overlay modal translúcido estilo pedra AoM para telas de opções/créditos/mp
-        if (state_ != EngineState::MAIN_MENU) {
+        // Não aplicar em MULTIPLAYER_LAN (tem UI própria) nem quando dialog modal aberto
+        if (state_ != EngineState::MAIN_MENU &&
+            state_ != EngineState::MULTIPLAYER_LAN &&
+            state_ != EngineState::MULTIPLAYER_LOBBY) {
             renderer_->draw_ui_quad({0.0f, 0.0f}, {vw, vh}, INVALID_TEXTURE, 0xB0110802);
         }
 

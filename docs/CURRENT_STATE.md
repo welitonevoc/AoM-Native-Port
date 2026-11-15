@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11142202 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11150044 (15/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -14,19 +14,22 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Menu de Campanha Autêntico em Duas Colunas com Mapas Regionais e Seletor de Dificuldade.
 - ✅ Resolução Autêntica de Texturas MTRL em BRGs e Relevo Normalizado acima do Mar ($Y \ge 0$).
 
-## Correções Aplicadas nesta Versão (Widgets XMB Autênticos: ScrollList, RadioSet, CheckButton, StateButton 4 Estados)
-- ✅ **UIManager estendido** (`ui.h`/`ui.cpp`):
-  - `UIScrollList` (dropdown XMB): expand/colapse, seleção por toque, texturas top/bottom cap.
-  - `UIRadioSet` (radio buttons XMB): grupo mutuamente exclusivo, texturas checked/unchecked.
-  - `UIButton` + 4 estados: `normal_tex`, `pressed_tex`, `rollover_tex`, `glow_tex` + hover tracking.
-  - `add_scroll_list()`, `add_radio_set()` + integração em `apply_layout_to_ui`.
-- ✅ **ui_layout.cpp**: Carrega `scrollList`, `radioset`, `checkButton`, `slider` do XMB com texturas autênticas.
-- ✅ **stateBackgrounds[0..3]** aplicados corretamente (normal, clicked, rollover, glow).
-- ✅ **DDT Formato 6 (AOM_8BPP)**: Auto-decoder via `ddt6_auto.h` integrado.
-- ✅ **textures2.bar / data2.bar** copiados no `MyNativeActivity.java`.
+## Correções Aplicadas nesta Versão (Multiplayer LAN — ScrollList Clip + Native Keyboard)
+- ✅ **ui.cpp**: ScrollList (dropdown) clipping via `glScissor` — fix "grade marrom gigante" do NumberPlayers vazando pela tela
+- ✅ **renderer.h/.cpp**: Nova interface `set_ui_scissor(x,y,w,h,enable)` implementada no GLES renderer
+- ✅ **MyNativeActivity.java + native_activity.cpp**: JNI bridge para teclado nativo Android — `showSoftKeyboard()`/`hideSoftKeyboard()` via `InputMethodManager`
+- ✅ **engine.cpp**: EditBox focus callback agora chama JNI nativo em vez de VKB customizado
+- ✅ **engine.cpp**: Removido overlay modal escuro (0xB0110802) para `MULTIPLAYER_LAN`/`MULTIPLAYER_LOBBY`
+- ✅ **engine_multiplayer.cpp**: `clear_ui()` no `show_host_game_dialog()` e `create_multiplayer_lan_menu()` — fix z-order
+- ✅ **ui.cpp**: `UIManager::clear()` esconde `virtual_keyboard_` + blur automático (clicar fora esconde)
+- ✅ **ui.h/.cpp**: EditBox IME fields (`is_edit_box`, `onTextInput`, `max_length`)
+- ✅ **native_activity.cpp**: Hardware keyboard (A-Z, 0-9, space, backspace, punctuation) via `AINPUT_EVENT_TYPE_KEY`
+- ✅ **uihostgamedialog.xmb**: Game Name (editBox + teclado nativo), Max Players, Public/Private
+- ✅ **uiprofileselect.xmb**: Profile list + New/Delete/OK/Exit
+- ✅ APK v1.0.11150044 gerado em `/sdcard/aom-native-v1.0.11150044.apk`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11142202 gerado e assinado em `/sdcard/aom-native-v1.0.11142202.apk`.
-2. Testar menu de opções XMB autêntico (dropdowns Screen Size, Unit Stance, MP Search; radios Graphics/Sound; checkboxes).
-3. Testar multiplayer LAN com layout XMB autêntico.
-4. Implementar callbacks XMB: `gadgetReal`, `gadgetUnReal`, `subModeEnter`, `exit`, `campaignStart`, `LoadScenario`.
+1. Testar: Host cria sala Pública → aparece na lista LAN → Cliente Join → Lobby
+2. Testar: Host cria sala Privada → NÃO aparece na lista → Cliente só entra via Invite
+3. Testar fluxo completo Room Invite/Join Request + Session Connect
+4. Refinar lobby multiplayer com layout XMB autêntico.

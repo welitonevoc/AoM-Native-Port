@@ -37,6 +37,23 @@ void Engine::load_game(const std::string& path) {
             gameplay_world_->set_victory_result(static_cast<VictoryResult>(data.victory_result));
             gameplay_world_->set_victory_timer(data.victory_timer);
         }
+
+        // Restaurar progresso das campanhas
+        for (const auto& cp : data.campaign_progress) {
+            if (campaign_mgr_ && campaign_mgr_->current_campaign() &&
+                campaign_mgr_->current_campaign()->name == cp.campaign_name) {
+                campaign_mgr_->set_scenario_index(cp.completed_scenarios);
+                LOGI("load_game: progresso restaurado para '%s' -> indice %zu",
+                     cp.campaign_name.c_str(), cp.completed_scenarios);
+            }
+            if (campaign_mgr_xpack_ && campaign_mgr_xpack_->current_campaign() &&
+                campaign_mgr_xpack_->current_campaign()->name == cp.campaign_name) {
+                campaign_mgr_xpack_->set_scenario_index(cp.completed_scenarios);
+                LOGI("load_game: progresso restaurado para '%s' (xpack) -> indice %zu",
+                     cp.campaign_name.c_str(), cp.completed_scenarios);
+            }
+        }
+
         LOGI("load_game: recursos e estado restaurados com sucesso de '%s'", p.c_str());
     }
 }
@@ -121,9 +138,25 @@ void Engine::save_game(const std::string& path) {
         LOGW("save_game: mundo de jogo nao inicializado, nada a salvar");
         return;
     }
+
+    // Coletar progresso das campanhas
+    std::vector<CampaignProgress> campaign_progress;
+    if (campaign_mgr_ && campaign_mgr_->current_campaign()) {
+        CampaignProgress cp;
+        cp.campaign_name = campaign_mgr_->current_campaign()->name;
+        cp.completed_scenarios = campaign_mgr_->current_index();
+        campaign_progress.push_back(cp);
+    }
+    if (campaign_mgr_xpack_ && campaign_mgr_xpack_->current_campaign()) {
+        CampaignProgress cp;
+        cp.campaign_name = campaign_mgr_xpack_->current_campaign()->name;
+        cp.completed_scenarios = campaign_mgr_xpack_->current_index();
+        campaign_progress.push_back(cp);
+    }
+
     std::error_code ec;
     std::filesystem::create_directories(std::filesystem::path(p).parent_path(), ec);
-    if (save_game_state(p, *gameplay_world_, accumulated_time_)) {
+    if (save_game_state(p, *gameplay_world_, accumulated_time_, 42, campaign_progress)) {
         LOGI("save_game: gravado com sucesso em '%s'", p.c_str());
     } else {
         LOGE("save_game: falha ao gravar '%s'", p.c_str());

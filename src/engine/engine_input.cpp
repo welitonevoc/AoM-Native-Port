@@ -245,4 +245,42 @@ void Engine::adjust_camera_zoom(float delta) {
     radius_ = std::clamp(radius_ - delta, 15.0f, 85.0f);
 }
 
+void Engine::handle_text_input(const std::string& text) {
+    if (!ui_) return;
+    // Encontrar o editBox focado (aquele com is_edit_box=true e que foi clicado recentemente)
+    // Por simplicidade, procuramos qualquer editBox que tenha sido tocado (interactive=true)
+    for (auto& btn : ui_->buttons_mut()) {
+        if (btn.is_edit_box && btn.interactive && btn.visible) {
+            if (btn.label.size() + text.size() <= btn.max_length) {
+                btn.label += text;
+                if (btn.onTextInput) btn.onTextInput(btn.label);
+            }
+            break; // Apenas um editBox ativo por vez
+        }
+    }
+}
+
+void Engine::handle_text_backspace() {
+    if (!ui_) return;
+    for (auto& btn : ui_->buttons_mut()) {
+        if (btn.is_edit_box && btn.interactive && btn.visible) {
+            if (!btn.label.empty()) {
+                btn.label.pop_back();
+                if (btn.onTextInput) btn.onTextInput(btn.label);
+            }
+            break;
+        }
+    }
+}
+
+void Engine::handle_text_enter() {
+    if (!ui_) return;
+    // Enter pressed - hide native keyboard
+    if (native_activity_) {
+        // Call Java hideSoftKeyboard via JNI
+        // For now, just hide the custom VKB if it's showing
+        ui_->hide_virtual_keyboard();
+    }
+}
+
 } // namespace aom

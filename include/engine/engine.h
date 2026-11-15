@@ -224,6 +224,9 @@ public:
 
     void handle_touch(const TouchEvent& touch);
     void adjust_camera_zoom(float delta);
+    void handle_text_input(const std::string& text);  // Android IME text input
+    void handle_text_backspace();  // Android IME backspace
+    void handle_text_enter();  // Android IME enter/done
 
     void set_state(EngineState new_state);
 
@@ -274,7 +277,7 @@ public:
     void quit_app();
 
     // --- Multiplayer network operations (aom-recover) ---
-    void network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port);
+    void network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port, bool is_public = true);
     void network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name);
     void network_leave_session();
     void network_update(float dt);
@@ -526,6 +529,12 @@ private:
     void create_load_game_menu();
     void create_multiplayer_menu();
     void create_multiplayer_lan_menu();
+    void show_host_game_dialog();
+    void show_room_invite_dialog(const std::string& inviter_name);
+    void show_room_join_request_dialog(const std::string& requester_name);
+    void show_room_error_dialog(const std::string& error_message);
+    void show_session_connect_dialog();
+    void hide_session_connect_dialog();
     void create_multiplayer_lobby_menu();
     void create_cinematics_menu();
     void create_history_menu();
@@ -776,6 +785,21 @@ private:
     std::string mp_target_ip_ = "192.168.1.100";
     int mp_ip_last_octet_ = 100;
     int mp_ip_subnet_ = 1;
+
+    // Pending Room Invite / Join Request (for dialog callbacks)
+    struct PendingRoomInvite {
+        std::string inviter_name;
+        std::string inviter_ip;
+        uint16_t inviter_port = 2300;
+        bool valid = false;
+    } pending_room_invite_;
+
+    struct PendingRoomJoinRequest {
+        std::string requester_name;
+        std::string requester_ip;
+        uint16_t requester_port = 2300;
+        bool valid = false;
+    } pending_room_join_request_;
 
     // God Picker state (after campaign)
     std::string god_picker_civilization_ = "Grego";

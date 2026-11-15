@@ -94,6 +94,20 @@ struct ChatMessage {
     uint32_t color = 0xFFFFFFFF;
 };
 
+struct RoomInvite {
+    std::string inviter_name;
+    std::string inviter_ip;
+    uint16_t inviter_port = DEFAULT_AOM_PORT;
+    float timestamp = 0.0f;
+};
+
+struct RoomJoinRequest {
+    std::string requester_name;
+    std::string requester_ip;
+    uint16_t requester_port = DEFAULT_AOM_PORT;
+    float timestamp = 0.0f;
+};
+
 enum class NetRole {
     OFFLINE,
     HOST,
@@ -115,7 +129,7 @@ public:
     std::vector<DiscoveredGame> get_discovered_games();
 
     // Session Management
-    bool host_game(const std::string& game_name, const std::string& player_name, uint16_t port = DEFAULT_AOM_PORT);
+    bool host_game(const std::string& game_name, const std::string& player_name, uint16_t port = DEFAULT_AOM_PORT, bool is_public = true);
     bool join_game(const std::string& host_ip, uint16_t port, const std::string& player_name);
     void leave_session();
 
@@ -134,6 +148,14 @@ public:
     void set_slot_state(uint8_t slot_id, bool is_open, bool is_human, AIDifficulty diff = AIDifficulty::MODERATE);
     void update_settings(const GameSettings& settings); // Host only
     void send_chat(const std::string& message);
+
+    // Room Invite / Join Request
+    void send_room_invite(const std::string& target_ip, uint16_t target_port);
+    void send_room_invite_response(const std::string& target_ip, uint16_t target_port, bool accept);
+    void send_room_join_request(const std::string& host_ip, uint16_t host_port);
+    void send_room_join_response(const std::string& target_ip, uint16_t target_port, bool accept, int slot_id);
+    void send_room_error(const std::string& target_ip, uint16_t target_port, const std::string& error);
+
     bool launch_game(); // Host only
 
     // Frame update (called in Engine::update)
@@ -144,6 +166,9 @@ public:
     std::function<void(const ChatMessage&)> on_chat_received;
     std::function<void()> on_game_launched;
     std::function<void(const std::string& reason)> on_disconnected;
+    std::function<void(const RoomInvite&)> on_room_invite_received;
+    std::function<void(const RoomJoinRequest&)> on_room_join_request_received;
+    std::function<void(const std::string& error)> on_room_error;
 
 private:
     void send_broadcast_beacon();
@@ -169,6 +194,7 @@ private:
 
     float beacon_timer_ = 0.0f;
     bool is_discovering_ = false;
+    bool is_public_ = true;  // Se true, transmite beacon LAN; se false, so conecta via invite/join direto
 };
 
 } // namespace aom::net

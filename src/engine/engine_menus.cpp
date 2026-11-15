@@ -886,12 +886,104 @@ void Engine::create_pregame_stress_menu() {
 
 // ── uiprofileselect ──
 void Engine::create_profile_select_menu() {
-    clear_ui();
+    if (!load_ui_layout("uiprofileselect.xmb")) {
+        LOGE("Failed to load uiprofileselect.xmb");
+        // Fallback procedural
+        clear_ui();
+        const float vw = static_cast<float>(config_.window_width);
+        const float vh = static_cast<float>(config_.window_height);
+        ui_->add_label("PROFILE SELECT", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+        ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                        [this]() { return_to_main_menu(); });
+        return;
+    }
+
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
-    ui_->add_label("PROFILE SELECT", {vw * 0.5f - 120.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
-    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
-                    [this]() { return_to_main_menu(); });
+
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"playerprofile-okbtn", [this]() {
+            // OK: seleciona o perfil escolhido na lista
+            if (ui_) {
+                auto* list = ui_->find_list_by_tag("playerprofile-list");
+                if (list && list->selected_index >= 0 && list->selected_index < (int)list->items.size()) {
+                    mp_player_name_ = list->items[list->selected_index];
+                    LOGI("Profile selected: %s", mp_player_name_.c_str());
+                }
+            }
+            create_multiplayer_lan_menu();
+        }},
+        {"playerprofile-newbtn", [this]() {
+            // New Player: abre dialog para criar novo perfil
+            // Por enquanto, usa nome padrão + timestamp
+            mp_player_name_ = "Jogador_" + std::to_string(time(nullptr) % 10000);
+            LOGI("New profile created: %s", mp_player_name_.c_str());
+            create_multiplayer_lan_menu();
+        }},
+        {"playerprofile-deletebtn", [this]() {
+            // Delete: remove perfil selecionado (não implementado)
+            LOGI("Delete profile requested");
+        }},
+        {"playerprofile-exitbtn", [this]() {
+            return_to_main_menu();
+        }},
+    };
+
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            return rt;
+        }
+        return rt;
+    };
+
+    const auto* layout = ui_layout_manager_.get_layout("uiprofileselect.xmb");
+    if (!layout) {
+        LOGE("Layout uiprofileselect.xmb not found after load");
+        return;
+    }
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    // Preencher lista de perfis (por enquanto só o atual)
+    if (ui_) {
+        auto* list = ui_->find_list_by_tag("playerprofile-list");
+        if (list) {
+            list->items = {mp_player_name_};
+            list->item_colors = {0xFFFFD000};
+            list->selected_index = 0;
+        }
+    }
+
+    LOGI("create_profile_select_menu: uiprofileselect.xmb exibido (%zu elementos)", created);
 }
 
 // ── uireceive ──

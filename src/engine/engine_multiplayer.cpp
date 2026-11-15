@@ -2,10 +2,12 @@
 #include "engine_internal.h"
 #include "network/network_manager.h"
 #include "ui/ui.h"
+#include "ui/ui_layout.h"
 
 #include <algorithm>
 #include <cstdio>
 #include <string>
+#include <unordered_map>
 
 namespace aom {
 
@@ -42,126 +44,714 @@ void Engine::create_multiplayer_menu() {
 }
 
 void Engine::create_multiplayer_lan_menu() {
-    clear_ui();
+    if (!load_ui_layout("uimplanip.xmb")) {
+        LOGE("Failed to load uimplanip.xmb");
+        return;
+    }
+
+    clear_ui();  // Limpa UI anterior (ex: dialog Host Game) antes de recriar menu LAN
+
+    // Configurar callbacks do NetworkManager para room dialogs
+    auto& net = net::NetworkManager::instance();
+    net.on_room_invite_received = [this](const net::RoomInvite& invite) {
+        pending_room_invite_ = {invite.inviter_name, invite.inviter_ip, invite.inviter_port, true};
+        show_room_invite_dialog(invite.inviter_name);
+    };
+    net.on_room_join_request_received = [this](const net::RoomJoinRequest& req) {
+        pending_room_join_request_ = {req.requester_name, req.requester_ip, req.requester_port, true};
+        show_room_join_request_dialog(req.requester_name);
+    };
+    net.on_room_error = [this](const std::string& error) {
+        show_room_error_dialog(error);
+    };
 
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
 
-    // Titulo Autentico AoM
-    ui_->add_label("MULTIJOGADOR - REDE LOCAL (LAN) / IP DIRETO", {vw * 0.5f - 300.0f, vh * 0.07f}, 26.0f, 0xFFFFD000);
-    ui_->add_label("Jogue contra outros dispositivos Android ou PC na mesma rede Wi-Fi", {vw * 0.5f - 270.0f, vh * 0.12f}, 15.0f, 0xFFCCCCCC);
-
-    const float col_w = vw * 0.42f;
-    const float col1_x = vw * 0.06f;
-    const float col2_x = vw * 0.52f;
-    const float btn_h = 42.0f;
-    const float gap = 12.0f;
-
-    // ── Coluna 1: Hospedar & Conexao Direta ────────────────────────────
-    float y1 = vh * 0.18f;
-    ui_->add_label("COORDENAR PARTIDA (HOST):", {col1_x, y1}, 20.0f, 0xFFFFD000);
-    y1 += 32.0f;
-
-    ui_->add_button({col1_x, y1}, {col_w, btn_h}, "CRIAR SALA LAN (HOST)", [this]() {
-        net::NetworkManager::instance().host_game(mp_session_name_, mp_player_name_, net::DEFAULT_AOM_PORT);
-        set_state(EngineState::MULTIPLAYER_LOBBY);
-    }, 0xAA2A1808, 0xAA553311);
-    y1 += btn_h + gap * 1.5f;
-
-    ui_->add_label("CONEXAO DIRETA VIA IP:", {col1_x, y1}, 20.0f, 0xFFFFD000);
-    y1 += 30.0f;
-
-    // Mostrador de IP selecionado
-    std::string ip_label = "IP Alvo: " + mp_target_ip_;
-    ui_->add_label(ip_label, {col1_x, y1 + 6.0f}, 17.0f, 0xFFFFFFFF);
-    y1 += 34.0f;
-
-    // Botao Conectar ao IP alvo
-    ui_->add_button({col1_x, y1}, {col_w, btn_h}, "CONECTAR AO IP ALVO", [this]() {
-        net::NetworkManager::instance().join_game(mp_target_ip_, net::DEFAULT_AOM_PORT, mp_player_name_);
-        set_state(EngineState::MULTIPLAYER_LOBBY);
-    }, 0xAA183818, 0xAA286028);
-    y1 += btn_h + gap;
-
-    // Botoes de ajuste de IP octeto (+1, +10, -1, -10)
-    float mini_w = (col_w - 3.0f * 8.0f) / 4.0f;
-    ui_->add_button({col1_x, y1}, {mini_w, 36.0f}, "-10", [this]() {
-        mp_ip_last_octet_ = std::clamp(mp_ip_last_octet_ - 10, 1, 254);
-        mp_target_ip_ = "192.168." + std::to_string(mp_ip_subnet_) + "." + std::to_string(mp_ip_last_octet_);
-        create_multiplayer_lan_menu();
-    });
-    ui_->add_button({col1_x + mini_w + 8.0f, y1}, {mini_w, 36.0f}, "-1", [this]() {
-        mp_ip_last_octet_ = std::clamp(mp_ip_last_octet_ - 1, 1, 254);
-        mp_target_ip_ = "192.168." + std::to_string(mp_ip_subnet_) + "." + std::to_string(mp_ip_last_octet_);
-        create_multiplayer_lan_menu();
-    });
-    ui_->add_button({col1_x + (mini_w + 8.0f) * 2.0f, y1}, {mini_w, 36.0f}, "+1", [this]() {
-        mp_ip_last_octet_ = std::clamp(mp_ip_last_octet_ + 1, 1, 254);
-        mp_target_ip_ = "192.168." + std::to_string(mp_ip_subnet_) + "." + std::to_string(mp_ip_last_octet_);
-        create_multiplayer_lan_menu();
-    });
-    ui_->add_button({col1_x + (mini_w + 8.0f) * 3.0f, y1}, {mini_w, 36.0f}, "+10", [this]() {
-        mp_ip_last_octet_ = std::clamp(mp_ip_last_octet_ + 10, 1, 254);
-        mp_target_ip_ = "192.168." + std::to_string(mp_ip_subnet_) + "." + std::to_string(mp_ip_last_octet_);
-        create_multiplayer_lan_menu();
-    });
-    y1 += 36.0f + gap;
-
-    // Presets de IP rapidos (Localhost 127.0.0.1 e Subnet 192.168.0.x / 192.168.1.x)
-    float half_w = (col_w - 8.0f) * 0.5f;
-    ui_->add_button({col1_x, y1}, {half_w, 36.0f}, "127.0.0.1 (Local)", [this]() {
-        mp_target_ip_ = "127.0.0.1";
-        create_multiplayer_lan_menu();
-    });
-    std::string subnet_text = (mp_ip_subnet_ == 1) ? "Sub-rede: .1.x" : "Sub-rede: .0.x";
-    ui_->add_button({col1_x + half_w + 8.0f, y1}, {half_w, 36.0f}, subnet_text, [this]() {
-        mp_ip_subnet_ = (mp_ip_subnet_ == 1) ? 0 : 1;
-        mp_target_ip_ = "192.168." + std::to_string(mp_ip_subnet_) + "." + std::to_string(mp_ip_last_octet_);
-        create_multiplayer_lan_menu();
-    });
-
-    // ── Coluna 2: Jogos em LAN Descobertos ──────────────────────────────
-    float y2 = vh * 0.18f;
-    ui_->add_label("JOGOS EM LAN DETECTADOS (UDP 2300):", {col2_x, y2}, 20.0f, 0xFFFFD000);
-    y2 += 32.0f;
-
-    auto games = net::NetworkManager::instance().get_discovered_games();
-    if (games.empty()) {
-        ui_->add_label("(Nenhum host encontrado na rede local ainda...)", {col2_x, y2}, 16.0f, 0xFFAAAAAA);
-        y2 += 26.0f;
-        ui_->add_label("Inicie o Host em outro aparelho ou use Conexao Direta.", {col2_x, y2}, 14.0f, 0xFF888888);
-        y2 += 36.0f;
-    } else {
-        for (size_t i = 0; i < games.size() && i < 4; ++i) {
-            const auto& g = games[i];
-            char btn_txt[128];
-            std::snprintf(btn_txt, sizeof(btn_txt), "%s (%s) [%d/%d]",
-                          g.name.c_str(), g.ip_address.c_str(), g.current_players, g.max_players);
-            std::string ip = g.ip_address;
-            uint16_t port = g.port;
-            ui_->add_button({col2_x, y2}, {col_w, btn_h}, btn_txt, [this, ip, port]() {
-                net::NetworkManager::instance().join_game(ip, port, mp_player_name_);
+    // Mapa de ações para os botoes do XMB uimplanip
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"MPLanIP-HostButton", [this]() {
+            // Host button: abre dialog para criar sala (uihostgamedialog.xmb)
+            show_host_game_dialog();
+        }},
+        {"MPLanIP-JoinLanButton", [this]() {
+            // Join button: entra no jogo LAN selecionado na lista
+            auto games = net::NetworkManager::instance().get_discovered_games();
+            // Usar o jogo selecionado na lista, se houver
+            int selected_idx = -1;
+            if (ui_) {
+                auto* lan_list = ui_->find_list_by_tag("MPLanIP-LanGamesList");
+                if (lan_list) {
+                    selected_idx = lan_list->selected_index;
+                }
+            }
+            if (selected_idx >= 0 && selected_idx < static_cast<int>(games.size())) {
+                const auto& g = games[selected_idx];
+                net::NetworkManager::instance().join_game(g.ip_address, g.port, mp_player_name_);
                 set_state(EngineState::MULTIPLAYER_LOBBY);
-            }, 0xAA204060, 0xAA306090);
-            y2 += btn_h + 8.0f;
+            } else if (!games.empty()) {
+                // Fallback: primeiro jogo se nenhum selecionado
+                const auto& g = games[0];
+                net::NetworkManager::instance().join_game(g.ip_address, g.port, mp_player_name_);
+                set_state(EngineState::MULTIPLAYER_LOBBY);
+            } else {
+                LOGW("Nenhum jogo LAN disponível para entrar");
+            }
+        }},
+        {"MPLanIP-RefreshButton", [this]() {
+            // Refresh button: atualiza lista de jogos LAN
+            net::NetworkManager::instance().refresh_lan_games();
+            // Re-renderiza o menu (recarrega XMB)
+            create_multiplayer_lan_menu();
+        }},
+        {"MPLanIP-JoinIPButton", [this]() {
+            // Connect button: conecta via IP direto
+            // Ler o editBox MPLanIP-DirectIPEditBox
+            std::string target_ip = mp_target_ip_;
+            if (ui_) {
+                auto* ip_btn = ui_->find_button_by_tag("MPLanIP-DirectIPEditBox");
+                if (ip_btn && !ip_btn->label.empty()) {
+                    target_ip = ip_btn->label;
+                }
+            }
+            net::NetworkManager::instance().join_game(target_ip, net::DEFAULT_AOM_PORT, mp_player_name_);
+            set_state(EngineState::MULTIPLAYER_LOBBY);
+        }},
+        {"MPLanIP-CancelButton", [this]() {
+            // Cancel button: volta ao menu principal
+            net::NetworkManager::instance().stop_lan_discovery();
+            return_to_main_menu();
+        }},
+    };
+
+    // Resolver de texturas (mesmo padrao do engine_menus.cpp)
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            LOGI("UI texture resolved from authentic BAR: '%s' -> '%s' (handle=%u, %ux%u)",
+                 name.c_str(), normalized.c_str(), h, rt.width, rt.height);
+            return rt;
+        }
+
+        // Fallback PNG
+        std::string png_name = name;
+        if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
+            png_name = png_name.substr(3);
+        }
+        for (char& c : png_name) {
+            if (c == ' ' || c == '\\' || c == '/') c = '_';
+            else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+        if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
+            png_name += ".png";
+        }
+        std::string asset_path = "assets/titans_menu_parts/" + png_name;
+        h = load_png_asset(asset_path);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            return rt;
+        }
+
+        return rt;
+    };
+
+    const auto* layout = ui_layout_manager_.get_layout("uimplanip.xmb");
+    if (!layout) {
+        LOGE("Layout uimplanip.xmb not found after load");
+        return;
+    }
+
+    // Nao limpar UI - o XMB sera desenhado por cima
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    // Resolver textos $$ID$$ usando as strings do Engine
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    // Preencher lista de jogos LAN no list widget MPLanIP-LanGamesList
+    auto games = net::NetworkManager::instance().get_discovered_games();
+    if (ui_) {
+        // Atualizar host game editBox com nome salvo
+        auto* host_edit = ui_->find_button_by_tag("MPLanIP-HostGameEditBox");
+        if (host_edit) {
+            host_edit->label = mp_session_name_;
+        }
+        // Atualizar direct IP editBox com IP salvo
+        auto* ip_edit = ui_->find_button_by_tag("MPLanIP-DirectIPEditBox");
+        if (ip_edit) {
+            ip_edit->label = mp_target_ip_;
+        }
+        // Popular lista de jogos LAN descobertos
+        auto* lan_list = ui_->find_list_by_tag("MPLanIP-LanGamesList");
+        if (lan_list) {
+            std::vector<std::string> game_items;
+            for (const auto& g : games) {
+                char buf[128];
+                std::snprintf(buf, sizeof(buf), "%s (%s) [%d/%d]",
+                              g.name.c_str(), g.ip_address.c_str(), g.current_players, g.max_players);
+                game_items.push_back(buf);
+            }
+            lan_list->items = game_items;
+            lan_list->item_colors.assign(game_items.size(), 0xFFFFD000);
+            lan_list->selected_index = -1;
+            LOGI("Populated MPLanIP-LanGamesList with %zu games", game_items.size());
         }
     }
 
-    ui_->add_button({col2_x, vh * 0.68f}, {col_w, btn_h}, "ATUALIZAR LISTA (REFRESH)", [this]() {
-        net::NetworkManager::instance().refresh_lan_games();
-        create_multiplayer_lan_menu();
-    });
+    LOGI("create_multiplayer_lan_menu: uimplanip.xmb exibido (%zu elementos, %zu jogos LAN)", created, games.size());
+}
 
-    // ── Barra Inferior: Voltar ─────────────────────────────────────────
-    float back_w = 260.0f;
-    ui_->add_button({(vw - back_w) * 0.5f, vh * 0.86f}, {back_w, 46.0f}, "VOLTAR AO MENU", [this]() {
-        net::NetworkManager::instance().stop_lan_discovery();
-        return_to_main_menu();
-    });
+void Engine::show_host_game_dialog() {
+    if (!load_ui_layout("uihostgamedialog.xmb")) {
+        LOGE("Failed to load uihostgamedialog.xmb");
+        return;
+    }
+
+    clear_ui();  // Limpa menu LAN (z=9 background) para dialog modal (z=5) receber toques
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    // Mapa de ações para os botoes do XMB
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"hostgame-dialog-LoginButton", [this]() {
+            // OK button: ler valores do dialog XMB e criar sala
+            std::string session_name = mp_session_name_;  // default
+            int max_players = 8;  // default
+            bool is_public = true;  // default
+
+            // Ler editBox: hostgame-dialog-UserName-Text (nome da sala)
+            // Nota: o editBox e renderizado como UIButton com tag, mas o texto esta no label
+            // O apply_layout_to_ui cria o editBox como button, precisamos achar pelo tag
+            if (ui_) {
+                auto* name_btn = ui_->find_button_by_tag("hostgame-dialog-UserName-Text");
+                if (name_btn && !name_btn->label.empty()) {
+                    session_name = name_btn->label;
+                }
+                // Ler scrollList: hostgame-dialog--NumberPlayers (max players)
+                auto* sl = ui_->find_scroll_list_by_tag("hostgame-dialog--NumberPlayers");
+                if (sl && sl->selected_index >= 0 && sl->selected_index < (int)sl->items.size()) {
+                    try {
+                        max_players = std::stoi(sl->items[sl->selected_index]);
+                    } catch (...) {}
+                }
+                // Ler radioset: hostgame-dialog-publicChoice (public/private)
+                auto* rs = ui_->find_radio_set_by_tag("hostgame-dialog-publicChoice");
+                if (rs) {
+                    // index 0 = Public, 1 = Private
+                    is_public = (rs->selected_index == 0);
+                }
+            }
+
+            mp_session_name_ = session_name;  // salvar para proxima vez
+            LOGI("Host Game: name='%s', max_players=%d, public=%d", session_name.c_str(), max_players, is_public);
+            net::NetworkManager::instance().host_game(session_name, mp_player_name_, net::DEFAULT_AOM_PORT, is_public);
+            set_state(EngineState::MULTIPLAYER_LOBBY);
+        }},
+        {"hostgame-dialog-CancelButton", [this]() {
+            // Cancel: volta ao menu LAN
+            create_multiplayer_lan_menu();
+        }},
+    };
+
+    // Resolver de texturas (mesmo padrao do engine_menus.cpp)
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            LOGI("UI texture resolved from authentic BAR: '%s' -> '%s' (handle=%u, %ux%u)",
+                 name.c_str(), normalized.c_str(), h, rt.width, rt.height);
+            return rt;
+        }
+
+        // Fallback PNG
+        std::string png_name = name;
+        if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
+            png_name = png_name.substr(3);
+        }
+        for (char& c : png_name) {
+            if (c == ' ' || c == '\\' || c == '/') c = '_';
+            else c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+        if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
+            png_name += ".png";
+        }
+        std::string asset_path = "assets/titans_menu_parts/" + png_name;
+        h = load_png_asset(asset_path);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            return rt;
+        }
+
+        return rt;
+    };
+
+    const auto* layout = ui_layout_manager_.get_layout("uihostgamedialog.xmb");
+    if (!layout) {
+        LOGE("Layout uihostgamedialog.xmb not found after load");
+        return;
+    }
+
+    // Nao limpar UI - o dialog XMB sera desenhado por cima do menu LAN
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+    
+    // Resolver textos $$ID$$ usando as strings do Engine
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    // Preencher editBox do nome da sala com valor atual
+    if (ui_) {
+        auto* name_btn = ui_->find_button_by_tag("hostgame-dialog-UserName-Text");
+        if (name_btn && name_btn->label.empty()) {
+            name_btn->label = mp_session_name_;
+            LOGI("Pre-filled host game dialog with session name: '%s'", mp_session_name_.c_str());
+        }
+        // Pre-selecionar scrollList de max players (default 8)
+        auto* sl = ui_->find_scroll_list_by_tag("hostgame-dialog--NumberPlayers");
+        if (sl && sl->selected_index < 0 && !sl->items.empty()) {
+            // Procurar "8" na lista
+            for (size_t i = 0; i < sl->items.size(); ++i) {
+                if (sl->items[i] == "8") {
+                    sl->selected_index = static_cast<int>(i);
+                    break;
+                }
+            }
+        }
+        // Pre-selecionar radioset public/private (default Public = index 0)
+        auto* rs = ui_->find_radio_set_by_tag("hostgame-dialog-publicChoice");
+        if (rs && rs->selected_index < 0) {
+            rs->selected_index = 0; // Public
+        }
+    }
+
+    LOGI("show_host_game_dialog: uihostgamedialog.xmb exibido (%zu elementos)", created);
+}
+
+// ── Room Dialogs (uiroomdialogs.xmb) ──────────────────────────────────────
+
+void Engine::show_room_invite_dialog(const std::string& inviter_name) {
+    if (!load_ui_layout("uiroomdialogs.xmb")) {
+        LOGE("Failed to load uiroomdialogs.xmb");
+        return;
+    }
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    std::string prompt_text = inviter_name + " has invited you to their room. Accept?";
+
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"mproom-roominviterequestdialog-Yesbutton", [this]() {
+            LOGI("Room invite accepted from %s", pending_room_invite_.inviter_name.c_str());
+            if (pending_room_invite_.valid) {
+                auto& net = net::NetworkManager::instance();
+                net.send_room_invite_response(pending_room_invite_.inviter_ip, pending_room_invite_.inviter_port, true);
+                // Join the host's game
+                net.join_game(pending_room_invite_.inviter_ip, pending_room_invite_.inviter_port, mp_player_name_);
+                set_state(EngineState::MULTIPLAYER_LOBBY);
+            }
+            pending_room_invite_.valid = false;
+        }},
+        {"mproom-roominviterequestdialog-Nobutton", [this]() {
+            LOGI("Room invite declined");
+            if (pending_room_invite_.valid) {
+                auto& net = net::NetworkManager::instance();
+                net.send_room_invite_response(pending_room_invite_.inviter_ip, pending_room_invite_.inviter_port, false);
+            }
+            pending_room_invite_.valid = false;
+            create_multiplayer_lan_menu();
+        }},
+    };
+
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            return rt;
+        }
+        return rt;
+    };
+
+    auto* layout = ui_layout_manager_.get_layout_mut("uiroomdialogs.xmb");
+    if (!layout) {
+        LOGE("Layout uiroomdialogs.xmb not found after load");
+        return;
+    }
+
+    for (auto& root : layout->root_gadgets) {
+        if (root.name == "mproom-roominviterequestdialog") {
+            root.hidden = false;
+            for (auto& child : root.children) {
+                if (child.name == "mproom-roominviterequestdialog-prompt") {
+                    child.text = prompt_text;
+                }
+            }
+            break;
+        }
+    }
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    LOGI("show_room_invite_dialog: displayed for %s (%zu elementos)", inviter_name.c_str(), created);
+}
+
+void Engine::show_room_join_request_dialog(const std::string& requester_name) {
+    if (!load_ui_layout("uiroomdialogs.xmb")) {
+        LOGE("Failed to load uiroomdialogs.xmb");
+        return;
+    }
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    std::string prompt_text = requester_name + " would like to join your room. Accept?";
+
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"mproom-roomjoinrequestdialog-Yesbutton", [this]() {
+            LOGI("Room join request accepted from %s", pending_room_join_request_.requester_name.c_str());
+            if (pending_room_join_request_.valid) {
+                auto& net = net::NetworkManager::instance();
+                // Find a free slot
+                int free_slot = -1;
+                auto slots = net.get_slots();
+                for (size_t i = 1; i < slots.size(); ++i) {
+                    if (slots[i].is_open && slots[i].name == "Aberto") {
+                        free_slot = static_cast<int>(i);
+                        break;
+                    }
+                }
+                if (free_slot >= 0) {
+                    net.send_room_join_response(pending_room_join_request_.requester_ip, pending_room_join_request_.requester_port, true, free_slot);
+                    // Update local slot
+                    net.set_slot_state(free_slot, false, true, net::AIDifficulty::MODERATE);
+                    net.update_settings(net.get_settings());
+                } else {
+                    net.send_room_join_response(pending_room_join_request_.requester_ip, pending_room_join_request_.requester_port, false, -1);
+                }
+            }
+            pending_room_join_request_.valid = false;
+            create_multiplayer_lobby_menu();
+        }},
+        {"mproom-roomjoinrequestdialog-Nobutton", [this]() {
+            LOGI("Room join request declined");
+            if (pending_room_join_request_.valid) {
+                auto& net = net::NetworkManager::instance();
+                net.send_room_join_response(pending_room_join_request_.requester_ip, pending_room_join_request_.requester_port, false, -1);
+            }
+            pending_room_join_request_.valid = false;
+        }},
+    };
+
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            return rt;
+        }
+        return rt;
+    };
+
+    auto* layout = ui_layout_manager_.get_layout_mut("uiroomdialogs.xmb");
+    if (!layout) {
+        LOGE("Layout uiroomdialogs.xmb not found after load");
+        return;
+    }
+
+    for (auto& root : layout->root_gadgets) {
+        if (root.name == "mproom-roomjoinrequestdialog") {
+            root.hidden = false;
+            for (auto& child : root.children) {
+                if (child.name == "mproom-roomjoinrequestdialog-prompt") {
+                    child.text = prompt_text;
+                }
+            }
+            break;
+        }
+    }
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    LOGI("show_room_join_request_dialog: displayed for %s (%zu elementos)", requester_name.c_str(), created);
+}
+
+void Engine::show_room_error_dialog(const std::string& error_message) {
+    if (!load_ui_layout("uiroomdialogs.xmb")) {
+        LOGE("Failed to load uiroomdialogs.xmb");
+        return;
+    }
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"mproom-roomerrordialog-OKbutton", [this]() {
+            create_multiplayer_lan_menu();
+        }},
+    };
+
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            return rt;
+        }
+        return rt;
+    };
+
+    auto* layout = ui_layout_manager_.get_layout_mut("uiroomdialogs.xmb");
+    if (!layout) {
+        LOGE("Layout uiroomdialogs.xmb not found after load");
+        return;
+    }
+
+    for (auto& root : layout->root_gadgets) {
+        if (root.name == "mproom-roomerrordialog") {
+            root.hidden = false;
+            for (auto& child : root.children) {
+                if (child.name == "mproom-roomerrordialog-prompt") {
+                    child.text = error_message;
+                }
+            }
+            break;
+        }
+    }
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    LOGI("show_room_error_dialog: displayed (%zu elementos)", created);
+}
+
+// ── Session Connect Dialog (uisessionconnect.xmb) ──────────────────────────
+
+void Engine::show_session_connect_dialog() {
+    if (!load_ui_layout("uisessionconnect.xmb")) {
+        LOGE("Failed to load uisessionconnect.xmb");
+        return;
+    }
+
+    const float vw = static_cast<float>(config_.window_width);
+    const float vh = static_cast<float>(config_.window_height);
+
+    std::unordered_map<std::string, std::function<void()>> action_callbacks = {
+        {"session-connect-Cancelbutton", [this]() {
+            LOGI("Session connect cancelled by user");
+            net::NetworkManager::instance().leave_session();
+            create_multiplayer_lan_menu();
+        }},
+    };
+
+    auto texture_resolver = [this](const std::string& name) -> ResolvedTexture {
+        ResolvedTexture rt;
+        auto it = texture_cache_.find(name);
+        if (it != texture_cache_.end()) {
+            rt.handle = it->second;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            return rt;
+        }
+        std::string normalized = name;
+        if (normalized.size() < 4 || normalized.substr(normalized.size() - 4) != ".ddt") {
+            normalized += ".ddt";
+        }
+        TextureHandle h = load_ddt_texture(normalized);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(normalized);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            texture_dimensions_[name] = texture_dimensions_[normalized];
+            return rt;
+        }
+        return rt;
+    };
+
+    const auto* layout = ui_layout_manager_.get_layout("uisessionconnect.xmb");
+    if (!layout) {
+        LOGE("Layout uisessionconnect.xmb not found after load");
+        return;
+    }
+
+    size_t created = apply_layout_to_ui(*layout, ui_.get(),
+                                        static_cast<int>(vw), static_cast<int>(vh),
+                                        action_callbacks, texture_resolver,
+                                        &button_set_manager_);
+
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+
+    LOGI("show_session_connect_dialog: displayed (%zu elementos)", created);
+}
+
+void Engine::hide_session_connect_dialog() {
+    // Volta ao menu LAN ou lobby dependendo do estado
+    if (state_ == EngineState::MULTIPLAYER_LAN) {
+        create_multiplayer_lan_menu();
+    } else if (state_ == EngineState::MULTIPLAYER_LOBBY) {
+        create_multiplayer_lobby_menu();
+    }
 }
 
 void Engine::create_multiplayer_lobby_menu() {
     clear_ui();
+
+    // Configurar callbacks do NetworkManager para room dialogs (no lobby tambem)
+    auto& net = net::NetworkManager::instance();
+    net.on_room_join_request_received = [this](const net::RoomJoinRequest& req) {
+        pending_room_join_request_ = {req.requester_name, req.requester_ip, req.requester_port, true};
+        show_room_join_request_dialog(req.requester_name);
+    };
+    net.on_room_error = [this](const std::string& error) {
+        show_room_error_dialog(error);
+    };
 
     const float vw = static_cast<float>(config_.window_width);
     const float vh = static_cast<float>(config_.window_height);
@@ -377,9 +967,9 @@ void Engine::create_multiplayer_lobby_menu() {
     });
 }
 
-void Engine::network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port) {
+void Engine::network_host_game(const std::string& game_name, const std::string& player_name, uint16_t port, bool is_public) {
     LOGI("Iniciando host multiplayer...");
-    net::NetworkManager::instance().host_game(game_name, player_name, port);
+    net::NetworkManager::instance().host_game(game_name, player_name, port, is_public);
 }
 
 void Engine::network_join_game(const std::string& host_ip, uint16_t port, const std::string& player_name) {

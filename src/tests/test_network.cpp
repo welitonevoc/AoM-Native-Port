@@ -44,7 +44,7 @@ int main() {
     // 3. Test NetworkManager Hosting
     std::cout << "\n--- 3. Testing Host Game & Lobby Slots ---\n";
     auto& nm = NetworkManager::instance();
-    bool hosted = nm.host_game("AoM Sala Android", "HostPlayer", 2305);
+    bool hosted = nm.host_game("AoM Sala Android", "HostPlayer", 2305, true);
     assert(hosted);
     assert(nm.is_host());
     assert(nm.is_connected());

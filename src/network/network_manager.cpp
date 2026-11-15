@@ -36,7 +36,12 @@ enum PacketType : uint8_t {
     PKT_SETTINGS_UPDATE = 6,
     PKT_CHAT = 7,
     PKT_LAUNCH = 8,
-    PKT_LEAVE = 9
+    PKT_LEAVE = 9,
+    PKT_ROOM_INVITE = 10,
+    PKT_ROOM_INVITE_RESP = 11,
+    PKT_ROOM_JOIN_REQUEST = 12,
+    PKT_ROOM_JOIN_RESP = 13,
+    PKT_ROOM_ERROR = 14
 };
 
 void set_nonblocking(int fd) {
@@ -213,7 +218,7 @@ std::vector<DiscoveredGame> NetworkManager::get_discovered_games() {
     return discovered_games_;
 }
 
-bool NetworkManager::host_game(const std::string& game_name, const std::string& player_name, uint16_t port) {
+bool NetworkManager::host_game(const std::string& game_name, const std::string& player_name, uint16_t port, bool is_public) {
     leave_session();
 
     std::lock_guard<std::mutex> lock(mutex_);
@@ -246,6 +251,7 @@ bool NetworkManager::host_game(const std::string& game_name, const std::string& 
     my_slot_id_ = 0;
     session_name_ = game_name.empty() ? "Partida de " + player_name : game_name;
     player_name_ = player_name.empty() ? "Jogador 1" : player_name;
+    is_public_ = is_public;
 
     // Reset Slots
     for (size_t i = 0; i < slots_.size(); ++i) {
@@ -370,6 +376,7 @@ void NetworkManager::leave_session() {
     role_ = NetRole::OFFLINE;
     my_slot_id_ = 0;
     host_ip_ = "";
+    is_public_ = true;
 }
 
 std::vector<PlayerSlot> NetworkManager::get_slots() {
@@ -486,6 +493,151 @@ void NetworkManager::send_chat(const std::string& message) {
     }
 }
 
+// ── Room Invite / Join Request ────────────────────────────────────────────
+
+void NetworkManager::send_room_invite(const std::string& target_ip, uint16_t target_port) {
+    if (role_ != NetRole::HOST) return;
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<uint8_t> pkt;
+    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
+    pkt.push_back(PKT_ROOM_INVITE);
+
+    uint8_t nlen = static_cast<uint8_t>(std::min(player_name_.size(), size_t(31)));
+    pkt.push_back(nlen);
+    pkt.insert(pkt.end(), player_name_.begin(), player_name_.begin() + nlen);
+
+    uint8_t slen = static_cast<uint8_t>(std::min(session_name_.size(), size_t(63)));
+    pkt.push_back(slen);
+    pkt.insert(pkt.end(), session_name_.begin(), session_name_.begin() + slen);
+
+    pkt.push_back(static_cast<uint8_t>(port_ & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((port_ >> 8) & 0xFF));
+
+    struct sockaddr_in target_addr{};
+    target_addr.sin_family = AF_INET;
+    target_addr.sin_port = htons(target_port);
+    inet_pton(AF_INET, target_ip.c_str(), &target_addr.sin_addr);
+
+    sendto(udp_sock_, pkt.data(), pkt.size(), 0,
+           reinterpret_cast<struct sockaddr*>(&target_addr), sizeof(target_addr));
+    LOGI("Sent room invite to %s:%d", target_ip.c_str(), target_port);
+}
+
+void NetworkManager::send_room_invite_response(const std::string& target_ip, uint16_t target_port, bool accept) {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<uint8_t> pkt;
+    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
+    pkt.push_back(PKT_ROOM_INVITE_RESP);
+    pkt.push_back(accept ? 1 : 0);
+
+    uint8_t nlen = static_cast<uint8_t>(std::min(player_name_.size(), size_t(31)));
+    pkt.push_back(nlen);
+    pkt.insert(pkt.end(), player_name_.begin(), player_name_.begin() + nlen);
+
+    struct sockaddr_in target_addr{};
+    target_addr.sin_family = AF_INET;
+    target_addr.sin_port = htons(target_port);
+    inet_pton(AF_INET, target_ip.c_str(), &target_addr.sin_addr);
+
+    int sock = (role_ == NetRole::HOST) ? udp_sock_ : (udp_sock_ >= 0 ? udp_sock_ : bcast_sock_);
+    if (sock >= 0) {
+        sendto(sock, pkt.data(), pkt.size(), 0,
+               reinterpret_cast<struct sockaddr*>(&target_addr), sizeof(target_addr));
+    }
+    LOGI("Sent room invite response: %s", accept ? "accept" : "decline");
+}
+
+void NetworkManager::send_room_join_request(const std::string& host_ip, uint16_t host_port) {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<uint8_t> pkt;
+    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
+    pkt.push_back(PKT_ROOM_JOIN_REQUEST);
+
+    uint8_t nlen = static_cast<uint8_t>(std::min(player_name_.size(), size_t(31)));
+    pkt.push_back(nlen);
+    pkt.insert(pkt.end(), player_name_.begin(), player_name_.begin() + nlen);
+
+    struct sockaddr_in target_addr{};
+    target_addr.sin_family = AF_INET;
+    target_addr.sin_port = htons(host_port);
+    inet_pton(AF_INET, host_ip.c_str(), &target_addr.sin_addr);
+
+    int sock = (role_ == NetRole::HOST) ? udp_sock_ : (udp_sock_ >= 0 ? udp_sock_ : bcast_sock_);
+    if (sock >= 0) {
+        sendto(sock, pkt.data(), pkt.size(), 0,
+               reinterpret_cast<struct sockaddr*>(&target_addr), sizeof(target_addr));
+    }
+    LOGI("Sent room join request to %s:%d", host_ip.c_str(), host_port);
+}
+
+void NetworkManager::send_room_join_response(const std::string& target_ip, uint16_t target_port, bool accept, int slot_id) {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<uint8_t> pkt;
+    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
+    pkt.push_back(PKT_ROOM_JOIN_RESP);
+    pkt.push_back(accept ? 1 : 0);
+    pkt.push_back(static_cast<uint8_t>(slot_id));
+
+    uint8_t nlen = static_cast<uint8_t>(std::min(player_name_.size(), size_t(31)));
+    pkt.push_back(nlen);
+    pkt.insert(pkt.end(), player_name_.begin(), player_name_.begin() + nlen);
+
+    struct sockaddr_in target_addr{};
+    target_addr.sin_family = AF_INET;
+    target_addr.sin_port = htons(target_port);
+    inet_pton(AF_INET, target_ip.c_str(), &target_addr.sin_addr);
+
+    int sock = (role_ == NetRole::HOST) ? udp_sock_ : (udp_sock_ >= 0 ? udp_sock_ : bcast_sock_);
+    if (sock >= 0) {
+        sendto(sock, pkt.data(), pkt.size(), 0,
+               reinterpret_cast<struct sockaddr*>(&target_addr), sizeof(target_addr));
+    }
+    LOGI("Sent room join response: %s (slot %d)", accept ? "accept" : "decline", slot_id);
+}
+
+void NetworkManager::send_room_error(const std::string& target_ip, uint16_t target_port, const std::string& error) {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<uint8_t> pkt;
+    pkt.push_back(static_cast<uint8_t>(AOM_NET_MAGIC & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 8) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 16) & 0xFF));
+    pkt.push_back(static_cast<uint8_t>((AOM_NET_MAGIC >> 24) & 0xFF));
+    pkt.push_back(PKT_ROOM_ERROR);
+
+    uint8_t elen = static_cast<uint8_t>(std::min(error.size(), size_t(127)));
+    pkt.push_back(elen);
+    pkt.insert(pkt.end(), error.begin(), error.begin() + elen);
+
+    struct sockaddr_in target_addr{};
+    target_addr.sin_family = AF_INET;
+    target_addr.sin_port = htons(target_port);
+    inet_pton(AF_INET, target_ip.c_str(), &target_addr.sin_addr);
+
+    int sock = (role_ == NetRole::HOST) ? udp_sock_ : (udp_sock_ >= 0 ? udp_sock_ : bcast_sock_);
+    if (sock >= 0) {
+        sendto(sock, pkt.data(), pkt.size(), 0,
+               reinterpret_cast<struct sockaddr*>(&target_addr), sizeof(target_addr));
+    }
+    LOGI("Sent room error: %s", error.c_str());
+}
+
 bool NetworkManager::launch_game() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (role_ != NetRole::HOST) return false;
@@ -527,6 +679,7 @@ bool NetworkManager::launch_game() {
 
 void NetworkManager::send_broadcast_beacon() {
     if (role_ != NetRole::HOST || udp_sock_ < 0) return;
+    if (!is_public_) return; // Private games don't broadcast LAN beacon
 
     // Beacon format:
     // Magic (4B) | PKT_BEACON (1B) | Port (2B) | Players (1B) | Max (1B) | NameLen (1B) | Name | HostLen (1B) | Host | MapLen (1B) | Map
@@ -802,6 +955,93 @@ void NetworkManager::process_incoming_packets() {
                     broadcast_lobby_state();
                     if (on_lobby_updated) on_lobby_updated();
                 }
+            }
+        } else if (type == PKT_ROOM_INVITE) {
+            // Received a room invite from a host
+            if (rec >= 8) {
+                size_t p = 5;
+                uint8_t nlen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string inviter_name = (p + nlen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), nlen) : "Host";
+                p += nlen;
+
+                uint8_t slen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string session_name = (p + slen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), slen) : "Sala";
+                p += slen;
+
+                uint16_t inviter_port = (p + 1 < static_cast<size_t>(rec)) ? (buf[p] | (buf[p+1] << 8)) : DEFAULT_AOM_PORT;
+                p += 2;
+
+                RoomInvite invite;
+                invite.inviter_name = inviter_name;
+                invite.inviter_ip = ip_str;
+                invite.inviter_port = inviter_port;
+                invite.timestamp = 0.0f;
+
+                LOGI("Received room invite from %s (%s:%d)", inviter_name.c_str(), ip_str, inviter_port);
+                if (on_room_invite_received) on_room_invite_received(invite);
+            }
+        } else if (type == PKT_ROOM_INVITE_RESP) {
+            // Response to our room invite (only relevant for host)
+            if (rec >= 7 && role_ == NetRole::HOST) {
+                bool accept = buf[5] == 1;
+                size_t p = 6;
+                uint8_t nlen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string responder_name = (p + nlen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), nlen) : "Jogador";
+
+                LOGI("Room invite response from %s: %s", responder_name.c_str(), accept ? "accepted" : "declined");
+                // The host can now join the responder or wait for them to connect
+                // For now, just log. In future, auto-join logic could go here.
+            }
+        } else if (type == PKT_ROOM_JOIN_REQUEST) {
+            // Received a join request (only relevant for host)
+            if (rec >= 6 && role_ == NetRole::HOST) {
+                size_t p = 5;
+                uint8_t nlen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string requester_name = (p + nlen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), nlen) : "Jogador";
+                p += nlen;
+
+                RoomJoinRequest req;
+                req.requester_name = requester_name;
+                req.requester_ip = ip_str;
+                req.requester_port = ntohs(from.sin_port);
+                req.timestamp = 0.0f;
+
+                LOGI("Received room join request from %s (%s)", requester_name.c_str(), ip_str);
+                if (on_room_join_request_received) on_room_join_request_received(req);
+            }
+        } else if (type == PKT_ROOM_JOIN_RESP) {
+            // Response to our join request (only relevant for client)
+            if (rec >= 7 && role_ == NetRole::CLIENT) {
+                bool accept = buf[5] == 1;
+                uint8_t slot_id = buf[6];
+                size_t p = 7;
+                uint8_t nlen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string responder_name = (p + nlen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), nlen) : "Host";
+
+                LOGI("Room join response from %s: %s (slot %d)", responder_name.c_str(), accept ? "accepted" : "declined", slot_id);
+                if (accept) {
+                    my_slot_id_ = slot_id;
+                    ChatMessage sys;
+                    sys.sender = "Sistema";
+                    sys.text = "Pedido de entrada aceito! Atribuído ao Slot #" + std::to_string(slot_id + 1);
+                    sys.is_system = true;
+                    sys.color = 0xFF88FF88;
+                    chat_history_.push_back(sys);
+                    if (on_chat_received) on_chat_received(sys);
+                    if (on_lobby_updated) on_lobby_updated();
+                } else {
+                    if (on_room_error) on_room_error("Pedido de entrada na sala foi recusado");
+                }
+            }
+        } else if (type == PKT_ROOM_ERROR) {
+            // Generic room error
+            if (rec >= 6) {
+                size_t p = 5;
+                uint8_t elen = (p < static_cast<size_t>(rec)) ? buf[p++] : 0;
+                std::string error = (p + elen <= static_cast<size_t>(rec)) ? std::string(reinterpret_cast<char*>(buf + p), elen) : "Erro desconhecido";
+
+                LOGI("Received room error: %s", error.c_str());
+                if (on_room_error) on_room_error(error);
             }
         }
     }

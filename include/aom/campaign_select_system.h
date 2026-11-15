@@ -59,6 +59,7 @@ private:
     struct Entry {
         const CampaignScenario* scenario = nullptr; ///< Cenario (campanha base ou expansao)
         bool expansion = false;                     ///< true se veio da expansao The Titans
+        bool completed = false;                     ///< true se ja foi concluido (desbloqueado para replay)
     };
 
     /// Reconstrói a interface em duas colunas.

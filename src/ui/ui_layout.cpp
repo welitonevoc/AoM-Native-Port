@@ -562,6 +562,16 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                         auto a = action_callbacks.find("return_to_main_menu");
                         if (a != action_callbacks.end()) a->second();
                     }
+                    // 3. Fallback: lookup by button name (gd.name) for custom XMB layouts
+                    else {
+                        auto a = action_callbacks.find(name);
+                        if (a != action_callbacks.end()) {
+                            LOGI("[UI Layout] Executando callback custom para button '%s'", name.c_str());
+                            a->second();
+                        } else {
+                            LOGW("[UI Layout] Nenhum callback para button '%s' (cmd='%s')", name.c_str(), cmd.c_str());
+                        }
+                    }
                 };
 
                 LOGI("[apply] button label='%s' pos=(%d,%d) size=(%d,%d) color=%08X text_color=%08X bg='%s' hidden=%d",
@@ -720,6 +730,43 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     ++created;
                 }
             }
+            // EditBox (XMB editBox) - campo de texto editável
+            else if (gd.type == "editBox") {
+                // O editBox é renderizado como um button com label editável
+                // O texto será editado via teclado virtual/Android IME
+                auto* btn = ui->add_button({x, y}, {w, h}, gd.text, []() {}, 0xFF221810, 0xFF443020);
+                if (btn) {
+                    btn->visible = !is_hidden;
+                    btn->tag = gd.name.empty() ? parent_tag : gd.name;
+                    btn->group_tag = parent_tag;
+                    btn->text_size = scaled_text_size;
+                    btn->normal_color = 0xFF221810;
+                    btn->pressed_color = 0xFF443020;
+                    btn->current_color = btn->normal_color;
+                    // Textura de fundo do text box (usar bg_texture do parent ou do próprio)
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            btn->normal_tex = rt.handle;
+                            btn->pressed_tex = rt.handle;
+                        }
+                    }
+                    // Cor do texto
+                    uint32_t eb_text_color = 0xFFFFFFFF;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        eb_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        eb_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    btn->text_color = eb_text_color;
+                    // Campos editBox
+                    btn->is_edit_box = true;
+                    btn->placeholder = "";  // poderia vir do XMB se houver attr
+                    btn->max_length = 256;
+                    // O callback onTextInput será definido pelo Engine após criação
+                }
+                ++created;
+            }
             // Sliders
             else if (gd.type == "slider") {
                 auto* s = ui->add_slider({x, y}, {w, h}, gd.text, 0.5f, [](float) {});
@@ -853,6 +900,53 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                         ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkhighlightart"));
                         if (rt.handle != INVALID_TEXTURE) {
                             cb->icon = rt.handle; // Reuse icon for rollover
+                        }
+                    }
+                }
+                ++created;
+            }
+            // List (XMB list) - lista de itens selecionáveis
+            else if (gd.type == "list") {
+                // Extrair itens dos filhos
+                std::vector<std::string> items;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        items.push_back(child.text);
+                    }
+                }
+                int initial = -1;
+                if (gd.extra_attrs.count("selected")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("selected")); } catch (...) {}
+                }
+                auto* lst = ui->add_list({x, y}, {w, h}, items, initial, [](int) {});
+                if (lst) {
+                    lst->visible = !is_hidden;
+                    lst->tag = gd.name.empty() ? parent_tag : gd.name;
+                    lst->group_tag = parent_tag;
+                    lst->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t lst_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        lst_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        lst_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    lst->text_color = lst_text_color;
+                    // Background texture
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            lst->bg_tex = rt.handle;
+                        }
+                    }
+                    // Selection highlight texture (from child gadget bg)
+                    for (const auto& child : gd.children) {
+                        if (!child.bg_texture.empty() && texture_resolver) {
+                            ResolvedTexture rt = texture_resolver(child.bg_texture);
+                            if (rt.handle != INVALID_TEXTURE) {
+                                lst->sel_tex = rt.handle;
+                            }
+                            break; // Use first child's bg as selection texture
                         }
                     }
                 }

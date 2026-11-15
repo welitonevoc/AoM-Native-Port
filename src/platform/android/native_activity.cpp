@@ -110,7 +110,9 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* stat
     AInputEvent* event = nullptr;
     while (AInputQueue_getEvent(queue, &event) >= 0) {
         bool handled = false;
-        if (engine && AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+        int32_t event_type = AInputEvent_getType(event);
+        
+        if (engine && event_type == AINPUT_EVENT_TYPE_MOTION) {
             const int32_t action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
             const size_t pointer_count = AMotionEvent_getPointerCount(event);
             aom::TouchEvent::State state_enum;
@@ -151,6 +153,70 @@ void process_input_queue(AInputQueue* queue, aom::Engine* engine, AppState* stat
                 engine->handle_touch({AMotionEvent_getX(event, 0),
                                       AMotionEvent_getY(event, 0), state_enum});
                 handled = true;
+            }
+        } else if (engine && event_type == AINPUT_EVENT_TYPE_KEY) {
+            // Hardware keyboard input handling
+            int32_t action = AKeyEvent_getAction(event);
+            int32_t key_code = AKeyEvent_getKeyCode(event);
+            int32_t meta_state = AKeyEvent_getMetaState(event);
+            
+            if (action == AKEY_EVENT_ACTION_DOWN) {
+                // Handle printable characters and backspace
+                // For simplicity, we'll handle basic ASCII keys
+                // In a full implementation, we'd use AKeyEvent_getUnicodeChar() (API 29+)
+                if (key_code >= AKEYCODE_A && key_code <= AKEYCODE_Z) {
+                    char c = 'a' + (key_code - AKEYCODE_A);
+                    // Shift for uppercase
+                    if (meta_state & AMETA_SHIFT_ON) c = toupper(c);
+                    engine->handle_text_input(std::string(1, c));
+                    handled = true;
+                } else if (key_code >= AKEYCODE_0 && key_code <= AKEYCODE_9) {
+                    char c = '0' + (key_code - AKEYCODE_0);
+                    engine->handle_text_input(std::string(1, c));
+                    handled = true;
+                } else if (key_code == AKEYCODE_SPACE) {
+                    engine->handle_text_input(" ");
+                    handled = true;
+                } else if (key_code == AKEYCODE_DEL) {
+                    engine->handle_text_backspace();
+                    handled = true;
+                } else if (key_code == AKEYCODE_ENTER || key_code == AKEYCODE_NUMPAD_ENTER) {
+                    // Enter could submit the form or add newline
+                    handled = true;
+                } else if (key_code == AKEYCODE_MINUS) {
+                    engine->handle_text_input("-");
+                    handled = true;
+                } else if (key_code == AKEYCODE_EQUALS) {
+                    engine->handle_text_input("=");
+                    handled = true;
+                } else if (key_code == AKEYCODE_COMMA) {
+                    engine->handle_text_input(",");
+                    handled = true;
+                } else if (key_code == AKEYCODE_PERIOD) {
+                    engine->handle_text_input(".");
+                    handled = true;
+                } else if (key_code == AKEYCODE_SLASH) {
+                    engine->handle_text_input("/");
+                    handled = true;
+                } else if (key_code == AKEYCODE_SEMICOLON) {
+                    engine->handle_text_input(";");
+                    handled = true;
+                } else if (key_code == AKEYCODE_APOSTROPHE) {
+                    engine->handle_text_input("'");
+                    handled = true;
+                } else if (key_code == AKEYCODE_GRAVE) {
+                    engine->handle_text_input("`");
+                    handled = true;
+                } else if (key_code == AKEYCODE_LEFT_BRACKET) {
+                    engine->handle_text_input("[");
+                    handled = true;
+                } else if (key_code == AKEYCODE_RIGHT_BRACKET) {
+                    engine->handle_text_input("]");
+                    handled = true;
+                } else if (key_code == AKEYCODE_BACKSLASH) {
+                    engine->handle_text_input("\\");
+                    handled = true;
+                }
             }
         }
         AInputQueue_finishEvent(queue, event, handled ? 1 : 0);
@@ -446,3 +512,46 @@ void ANativeActivity_onCreate(ANativeActivity* activity,
 
     state->game_thread = std::thread(game_loop, state);
 }
+
+// ============================================================
+// JNI Native Keyboard Support
+// ============================================================
+
+static aom::Engine* g_engine_instance = nullptr;
+
+extern "C" {
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextInput(JNIEnv* env, jobject thiz, jstring text) {
+    if (!g_engine_instance || !text) return;
+    const char* str = env->GetStringUTFChars(text, nullptr);
+    if (str) {
+        g_engine_instance->handle_text_input(str);
+        env->ReleaseStringUTFChars(text, str);
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextBackspace(JNIEnv* env, jobject thiz) {
+    if (g_engine_instance) {
+        g_engine_instance->handle_text_backspace();
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_aom_nativeport_MyNativeActivity_nativeOnTextEnter(JNIEnv* env, jobject thiz) {
+    if (g_engine_instance) {
+        // Enter key - could submit form or hide keyboard
+        g_engine_instance->handle_text_enter();
+    }
+}
+
+} // extern "C"
+
+namespace aom {
+
+void aom_set_engine_instance(Engine* engine) {
+    g_engine_instance = engine;
+}
+
+} // namespace aom

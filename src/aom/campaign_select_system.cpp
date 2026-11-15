@@ -26,18 +26,35 @@ bool CampaignSelectSystem::initialize(Engine* engine, UIManager* ui, Engine* pro
 
     if (!ui_ || !provider_) return false;
 
+    // Obter progresso atual das campanhas
+    size_t base_progress = 0;
+    if (provider_->campaign_manager() && provider_->campaign_manager()->current_campaign()) {
+        base_progress = provider_->campaign_manager()->current_index();
+    }
+    size_t xpack_progress = 0;
+    if (provider_->expansion_campaign_manager() && provider_->expansion_campaign_manager()->current_campaign()) {
+        xpack_progress = provider_->expansion_campaign_manager()->current_index();
+    }
+
     // ── Coleta os cenarios jogaveis da campanha base e da expansao ─────────
-    auto collect = [this](CampaignManager* mgr, bool expansion) {
+    auto collect = [this, base_progress, xpack_progress](CampaignManager* mgr, bool expansion, size_t progress) {
         if (!mgr) return;
         const Campaign* campaign = mgr->current_campaign();
         if (!campaign) return;
-        for (const CampaignScenario& scenario : campaign->scenarios) {
+        for (size_t i = 0; i < campaign->scenarios.size(); ++i) {
+            const CampaignScenario& scenario = campaign->scenarios[i];
             if (scenario.unlisted) continue; // cutscenes nao aparecem na lista
-            scenarios_.push_back(Entry{&scenario, expansion});
+            // Cenario esta desbloqueado se: ja foi concluido (i < progress) OU e o proximo a jogar (i == progress)
+            bool is_completed = (i < progress);
+            bool is_unlocked = (i <= progress);
+            // So adicionamos a lista se estiver desbloqueado
+            if (is_unlocked) {
+                scenarios_.push_back(Entry{&scenario, expansion, is_completed});
+            }
         }
     };
-    collect(provider_->campaign_manager(), false);
-    collect(provider_->expansion_campaign_manager(), true);
+    collect(provider_->campaign_manager(), false, base_progress);
+    collect(provider_->expansion_campaign_manager(), true, xpack_progress);
 
     if (scenarios_.empty()) return false;
 
@@ -183,8 +200,34 @@ void CampaignSelectSystem::rebuild_ui() {
             label += entry.scenario->filename;
         }
 
+        // Indicar status: concluido (check), atual (seta), proximo (cadeado)
+        bool is_last_completed = entry.completed;
+        bool is_current_mission = (!entry.completed && i == page_start); // primeiro da pagina = proximo a jogar
+
+        if (is_last_completed) {
+            label += " ✓";
+        } else if (is_current_mission) {
+            label += " ▶";
+        } else {
+            label += " 🔒";
+        }
+
         const bool is_selected = (i == selected_index_);
-        const uint32_t bg_color = is_selected ? 0xFF4A3810 : 0xFF1C2632;
+        uint32_t bg_color;
+        uint32_t text_color;
+        if (is_selected) {
+            bg_color = 0xFF4A3810;
+            text_color = 0xFFFFFFFF;
+        } else if (is_last_completed) {
+            bg_color = 0xFF1C3A1C; // verde escuro para concluido
+            text_color = 0xFF88FF88;
+        } else if (is_current_mission) {
+            bg_color = 0xFF3A3010; // dourado para missao atual
+            text_color = 0xFFFFD000;
+        } else {
+            bg_color = 0xFF1C2632;
+            text_color = 0xFF888888; // cinza para bloqueado
+        }
         const uint32_t border_color = is_selected ? 0xFFFFD000 : 0xFF3A4858;
 
         if (is_selected) {
@@ -198,7 +241,7 @@ void CampaignSelectSystem::rebuild_ui() {
                         [self, clicked_idx]() { self->select_scenario(clicked_idx); },
                         bg_color, 0xFF6A5018);
         if (btn) {
-            btn->text_color = is_selected ? 0xFFFFFFFF : 0xFFFFD000;
+            btn->text_color = text_color;
             btn->text_size = 14.0f * sy;
         }
 
@@ -294,17 +337,37 @@ void CampaignSelectSystem::rebuild_ui() {
         const float start_x = col_right_x + 18.0f * sx;
         const float start_y = content_y + content_h - 52.0f * sy;
 
+        bool is_locked = (!sel_entry.completed && selected_index_ != page_start);
+        // page_start is the first item on the current page; but we need the actual current mission index
+        // Find the first non-completed scenario in the full list
+        size_t current_mission_idx = 0;
+        for (size_t idx = 0; idx < scenarios_.size(); ++idx) {
+            if (!scenarios_[idx].completed) {
+                current_mission_idx = idx;
+                break;
+            }
+        }
+        is_locked = (selected_index_ != current_mission_idx && !sel_entry.completed);
+
+        uint32_t start_bg = is_locked ? 0xFF2A2A2A : 0xFF5E4210;
+        uint32_t start_hover = is_locked ? 0xFF3A3A3A : 0xFF8A6218;
+        uint32_t start_text = is_locked ? 0xFF888888 : 0xFFFFFFFF;
+        std::string start_label = is_locked ? "BLOQUEADO" : "INICIAR MISSAO";
+        uint32_t border_col = is_locked ? 0xFF555555 : 0xFFFFD000;
+
         ui_->add_background_quad({start_x - 2.0f * sx, start_y - 2.0f * sy},
                                  {start_w + 4.0f * sx, start_h + 4.0f * sy},
-                                 INVALID_TEXTURE, 0xFFFFD000);
+                                 INVALID_TEXTURE, border_col);
 
         Entry start_entry = sel_entry;
         UIButton* start_btn = ui_->add_button({start_x, start_y}, {start_w, start_h},
-                                              "INICIAR MISSAO",
-                                              [self, start_entry]() { self->start_scenario(start_entry); },
-                                              0xFF5E4210, 0xFF8A6218);
+                                              start_label,
+                                              [self, start_entry, is_locked]() {
+                                                  if (!is_locked) self->start_scenario(start_entry);
+                                              },
+                                              start_bg, start_hover);
         if (start_btn) {
-            start_btn->text_color = 0xFFFFFFFF;
+            start_btn->text_color = start_text;
             start_btn->text_size = 16.0f * sy;
             start_btn->is_big_button = true;
         }

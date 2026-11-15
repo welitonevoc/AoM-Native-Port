@@ -2041,6 +2041,18 @@ public:
     }
 
     void end_ui() override {}
+
+    void set_ui_scissor(int x, int y, int width, int height, bool enable) override {
+        if (enable) {
+            // OpenGL scissor uses bottom-left origin, UI uses top-left
+            // Convert: glScissor(x, screen_height - (y + height), width, height)
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(x, height_ - (y + height), width, height);
+        } else {
+            glDisable(GL_SCISSOR_TEST);
+        }
+    }
+
     void draw_debug_line(const glm::vec3& from, const glm::vec3& to, uint32_t color) override {
         if (!line_program_ || line_vao_ == 0) return;
         glUseProgram(line_program_);

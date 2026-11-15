@@ -41,4 +41,7 @@ inline std::string texture_key(std::string s) {
     return k;
 }
 
+// JNI engine instance for native keyboard callbacks
+void aom_set_engine_instance(class Engine* engine);
+
 } // namespace aom

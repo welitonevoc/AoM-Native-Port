@@ -321,6 +321,11 @@ public:
     /// End UI rendering pass
     virtual void end_ui() = 0;
 
+    /// Scissor test for UI clipping (e.g., dropdown lists)
+    /// @param x, y, width, height in screen pixels (origin top-left)
+    /// @param enable false to disable scissor test
+    virtual void set_ui_scissor(int x, int y, int width, int height, bool enable = true) = 0;
+
     // --- Debug ---
 
     /// Draw a debug line

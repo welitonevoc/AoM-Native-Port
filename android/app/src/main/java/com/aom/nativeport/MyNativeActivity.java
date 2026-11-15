@@ -60,8 +60,43 @@ public class MyNativeActivity extends android.app.NativeActivity {
         System.loadLibrary("aom_native");
     }
 
-
     private static final String TAG = "AoM-Activity";
+
+    // Native keyboard support
+    private android.view.inputmethod.InputMethodManager imm_;
+    private android.view.View decorView_;
+
+    // JNI methods called from native code
+    public void showSoftKeyboard() {
+        runOnUiThread(() -> {
+            Log.i(TAG, "showSoftKeyboard requested");
+            if (imm_ == null) {
+                imm_ = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            }
+            if (decorView_ == null) {
+                decorView_ = getWindow().getDecorView();
+            }
+            if (imm_ != null && decorView_ != null) {
+                // Request focus on the decor view to show keyboard
+                decorView_.requestFocus();
+                imm_.showSoftInput(decorView_, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+    }
+
+    public void hideSoftKeyboard() {
+        runOnUiThread(() -> {
+            Log.i(TAG, "hideSoftKeyboard requested");
+            if (imm_ != null && decorView_ != null) {
+                imm_.hideSoftInputFromWindow(decorView_.getWindowToken(), 0);
+            }
+        });
+    }
+
+    // Native callbacks (for future use with InputConnection)
+    private native void nativeOnTextInput(String text);
+    private native void nativeOnTextBackspace();
+    private native void nativeOnTextEnter();
 
     private static final int REQUEST_STORAGE = 1001;
 
