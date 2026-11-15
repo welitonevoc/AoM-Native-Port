@@ -44,7 +44,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/data/major_god.h (73 linhas)
 
-## include/data/proto_unit.h (141 linhas)
+## include/data/proto_unit.h (142 linhas)
 
 ## include/data/sound_def.h (78 linhas)
 

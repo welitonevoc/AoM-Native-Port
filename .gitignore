@@ -243,3 +243,7 @@ $RECYCLE.BIN/
 *$py.class
 aom_prt_extracted/
 *.prt
+options.cfg
+fix_*.py
+log_*.txt
+*.log
