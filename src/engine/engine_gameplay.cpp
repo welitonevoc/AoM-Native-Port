@@ -198,6 +198,32 @@ void Engine::start_game() {
     gameplay_world_->add_resource_node(ResourceType::WOOD, glm::vec3(7.5f, 0.0f, 3.5f), 1500);
     gameplay_world_->add_resource_node(ResourceType::GOLD, glm::vec3(5.5f, 0.0f, -3.5f), 2000);
 
+    // ── Spawn árvores e animais no mapa do jogo (não só no menu) ──────────────
+    ModelEntry* palm_me = get_model_entry("world e palm a.brg");
+    ModelEntry* oak_me = get_model_entry("world g oak a.brg");
+    ModelEntry* pine_me = get_model_entry("world n pine a.brg");
+    ModelEntry* rock_me = get_model_entry("world a sandyriverrock a.brg");
+    if (palm_me && palm_me->mesh != INVALID_MESH) {
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-3.0f, 0.0f, -4.0f), 1.3f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-1.5f, 0.0f, -5.5f), 1.1f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(3.5f, 0.0f, -3.0f), 1.2f, palm_me->texture, palm_me->mesh);
+        gameplay_world_->spawn_scenery_object("Palm Tree", glm::vec3(-6.0f, 0.0f, -6.0f), 1.1f, palm_me->texture, palm_me->mesh);
+    }
+    if (oak_me && oak_me->mesh != INVALID_MESH) {
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-7.5f, 0.0f, 1.0f), 1.4f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(5.0f, 0.0f, 2.0f), 1.3f, oak_me->texture, oak_me->mesh);
+        gameplay_world_->spawn_scenery_object("Oak Tree", glm::vec3(-8.0f, 0.0f, -4.0f), 1.2f, oak_me->texture, oak_me->mesh);
+    }
+    if (pine_me && pine_me->mesh != INVALID_MESH) {
+        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(-9.0f, 0.0f, 3.0f), 1.5f, pine_me->texture, pine_me->mesh);
+        gameplay_world_->spawn_scenery_object("Pine Tree", glm::vec3(7.0f, 0.0f, -5.0f), 1.4f, pine_me->texture, pine_me->mesh);
+    }
+    if (rock_me && rock_me->mesh != INVALID_MESH) {
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(-6.5f, 0.0f, 4.5f), 1.2f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(6.0f, 0.0f, -6.5f), 1.3f, rock_me->texture, rock_me->mesh);
+        gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(8.5f, 0.0f, 1.0f), 1.1f, rock_me->texture, rock_me->mesh);
+    }
+
     // Generate 3D terrain: try loading real height-map from .scn first,
     // fall back to procedural terrain if no scenario file is available.
     if (terrain_mesh_ == INVALID_MESH) {

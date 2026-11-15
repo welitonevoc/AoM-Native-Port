@@ -706,7 +706,8 @@ public:
         return !units_.empty() || !building_components_.empty();
     }
 
-    Entity spawn_unit(Team team, const glm::vec3& position, const UnitStats& stats = {}) {
+    Entity spawn_unit(Team team, const glm::vec3& position, const UnitStats& stats = {},
+                      MeshHandle mesh = INVALID_MESH, TextureHandle texture = INVALID_TEXTURE) {
         Entity id = ecs_world_.create_entity();
 
         auto& tr = ecs_world_.transforms_mut()[id];
@@ -732,6 +733,14 @@ public:
         u.gather_timer = 0.0f;
         units_[id] = u;
 
+        // Set unit visuals (mesh/texture) if provided
+        if (mesh != INVALID_MESH) {
+            u.mesh = mesh;
+        }
+        if (texture != INVALID_TEXTURE) {
+            u.texture = texture;
+        }
+
         selections_[id] = SelectionComponent{};
 
         // Auto-attach default animation if available
@@ -746,14 +755,15 @@ public:
         return id;
     }
 
-    Entity spawn_worker(const glm::vec3& position, const UnitStats& stats = {}) {
+    Entity spawn_worker(const glm::vec3& position, const UnitStats& stats = {},
+                        MeshHandle mesh = INVALID_MESH, TextureHandle texture = INVALID_TEXTURE) {
         UnitStats w_stats = stats;
         w_stats.worker = true;
         w_stats.pop_cost = 1;
         if (w_stats.name.empty() || w_stats.name == "Unit") {
             w_stats.name = "Villager Greek";
         }
-        return spawn_unit(Team::FRIENDLY, position, w_stats);
+        return spawn_unit(Team::FRIENDLY, position, w_stats, mesh, texture);
     }
 
     Entity spawn_scenery_object(const std::string& name, const glm::vec3& position,
