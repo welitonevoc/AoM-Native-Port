@@ -428,12 +428,12 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 434-436 (3)
 - `Engine::play_named_cinematic` 438-446 (9)
 
-## src/engine/engine_gameplay.cpp (467 linhas)
-- `Engine::start_game` 20-256 (237)
-- `Engine::populate_menu_background_scene` 258-390 (133)
-- `Engine::start_menu_background` 392-397 (6)
-- `Engine::apply_unit_visual` 399-416 (18)
-- `Engine::resolve_building_visual` 418-464 (47)
+## src/engine/engine_gameplay.cpp (493 linhas)
+- `Engine::start_game` 20-282 (263)
+- `Engine::populate_menu_background_scene` 284-416 (133)
+- `Engine::start_menu_background` 418-423 (6)
+- `Engine::apply_unit_visual` 425-442 (18)
+- `Engine::resolve_building_visual` 444-490 (47)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)

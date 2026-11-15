@@ -224,6 +224,32 @@ void Engine::start_game() {
         gameplay_world_->spawn_scenery_object("Rock Sandy", glm::vec3(8.5f, 0.0f, 1.0f), 1.1f, rock_me->texture, rock_me->mesh);
     }
 
+    // ── Spawn fauna como CENÁRIO (decorativa, estática; não interativa) ─────
+    // Modelos autênticos do models.bar. Sem componente de unidade: a IA não
+    // mira neles, não têm HP e o jogador não consegue selecioná-los. São
+    // placeholder visual até existir um sistema de animais passivos/caça.
+    {
+        struct AnimalSpawn { const char* name; const char* brg; const glm::vec3 pos; float scale; };
+        const AnimalSpawn animal_spawns[] = {
+            {"Gazelle",  "animal gazelle_idlea.brg", glm::vec3(-2.0f, 0.0f,  6.0f), 1.0f},
+            {"Gazelle",  "animal gazelle_idlea.brg", glm::vec3(-1.0f, 0.0f,  7.0f), 0.9f},
+            {"Aurochs",  "animal aurochs_idlea.brg", glm::vec3( 0.5f, 0.0f, -6.5f), 1.1f},
+            {"Doe",      "animal doe_idlea.brg",     glm::vec3(-9.5f, 0.0f, -1.5f), 1.0f},
+            {"Deer",     "animal doe_idlea.brg",     glm::vec3( 8.0f, 0.0f,  6.0f), 1.0f},
+            {"Lion",     "animal lion_idlea.brg",    glm::vec3(10.0f, 0.0f, -7.5f), 1.0f},
+            {"Boar",     "animal boar_idlea.brg",    glm::vec3(-7.0f, 0.0f, -7.0f), 1.0f},
+        };
+        for (const auto& a : animal_spawns) {
+            ModelEntry* me = get_model_entry(a.brg);
+            if (me && me->mesh != INVALID_MESH) {
+                gameplay_world_->spawn_scenery_object(a.name, a.pos, a.scale, me->texture, me->mesh);
+                LOGI("Scenery animal '%s' spawnado (mesh=%u)", a.name, me->mesh);
+            } else {
+                LOGW("Scenery animal '%s' (%s) nao encontrado no models.bar", a.name, a.brg);
+            }
+        }
+    }
+
     // Generate 3D terrain: try loading real height-map from .scn first,
     // fall back to procedural terrain if no scenario file is available.
     if (terrain_mesh_ == INVALID_MESH) {

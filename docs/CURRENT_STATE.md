@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11151517 (15/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11151522 (15/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -30,7 +30,8 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ **ui.h**: `resolve_text()` traduz `$$ID$$` também dentro de itens de scroll_lists/radio_sets/lists
 - ✅ **engine_gameplay.cpp + gameplay.h**: unidades spawnadas em jogo recebem mesh/textura via `spawn_unit(..., mesh, texture)`; `attach_animation` stub morto removido (animações morph/GRN voltaram)
 - ✅ **engine_gameplay.cpp**: mapa in-game com palmeiras/carvalhos/pinheiros/rochas (`world e/g/n ...`) além do menu
-- ✅ APK v1.0.11151517 gerado em `/sdcard/aom-native-v1.0.11151517.apk`.
+- ✅ **engine_gameplay.cpp**: fauna decorativa no mapa in-game (gazela, aurochs, doe, leão, javali) via `spawn_scenery_object` — cenário estático, sem HP/AI/interação (placeholder até sistema de caça real)
+- ✅ APK v1.0.11151522 gerado em `/sdcard/aom-native-v1.0.11151522.apk`.
 
 ## Correções de Menus de Campanha (sessão 15/11/2026)
 - ✅ **campaign_select_system.cpp**: nomes de dificuldade corrigidos → Easy/Moderate/Hard/Titan (era Facil/Moderado/Dificil/Tita)
