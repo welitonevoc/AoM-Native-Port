@@ -31,6 +31,8 @@ struct UIButton {
     float text_size = 20.0f;
     TextureHandle normal_tex = INVALID_TEXTURE;
     TextureHandle pressed_tex = INVALID_TEXTURE;
+    TextureHandle rollover_tex = INVALID_TEXTURE;  // stateentry[2] - mouse over
+    TextureHandle glow_tex = INVALID_TEXTURE;      // stateentry[3] - focus/glow
     TextureHandle icon = INVALID_TEXTURE;
     bool is_big_button = false;
     bool interactive = true;  // se false, o botão não recebe toques (painel de fundo)
@@ -64,6 +66,9 @@ struct UIButton {
     bool is_checkbox = false;
     bool is_checked = false;
     std::function<void(bool)> onToggle;
+
+    // Hover/rollover state (for stateButton rollover/glow)
+    bool is_hovered = false;
 };
 
 struct UILabel {
@@ -85,6 +90,45 @@ struct UIAnimation {
     float frame_time = 0.1f;
     float elapsed = 0.0f;
     int current_frame = 0;
+};
+
+/// ScrollList / Dropdown widget (XMB scrollList)
+struct UIScrollList {
+    glm::vec2 pos;
+    glm::vec2 size;
+    std::vector<std::string> items;          // Lista de itens (ex: "640 x 480", "800 x 600")
+    std::vector<uint32_t> item_colors;       // Cor por item (opcional)
+    int selected_index = 0;                  // Item atualmente selecionado
+    bool expanded = false;                   // Se o dropdown está aberto
+    float item_height = 24.0f;               // Altura de cada item
+    TextureHandle bg_tex = INVALID_TEXTURE;  // Textura de fundo (ui\ui scroll middle tile)
+    TextureHandle top_cap_tex = INVALID_TEXTURE;  // Top cap
+    TextureHandle bottom_cap_tex = INVALID_TEXTURE; // Bottom cap
+    uint32_t text_color = 0xFFFFD000;
+    float text_size = 16.0f;
+    uint32_t tex_width = 0;                  // Largura da textura de fundo
+    uint32_t tex_height = 0;                 // Altura da textura de fundo
+    std::function<void(int)> onSelectionChange;  // Callback com novo índice
+    bool visible = true;
+    std::string tag;
+    std::string group_tag;
+};
+
+/// RadioSet widget (XMB radioset) - grupo de radio buttons mutuamente exclusivos
+struct UIRadioSet {
+    glm::vec2 pos;
+    glm::vec2 size;
+    std::vector<std::string> options;        // Labels das opções (ex: "High", "Low")
+    int selected_index = 0;                  // Índice da opção selecionada
+    float option_height = 36.0f;             // Altura de cada opção
+    TextureHandle checked_tex = INVALID_TEXTURE;    // ui\ui button radial 32x32 clicked
+    TextureHandle unchecked_tex = INVALID_TEXTURE;  // ui\ui button radial 32x32
+    uint32_t text_color = 0xFFFFD000;
+    float text_size = 18.0f;
+    std::function<void(int)> onSelectionChange;  // Callback com novo índice
+    bool visible = true;
+    std::string tag;
+    std::string group_tag;
 };
 
 class UIManager {
@@ -163,13 +207,31 @@ public:
                                   TextureHandle tex = INVALID_TEXTURE,
                                   uint32_t color = 0xFFFFFFFF);
 
+    /** Add a scroll list / dropdown (XMB scrollList) */
+    UIScrollList* add_scroll_list(const glm::vec2& pos,
+                                  const glm::vec2& size,
+                                  const std::vector<std::string>& items,
+                                  int initial_selection,
+                                  const std::function<void(int)>& onSelectionChange);
+
+    /** Add a radio button set (XMB radioset) */
+    UIRadioSet* add_radio_set(const glm::vec2& pos,
+                              const glm::vec2& size,
+                              const std::vector<std::string>& options,
+                              int initial_selection,
+                              const std::function<void(int)>& onSelectionChange);
+
     void set_group_visible(const std::string& tag, bool visible);
 
     [[nodiscard]] const std::vector<UIButton>& buttons() const { return buttons_; }
     [[nodiscard]] const std::vector<UILabel>& labels() const { return labels_; }
     [[nodiscard]] const std::vector<UIAnimation>& animations() const { return animations_; }
+    [[nodiscard]] const std::vector<UIScrollList>& scroll_lists() const { return scroll_lists_; }
+    [[nodiscard]] const std::vector<UIRadioSet>& radio_sets() const { return radio_sets_; }
     std::vector<UIButton>& buttons_mut() { return buttons_; }
     std::vector<UILabel>& labels_mut() { return labels_; }
+    std::vector<UIScrollList>& scroll_lists_mut() { return scroll_lists_; }
+    std::vector<UIRadioSet>& radio_sets_mut() { return radio_sets_; }
 
     // Resolve textos no formato $$ID$$texto_fallback (ex: $$19825$$Learn To Play).
     // Extrai o ID entre os primeiros $$ e o segundo $$, tenta traduzir, senão mostra o fallback.
@@ -234,8 +296,12 @@ private:
     std::vector<UIButton> buttons_;
     std::vector<UILabel> labels_;
     std::vector<UIAnimation> animations_;
+    std::vector<UIScrollList> scroll_lists_;
+    std::vector<UIRadioSet> radio_sets_;
 
     static bool hit_test(const UIButton& btn, float x, float y);
+    static bool hit_test_scroll_list(const UIScrollList& sl, float x, float y);
+    static bool hit_test_radio_set(const UIRadioSet& rs, float x, float y);
 };
 
 } // namespace aom

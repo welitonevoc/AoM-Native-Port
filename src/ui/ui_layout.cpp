@@ -646,6 +646,20 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                                     btn->pressed_tex = rt_clk.handle;
                                 }
                             }
+                            // Rollover state (state_backgrounds[2])
+                            if (gd.state_backgrounds.size() > 2 && !gd.state_backgrounds[2].empty()) {
+                                ResolvedTexture rt_roll = texture_resolver(gd.state_backgrounds[2]);
+                                if (rt_roll.handle != INVALID_TEXTURE) {
+                                    btn->rollover_tex = rt_roll.handle;
+                                }
+                            }
+                            // Glow state (state_backgrounds[3])
+                            if (gd.state_backgrounds.size() > 3 && !gd.state_backgrounds[3].empty()) {
+                                ResolvedTexture rt_glow = texture_resolver(gd.state_backgrounds[3]);
+                                if (rt_glow.handle != INVALID_TEXTURE) {
+                                    btn->glow_tex = rt_glow.handle;
+                                }
+                            }
 
                             if (!btn->has_uv) {
                                 // Definir borders de 9-slice apenas se não tiver UV direta
@@ -713,6 +727,134 @@ size_t apply_layout_to_ui(const UILayoutResult& layout, UIManager* ui,
                     s->visible = !is_hidden;
                     s->tag = gd.name.empty() ? parent_tag : gd.name;
                     s->group_tag = parent_tag;
+                }
+                ++created;
+            }
+            // ScrollList / Dropdown (XMB scrollList)
+            else if (gd.type == "scrollList") {
+                // Extrair itens dos filhos (gd.children é vector<UIGadgetDef>, não ponteiros)
+                std::vector<std::string> items;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        items.push_back(child.text);
+                    }
+                }
+                int initial = 0;
+                if (gd.extra_attrs.count("selected")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("selected")); } catch (...) {}
+                }
+                auto* sl = ui->add_scroll_list({x, y}, {w, h}, items, initial, [](int) {});
+                if (sl) {
+                    sl->visible = !is_hidden;
+                    sl->tag = gd.name.empty() ? parent_tag : gd.name;
+                    sl->group_tag = parent_tag;
+                    sl->text_size = scaled_text_size;
+                    // Background texture do XMB
+                    if (!gd.bg_texture.empty() && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.bg_texture);
+                        if (rt.handle != INVALID_TEXTURE) {
+                            sl->bg_tex = rt.handle;
+                            sl->tex_width = rt.width;
+                            sl->tex_height = rt.height;
+                        }
+                    }
+                    // Top/Bottom cap textures
+                    if (gd.extra_attrs.count("topcapart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("topcapart"));
+                        if (rt.handle != INVALID_TEXTURE) sl->top_cap_tex = rt.handle;
+                    }
+                    if (gd.extra_attrs.count("bottomcapart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("bottomcapart"));
+                        if (rt.handle != INVALID_TEXTURE) sl->bottom_cap_tex = rt.handle;
+                    }
+                    // Cor do texto (mesma lógica dos botões)
+                    uint32_t sl_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        sl_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        sl_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    sl->text_color = sl_text_color;
+                }
+                ++created;
+            }
+            // RadioSet (XMB radioset)
+            else if (gd.type == "radioset") {
+                std::vector<std::string> options;
+                for (const auto& child : gd.children) {
+                    if (!child.text.empty()) {
+                        options.push_back(child.text);
+                    }
+                }
+                int initial = 0;
+                if (gd.extra_attrs.count("radiosetdefaultbuttonindex")) {
+                    try { initial = std::stoi(gd.extra_attrs.at("radiosetdefaultbuttonindex")); } catch (...) {}
+                }
+                auto* rs = ui->add_radio_set({x, y}, {w, h}, options, initial, [](int) {});
+                if (rs) {
+                    rs->visible = !is_hidden;
+                    rs->tag = gd.name.empty() ? parent_tag : gd.name;
+                    rs->group_tag = parent_tag;
+                    rs->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t rs_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        rs_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        rs_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    rs->text_color = rs_text_color;
+                    // Checked/Unchecked textures do XMB
+                    if (gd.extra_attrs.count("radiocheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("radiocheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) rs->checked_tex = rt.handle;
+                    }
+                    if (gd.extra_attrs.count("radiouncheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("radiouncheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) rs->unchecked_tex = rt.handle;
+                    }
+                }
+                ++created;
+            }
+            // CheckButton (XMB checkButton)
+            else if (gd.type == "checkButton") {
+                bool initial = false;
+                if (gd.extra_attrs.count("checked")) {
+                    initial = (gd.extra_attrs.at("checked") == "1" || gd.extra_attrs.at("checked") == "true");
+                }
+                auto* cb = ui->add_checkbox({x, y}, {w, h}, gd.text, initial, [](bool) {});
+                if (cb) {
+                    cb->visible = !is_hidden;
+                    cb->tag = gd.name.empty() ? parent_tag : gd.name;
+                    cb->group_tag = parent_tag;
+                    cb->text_size = scaled_text_size;
+                    // Cor do texto
+                    uint32_t cb_text_color = 0xFFFFD000;
+                    if (!gd.extra_attrs.empty() && gd.extra_attrs.count("textcolor")) {
+                        cb_text_color = UILayoutManager::parse_color_rgba(gd.extra_attrs.at("textcolor"));
+                    } else if (gd.text_color != glm::vec3(0, 0, 0)) {
+                        cb_text_color = UILayoutManager::parse_color_rgba(gd.text_color);
+                    }
+                    cb->text_color = cb_text_color;
+                    // Checked/Unchecked/Rollover textures
+                    if (gd.extra_attrs.count("checkcheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkcheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->pressed_tex = rt.handle; // Reuse pressed_tex for checked state
+                        }
+                    }
+                    if (gd.extra_attrs.count("checkuncheckedart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkuncheckedart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->normal_tex = rt.handle;
+                        }
+                    }
+                    if (gd.extra_attrs.count("checkhighlightart") && texture_resolver) {
+                        ResolvedTexture rt = texture_resolver(gd.extra_attrs.at("checkhighlightart"));
+                        if (rt.handle != INVALID_TEXTURE) {
+                            cb->icon = rt.handle; // Reuse icon for rollover
+                        }
+                    }
                 }
                 ++created;
             }

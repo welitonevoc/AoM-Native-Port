@@ -1,4 +1,4 @@
-# CURRENT_STATE — baseado na versão 1.0.11141811 (14/11/2026). Máx. ~60 linhas.
+# CURRENT_STATE — baseado na versão 1.0.11142202 (14/11/2026). Máx. ~60 linhas.
 Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ainda não feito
 
 ## Já aplicado no GitHub (verificado no código)
@@ -14,17 +14,19 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ Menu de Campanha Autêntico em Duas Colunas com Mapas Regionais e Seletor de Dificuldade.
 - ✅ Resolução Autêntica de Texturas MTRL em BRGs e Relevo Normalizado acima do Mar ($Y \ge 0$).
 
-## Correções Aplicadas nesta Versão (Menu de Opções Confinado & Controles Cíclicos)
-- ✅ **Layout Confinado à Tela (`engine_options_menu.cpp`)**:
-  - Eliminação da escala quadrática `vh * 0.18f * sy` nas abas e painel de conteúdo.
-  - Painel de conteúdo estritamente contido entre as abas e o botão `VOLTAR` (`content_h = back_y - content_y - 12*sy`).
-  - Botão `VOLTAR` reposicionado no rodapé (`vh * 0.95f - back_h - 10*sy`) com contorno dourado e hitbox ampliada.
-- ✅ **Controles Cíclicos e Tácteis com `add_button` (`engine_options_menu.cpp`)**:
-  - Volume Master, Música e Efeitos com botões cíclicos (+10% por toque: 0%..100%).
-  - Toggles funcionais com feedback de cor (Verde=Ativado / Vermelho=Desativado) para Música, SFX e Joystick Virtual.
-  - Seletores de Qualidade Gráfica, Exibir FPS e Sensibilidade Touch com persistência em `options.cfg`.
-  - Log consistente do estado das abas: `Entered state: OPTIONS / Tab %d (%s)`.
+## Correções Aplicadas nesta Versão (Widgets XMB Autênticos: ScrollList, RadioSet, CheckButton, StateButton 4 Estados)
+- ✅ **UIManager estendido** (`ui.h`/`ui.cpp`):
+  - `UIScrollList` (dropdown XMB): expand/colapse, seleção por toque, texturas top/bottom cap.
+  - `UIRadioSet` (radio buttons XMB): grupo mutuamente exclusivo, texturas checked/unchecked.
+  - `UIButton` + 4 estados: `normal_tex`, `pressed_tex`, `rollover_tex`, `glow_tex` + hover tracking.
+  - `add_scroll_list()`, `add_radio_set()` + integração em `apply_layout_to_ui`.
+- ✅ **ui_layout.cpp**: Carrega `scrollList`, `radioset`, `checkButton`, `slider` do XMB com texturas autênticas.
+- ✅ **stateBackgrounds[0..3]** aplicados corretamente (normal, clicked, rollover, glow).
+- ✅ **DDT Formato 6 (AOM_8BPP)**: Auto-decoder via `ddt6_auto.h` integrado.
+- ✅ **textures2.bar / data2.bar** copiados no `MyNativeActivity.java`.
 
 ## Próximos passos (ordem)
-1. ✅ APK v1.0.11141811 gerado e assinado em `/sdcard/aom-native-v1.0.11141811.apk`.
-2. Validar resposta de toque no menu de opções e navegação entre abas via logcat.
+1. ✅ APK v1.0.11142202 gerado e assinado em `/sdcard/aom-native-v1.0.11142202.apk`.
+2. Testar menu de opções XMB autêntico (dropdowns Screen Size, Unit Stance, MP Search; radios Graphics/Sound; checkboxes).
+3. Testar multiplayer LAN com layout XMB autêntico.
+4. Implementar callbacks XMB: `gadgetReal`, `gadgetUnReal`, `subModeEnter`, `exit`, `campaignStart`, `LoadScenario`.

@@ -53,7 +53,10 @@ public:
     void draw_ui_quad_nineslice(const glm::vec2&, const glm::vec2&, aom::TextureHandle,
                                  uint32_t, uint32_t, float, float, float, float,
                                  uint32_t) override {}
+    void draw_ui_quad_uv(const glm::vec2&, const glm::vec2&, aom::TextureHandle,
+                          const glm::vec2&, const glm::vec2&, uint32_t) override {}
     void draw_ui_text(const std::string&, const glm::vec2&, float, uint32_t) override {}
+    float measure_ui_text(const std::string&, float) const override { return 100.0f; }
     void end_ui() override {}
 
     void draw_debug_line(const glm::vec3& from, const glm::vec3& to, uint32_t) override {
