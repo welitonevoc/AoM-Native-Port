@@ -109,6 +109,11 @@ void Engine::create_campaign_selection_menu() {
         };
     }
     
+    // DifficultySetting em uicampaignsetup.xmb e textField com dropdown
+    // (ja tem os itens no XMB, so precisamos sincronizar se necessario)
+    // auto* diff_dropdown = ui_->find_scroll_list_by_tag("DifficultySetting");
+    // textField nao tem API direta, ignorar por enquanto
+    
     // Botão Play
     auto* play_btn = ui_->find_button_by_tag("PlaySelectedScenarioButton");
     if (play_btn) {
@@ -148,7 +153,7 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
     const auto* scn = sel.first;
     bool is_expansion = sel.second;
     
-    // Mapa regional - encontrar o botao de background do ScenarioImage
+    // Mapa regional - ScenarioImage e um background gadget (botao nao-interativo)
     auto& buttons = ui_->buttons_mut();
     for (auto& btn : buttons) {
         if (btn.tag == "ScenarioImage" || btn.group_tag == "ScenarioImage") {
@@ -157,16 +162,19 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
             if (tex != INVALID_TEXTURE) {
                 btn.normal_tex = tex;
                 btn.pressed_tex = tex;
+                btn.current_color = 0xFFFFFFFF; // Opaco para mostrar textura
                 // Fix upside-down: flip V coordinate
                 btn.has_uv = true;
                 btn.uv_min = {0.0f, 1.0f};
                 btn.uv_max = {1.0f, 0.0f};
+                // Garantir que esta visivel
+                btn.visible = true;
             }
             break;
         }
     }
     
-    // Titulo do cenario
+    // Descricao - ScenarioDetails (formatText vira label)
     auto& labels = ui_->labels_mut();
     for (auto& lbl : labels) {
         if (lbl.tag == "ScenarioDetails" || lbl.group_tag == "ScenarioDetails") {
@@ -177,7 +185,7 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
         }
     }
     
-    // HelpDisplay text
+    // HelpDisplay text (textBox vira label)
     for (auto& lbl : labels) {
         if (lbl.tag == "HelpDisplay" || lbl.group_tag == "HelpDisplay") {
             lbl.text = scn->display_name.empty() ? scn->filename : scn->display_name;
@@ -468,7 +476,7 @@ void Engine::populate_campaign_scenario_list(CampaignManager* mgr) {
 
 // Atualiza preview do mapa, titulo e descricao no painel direito
 void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expansion) {
-    // Mapa regional - Campaign-Map-Section (gadget com background)
+    // Mapa regional - Campaign-Map-Section (gadget com background, hidden por padrao)
     auto& buttons = ui_->buttons_mut();
     for (auto& btn : buttons) {
         if (btn.tag == "Campaign-Map-Section" || btn.group_tag == "Campaign-Map-Section") {
@@ -477,9 +485,12 @@ void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expans
             if (tex != INVALID_TEXTURE) {
                 btn.normal_tex = tex;
                 btn.pressed_tex = tex;
+                btn.current_color = 0xFFFFFFFF; // Opaco para mostrar textura
                 btn.has_uv = true;
                 btn.uv_min = {0.0f, 1.0f};
                 btn.uv_max = {1.0f, 0.0f};
+                // O gadget tem hidden="" no XMB, entao comeca invisivel - tornar visivel
+                btn.visible = true;
             }
             break;
         }

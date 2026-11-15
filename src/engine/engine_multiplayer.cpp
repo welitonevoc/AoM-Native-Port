@@ -157,7 +157,7 @@ void Engine::create_multiplayer_lan_menu() {
             return rt;
         }
 
-        // Fallback PNG
+        // Fallback PNG - tentar assets do jogo primeiro
         std::string png_name = name;
         if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
             png_name = png_name.substr(3);
@@ -169,8 +169,24 @@ void Engine::create_multiplayer_lan_menu() {
         if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
             png_name += ".png";
         }
-        std::string asset_path = "assets/titans_menu_parts/" + png_name;
-        h = load_png_asset(asset_path);
+        
+        std::string game_asset_path = "assets/game_textures/" + png_name;
+        h = load_png_asset(game_asset_path);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            LOGI("UI texture resolution: asset do jogo encontrado: '%s'", game_asset_path.c_str());
+            return rt;
+        }
+
+        // FALLBACK: asset UI
+        std::string ui_asset_path = "assets/titans_menu_parts/" + png_name;
+        h = load_png_asset(ui_asset_path);
         if (h != INVALID_TEXTURE) {
             rt.handle = h;
             auto dit = texture_dimensions_.find(name);
@@ -181,8 +197,6 @@ void Engine::create_multiplayer_lan_menu() {
             texture_cache_[name] = h;
             return rt;
         }
-
-        return rt;
     };
 
     const auto* layout = ui_layout_manager_.get_layout("uimplanip.xmb");
@@ -319,7 +333,7 @@ void Engine::show_host_game_dialog() {
             return rt;
         }
 
-        // Fallback PNG
+        // Fallback PNG - tentar assets do jogo primeiro
         std::string png_name = name;
         if (png_name.rfind("ui\\", 0) == 0 || png_name.rfind("ui/", 0) == 0) {
             png_name = png_name.substr(3);
@@ -331,8 +345,24 @@ void Engine::show_host_game_dialog() {
         if (png_name.size() < 4 || png_name.substr(png_name.size() - 4) != ".png") {
             png_name += ".png";
         }
-        std::string asset_path = "assets/titans_menu_parts/" + png_name;
-        h = load_png_asset(asset_path);
+        
+        std::string game_asset_path = "assets/game_textures/" + png_name;
+        h = load_png_asset(game_asset_path);
+        if (h != INVALID_TEXTURE) {
+            rt.handle = h;
+            auto dit = texture_dimensions_.find(name);
+            if (dit != texture_dimensions_.end()) {
+                rt.width = static_cast<uint32_t>(dit->second.x);
+                rt.height = static_cast<uint32_t>(dit->second.y);
+            }
+            texture_cache_[name] = h;
+            LOGI("UI texture resolution: asset do jogo encontrado: '%s'", game_asset_path.c_str());
+            return rt;
+        }
+
+        // FALLBACK: asset UI
+        std::string ui_asset_path = "assets/titans_menu_parts/" + png_name;
+        h = load_png_asset(ui_asset_path);
         if (h != INVALID_TEXTURE) {
             rt.handle = h;
             auto dit = texture_dimensions_.find(name);
@@ -343,8 +373,6 @@ void Engine::show_host_game_dialog() {
             texture_cache_[name] = h;
             return rt;
         }
-
-        return rt;
     };
 
     const auto* layout = ui_layout_manager_.get_layout("uihostgamedialog.xmb");
