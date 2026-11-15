@@ -281,8 +281,8 @@ out float vWaterDepth;
 
 void main() {
     // Ondulação visível estilo The Titans (ondas amplas e perceptíveis)
-    float wave = (sin(aPos.x * 0.35 + uTime * 1.8) * cos(aPos.z * 0.35 + uTime * 1.4) +
-                  sin(aPos.x * 0.7 - uTime * 1.1)) * 0.07;
+    float wave = (sin(aPos.x * 0.35 + uTime * 2.5) * cos(aPos.z * 0.35 + uTime * 2.0) +
+                  sin(aPos.x * 0.9 - uTime * 1.6)) * 0.15;
     vec3 animatedPos = aPos + vec3(0.0, wave, 0.0);
     vec4 worldPos = uModel * vec4(animatedPos, 1.0);
     vWorldPos = worldPos.xyz;
@@ -320,8 +320,8 @@ out vec4 fragColor;
 
 void main() {
     // 1. Amostragem de normal map com coordenadas UV duplas em movimento (ondas)
-    vec2 uvNorm1 = vWorldPos.xz * 0.08 + vec2(uTime * 0.03, uTime * 0.02);
-    vec2 uvNorm2 = vWorldPos.xz * 0.12 - vec2(uTime * 0.02, uTime * 0.035);
+    vec2 uvNorm1 = vWorldPos.xz * 0.08 + vec2(uTime * 0.05, uTime * 0.04);
+    vec2 uvNorm2 = vWorldPos.xz * 0.12 - vec2(uTime * 0.04, uTime * 0.06);
 
     vec3 normal = vec3(0.0, 1.0, 0.0);
     if (uHasNormalMap != 0) {
@@ -350,8 +350,8 @@ void main() {
 
     // Textura de ondulação e caustics original do AoM (water0000.ddt)
     if (uHasWaterTex != 0) {
-        vec2 uvWater1 = vWorldPos.xz * 0.14 + vec2(uTime * 0.045, uTime * 0.025);
-        vec2 uvWater2 = vWorldPos.xz * 0.10 - vec2(uTime * 0.030, uTime * 0.040);
+        vec2 uvWater1 = vWorldPos.xz * 0.14 + vec2(uTime * 0.08, uTime * 0.05);
+        vec2 uvWater2 = vWorldPos.xz * 0.10 - vec2(uTime * 0.06, uTime * 0.08);
         vec4 w1 = texture(uWaterTex, uvWater1);
         vec4 w2 = texture(uWaterTex, uvWater2);
         vec3 caustics = (w1.rgb + w2.rgb) * 0.5;
@@ -366,7 +366,7 @@ void main() {
     float distToCoast = vWorldPos.x - shoreOffset; // < 0 na praia, > 0 no mar
 
     // Trem de ondas se propagando em direção à praia
-    float wavePhase = distToCoast * 3.2 - uTime * 2.4 + sin(vWorldPos.z * 1.6) * 0.7;
+    float wavePhase = distToCoast * 4.0 - uTime * 3.5 + sin(vWorldPos.z * 2.0) * 1.0;
     float waveSurf = sin(wavePhase);
 
     // Faixa costeira onde a onda quebra (entre praia e água rasa)
@@ -374,7 +374,7 @@ void main() {
     float crestFoam = smoothstep(0.35, 0.95, waveSurf) * surfZone;
 
     // Faixa de espuma na orla (marulhar da maré subindo e descendo na areia)
-    float washWave = sin(uTime * 1.8 + vWorldPos.z * 0.8) * 0.35;
+    float washWave = sin(uTime * 2.5 + vWorldPos.z * 1.0) * 0.45;
     float washFoam = smoothstep(0.45, 0.0, distToCoast - washWave) * smoothstep(-0.6, -0.1, distToCoast - washWave);
 
     float totalFoam = clamp(crestFoam * 1.3 + washFoam * 0.9, 0.0, 1.0);
