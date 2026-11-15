@@ -1296,6 +1296,27 @@ void Engine::load_ui_strings() {
         {"AOM Credits", "Créditos AoM"},
         {"Titans Credits", "Créditos Titãs"},
 
+        // Dificuldades em ingles (fallback procedural campaign_select_system + resolve_text)
+        {"Easy", "Fácil"},
+        {"Moderate", "Moderado"},
+        {"Hard", "Difícil"},
+        {"Titan", "Titã"},
+
+        // Dificuldades (uicampaign.xmb radioset / uicampaignsetup.xmb dropdown)
+        {"18297", "Fácil"},
+        {"18298", "Moderado"},
+        {"18299", "Difícil"},
+        {"18300", "Titã"},
+
+        // Menu principal e configuração de campanha
+        {"18445", "Sair"},
+        {"18588", "Campanha:"},
+        {"18589", "Dificuldade:"},
+        {"18593", "Jogar"},
+        {"18691", "Dificuldade:"},
+        {"20064", "Jogador Único - Campanha"},
+        {"20189", "Iniciar"},
+
         // Títulos de cenários da campanha
         {"20585", "Prólogo: Sono Agitado"},
         {"20586", "Presságios"},

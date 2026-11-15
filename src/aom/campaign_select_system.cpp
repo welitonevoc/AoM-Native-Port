@@ -296,7 +296,12 @@ void CampaignSelectSystem::rebuild_ui() {
         ui_->add_background_quad({map_x - 2.0f * sx, map_y - 2.0f * sy},
                                  {map_w + 4.0f * sx, map_h + 4.0f * sy},
                                  INVALID_TEXTURE, 0xFF886622);
-        ui_->add_background_quad({map_x, map_y}, {map_w, map_h}, map_tex, 0xFFFFFFFF);
+        // So desenha o mapa se a textura carregou; senao, painel escuro (evita quad branco)
+        if (map_tex != INVALID_TEXTURE) {
+            ui_->add_background_quad({map_x, map_y}, {map_w, map_h}, map_tex, 0xFFFFFFFF);
+        } else {
+            ui_->add_background_quad({map_x, map_y}, {map_w, map_h}, INVALID_TEXTURE, 0xFF1E2834);
+        }
 
         // Sinopse
         const float brief_y = map_y + map_h + 12.0f * sy;
@@ -309,7 +314,7 @@ void CampaignSelectSystem::rebuild_ui() {
         const float diff_y = brief_y + 54.0f * sy;
         ui_->add_label("DIFICULDADE:", {col_right_x + 18.0f * sx, diff_y}, 13.0f * sy, 0xFFFFD000);
 
-        static const char* kDiffNames[] = {"Facil", "Moderado", "Dificil", "Tita"};
+        static const char* kDiffNames[] = {"Easy", "Moderate", "Hard", "Titan"};
         const float diff_btn_w = (col_right_w - 36.0f * sx - 3.0f * 6.0f * sx) / 4.0f;
         const float diff_btn_h = 28.0f * sy;
         for (int d = 0; d < 4; ++d) {

@@ -23,6 +23,15 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ **engine_multiplayer.cpp**: texture_resolver corrigido (png_name computado localmente, sem std::filesystem)
 - ✅ APK v1.0.11151142 gerado em `/sdcard/aom-native-v1.0.11151142.apk`.
 
+## Correções de Menus de Campanha (sessão 15/11/2026)
+- ✅ **campaign_select_system.cpp**: nomes de dificuldade corrigidos → Easy/Moderate/Hard/Titan (era Facil/Moderado/Dificil/Tita)
+- ✅ **engine_menus.cpp**: callback XMB `open_campaign` → `create_campaign_menu()` (uicampaign.xmb) e `open_single_player` → `create_single_player_setup_menu()` (era invertido)
+- ✅ **engine_menus.cpp**: menu procedural fallback — CAMPAIGN → `create_campaign_menu()`, SINGLE PLAYER → `create_single_player_setup_menu()`
+- ✅ **engine_menus.cpp**: `update_campaign_preview` / `update_campaign_setup_selection` — LOGE de textura falha/gadget não encontrado (item 3: validar layout do preview no aparelho)
+- ✅ **campaign_select_system.cpp**: quad do mapa só é desenhado se a textura carregou (painel escuro caso falhe; antes virava quad branco)
+- ✅ **engine_assets.cpp**: traduções $$ID$$ — 18297-18300 (Fácil/Moderado/Difícil/Titã), 18445, 18588, 18589, 18593, 18691, 20064, 20189 + fallbacks ingleses Easy/Moderate/Hard/Titan → PT-BR
+- ⬜ Rebuild do APK e teste: Main Menu → Campanha → mapa preview, dificuldade, textos PT-BR, item "18300" no radioset
+
 ## Próximos passos (ordem)
 1. Testar: Main Menu → Single Player → Campaign → Fall of the Trident → lista cenários, mapa preview certo
 2. Testar: Selecionar cenário → mapa regional aparece direito, título/descrição atualizam

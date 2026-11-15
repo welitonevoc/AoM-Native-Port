@@ -155,8 +155,10 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
     
     // Mapa regional - ScenarioImage e um background gadget (botao nao-interativo)
     auto& buttons = ui_->buttons_mut();
+    bool map_found = false;
     for (auto& btn : buttons) {
         if (btn.tag == "ScenarioImage" || btn.group_tag == "ScenarioImage") {
+            map_found = true;
             std::string map_tex = get_campaign_map_texture(scn->filename, is_expansion);
             TextureHandle tex = load_ddt_texture(map_tex);
             if (tex != INVALID_TEXTURE) {
@@ -169,9 +171,15 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
                 btn.uv_max = {1.0f, 0.0f};
                 // Garantir que esta visivel
                 btn.visible = true;
+            } else {
+                LOGE("update_campaign_setup_selection: falha ao carregar '%s' (cenario '%s')",
+                     map_tex.c_str(), scn->filename.c_str());
             }
             break;
         }
+    }
+    if (!map_found) {
+        LOGE("update_campaign_setup_selection: gadget 'ScenarioImage' nao encontrado no layout atual");
     }
     
     // Descricao - ScenarioDetails (formatText vira label)
@@ -478,8 +486,10 @@ void Engine::populate_campaign_scenario_list(CampaignManager* mgr) {
 void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expansion) {
     // Mapa regional - Campaign-Map-Section (gadget com background, hidden por padrao)
     auto& buttons = ui_->buttons_mut();
+    bool map_found = false;
     for (auto& btn : buttons) {
         if (btn.tag == "Campaign-Map-Section" || btn.group_tag == "Campaign-Map-Section") {
+            map_found = true;
             std::string map_tex = get_campaign_map_texture(scn->filename, is_expansion);
             TextureHandle tex = load_ddt_texture(map_tex);
             if (tex != INVALID_TEXTURE) {
@@ -491,9 +501,15 @@ void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expans
                 btn.uv_max = {1.0f, 0.0f};
                 // O gadget tem hidden="" no XMB, entao comeca invisivel - tornar visivel
                 btn.visible = true;
+            } else {
+                LOGE("update_campaign_preview: falha ao carregar '%s' (cenario '%s')",
+                     map_tex.c_str(), scn->filename.c_str());
             }
             break;
         }
+    }
+    if (!map_found) {
+        LOGE("update_campaign_preview: gadget 'Campaign-Map-Section' nao encontrado no layout atual");
     }
     
     // Titulo do cenario - Scenario-Title
@@ -1739,9 +1755,9 @@ size_t Engine::show_ui_layout(const std::string& layout_name) {
     // Mapa de ações do AoM para callbacks do Engine
     std::unordered_map<std::string, std::function<void()>> action_callbacks = {
         {"start_game", [this]() { start_game(); }},
-        {"open_campaign", [this]() { create_campaign_selection_menu(); }},
+        {"open_campaign", [this]() { create_campaign_menu(); }},
         {"open_campaign_selection", [this]() { create_campaign_selection_menu(); }},
-        {"open_single_player", [this]() { create_campaign_menu(); }},
+        {"open_single_player", [this]() { create_single_player_setup_menu(); }},
         {"open_multiplayer", [this]() { open_multiplayer(); }},
         {"open_options", [this]() { open_options(); }},
         {"open_credits", [this]() { open_credits(); }},
@@ -1973,8 +1989,8 @@ void Engine::create_main_menu_fallback() {
 
     const TitansBtn btns[] = {
         { 325.0f, "MENU_LEARN_TO_PLAY", "LEARN TO PLAY", [this]() { start_game(); }    },
-        { 365.0f, "MENU_CAMPAIGN", "CAMPAIGN", [this]() { create_campaign_selection_menu(); } },
-        { 405.0f, "MENU_SINGLE_PLAYER", "SINGLE PLAYER", [this]() { create_campaign_menu(); } },
+        { 365.0f, "MENU_CAMPAIGN", "CAMPAIGN", [this]() { create_campaign_menu(); } },
+        { 405.0f, "MENU_SINGLE_PLAYER", "SINGLE PLAYER", [this]() { create_single_player_setup_menu(); } },
         { 445.0f, "MENU_MULTIPLAYER", "MULTIPLAYER", [this]() { open_multiplayer(); } },
         { 485.0f, "MENU_OPTIONS", "OPTIONS", [this]() { open_options(); } },
         { 525.0f, "MENU_MORE", "MORE", [this]() { open_credits(); } },
