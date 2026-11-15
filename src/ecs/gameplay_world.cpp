@@ -96,12 +96,6 @@ void GameplayWorld::update_animations(float dt) {
 
 // Implementação de outros métodos auxiliares para testes
 
-void GameplayWorld::attach_animation(Entity entity, const aom::anim::BrgAnimationClip* clip,
-                                       TextureHandle texture, IRenderer* renderer) {
-    if (!clip || !clip->is_valid() || !renderer) return;
-    // Implementation would go here
-}
-
 void GameplayWorld::set_default_animation(const aom::anim::BrgAnimationClip* clip, TextureHandle texture) {
     default_clip_ = clip;
     default_clip_tex_ = texture;
