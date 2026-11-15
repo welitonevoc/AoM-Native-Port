@@ -21,6 +21,23 @@ extern "C" {
 
 namespace aom {
 
+// Resolve textos localizados do AoM no formato "$$ID$$Texto" (ex.: "$$20585$$Prologue: Troubled Sleep"
+// vindo do main campaign.cpn). Se o ID existir na tabela do Engine, retorna a tradução;
+// se não, remove o prefixo e retorna o texto. Formato único: um ID no início, ex.: "$$20585$$Texto".
+static std::string resolve_loc_ids(const std::string& s,
+                                   const std::function<std::string(const std::string&)>& tr) {
+    if (s.size() < 4 || s[0] != '$' || s[1] != '$') return s;
+    const size_t end = s.find("$$", 2);
+    if (end == std::string::npos) return s;
+    const std::string id = s.substr(2, end - 2);
+    std::string rest = s.substr(end + 2);
+    while (!rest.empty() && rest.front() == ' ') rest.erase(rest.begin());
+    while (!rest.empty() && (rest.back() == ' ' || rest.back() == '\r' || rest.back() == '\n')) rest.pop_back();
+    const std::string t = tr(id);
+    if (!t.empty() && t != id) return t;
+    return rest;
+}
+
 void Engine::create_main_menu() {
     create_main_menu_from_xmb();
 }
@@ -67,8 +84,9 @@ void Engine::create_campaign_selection_menu() {
             if (scn.unlisted) continue;
             if (i <= progress) { // unlocked: completed or next to play
                 scenarios.emplace_back(&scn, false);
-                std::string label = std::to_string(i + 1) + ". " + 
-                    (scn.display_name.empty() ? scn.filename : scn.display_name);
+                std::string label = std::to_string(i + 1) + ". " +
+                    resolve_loc_ids(scn.display_name.empty() ? scn.filename : scn.display_name,
+                                    [this](const std::string& k) { return tr(k); });
                 if (i < progress) label += " \u2713"; // completed
                 else if (i == progress) label += " \u25B6"; // current
                 scenario_labels.push_back(label);
@@ -82,8 +100,9 @@ void Engine::create_campaign_selection_menu() {
             if (scn.unlisted) continue;
             if (i <= progress) {
                 scenarios.emplace_back(&scn, true);
-                std::string label = std::to_string(i + 1) + ". " + 
-                    (scn.display_name.empty() ? scn.filename : scn.display_name);
+                std::string label = std::to_string(i + 1) + ". " +
+                    resolve_loc_ids(scn.display_name.empty() ? scn.filename : scn.display_name,
+                                    [this](const std::string& k) { return tr(k); });
                 if (i < progress) label += " \u2713";
                 else if (i == progress) label += " \u25B6";
                 scenario_labels.push_back(label);
@@ -196,7 +215,8 @@ void Engine::update_campaign_setup_selection(const std::pair<const CampaignScena
     // HelpDisplay text (textBox vira label)
     for (auto& lbl : labels) {
         if (lbl.tag == "HelpDisplay" || lbl.group_tag == "HelpDisplay") {
-            lbl.text = scn->display_name.empty() ? scn->filename : scn->display_name;
+            lbl.text = resolve_loc_ids(scn->display_name.empty() ? scn->filename : scn->display_name,
+                                       [this](const std::string& k) { return tr(k); });
             break;
         }
     }
@@ -397,11 +417,11 @@ void Engine::create_campaign_menu() {
     std::vector<CampaignManager*> campaign_managers;
     
     if (campaign_manager() && campaign_manager()->current_campaign()) {
-        campaign_names.push_back("Fall of the Trident");
+        campaign_names.push_back(tr("Fall of the Trident"));
         campaign_managers.push_back(campaign_manager());
     }
     if (expansion_campaign_manager() && expansion_campaign_manager()->current_campaign()) {
-        campaign_names.push_back("The New Atlantis");
+        campaign_names.push_back(tr("The New Atlantis"));
         campaign_managers.push_back(expansion_campaign_manager());
     }
 
@@ -459,8 +479,9 @@ void Engine::populate_campaign_scenario_list(CampaignManager* mgr) {
         if (scn.unlisted) continue;
         if (i <= progress) { // unlocked
             scenarios.push_back(&scn);
-            std::string label = std::to_string(i + 1) + ". " + 
-                (scn.display_name.empty() ? scn.filename : scn.display_name);
+            std::string label = std::to_string(i + 1) + ". " +
+                resolve_loc_ids(scn.display_name.empty() ? scn.filename : scn.display_name,
+                                [this](const std::string& k) { return tr(k); });
             if (i < progress) label += " \u2713";
             else if (i == progress) label += " \u25B6";
             scenario_labels.push_back(label);
@@ -516,7 +537,8 @@ void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expans
     auto& labels = ui_->labels_mut();
     for (auto& lbl : labels) {
         if (lbl.tag == "Scenario-Title" || lbl.group_tag == "Scenario-Title") {
-            lbl.text = scn->display_name.empty() ? scn->filename : scn->display_name;
+            lbl.text = resolve_loc_ids(scn->display_name.empty() ? scn->filename : scn->display_name,
+                                       [this](const std::string& k) { return tr(k); });
             break;
         }
     }

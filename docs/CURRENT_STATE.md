@@ -30,6 +30,9 @@ Legenda: ✅ confirmado no código/captura · ❓ hipótese sem teste · ⬜ ain
 - ✅ **engine_menus.cpp**: `update_campaign_preview` / `update_campaign_setup_selection` — LOGE de textura falha/gadget não encontrado (item 3: validar layout do preview no aparelho)
 - ✅ **campaign_select_system.cpp**: quad do mapa só é desenhado se a textura carregou (painel escuro caso falhe; antes virava quad branco)
 - ✅ **engine_assets.cpp**: traduções $$ID$$ — 18297-18300 (Fácil/Moderado/Difícil/Titã), 18445, 18588, 18589, 18593, 18691, 20064, 20189 + fallbacks ingleses Easy/Moderate/Hard/Titan → PT-BR
+- ✅ **engine_menus.cpp**: helper `resolve_loc_ids()` resolve `$$ID$$` dos nomes de campanha/cenário vindos do `main campaign.cpn`/`xpack campaign.cpx` (lista ScenarioList, combo CampaignSelection, título Scenario-Title)
+- ✅ **engine_assets.cpp**: strings faltantes 20597-20617, 23702/23703-23714/23867, 20623 + fallbacks "Fall of the Trident"/"The New Atlantis" → PT-BR
+- ⚠️ Achado (não corrigido): `get_campaign_briefing` hardcoded mapeja errado os `aomsp##` (aomsp04=Omens recebe texto de Troia); briefing real está no `<Scenario>` do cpn
 - ⬜ Rebuild do APK e teste: Main Menu → Campanha → mapa preview, dificuldade, textos PT-BR, item "18300" no radioset
 
 ## Próximos passos (ordem)
