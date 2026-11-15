@@ -264,6 +264,16 @@ public:
     void create_campaign_menu();
     /// Abre a tela de selecao de cenario da campanha (lista de missoes).
     void create_campaign_selection_menu();
+    
+    // Campanha: helpers para uicampaign.xmb e uicampaignsetup.xmb
+    void populate_campaign_scenario_list(CampaignManager* mgr);
+    void update_campaign_preview(const CampaignScenario* scn, bool is_expansion);
+    void start_selected_campaign_scenario();
+    void update_campaign_setup_selection(const std::pair<const CampaignScenario*, bool>& sel);
+    std::string get_campaign_map_texture(const std::string& filename, bool expansion) const;
+    std::string get_campaign_briefing(const std::string& filename, const std::string& title) const;
+    void start_campaign_scenario(const std::pair<const CampaignScenario*, bool>& sel);
+    
     void save_game(const std::string& path = "");
     void load_game(const std::string& path = "");
 

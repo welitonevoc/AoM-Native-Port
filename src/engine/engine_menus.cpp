@@ -25,23 +25,240 @@ void Engine::create_main_menu() {
     create_main_menu_from_xmb();
 }
 
-// ── Seleção de Campanha ─────────────────────────────────────────────
+// ── Seleção de Campanha (uicampaignsetup.xmb) ──────────────────────────
 void Engine::create_campaign_selection_menu() {
-    LOGI("Opening campaign selection menu...");
+    LOGI("Opening campaign selection menu (uicampaignsetup.xmb)...");
     
-    // Criar o CampaignSelectSystem para mostrar lista de cenários
-    // Usar os mesmos parâmetros do menu principal
-    campaign_select_system_.reset(new aom::CampaignSelectSystem());
-    if (campaign_select_system_->initialize(this, ui_.get(), this, 
-                config_.window_width, config_.window_height)) {
-        LOGI("Campaign selection menu initialized successfully");
-        // O CampaignSelectSystem já criou seus botões e está gerenciando toques
-        // O usuário agora pode selecionar um cenário
-    } else {
-        LOGW("Failed to initialize campaign selection menu");
-        // Fallback: tentar o menu de campanha original
+    clear_ui();
+    
+    // Carregar layout autentico
+    if (!load_ui_layout("uicampaignsetup.xmb")) {
+        LOGE("Failed to load uicampaignsetup.xmb, falling back to legacy system");
+        campaign_select_system_.reset(new aom::CampaignSelectSystem());
+        if (campaign_select_system_->initialize(this, ui_.get(), this, 
+                    config_.window_width, config_.window_height)) {
+            return;
+        }
         create_campaign_menu();
+        return;
     }
+    
+    size_t created = show_ui_layout("uicampaignsetup.xmb");
+    if (created == 0) {
+        LOGW("uicampaignsetup.xmb created no elements, falling back");
+        create_campaign_menu();
+        return;
+    }
+    
+    // Resolver textos $$ID$$
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
+    
+    // ── Coletar cenarios da campanha atual ────────────────────────────
+    auto* base_mgr = campaign_manager();
+    auto* xpack_mgr = expansion_campaign_manager();
+    
+    std::vector<std::pair<const CampaignScenario*, bool>> scenarios; // {scenario, is_expansion}
+    std::vector<std::string> scenario_labels;
+    
+    if (base_mgr && base_mgr->current_campaign()) {
+        size_t progress = base_mgr->current_index();
+        for (size_t i = 0; i < base_mgr->current_campaign()->scenarios.size(); ++i) {
+            const auto& scn = base_mgr->current_campaign()->scenarios[i];
+            if (scn.unlisted) continue;
+            if (i <= progress) { // unlocked: completed or next to play
+                scenarios.emplace_back(&scn, false);
+                std::string label = std::to_string(i + 1) + ". " + 
+                    (scn.display_name.empty() ? scn.filename : scn.display_name);
+                if (i < progress) label += " \u2713"; // completed
+                else if (i == progress) label += " \u25B6"; // current
+                scenario_labels.push_back(label);
+            }
+        }
+    }
+    if (xpack_mgr && xpack_mgr->current_campaign()) {
+        size_t progress = xpack_mgr->current_index();
+        for (size_t i = 0; i < xpack_mgr->current_campaign()->scenarios.size(); ++i) {
+            const auto& scn = xpack_mgr->current_campaign()->scenarios[i];
+            if (scn.unlisted) continue;
+            if (i <= progress) {
+                scenarios.emplace_back(&scn, true);
+                std::string label = std::to_string(i + 1) + ". " + 
+                    (scn.display_name.empty() ? scn.filename : scn.display_name);
+                if (i < progress) label += " \u2713";
+                else if (i == progress) label += " \u25B6";
+                scenario_labels.push_back(label);
+            }
+        }
+    }
+    
+    if (scenarios.empty()) {
+        LOGW("No unlocked scenarios found");
+        create_campaign_menu();
+        return;
+    }
+    
+    // ── Encontrar e popular widgets do XMB ────────────────────────────
+    auto* scenario_list = ui_->find_list_by_tag("ScenarioList");
+    if (scenario_list) {
+        scenario_list->items = scenario_labels;
+        scenario_list->selected_index = 0;
+        scenario_list->onSelectionChange = [this, scenarios](int idx) {
+            if (idx >= 0 && idx < (int)scenarios.size()) {
+                update_campaign_setup_selection(scenarios[idx]);
+            }
+        };
+    }
+    
+    // Botão Play
+    auto* play_btn = ui_->find_button_by_tag("PlaySelectedScenarioButton");
+    if (play_btn) {
+        play_btn->onClick = [this, scenarios]() {
+            auto* lst = ui_->find_list_by_tag("ScenarioList");
+            if (lst && lst->selected_index >= 0 && lst->selected_index < (int)scenarios.size()) {
+                start_campaign_scenario(scenarios[lst->selected_index]);
+            }
+        };
+    }
+    
+    // Botão Main Menu
+    auto* main_menu_btn = ui_->find_button_by_tag("campaignsetup-MainMenuButton");
+    if (main_menu_btn) {
+        main_menu_btn->onClick = [this]() { return_to_main_menu(); };
+    }
+    
+    // Selecionar primeiro cenario por padrao (o proximo a jogar)
+    int default_idx = 0;
+    for (size_t i = 0; i < scenarios.size(); ++i) {
+        // Procurar o primeiro nao completado (marcado com seta)
+        // Na nossa logica, o primeiro da lista ja e o proximo
+        default_idx = static_cast<int>(i);
+        break;
+    }
+    
+    if (scenario_list) {
+        scenario_list->selected_index = default_idx;
+        update_campaign_setup_selection(scenarios[default_idx]);
+    }
+    
+    LOGI("Campaign selection menu initialized with %zu scenarios", scenarios.size());
+}
+
+// Atualiza a preview do mapa, descricao e titulo ao selecionar cenario
+void Engine::update_campaign_setup_selection(const std::pair<const CampaignScenario*, bool>& sel) {
+    const auto* scn = sel.first;
+    bool is_expansion = sel.second;
+    
+    // Mapa regional - encontrar o botao de background do ScenarioImage
+    auto& buttons = ui_->buttons_mut();
+    for (auto& btn : buttons) {
+        if (btn.tag == "ScenarioImage" || btn.group_tag == "ScenarioImage") {
+            std::string map_tex = get_campaign_map_texture(scn->filename, is_expansion);
+            TextureHandle tex = load_ddt_texture(map_tex);
+            if (tex != INVALID_TEXTURE) {
+                btn.normal_tex = tex;
+                btn.pressed_tex = tex;
+                // Fix upside-down: flip V coordinate
+                btn.has_uv = true;
+                btn.uv_min = {0.0f, 1.0f};
+                btn.uv_max = {1.0f, 0.0f};
+            }
+            break;
+        }
+    }
+    
+    // Titulo do cenario
+    auto& labels = ui_->labels_mut();
+    for (auto& lbl : labels) {
+        if (lbl.tag == "ScenarioDetails" || lbl.group_tag == "ScenarioDetails") {
+            std::string briefing = get_campaign_briefing(scn->filename, 
+                scn->display_name.empty() ? scn->filename : scn->display_name);
+            lbl.text = briefing;
+            break;
+        }
+    }
+    
+    // HelpDisplay text
+    for (auto& lbl : labels) {
+        if (lbl.tag == "HelpDisplay" || lbl.group_tag == "HelpDisplay") {
+            lbl.text = scn->display_name.empty() ? scn->filename : scn->display_name;
+            break;
+        }
+    }
+}
+
+// Helper: textura do mapa regional para cenario
+std::string Engine::get_campaign_map_texture(const std::string& filename, bool expansion) const {
+    if (expansion) return "ui/campmap_new_atlantis7.ddt";
+    std::string lower = filename;
+    for (char& c : lower) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    
+    if (lower.find("aomsp01") != std::string::npos || lower.find("omens") != std::string::npos) {
+        return "ui/campmap_atlantis7.ddt";
+    }
+    if (lower.find("aomsp05") != std::string::npos || lower.find("aomsp06") != std::string::npos ||
+        lower.find("aomsp07") != std::string::npos || lower.find("aomsp08") != std::string::npos ||
+        lower.find("aomsp09") != std::string::npos || lower.find("aomsp10") != std::string::npos ||
+        lower.find("aomsp11") != std::string::npos) {
+        return "ui/campmap_greece7.ddt";
+    }
+    if (lower.find("aomsp12") != std::string::npos || lower.find("aomsp13") != std::string::npos ||
+        lower.find("aomsp14") != std::string::npos || lower.find("aomsp15") != std::string::npos ||
+        lower.find("aomsp16") != std::string::npos || lower.find("aomsp17") != std::string::npos ||
+        lower.find("aomsp18") != std::string::npos || lower.find("aomsp19") != std::string::npos) {
+        return "ui/campmap_egypt7.ddt";
+    }
+    if (lower.find("aomsp20") != std::string::npos || lower.find("aomsp21") != std::string::npos ||
+        lower.find("aomsp22") != std::string::npos || lower.find("aomsp23") != std::string::npos ||
+        lower.find("aomsp24") != std::string::npos || lower.find("aomsp25") != std::string::npos ||
+        lower.find("aomsp26") != std::string::npos || lower.find("aomsp27") != std::string::npos ||
+        lower.find("aomsp28") != std::string::npos || lower.find("aomsp29") != std::string::npos) {
+        return "ui/campmap_norselands3.ddt";
+    }
+    return "ui/campmap_atlantis7.ddt";
+}
+
+// Helper: briefing do cenario
+std::string Engine::get_campaign_briefing(const std::string& filename, const std::string& title) const {
+    std::string lower = filename;
+    for (char& c : lower) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    
+    if (lower.find("aomsp01") != std::string::npos || lower.find("omens") != std::string::npos) {
+        return "Defenda as praias e a cidadela de Atlantida contra o ataque repentino dos piratas sob o comando de Kamos.";
+    }
+    if (lower.find("aomsp02") != std::string::npos) {
+        return "Persiga os invasores sobreviventes para proteger o porto e recuperar as reliquias sagradas de Poseidon.";
+    }
+    if (lower.find("aomsp03") != std::string::npos) {
+        return "Desembarque na ilha dos piratas e destrua o acampamento fortificado para restaurar a ordem nos mares.";
+    }
+    if (lower.find("aomsp04") != std::string::npos) {
+        return "Reuna a frota atlante e navegue pelo Mar Egeu rumo a Troia para responder ao chamado de Agamemnon.";
+    }
+    return "Comande suas tropas com sabedoria, desenvolva a economia e alcance os objetivos estrategicos do cenario.";
+}
+
+// Inicia o cenario de campanha selecionado
+void Engine::start_campaign_scenario(const std::pair<const CampaignScenario*, bool>& sel) {
+    const auto* scn = sel.first;
+    bool is_expansion = sel.second;
+    
+    auto* mgr = is_expansion ? expansion_campaign_manager() : campaign_manager();
+    if (!mgr || !mgr->current_campaign()) {
+        start_game();
+        return;
+    }
+    
+    // Encontrar o indice do cenario
+    size_t scn_idx = 0;
+    for (size_t i = 0; i < mgr->current_campaign()->scenarios.size(); ++i) {
+        if (&mgr->current_campaign()->scenarios[i] == scn) {
+            scn_idx = i;
+            break;
+        }
+    }
+    
+    mgr->set_scenario_index(scn_idx);
+    start_game();
 }
 
 // ── uigamelist — lista de jogos salvos, campanhas e cenarios ─────────────────
@@ -135,22 +352,187 @@ void Engine::create_campaign_menu() {
     clear_ui();
 
     // ── Layout Autêntico Age of Mythology: The Titans (uicampaign.xmb) ────────
-    if (load_ui_layout("uicampaign.xmb")) {
-        size_t created = show_ui_layout("uicampaign.xmb");
-        if (created > 0) {
-            LOGI("create_campaign_menu: uicampaign.xmb aplicado com %zu elementos", created);
-            return;
-        }
+    if (!load_ui_layout("uicampaign.xmb")) {
+        LOGW("create_campaign_menu: falha ao carregar uicampaign.xmb, usando fallback procedural");
+        const float vw = static_cast<float>(config_.window_width);
+        const float vh = static_cast<float>(config_.window_height);
+        ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+        ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                        [this]() { return_to_main_menu(); });
+        return;
+    }
+    
+    size_t created = show_ui_layout("uicampaign.xmb");
+    if (created == 0) {
+        LOGW("create_campaign_menu: uicampaign.xmb criou 0 elementos, usando fallback");
+        const float vw = static_cast<float>(config_.window_width);
+        const float vh = static_cast<float>(config_.window_height);
+        ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
+        ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
+                        [this]() { return_to_main_menu(); });
+        return;
     }
 
-    LOGW("create_campaign_menu: falha ao carregar uicampaign.xmb, usando fallback procedural");
+    // Resolver textos $$ID$$
+    ui_->resolve_text([this](const std::string& key) { return tr(key); });
 
-    const float vw = static_cast<float>(config_.window_width);
-    const float vh = static_cast<float>(config_.window_height);
+    // ── Coletar campanhas disponiveis ────────────────────────────────────
+    std::vector<std::string> campaign_names;
+    std::vector<CampaignManager*> campaign_managers;
+    
+    if (campaign_manager() && campaign_manager()->current_campaign()) {
+        campaign_names.push_back("Fall of the Trident");
+        campaign_managers.push_back(campaign_manager());
+    }
+    if (expansion_campaign_manager() && expansion_campaign_manager()->current_campaign()) {
+        campaign_names.push_back("The New Atlantis");
+        campaign_managers.push_back(expansion_campaign_manager());
+    }
 
-    ui_->add_label("CAMPAIGN", {vw * 0.5f - 140.0f, vh * 0.15f}, 32.0f, 0xFFFFD000);
-    ui_->add_button({(vw - 200.0f) * 0.5f, vh * 0.88f}, {200.0f, 44.0f}, "VOLTAR",
-                    [this]() { return_to_main_menu(); });
+    // Popular CampaignSelection (scrollList)
+    auto* campaign_sel = ui_->find_scroll_list_by_tag("CampaignSelection");
+    if (campaign_sel && !campaign_names.empty()) {
+        campaign_sel->items = campaign_names;
+        campaign_sel->selected_index = 0;
+        campaign_sel->onSelectionChange = [this, campaign_managers](int idx) {
+            if (idx >= 0 && idx < (int)campaign_managers.size()) {
+                populate_campaign_scenario_list(campaign_managers[idx]);
+            }
+        };
+    }
+
+    // Popular DifficultySetting (radioset) - ja tem itens no XMB
+    // Popular ScenarioList com a primeira campanha
+    if (!campaign_managers.empty()) {
+        populate_campaign_scenario_list(campaign_managers[0]);
+    }
+
+    // Botao Start
+    auto* start_btn = ui_->find_button_by_tag("PlaySelectedScenarioButton");
+    if (start_btn) {
+        start_btn->onClick = [this]() {
+            start_selected_campaign_scenario();
+        };
+    }
+
+    // Botao Quit/Main Menu
+    auto* quit_btn = ui_->find_button_by_tag("MainMenuButton");
+    if (quit_btn) {
+        quit_btn->onClick = [this]() { return_to_main_menu(); };
+    }
+
+    LOGI("create_campaign_menu: uicampaign.xmb aplicado com %zu elementos, %zu campanhas", 
+         created, campaign_names.size());
+}
+
+// Popula a lista de cenarios para uma campanha selecionada
+void Engine::populate_campaign_scenario_list(CampaignManager* mgr) {
+    if (!mgr || !mgr->current_campaign()) return;
+    
+    auto* scenario_list = ui_->find_list_by_tag("ScenarioList");
+    if (!scenario_list) return;
+
+    const auto* campaign = mgr->current_campaign();
+    size_t progress = mgr->current_index();
+    
+    std::vector<std::string> scenario_labels;
+    std::vector<const CampaignScenario*> scenarios;
+    
+    for (size_t i = 0; i < campaign->scenarios.size(); ++i) {
+        const auto& scn = campaign->scenarios[i];
+        if (scn.unlisted) continue;
+        if (i <= progress) { // unlocked
+            scenarios.push_back(&scn);
+            std::string label = std::to_string(i + 1) + ". " + 
+                (scn.display_name.empty() ? scn.filename : scn.display_name);
+            if (i < progress) label += " \u2713";
+            else if (i == progress) label += " \u25B6";
+            scenario_labels.push_back(label);
+        }
+    }
+    
+    scenario_list->items = scenario_labels;
+    scenario_list->selected_index = (progress < scenario_labels.size()) ? static_cast<int>(progress) : 0;
+    
+    // Atualizar preview do primeiro cenario selecionado
+    if (!scenarios.empty()) {
+        update_campaign_preview(scenarios[scenario_list->selected_index], mgr == expansion_campaign_manager());
+    }
+    
+    scenario_list->onSelectionChange = [this, scenarios, mgr](int idx) {
+        if (idx >= 0 && idx < (int)scenarios.size()) {
+            update_campaign_preview(scenarios[idx], mgr == expansion_campaign_manager());
+        }
+    };
+}
+
+// Atualiza preview do mapa, titulo e descricao no painel direito
+void Engine::update_campaign_preview(const CampaignScenario* scn, bool is_expansion) {
+    // Mapa regional - Campaign-Map-Section (gadget com background)
+    auto& buttons = ui_->buttons_mut();
+    for (auto& btn : buttons) {
+        if (btn.tag == "Campaign-Map-Section" || btn.group_tag == "Campaign-Map-Section") {
+            std::string map_tex = get_campaign_map_texture(scn->filename, is_expansion);
+            TextureHandle tex = load_ddt_texture(map_tex);
+            if (tex != INVALID_TEXTURE) {
+                btn.normal_tex = tex;
+                btn.pressed_tex = tex;
+                btn.has_uv = true;
+                btn.uv_min = {0.0f, 1.0f};
+                btn.uv_max = {1.0f, 0.0f};
+            }
+            break;
+        }
+    }
+    
+    // Titulo do cenario - Scenario-Title
+    auto& labels = ui_->labels_mut();
+    for (auto& lbl : labels) {
+        if (lbl.tag == "Scenario-Title" || lbl.group_tag == "Scenario-Title") {
+            lbl.text = scn->display_name.empty() ? scn->filename : scn->display_name;
+            break;
+        }
+    }
+    
+    // Descricao - ScenarioDetails
+    for (auto& lbl : labels) {
+        if (lbl.tag == "ScenarioDetails" || lbl.group_tag == "ScenarioDetails") {
+            std::string briefing = get_campaign_briefing(scn->filename, 
+                scn->display_name.empty() ? scn->filename : scn->display_name);
+            lbl.text = briefing;
+            break;
+        }
+    }
+}
+
+// Inicia o cenario selecionado na campanha atual
+void Engine::start_selected_campaign_scenario() {
+    auto* campaign_sel = ui_->find_scroll_list_by_tag("CampaignSelection");
+    auto* scenario_list = ui_->find_list_by_tag("ScenarioList");
+    
+    if (!campaign_sel || !scenario_list) return;
+    
+    int camp_idx = campaign_sel->selected_index;
+    int scn_idx = scenario_list->selected_index;
+    
+    auto* mgr = (camp_idx == 0) ? campaign_manager() : expansion_campaign_manager();
+    if (!mgr || !mgr->current_campaign()) return;
+    
+    // Encontrar o cenario real (considerando so os desbloqueados)
+    size_t progress = mgr->current_index();
+    int unlocked_count = 0;
+    for (size_t i = 0; i < mgr->current_campaign()->scenarios.size(); ++i) {
+        const auto& scn = mgr->current_campaign()->scenarios[i];
+        if (scn.unlisted) continue;
+        if (i <= progress) {
+            if (unlocked_count == scn_idx) {
+                mgr->set_scenario_index(i);
+                start_game();
+                return;
+            }
+            ++unlocked_count;
+        }
+    }
 }
 
 // ── ucampaign_editor ──
