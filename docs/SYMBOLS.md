@@ -54,7 +54,7 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 
 ## include/ecs/ecs.h (184 linhas)
 
-## include/ecs/gameplay.h (2257 linhas) **GRANDE**
+## include/ecs/gameplay.h (2267 linhas) **GRANDE**
 
 ## include/engine/engine.h (854 linhas)
 
@@ -367,15 +367,6 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 ## src/ecs/ecs.cpp (25 linhas)
 - `RenderSystem::update` 6-23 (18)
 
-## src/ecs/gameplay_world.cpp (152 linhas)
-- `GameplayWorld::update_animations` 17-95 (79)
-- `GameplayWorld::attach_animation` 99-103 (5)
-- `GameplayWorld::set_default_animation` 105-108 (4)
-- `GameplayWorld::has_entity` 115-118 (4)
-- `GameplayWorld::cleanup_entity` 120-127 (8)
-- `GameplayWorld::has_background_scenario` 131-133 (3)
-- `GameplayWorld::get_nearest_town_center` 135-149 (15)
-
 ## src/engine/engine.cpp (913 linhas)
 - `Engine::initialize` 64-204 (141)
 - `Engine::request_game_data_import` 213-265 (53)
@@ -437,12 +428,12 @@ Como usar: ache a função aqui e leia só o intervalo: `sed -n 'INI,FIMp' arqui
 - `Engine::play_titans_credits_cinematic` 434-436 (3)
 - `Engine::play_named_cinematic` 438-446 (9)
 
-## src/engine/engine_gameplay.cpp (441 linhas)
-- `Engine::start_game` 20-230 (211)
-- `Engine::populate_menu_background_scene` 232-364 (133)
-- `Engine::start_menu_background` 366-371 (6)
-- `Engine::apply_unit_visual` 373-390 (18)
-- `Engine::resolve_building_visual` 392-438 (47)
+## src/engine/engine_gameplay.cpp (467 linhas)
+- `Engine::start_game` 20-256 (237)
+- `Engine::populate_menu_background_scene` 258-390 (133)
+- `Engine::start_menu_background` 392-397 (6)
+- `Engine::apply_unit_visual` 399-416 (18)
+- `Engine::resolve_building_visual` 418-464 (47)
 
 ## src/engine/engine_hud.cpp (427 linhas)
 - `Engine::create_in_game_hud` 13-68 (56)
